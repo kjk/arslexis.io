@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>This is a test page</title>
+</head>
+
+<body class="p-4 text-lg">
+
+  <div id="app"></div>
+
+  <script type="module">
+    import Test from './Test.svelte'
+    import './gisteditor/main.css'
+
+    // const q = new URLSearchParams(window.location.search);
+    // const gistid = q.get("id");
+    const args = {
+      target: document.getElementById('app'),
+    };
+    new Test(args)
+  </script>
+</body>
+
+</html>

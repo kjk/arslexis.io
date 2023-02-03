@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="./Notepad2.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>notepad2 online</title>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import Notepad2 from './Notepad2.svelte'
+    import './notepad2.css'
+
+    const args = {
+      target: document.getElementById('app'),
+    };
+    const app = new Notepad2(args)
+  </script>
+</body>
+
+</html>

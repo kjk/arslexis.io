@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.ico" />
+  <title>Gist Editor</title>
+</head>
+
+<body>
+  <script type="module">
+    import { setLoginRedirect, keyGitHubToken, keyTempLoginRedirect, setToken } from "./github_login.js";
+
+    console.log("github_success.html")
+
+    // this is called after logging in but in a separate window
+    // setting the token in localstorage will trigger handleStorageChanged
+    // in main window, which will do the rest of login logic
+
+    function getLoginRedirect() {
+      const v = localStorage.getItem(keyTempLoginRedirect);
+      console.log("getLoginRedirect:", v);
+      return v;
+    }
+
+    // callback on pop-up window
+    const q = new URLSearchParams(window.location.search);
+    const token = q.get("access_token");
+    console.log("q:", q, "token:", token);
+
+    const redirect = getLoginRedirect();
+    console.log("redirect:", redirect);
+    setLoginRedirect(null);
+
+    try {
+      console.log("storeGitHubToken:", token);
+      localStorage.setItem(keyGitHubToken, token);
+    } catch (ex) {
+      // TODO: don't know why this fails
+      console.log("localStorage.setItem(keyGitHubToken) failed with:", ex);
+    }
+
+    if (redirect) {
+      setToken(token);
+      window.location.href = redirect;
+    } else {
+      window.close();
+    }
+
+  </script>
+
+</body>
+
+</html>
