@@ -1,6 +1,8 @@
 import { showError } from "./Messages.svelte";
 
-async function httpPost(uri, js) {
+export let disableEvents = false;
+
+async function httpPostJSON(uri, js) {
   try {
     let opts = {
       method: "POST",
@@ -15,19 +17,13 @@ async function httpPost(uri, js) {
   }
 }
 
-export function logEvent(js, durMs = null) {
-  /*
-  if (!js.type) {
-    throw new Error(`expected type in event object '${js}'`);
+export function logEvent(name, durMs = 0, meta = {}) {
+  if (window.location.host !== "onlinetool.io") {
+    return;
   }
-  const user = getLoggedUser();
-  if (user) {
-    js.user = user;
+  if (durMs > 0) {
+    meta.dur = durMs.toFixed(0);
   }
-  if (timeStart) {
-    js.dur = durMs;
-  }
-  httpPost("/event", js)
-  */
+  httpPostJSON(`/event/${name}`, meta);
   // console.log(`ev '${js.type}' took ${js.dur} ms`);
 }

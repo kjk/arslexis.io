@@ -185,10 +185,9 @@ export async function getGistsForUser(userID) {
   const uri = `/users/${userID}/gists?per_page=100`;
   const gists = await apiGetPaginateAll(uri);
   const ev = {
-    type: "getGistsForUser",
     user: userID,
   };
-  logEvent(ev, elapsedFn())
+  logEvent("getGistsForUser", elapsedFn(), ev)
   console.log(`getGistsForUser: '${userID} ${len(gists)} in ${elapsedFn()} ms`);
   return checkForError(gists);
 }
@@ -211,11 +210,10 @@ export async function updateGist(gistId, data) {
   showMessage(`saving the gist`, 10000);
   const uri = `/gists/${gistId}`;
   const gist = await apiPatch(uri, data);
-  const ev = {
-    type: "updateGist",
+  const meta = {
     gistId: gistId,
   };
-  logEvent(ev, elapsedFn());
+  logEvent("updateGist", elapsedFn(), meta);
   return checkForError(gist);
 }
 
@@ -228,10 +226,7 @@ export async function createGist(gist) {
   console.log("createGist:", gist);
   showMessage(`creating a new gist`, 10000);
   const res = await apiPost(`/gists`, gist);
-  const ev = {
-    type: "createGist",
-  };
-  logEvent(ev, elapsedFn());
+  logEvent("createGist", elapsedFn());
   return checkForError(res);
 }
 
@@ -246,10 +241,9 @@ export async function deleteGist(gistId) {
   showMessage("deleting the gist", 10000);
   const elapsedFn = startTimer();
   const ok = await apiDelete(`/gists/${gistId}`);
-  const ev = {
-    type: "deleteGist",
+  const meta = {
     gistId: gistId,
   };
-  logEvent(ev, elapsedFn());
+  logEvent("deleteGist", elapsedFn(), meta);
   return ok;
 }

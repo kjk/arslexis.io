@@ -100,11 +100,8 @@ export function openLoginWindow() {
 }
 
 export function logout() {
-  const ev = {
-    type: "logout",
-  };
   // must log before clearing tokens to log user
-  logEvent(ev);
+  logEvent("logout");
 
   localStorage.removeItem(keyGitHubToken);
   setGitHubToken(null);

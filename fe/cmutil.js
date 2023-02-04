@@ -145,10 +145,10 @@ export function focusEditorView(editorView) {
   if (!editorView) {
     return;
   }
-  let max = 8;
+  let max = 10; // limit to 1 sec
   const timer = setInterval(() => {
     editorView.focus();
     max -= 1;
     if (editorView.hasFocus || max < 0) clearInterval(timer);
-  }, 500);
+  }, 100);
 }
