@@ -1,33 +1,19 @@
 <script>
-  import { onMount } from "svelte";
-
   export let ondismiss; // function
   export let dismissWithEsc = false;
 
-  let overlay = null;
+  let overlayEl = null;
 
   if (!ondismiss) {
-    throw new Error("ondimiss property is requred");
+    throw new Error("ondismiss property is requred");
   }
 
-  function removeKeyHandler() {
-    document.removeEventListener("keydown", handleKeyDown);
-  }
-  onMount(() => {
-    if (dismissWithEsc) {
-      document.addEventListener("keydown", handleKeyDown);
-      return removeKeyHandler;
-    }
-  });
-
-  function handleKeyDown(ev) {
-    if (ev.which === 27) {
-      ondismiss();
-    }
-  }
-
+  /**
+   * @param {MouseEvent} ev
+   */
   function handleClick(ev) {
-    if (ev.target !== overlay) {
+    // console.log("Overlay: handleClick:");
+    if (ev.target !== overlayEl) {
       // clicked outside of the overlay
       return;
     }
@@ -35,12 +21,50 @@
     ev.preventDefault();
     ondismiss();
   }
+
+  // https://hidde.blog/using-javascript-to-trap-focus-in-an-element/
+
+  /**
+   * @param {KeyboardEvent} e
+   */
+  function onKeyDown(e) {
+    if (dismissWithEsc && e.key === "Escape") {
+      ondismiss();
+    }
+
+    var isTabPressed = e.key === "Tab";
+    if (!isTabPressed) {
+      e.stopPropagation();
+      return;
+    }
+
+    // re-get focusable elements because disabled state might change
+    var focusableEls = overlayEl.querySelectorAll(
+      'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
+    );
+    // console.log("focusableEls:", focusableEls);
+    var firstFocusableEl = focusableEls[0];
+    var lastFocusableEl = focusableEls[focusableEls.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === firstFocusableEl) {
+        // console.log("trapped to lastFocusableEl", lastFocusableEl);
+        lastFocusableEl.focus();
+        e.preventDefault();
+      }
+    } else {
+      if (document.activeElement === lastFocusableEl) {
+        // console.log("trapped to firstFocusableEl:", firstFocusableEl);
+        firstFocusableEl.focus();
+        e.preventDefault();
+      }
+    }
+  }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-  bind:this={overlay}
-  class="fixed inset-0 bg-gray-600 bg-opacity-40 z-50"
+  on:keydown={onKeyDown}
+  bind:this={overlayEl}
+  class="fixed inset-0 bg-gray-600 bg-opacity-40 z-50 flex text-black"
   on:click={handleClick}
 >
   <slot />

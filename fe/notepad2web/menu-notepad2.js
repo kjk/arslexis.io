@@ -7,7 +7,7 @@ const SEPARATOR = "---";
 export const IDM_FILE_READONLY_FILE = "IDM_FILE_READONLY_FILE";
 export const IDM_FILE_READONLY_MODE = "IDM_FILE_READONLY_MODE";
 const menuFileMode = [
-  ["Read Only &File", IDM_FILE_READONLY_FILE],
+  // ["Read Only &File", IDM_FILE_READONLY_FILE],
   ["&Read Only Mode\tF10", IDM_FILE_READONLY_MODE],
 ];
 
@@ -98,23 +98,23 @@ const menuFile = [
   menuSep,
   ["File &Mode", menuFileMode],
   ["Re&vert\tF5", IDM_FILE_REVERT],
-  ["Reloa&d", menuReload],
+  // ["Reloa&d", menuReload],
   menuSep,
-  ["&Encoding", menuEncoding],
+  // ["&Encoding", menuEncoding],
   ["Line Endin&gs", menuLineEndings],
   menuSep,
   ["Page Se&tup...", IDM_FILE_PAGESETUP],
   ["&Print...\tCtrl+P", IDM_FILE_PRINT],
   [SEPARATOR],
   ["Propert&ies...", IDM_FILE_PROPERTIES],
-  ["Open &Containing Folder", IDM_FILE_OPEN_CONTAINING_FOLDER],
-  ["Create Desktop Lin&k", IDM_FILE_CREATELINK],
+  // ["Open &Containing Folder", IDM_FILE_OPEN_CONTAINING_FOLDER],
+  // ["Create Desktop Lin&k", IDM_FILE_CREATELINK],
   [SEPARATOR],
   ["&Browse...\tCtrl+M", IDM_FILE_BROWSE],
   ["&Favorites", menuFavorites],
   ["Recent (&History)...\tAlt+H", IDM_FILE_RECENT],
-  [SEPARATOR],
-  ["E&xit\tAlt+F4", IDM_FILE_EXIT],
+  // [SEPARATOR],
+  // ["E&xit\tAlt+F4", IDM_FILE_EXIT],
 ];
 
 export const CMD_COPYFILENAME_NOEXT = "CMD_COPYFILENAME_NOEXT";
@@ -132,13 +132,13 @@ const menuCopyToClipboard = [
   [SEPARATOR],
   ["Copy &All\tAlt+A", IDM_EDIT_COPYALL],
   ["Copy A&dd\tCtrl+E", IDM_EDIT_COPYADD],
-  ["Copy as &RTF", IDM_EDIT_COPYRTF],
+  // ["Copy as &RTF", IDM_EDIT_COPYRTF],
   //MENUITEM SEPARATOR
   //MENUITEM "&Copy as Binary",					IDM_EDIT_COPY_BINARY
   //MENUITEM "Cu&t as Binary",					IDM_EDIT_CUT_BINARY
   //MENUITEM "&Paste as Binary",				IDM_EDIT_PASTE_BINARY
-  [SEPARATOR],
-  ["&Window Position\tCtrl+Shift+K", CMD_COPYWINPOS],
+  // [SEPARATOR],
+  // ["&Window Position\tCtrl+Shift+K", CMD_COPYWINPOS],
 ];
 
 export const IDM_EDIT_SELECTIONDUPLICATE = "IDM_EDIT_SELECTIONDUPLICATE";
@@ -1157,13 +1157,13 @@ export const IDM_HELP_ABOUT = "IDM_HELP_ABOUT";
 
 const menuHelp = [
   ["Project &Home", IDM_HELP_PROJECT_HOME],
-  ["Latest &Release", IDM_HELP_LATEST_RELEASE],
-  ["Latest &Build", IDM_HELP_LATEST_BUILD],
+  // ["Latest &Release", IDM_HELP_LATEST_RELEASE],
+  // ["Latest &Build", IDM_HELP_LATEST_BUILD],
   ["Report &Issue", IDM_HELP_REPORT_ISSUE],
   ["&Feature Request", IDM_HELP_FEATURE_REQUEST],
-  [SEPARATOR],
-  ["Online &Wiki", IDM_HELP_ONLINE_WIKI],
-  ["&Command Line Help", IDM_CMDLINE_HELP],
+  // [SEPARATOR],
+  // ["Online &Wiki", IDM_HELP_ONLINE_WIKI],
+  // ["&Command Line Help", IDM_CMDLINE_HELP],
   [SEPARATOR],
   ["&About Notepad2\tF1", IDM_HELP_ABOUT],
 ];

@@ -6,6 +6,9 @@
   import MenuBar2 from "../MenuBar2.svelte";
   import {
     IDM_HELP_ABOUT,
+    IDM_HELP_FEATURE_REQUEST,
+    IDM_HELP_PROJECT_HOME,
+    IDM_HELP_REPORT_ISSUE,
     IDM_VIEW_WORDWRAP,
     mainMenuBar,
   } from "./menu-notepad2";
@@ -19,6 +22,9 @@
   } from "../cmutil";
   import { debounce, throwIf } from "../util.js";
   import { onDestroy, onMount } from "svelte";
+  import { tooltip } from "../actions/tooltip";
+  import DialogSaveChanges from "./DialogSaveChanges.svelte";
+  import Overlay from "../Overlay.svelte";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -36,6 +42,8 @@
   let typingMode = "INS"; // OVR
 
   let wordWrap = true;
+  let name = "Untitled";
+  let isDirty = false;
 
   function newFile() {
     console.log("newFile");
@@ -71,20 +79,17 @@
    * @param {string} cmdId
    */
   function isMenuEnabled(cmdId) {
-    if (cmdId === IDM_HELP_ABOUT) {
-      // just for testing
-      return false;
+    switch (cmdId) {
+      case IDM_HELP_ABOUT:
+        break;
     }
     return true;
   }
 
   function isMenuChecked(cmdId) {
-    if (cmdId === IDM_HELP_ABOUT) {
-      // just for testing
-      return true;
-    }
-    if (cmdId === IDM_VIEW_WORDWRAP) {
-      return wordWrap;
+    switch (cmdId) {
+      case IDM_VIEW_WORDWRAP:
+        return wordWrap;
     }
     return false;
   }
@@ -163,8 +168,20 @@
   function handleMenuCmd(cmd) {
     const cmdId = cmd.detail;
     console.log("handleMenuCmd:", cmdId);
-    if (cmdId === IDM_VIEW_WORDWRAP) {
-      wordWrap = !wordWrap;
+    switch (cmdId) {
+      case IDM_VIEW_WORDWRAP:
+        wordWrap = !wordWrap;
+        break;
+      case IDM_HELP_PROJECT_HOME:
+        // TODO: needs home
+        window.open("https://onlinetool.io/", "_blank");
+        break;
+      case IDM_HELP_REPORT_ISSUE:
+      case IDM_HELP_FEATURE_REQUEST:
+        window.open("https://github.com/kjk/notepad2web/issues", "_blank");
+        break;
+      default:
+      // TODO: not handled
     }
     closeMenu();
   }
@@ -185,11 +202,31 @@
 </script>
 
 <main class="fixed inset-0 grid">
-  <MenuBar2
-    menuDidOpenFn={handleMenuDidOpen}
-    menuBar={mainMenuBar}
-    on:menucmd={handleMenuCmd}
-  />
+  <div class="flex items-center shadow text-sm">
+    <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 24 24"
+      >
+        <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8h5Z" />
+      </svg></a
+    >
+    <MenuBar2
+      menuDidOpenFn={handleMenuDidOpen}
+      menuBar={mainMenuBar}
+      on:menucmd={handleMenuCmd}
+    />
+    <div class="grow" />
+    {#if isDirty}
+      <div>*</div>
+    {/if}
+    <div class="mr-2">
+      {name}
+    </div>
+  </div>
+
   <div class="min-h-0 overflow-hidden">
     <div
       class="codemirror-wrapper overflow-auto flex-grow bg-transparent"
@@ -205,6 +242,12 @@
     <div>{charEncoding}</div>
     <div>{typingMode}</div>
   </div>
+
+  {#if false}
+    <Overlay ondismiss={() => {}}>
+      <DialogSaveChanges filePath="foo.md" />
+    </Overlay>
+  {/if}
 </main>
 
 <style>

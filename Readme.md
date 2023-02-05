@@ -1,6 +1,6 @@
 ## About
 
-notepad2 is a web adaptation of notepad2 windows text editor.
+notepad2web is a web adaptation of notepad2 windows text editor.
 
 ## To run
 
@@ -11,7 +11,7 @@ You need to have node installed.
 
 ## License
 
-notepad2 is Copyright (c) 2023 Krzysztof Kowalczyk
+notepad2web is Copyright (c) 2023 Krzysztof Kowalczyk
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the Free

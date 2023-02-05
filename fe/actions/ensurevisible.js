@@ -22,7 +22,10 @@ export function ensureRectVisibleInWindow(rect) {
   return { x: x, y: y };
 }
 
-// action that ensures that the node is fully visible in the window
+/**
+/* action that ensures that the node is fully visible in the window
+ * @param {HTMLElement} node
+ */
 export function ensurevisible(node) {
   const r = node.getBoundingClientRect();
   const { x, y } = ensureRectVisibleInWindow(r);

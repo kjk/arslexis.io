@@ -1,8 +1,6 @@
 import { ensurevisible } from "./ensurevisible.js";
 
 /*
-absolutely position args.node relative to node 
-
 args = {
   node = element 
   position = 'top' | 'bottom' | 'left'| 'right'
@@ -10,6 +8,12 @@ args = {
   offsety
 }
 */
+
+/**
+/* absolutely position args.node relative to node 
+ * @param {HTMLElement} node
+ * @param {Object} args
+ */
 export function positionnode(node, args) {
   const r = args.node.getBoundingClientRect();
   const rn = node.getBoundingClientRect();
@@ -22,7 +26,7 @@ export function positionnode(node, args) {
   if (pos === "bottom") {
     // bottom-center
     const y = r.bottom + offy;
-    const x = r.x - (rn.width / 2) + (r.width / 2);
+    const x = r.x - rn.width / 2 + r.width / 2;
     st.left = `${x}px`;
     st.top = `${y}px`;
   } else if (pos === "bottom-left") {
@@ -37,7 +41,9 @@ export function positionnode(node, args) {
     st.left = `${x}px`;
     st.top = `${y}px`;
   } else {
-    throw new Error(`only position 'bottom', 'bottom-left', 'bottom-right' implemented, got '${pos}'`);
+    throw new Error(
+      `only position 'bottom', 'bottom-left', 'bottom-right' implemented, got '${pos}'`
+    );
   }
 
   //console.log("before:", node.getBoundingClientRect());

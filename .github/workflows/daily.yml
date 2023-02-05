@@ -1,10 +1,10 @@
-name: Daily update notepad2
+name: Daily update notepad2web
 on:
   schedule:
     - cron: "0 1 * * *"
 jobs:
   build:
-    name: Update notepad2
+    name: Update notepad2web
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
@@ -18,7 +18,7 @@ jobs:
           # needed to calc build number via git log --oneline
           fetch-depth: 0
 
-      - name: update notepad2
+      - name: update notepad2web
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm i && npx vite build && go run . -extract-notepad2 -ci

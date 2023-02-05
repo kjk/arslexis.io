@@ -133,7 +133,7 @@
 </script>
 
 <div
-  class="z-10 flex w-full items-center gap-2 bg-white/80 py-0 shadow select-none text-xs"
+  class="z-10 flex w-full items-center gap-2 bg-white/80 py-0 select-none"
   bind:this={menuBarElement}
 >
   <div class="flex justify-center text-neutral-700 cursor-pointer">
