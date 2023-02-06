@@ -98,6 +98,7 @@
    * @param {KeyboardEvent} ev
    */
   function handleKeyDown(ev) {
+    // console.log("handleKeyDown:", ev);
     let menuEl = /** @type {HTMLElement} */ (document.activeElement);
     // console.log("menuEl:", menuEl);
     let isMenuOpen = menuEl && menuEl.classList.contains("menu-trigger");
@@ -118,6 +119,7 @@
       if (ev.key != k.key) {
         continue;
       }
+      console.log("handleKeyDown: dispatching:", k.cmdId);
       ev.stopPropagation();
       ev.preventDefault();
       dispatch("menucmd", k.cmdId);

@@ -1,1 +1,18 @@
 https://www.neodrag.dev/docs/svelte
+
+"editor.getCursor": (): number => {
+  return editor.editorView!.state.selection.main.from;
+},
+"editor.getSelection": (): { from: number; to: number } => {
+  return editor.editorView!.state.selection.main;
+},
+
+Text.lineAt(pos)
+
+So to get cursor line / char:
+
+let cursor = editorView.state.selection.main.from;
+let line = editorView.state.doc.lineAt(cursor);
+let lineNo = line.number;
+let charNo = cursor - line.from;
+

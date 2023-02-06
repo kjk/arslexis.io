@@ -1,5 +1,6 @@
 <script context="module">
   /** @typedef { import("@codemirror/state").Extension} Extension */
+  /** @typedef { import("@codemirror/state").Transaction} Transaction */
 </script>
 
 <script>
@@ -21,10 +22,13 @@
     getTheme,
   } from "../cmutil";
   import { debounce, throwIf } from "../util.js";
-  import { onDestroy, onMount } from "svelte";
+  import { onDestroy, onMount, setContext } from "svelte";
   import { tooltip } from "../actions/tooltip";
   import DialogSaveChanges from "./DialogSaveChanges.svelte";
   import Overlay from "../Overlay.svelte";
+  import DialogNotImplemented from "./DialogNotImplemented.svelte";
+  import DialogSaveFile from "./DialogSaveFile.svelte";
+  import { saveFile } from "./FsFile";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -43,22 +47,51 @@
 
   let wordWrap = true;
   let name = "Untitled";
+  /** @type {EditorState} */
+  let initialState = null;
   let isDirty = false;
 
-  function newFile() {
-    console.log("newFile");
+  // dialogs
+  let msgNotImplemented = "";
+  let showingSaveChanges = false;
+  let saveFileList = [];
+  let saveName = "";
+
+  function closeDialogs() {
+    console.log("closeDialogs");
+    msgNotImplemented = "";
+    showingSaveChanges = false;
+    saveFileList = [];
+    saveName = "";
   }
+
+  /**
+   * @param {string} name
+   */
+  function handleSaeFile(name) {
+    console.log("handleSaveFile:", name);
+  }
+
+  setContext("fnDismissDialog", closeDialogs);
 
   function createEditorView() {
     throwIf(!editorElement);
 
+    /**
+     * @param {Transaction} tr
+     */
     function handleEditorChange(tr) {
+      let doc = tr.newDoc;
+      isDirty = !doc.eq(initialState.doc);
       // must re-render tabs to show change indicator
     }
 
     /** @type {Function} */
     const changeFn = debounce(handleEditorChange, 300);
 
+    /**
+     * @param {Transaction} tr
+     */
     function dispatchTransaction(tr) {
       editorView.update([tr]);
 
@@ -181,15 +214,16 @@
         window.open("https://github.com/kjk/notepad2web/issues", "_blank");
         break;
       default:
-      // TODO: not handled
+        // TODO: not handled
+        msgNotImplemented = `Command ${cmdId} not yet implemented!`;
     }
     closeMenu();
   }
 
   function handleOnMount() {
     editorView = createEditorView();
-    let state = createEditorState("");
-    editorView.setState(state);
+    initialState = createEditorState("");
+    editorView.setState(initialState);
     // document.addEventListener("keydown", onKeyDown);
     focusEditorView(editorView);
   }
@@ -220,7 +254,7 @@
     />
     <div class="grow" />
     {#if isDirty}
-      <div>*</div>
+      <div>*&nbsp;</div>
     {/if}
     <div class="mr-2">
       {name}
@@ -243,9 +277,23 @@
     <div>{typingMode}</div>
   </div>
 
-  {#if false}
-    <Overlay ondismiss={() => {}}>
+  {#if saveName !== ""}
+    <Overlay dismissWithEsc={true} ondismiss={closeDialogs}>
+      <DialogSaveFile
+        fileList={saveFileList}
+        name={saveName}
+        handleSave={handleSaeFile}
+      />
+    </Overlay>
+  {/if}
+  {#if showingSaveChanges}
+    <Overlay dismissWithEsc={true} ondismiss={closeDialogs}>
       <DialogSaveChanges filePath="foo.md" />
+    </Overlay>
+  {/if}
+  {#if msgNotImplemented !== ""}
+    <Overlay dismissWithEsc={true} ondismiss={closeDialogs}>
+      <DialogNotImplemented msg={msgNotImplemented} />
     </Overlay>
   {/if}
 </main>

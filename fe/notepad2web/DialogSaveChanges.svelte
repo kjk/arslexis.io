@@ -9,7 +9,7 @@
 </script>
 
 <WinDialogBase title="Save Changes?">
-  <div class="bg-white px-2 py-8 flex justify-center" slot="main">
+  <div slot="main" class="bg-white px-2 py-8 flex justify-center">
     <div>Save changes to '{filePath}' ?</div>
   </div>
 

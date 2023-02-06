@@ -1,4 +1,6 @@
 <script>
+  import { onDestroy, onMount } from "svelte";
+
   export let ondismiss; // function
   export let dismissWithEsc = false;
 
@@ -27,7 +29,8 @@
   /**
    * @param {KeyboardEvent} e
    */
-  function onKeyDown(e) {
+  function handleKeyDown(e) {
+    // console.log("Overlay: handleKeyDown", e);
     if (dismissWithEsc && e.key === "Escape") {
       ondismiss();
     }
@@ -59,10 +62,19 @@
       }
     }
   }
+
+  // TODO: why need this and not on:keydown on the div?
+  // global handler in MenuBar2 seems to interfere with that
+  onMount(() => {
+    document.addEventListener("keydown", handleKeyDown);
+  });
+  onDestroy(() => {
+    document.removeEventListener("keydown", handleKeyDown);
+  });
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-  on:keydown={onKeyDown}
   bind:this={overlayEl}
   class="fixed inset-0 bg-gray-600 bg-opacity-40 z-50 flex text-black"
   on:click={handleClick}
