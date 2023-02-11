@@ -4,6 +4,7 @@ import popup from "./popup.js";
 import { logEvent } from "./events.js";
 import * as githubapi from "./githubapi.js";
 import { showError } from "./Messages.svelte";
+import { gistsSummary } from "./gisteditor/store.js";
 
 // localStorage key for github token
 export const keyGitHubToken = "codeeval:gh-token";

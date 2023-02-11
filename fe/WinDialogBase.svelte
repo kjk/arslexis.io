@@ -1,55 +1,121 @@
 <script>
-  import { getContext } from "svelte";
   import Close from "./icons/Close.svelte";
   import { draggable } from "@neodrag/svelte";
+  import { onDestroy } from "svelte";
+  import { trapFocus } from "./util";
+  import { positionModal } from "./actions/positionnode";
+
+  // based on:
+  // https://svelte.dev/examples/modal
 
   export let title = "";
+  export let open = false;
+  // TODO: always true?
+  export let closeOnEsc = true;
 
-  let fnDismissDialog = getContext("fnDismissDialog");
+  let overlay = null;
+  let modal = null;
+  let dragHandle = null;
 
-  let dragHandleEl = null;
+  function close() {
+    open = false;
+  }
 
   /**
-   * @param {HTMLElement} node
+   * @param {KeyboardEvent} e
    */
-  function centerScreen(node) {
-    let dx = screen.width;
-    let dy = screen.height;
-    const r = node.getBoundingClientRect();
-    let x = (dx / 2 - r.width) / 2;
-    let y = (dy / 2 - r.height) / 2;
-    const st = node.style;
-    st.left = `${x}px`;
-    st.top = `${y}px`;
+  function handleKeyDown(e) {
+    if (closeOnEsc && e.key === "Escape") {
+      close();
+      return;
+    }
+
+    if (modal && e.key === "Tab") {
+      trapFocus(modal, e);
+      e.preventDefault();
+      return;
+    }
+    // needed to prevent arrow up / down etc. in FileList
+    e.stopPropagation();
+  }
+
+  /**
+   * @param {MouseEvent} e
+   */
+  function handleClick(e) {
+    if (e.target == overlay) {
+      // clicked on overlay => dismiss
+      e.stopPropagation();
+      e.preventDefault();
+      close();
+    }
+  }
+
+  const previouslyFocused = /** @type {HTMLElement} */ (
+    typeof document !== "undefined" && document.activeElement
+  );
+
+  if (previouslyFocused) {
+    onDestroy(() => {
+      previouslyFocused.focus();
+    });
   }
 </script>
 
-<div
-  class="absolute shadow-xl bg-white max-w-[80vw] flex flex-col text-sm w-fit"
-  use:centerScreen
-  use:draggable={{ handle: dragHandleEl }}
->
-  <!-- title area -->
+{#if open}
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
-    class="flex items-center bg-blue-50 py-2  cursor-grab"
-    bind:this={dragHandleEl}
+    tabindex="0"
+    class="fixed inset-0 z-40 bg-gray-600 bg-opacity-40"
+    bind:this={overlay}
+    on:click={handleClick}
+    on:keydown={handleKeyDown}
   >
-    <div class="grow ml-2">
-      {title}
-    </div>
-    <button
-      class="hover:bg-gray-200 mr-2 text-gray-700"
-      on:click={fnDismissDialog}
+    <div
+      role="dialog"
+      class="absolute w-fit min-w-[360px] shadow-xl shadow-md bg-white flex flex-col text-black text-sm"
+      bind:this={modal}
+      use:draggable={{ handle: dragHandle }}
+      use:positionModal
     >
-      <Close size={20} />
-    </button>
-  </div>
+      <!-- title area -->
+      <div
+        class="flex items-center bg-blue-50 py-2  cursor-grab"
+        bind:this={dragHandle}
+      >
+        <div class="grow ml-2">
+          {title}
+        </div>
+        <button
+          class="btn-dlg hover:bg-gray-200 mr-2 text-gray-700"
+          on:click={close}
+        >
+          <Close size={20} />
+        </button>
+      </div>
 
-  <!-- main body -->
-  <slot name="main" />
+      <!-- main body -->
+      <slot name="main" />
 
-  <!-- buttons -->
-  <div class="bg-gray-100 px-2 py-2">
-    <slot name="bottom" />
+      <!-- buttons -->
+      <div class="bg-gray-100 px-2 py-2">
+        <slot name="bottom" />
+      </div>
+    </div>
   </div>
-</div>
+{/if}
+
+<style>
+  /* :focus-within is not set by focus() so we normalize the style
+  of :focus and :focus-with of buttons inside dialogs */
+  :global(.btn-dlg:focus) {
+    outline-color: blue;
+    outline-style: solid;
+    outline-width: 2px;
+  }
+  :global(.btn-dlg:ocus-within) {
+    outline-color: blue;
+    outline-style: solid;
+    outline-width: 2px;
+  }
+</style>

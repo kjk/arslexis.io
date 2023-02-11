@@ -6,7 +6,7 @@ import {
   keymap,
   placeholder as placeholderExt,
 } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
+import { EditorState, Compartment } from "@codemirror/state";
 import { indentWithTab } from "@codemirror/commands";
 import { indentUnit } from "@codemirror/language";
 import { javascript } from "@codemirror/lang-javascript";
@@ -90,6 +90,26 @@ export function getLangFromFileName(fileName) {
 }
 
 /** @typedef { import("@codemirror/state").Extension} Extension */
+
+// all extensions that can be reconfigured
+export class EditorConfigurator {
+  /** @type {EditorView} */
+  editorView;
+  /** @type {Extension[]} */
+  exts = [];
+  readOnlyCompartment = new Compartment();
+  constructor() {
+    this.exts = [this.readOnlyCompartment.of(EditorState.readOnly.of(false))];
+  }
+  setReadOnly(readOnly) {
+    this.editorView.dispatch({
+      effects: this.readOnlyCompartment.reconfigure(
+        EditorState.readOnly.of(readOnly)
+      ),
+    });
+  }
+}
+
 /**
  * @param {boolean} basic
  * @param {boolean} useTab
@@ -113,7 +133,6 @@ export function getBaseExtensions(
   const res = [
     indentUnit.of(" ".repeat(tabSize)),
     EditorView.editable.of(editable),
-    EditorState.readOnly.of(readonly),
   ];
 
   if (basic) res.push(basicSetup);
@@ -122,6 +141,21 @@ export function getBaseExtensions(
   if (lineWrapping) res.push(EditorView.lineWrapping);
 
   return res;
+}
+
+/**
+ * @param {import("@codemirror/view").EditorView} editorView
+ * @param {Compartment} readOnlyCompartment
+ * @param {boolean} readOnly
+ */
+export function editorViewSetReadOnly(
+  editorView,
+  readOnlyCompartment,
+  readOnly
+) {
+  editorView.dispatch({
+    effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(readOnly)),
+  });
 }
 
 /**

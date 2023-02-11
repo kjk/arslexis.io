@@ -319,3 +319,223 @@ export function removeDescriptionAd(s) {
   s = s.replace(adText, "");
   return s.trim();
 }
+
+export function fnNoOp() {
+  // just a no-op function
+  // more efficient than doing () => {} many times
+}
+
+// https://svelte.dev/examples/modal
+/**
+ *
+ * @param {*} parent
+ * @param {KeyboardEvent} e
+ */
+export function trapFocus(parent, e) {
+  const nodes = parent.querySelectorAll("*:not([disabled])");
+  const tabbable = Array.from(nodes).filter((n) => n.tabIndex >= 0);
+
+  let index = tabbable.indexOf(document.activeElement);
+  if (index === -1 && e.shiftKey) index = 0;
+
+  index += tabbable.length + (e.shiftKey ? -1 : 1);
+  index %= tabbable.length;
+
+  tabbable[index].focus();
+}
+
+/*
+// https://hidde.blog/using-javascript-to-trap-focus-in-an-element/
+export function trapFocus2(parent, e) {
+  // re-get focusable elements because disabled state might change
+  var focusableEls = parent.querySelectorAll(
+    'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
+  );
+  // console.log("focusableEls:", focusableEls);
+  var firstFocusableEl = focusableEls[0];
+  var lastFocusableEl = focusableEls[focusableEls.length - 1];
+  if (e.shiftKey) {
+    if (document.activeElement === firstFocusableEl) {
+      // console.log("trapped to lastFocusableEl", lastFocusableEl);
+      lastFocusableEl.focus();
+    }
+  } else {
+    if (document.activeElement === lastFocusableEl) {
+      // console.log("trapped to firstFocusableEl:", firstFocusableEl);
+      firstFocusableEl.focus();
+    }
+  }
+}
+*/
+
+export function humanizeSize(n) {
+  const a = [
+    [1024 * 1024 * 1024 * 1024, "TB"],
+    [1024 * 1024 * 1024, "GB"],
+    [1024 * 1024, "MB"],
+    [1024, "kB"],
+  ];
+  for (const el of a) {
+    const size = el[0];
+    if (n >= size) {
+      // @ts-ignore
+      let s = (n / size).toFixed(2);
+      return s.replace(".00", "") + " " + el[1];
+    }
+  }
+  return `${n} B`;
+}
+
+export function preventDefaults(e) {
+  //console.log("preventDefaults");
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+export function preventDragOnElement(el) {
+  //console.log("preventDragOnElement", el);
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    el.addEventListener(eventName, preventDefaults, false);
+  });
+}
+
+export function undoPreventDragOnElement(el) {
+  //console.log("preventDragOnElement", el);
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    el.addEventListener(eventName, preventDefaults, false);
+  });
+}
+
+// Wrap readEntries in a promise to make working with readEntries easier
+export async function readEntriesPromise(directoryReader) {
+  try {
+    return await new Promise((resolve, reject) => {
+      directoryReader.readEntries(resolve, reject);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function collectAllDirectoryEntries(directoryReader, queue) {
+  let readEntries = await readEntriesPromise(directoryReader);
+  while (readEntries.length > 0) {
+    queue.push(...readEntries);
+    readEntries = await readEntriesPromise(directoryReader);
+  }
+}
+
+export async function getAllFileEntries(dataTransferItemList) {
+  let fileEntries = [];
+  let queue = [];
+  let n = dataTransferItemList.length;
+  for (let i = 0; i < n; i++) {
+    let item = dataTransferItemList[i];
+    let entry = item.webkitGetAsEntry();
+    queue.push(entry);
+  }
+  while (len(queue) > 0) {
+    let entry = queue.shift();
+    if (entry.isFile) {
+      fileEntries.push(entry);
+    } else if (entry.isDirectory) {
+      let reader = entry.createReader();
+      await collectAllDirectoryEntries(reader, queue);
+    }
+  }
+  return fileEntries;
+}
+
+class FileWithPath {
+  /** @type {File} */
+  file;
+  path = "";
+  constructor(file, path) {
+    this.file = file;
+    this.path = path;
+  }
+}
+
+/**
+ * @param {FileList} files
+ * @param {Function} fnAllowed
+ * @returns {FileWithPath[]}
+ */
+export function filterFiles(files, fnAllowed) {
+  /** @type {FileWithPath[]} */
+  let res = [];
+  for (const file of files) {
+    if (fnAllowed && !fnAllowed(file.name)) {
+      console.log(`${file.name} is not a supported file type`);
+      continue;
+    }
+
+    let f = new FileWithPath(file, file.name);
+    res.push(f);
+  }
+  return res;
+}
+
+/**
+ * @param {DataTransfer} dt
+ * @param {Function} fnAllowed
+ * @returns {Promise<FileWithPath[]>}
+ */
+export async function filterDataTransferEntries(dt, fnAllowed) {
+  let fileEntries = await getAllFileEntries(dt.items);
+  // convert to File objects
+
+  let res = [];
+  for (let fe of fileEntries) {
+    let path = fe.fullPath;
+    if (fnAllowed && !fnAllowed(path)) {
+      console.log(`${path} is not a supported file type`);
+      continue;
+    }
+    let file = await new Promise((resolve, reject) => {
+      fe.file(resolve, reject);
+    });
+    path = path.replace(/^\//, "");
+    const f = new FileWithPath(file, path);
+    res.push(f);
+  }
+  return res;
+}
+
+/**
+ * @param {number} n
+ * @returns {string}
+ */
+export function genRandomID(n) {
+  const SHORT_ID_SYMBOLS =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const nShortSymbols = len(SHORT_ID_SYMBOLS);
+
+  let res = "";
+  for (let i = 0; i < n; i++) {
+    const idx = Math.floor(Math.random() * nShortSymbols);
+    const c = SHORT_ID_SYMBOLS[idx];
+    res = res + c;
+  }
+  return res;
+}
+
+/**
+ * split("a.b.c", "." 2) => ["a" "b.c"]
+ * which is different from "a.b.c".split(".",2) => ["a", "b"]
+ * @param {string} s
+ * @param {string} sep
+ * @param {number} max
+ * @returns {string[]}
+ */
+export function splitMax(s, sep, max) {
+  throwIf(max === 0);
+  let parts = s.split(sep);
+  if (parts.length <= max) {
+    return parts;
+  }
+  let restParts = parts.slice(max - 1);
+  let restStr = restParts.join(sep);
+  parts[max - 1] = restStr;
+  return parts.slice(0, max);
+}

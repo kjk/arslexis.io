@@ -2,7 +2,7 @@
   // menu based on https://play.tailwindcss.com/0xQBSdXxsK
   import Menu, { fixMenuName, menuSep } from "./Menu2.svelte";
   import { onMount, onDestroy, createEventDispatcher } from "svelte";
-  import { len } from "./util";
+  import { len, splitMax } from "./util";
   import { parseShortcut } from "./keys";
 
   const dispatch = createEventDispatcher();
@@ -17,13 +17,14 @@
   /** @type {HTMLElement} */
   let menuBarElement = null;
 
+  /** @type {import("./keys").Shortcut[]} */
   let keyboardShortcuts = [];
 
   function buildKeyboarShortcutsMenu(menu) {
     for (let mi of menu) {
       let s = mi[0];
       let cmdId = mi[1];
-      let parts = s.split("\t");
+      let parts = splitMax(s, "\t", 2);
       if (len(parts) < 2) {
         continue;
       }
@@ -39,7 +40,7 @@
   }
 
   function buildKeyboardShortcutsBar() {
-    console.log("buildKeyboardShortcutsBar");
+    // console.log("buildKeyboardShortcutsBar");
     for (let mi of menuBar) {
       let menu = mi[1];
       buildKeyboarShortcutsMenu(menu);
@@ -116,6 +117,9 @@
       if (ev.altKey != k.altKey) {
         continue;
       }
+      if (ev.metaKey != k.metaKey) {
+        continue;
+      }
       if (ev.key != k.key) {
         continue;
       }
@@ -135,7 +139,7 @@
 </script>
 
 <div
-  class="z-10 flex w-full items-center gap-2 bg-white/80 py-0 select-none"
+  class="z-20 flex w-full items-center gap-2 bg-white py-0 select-none"
   bind:this={menuBarElement}
 >
   <div class="flex justify-center text-neutral-700 cursor-pointer">

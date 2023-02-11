@@ -18,8 +18,10 @@
 </script>
 
 <script>
+  import { parseShortcut, serializeShortuct } from "./keys.js";
+
   import { createEventDispatcher } from "svelte";
-  import { len } from "./util.js";
+  import { len, splitMax } from "./util.js";
 
   const dispatch = createEventDispatcher();
 
@@ -31,15 +33,24 @@
   // menu-child1, menu-child2, menu-child3 global classes
   export let nest = 1;
 
+  function sanitizeShortcut(txt) {
+    const s = parseShortcut(txt);
+    if (s === null) {
+      return txt;
+    }
+    const res = serializeShortuct(s);
+    return res;
+  }
+
   /**
    * @param {string[]} mi
    * @returns {string}
    */
   function getShortcut(mi) {
     let s = mi[0];
-    let parts = s.split("\t");
+    let parts = splitMax(s, "\t", 2);
     if (len(parts) > 1) {
-      return parts[1];
+      return sanitizeShortcut(parts[1]);
     }
     // TODO: remove this
     // for the old style menu
@@ -119,7 +130,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
-  class="mt-1 rounded-md border border-neutral-50 bg-white/50 py-1 shadow backdrop-blur-sm"
+  class="mt-1 rounded-md border border-neutral-50 bg-white py-1 shadow-lg"
   on:click={handleClicked}
 >
   {#each menu as mi}
@@ -175,7 +186,7 @@
         on:mouseleave={handleMouseLeave}
         on:mouseover={handleMouseOver}
       >
-        <span class="flex">
+        <span class="flex items-center">
           <svg
             class="w-4 h-4 check invisible"
             xmlns="http://www.w3.org/2000/svg"

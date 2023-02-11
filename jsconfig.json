@@ -22,7 +22,7 @@
     // "baseUrl": "./fe",
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./fe/*"],
+      "*": ["./fe/*"],
     },
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.

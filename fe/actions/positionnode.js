@@ -50,3 +50,21 @@ export function positionnode(node, args) {
   ensurevisible(node);
   //console.log("after:", node.getBoundingClientRect());
 }
+
+/**
+ * center in dx, in dy center but not lower than 240, for better eye focus
+ * @param {HTMLElement} node
+ */
+export function positionModal(node) {
+  let dx = window.innerWidth;
+  let dy = window.innerHeight;
+  const r = node.getBoundingClientRect();
+  let x = dx / 2 - r.width / 2;
+  let y = dy / 2 - r.height / 2;
+  x = Math.max(0, x);
+  y = Math.max(0, y);
+  y = Math.min(y, 240);
+  const st = node.style;
+  st.left = `${x}px`;
+  st.top = `${y}px`;
+}

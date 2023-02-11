@@ -4,8 +4,30 @@
 </script>
 
 <script>
+  import "../gisteditor/main.css";
+
   import MenuBar2 from "../MenuBar2.svelte";
   import {
+    IDM_EDIT_CLEARDOCUMENT,
+    IDM_EDIT_CONVERTLOWERCASE,
+    IDM_EDIT_CONVERTSPACES,
+    IDM_EDIT_CONVERTSPACES2,
+    IDM_EDIT_CONVERTTABS,
+    IDM_EDIT_CONVERTTABS2,
+    IDM_EDIT_CONVERTUPPERCASE,
+    IDM_EDIT_COPY,
+    IDM_EDIT_INVERTCASE,
+    IDM_EDIT_NUM2BIN,
+    IDM_EDIT_NUM2DEC,
+    IDM_EDIT_NUM2HEX,
+    IDM_EDIT_NUM2OCT,
+    IDM_EDIT_SENTENCECASE,
+    IDM_EDIT_TITLECASE,
+    IDM_FILE_NEW,
+    IDM_FILE_OPEN,
+    IDM_FILE_READONLY_MODE,
+    IDM_FILE_SAVE,
+    IDM_FILE_SAVEAS,
     IDM_HELP_ABOUT,
     IDM_HELP_FEATURE_REQUEST,
     IDM_HELP_PROJECT_HOME,
@@ -14,21 +36,22 @@
     mainMenuBar,
   } from "./menu-notepad2";
   import { EditorView } from "@codemirror/view";
-  import { EditorState } from "@codemirror/state";
+  import { EditorState, Compartment } from "@codemirror/state";
   import {
+    editorViewSetReadOnly,
     focusEditorView,
     getBaseExtensions,
     getLangFromFileName,
     getTheme,
   } from "../cmutil";
-  import { debounce, throwIf } from "../util.js";
-  import { onDestroy, onMount, setContext } from "svelte";
+  import { debounce, len, throwIf } from "../util.js";
+  import { onDestroy, onMount } from "svelte";
   import { tooltip } from "../actions/tooltip";
-  import DialogSaveChanges from "./DialogSaveChanges.svelte";
-  import Overlay from "../Overlay.svelte";
+  import DialogAskSaveChanges from "./DialogAskSaveChanges.svelte";
   import DialogNotImplemented from "./DialogNotImplemented.svelte";
-  import DialogSaveFile from "./DialogSaveFile.svelte";
-  import { saveFile } from "./FsFile";
+  import DialogSaveAs from "./DialogSaveAs.svelte";
+  import DialogFileOpen from "./DialogFileOpen.svelte";
+  import { FsFile, readFile, saveFile } from "./FsFile";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -44,8 +67,50 @@
   let lineEncoding = "Windows (CRLF)";
   let charEncoding = "UTF-8";
   let typingMode = "INS"; // OVR
-
   let wordWrap = true;
+
+  /** @typedef {import("@codemirror/state").EditorSelection} EditorSelection */
+  /** @typedef {import("@codemirror/state").SelectionRange} SelectionRange */
+  /** @type {EditorSelection} */
+  let currSelection = null;
+  let hasSelection = false;
+  $: updateSelectionState(currSelection);
+  /**
+   * @param {EditorSelection} sel
+   */
+  function updateSelectionState(sel) {
+    hasSelection = false;
+    if (!sel) {
+      return;
+    }
+    let n = len(sel.ranges);
+    for (let i = 0; i < n; i++) {
+      const r = sel.ranges[i];
+      if (!r.empty) {
+        hasSelection = true;
+        break;
+      }
+    }
+    console.log("hasSelection:", hasSelection);
+  }
+
+  let readOnly = false;
+  let readOnlyCompartment = new Compartment();
+  $: setReadOnlyState(readOnly);
+
+  /**
+   * @param {boolean} ro
+   */
+  function setReadOnlyState(ro) {
+    if (!editorView) {
+      // might be called before creating view
+      return;
+    }
+    editorViewSetReadOnly(editorView, readOnlyCompartment, ro);
+  }
+
+  /** @type {FsFile} */
+  let file = null;
   let name = "Untitled";
   /** @type {EditorState} */
   let initialState = null;
@@ -53,26 +118,42 @@
 
   // dialogs
   let msgNotImplemented = "";
+  let showingMsgNotImplemented = false;
+
   let showingSaveChanges = false;
-  let saveFileList = [];
   let saveName = "";
 
-  function closeDialogs() {
-    console.log("closeDialogs");
-    msgNotImplemented = "";
-    showingSaveChanges = false;
-    saveFileList = [];
-    saveName = "";
+  let showingOpenFile = false;
+  let showingSaveAs = false;
+
+  /**
+   * @param {FsFile} fileIn
+   */
+  function handleFileOpen(fileIn) {
+    console.log("handleFileOpen:", fileIn);
+    let content = readFile(fileIn);
+    let state = createEditorState(content, fileIn.name);
+    initialState = state;
+    editorView.setState(initialState);
+    focusEditorView(editorView);
+    isDirty = false;
+    file = fileIn;
+    name = file.name;
   }
 
   /**
-   * @param {string} name
+   * @param {FsFile} fileIn
    */
-  function handleSaeFile(name) {
-    console.log("handleSaveFile:", name);
+  function handleSaveAs(fileIn) {
+    console.log("handleSaveAs:", fileIn);
+    initialState = editorView.state;
+    let content = initialState.doc.toString();
+    saveFile(fileIn, content);
+    focusEditorView(editorView);
+    isDirty = false;
+    file = fileIn;
+    name = file.name;
   }
-
-  setContext("fnDismissDialog", closeDialogs);
 
   function createEditorView() {
     throwIf(!editorElement);
@@ -97,6 +178,8 @@
 
       if (tr.docChanged) {
         changeFn(tr);
+      } else {
+        currSelection = tr.state.selection;
       }
     }
 
@@ -113,6 +196,22 @@
    */
   function isMenuEnabled(cmdId) {
     switch (cmdId) {
+      // TODO: much more that depend on selection state
+      case IDM_EDIT_COPY:
+      case IDM_EDIT_CONVERTUPPERCASE:
+      case IDM_EDIT_CONVERTLOWERCASE:
+      case IDM_EDIT_INVERTCASE:
+      case IDM_EDIT_TITLECASE:
+      case IDM_EDIT_SENTENCECASE:
+      case IDM_EDIT_CONVERTSPACES:
+      case IDM_EDIT_CONVERTTABS:
+      case IDM_EDIT_CONVERTSPACES2:
+      case IDM_EDIT_CONVERTTABS2:
+      case IDM_EDIT_NUM2HEX:
+      case IDM_EDIT_NUM2DEC:
+      case IDM_EDIT_NUM2BIN:
+      case IDM_EDIT_NUM2OCT:
+        return hasSelection;
       case IDM_HELP_ABOUT:
         break;
     }
@@ -123,6 +222,8 @@
     switch (cmdId) {
       case IDM_VIEW_WORDWRAP:
         return wordWrap;
+      case IDM_FILE_READONLY_MODE:
+        return readOnly;
     }
     return false;
   }
@@ -161,7 +262,6 @@
     let styles = undefined;
     let lineWrapping = false;
     let editable = true;
-    let readonly = false;
     let placeholder = "start typing...";
     /** @type {Extension[]}*/
     const exts = [
@@ -172,8 +272,9 @@
         lineWrapping,
         placeholder,
         editable,
-        readonly
+        false
       ),
+      readOnlyCompartment.of(EditorState.readOnly.of(readOnly)),
       ...getTheme(theme, styles),
     ];
     const lang = getLangFromFileName(fileName);
@@ -186,7 +287,7 @@
     });
   }
 
-  function closeMenu() {
+  function closeMenuAndFocusEditor() {
     let el = document.activeElement;
     if (!el) {
       return;
@@ -198,12 +299,60 @@
     focusEditorView(editorView);
   }
 
+  function closeMenu() {
+    let el = document.activeElement;
+    if (!el) {
+      return;
+    }
+    // TODO: do nothing if el is not menu
+    /** @type {HTMLElement}*/ (el).blur();
+  }
+
+  function newEmptyFile() {
+    file = null;
+    name = "Untitled";
+    initialState = createEditorState("");
+    editorView.setState(initialState);
+    isDirty = false;
+  }
+
+  // this can be invoked via keyboard shortcut of via menu
+  // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
   function handleMenuCmd(cmd) {
     const cmdId = cmd.detail;
     console.log("handleMenuCmd:", cmdId);
     switch (cmdId) {
+      case IDM_FILE_NEW:
+        if (isDirty) {
+          // TODO: ask if should save changes
+        }
+        newEmptyFile();
+        focusEditorView(editorView);
+        break;
+      case IDM_FILE_OPEN:
+        showingOpenFile = true;
+        // TODO: more
+        break;
+      case IDM_FILE_SAVE:
+        if (file === null) {
+          // TODO: need to provide callback to call when saving a file
+          showingSaveAs = true;
+        } else {
+          handleSaveAs(file);
+        }
+        break;
+      case IDM_FILE_SAVEAS:
+        showingSaveAs = true;
+        break;
       case IDM_VIEW_WORDWRAP:
         wordWrap = !wordWrap;
+        break;
+      case IDM_FILE_READONLY_MODE:
+        readOnly = !readOnly;
+        break;
+      case IDM_EDIT_CLEARDOCUMENT:
+        // TODO: ask to save if dirty?
+        newEmptyFile();
         break;
       case IDM_HELP_PROJECT_HOME:
         // TODO: needs home
@@ -216,14 +365,14 @@
       default:
         // TODO: not handled
         msgNotImplemented = `Command ${cmdId} not yet implemented!`;
+        showingMsgNotImplemented = true;
     }
     closeMenu();
   }
 
   function handleOnMount() {
     editorView = createEditorView();
-    initialState = createEditorState("");
-    editorView.setState(initialState);
+    newEmptyFile();
     // document.addEventListener("keydown", onKeyDown);
     focusEditorView(editorView);
   }
@@ -277,25 +426,26 @@
     <div>{typingMode}</div>
   </div>
 
-  {#if saveName !== ""}
-    <Overlay dismissWithEsc={true} ondismiss={closeDialogs}>
-      <DialogSaveFile
-        fileList={saveFileList}
-        name={saveName}
-        handleSave={handleSaeFile}
-      />
-    </Overlay>
+  {#if showingOpenFile}
+    <DialogFileOpen bind:open={showingOpenFile} handleOpen={handleFileOpen} />
   {/if}
+
+  {#if showingSaveAs}
+    <DialogSaveAs
+      bind:open={showingSaveAs}
+      name={saveName}
+      handleSave={handleSaveAs}
+    />
+  {/if}
+
   {#if showingSaveChanges}
-    <Overlay dismissWithEsc={true} ondismiss={closeDialogs}>
-      <DialogSaveChanges filePath="foo.md" />
-    </Overlay>
+    <DialogAskSaveChanges bind:open={showingSaveChanges} filePath="foo.md" />
   {/if}
-  {#if msgNotImplemented !== ""}
-    <Overlay dismissWithEsc={true} ondismiss={closeDialogs}>
-      <DialogNotImplemented msg={msgNotImplemented} />
-    </Overlay>
-  {/if}
+
+  <DialogNotImplemented
+    bind:open={showingMsgNotImplemented}
+    msg={msgNotImplemented}
+  />
 </main>
 
 <style>
