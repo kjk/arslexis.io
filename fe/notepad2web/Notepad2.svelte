@@ -4,8 +4,6 @@
 </script>
 
 <script>
-  import "../gisteditor/main.css";
-
   import MenuBar2 from "../MenuBar2.svelte";
   import {
     IDM_EDIT_CLEARDOCUMENT,
