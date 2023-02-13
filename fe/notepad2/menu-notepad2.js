@@ -649,6 +649,7 @@ const menuView = [
   ["Highlight C&urrent Line", menuHighlightCurrentLine],
   ["Mar&k Occurrences", menuMarkOccurences],
   [SEPARATOR],
+  // TODO: needs a different shortuct
   ["Line &Numbers\tCtrl+Shift+N", IDM_VIEW_LINENUMBERS],
   ["Bookmark &Margin\tCtrl+Shift+M", IDM_VIEW_MARGIN],
   [SEPARATOR],
@@ -948,14 +949,14 @@ const menuAppearance = [
   ["&Auto Scale Toolbar", IDM_VIEW_AUTO_SCALE_TOOLBAR],
   ["Show Stat&usbar\tShift+F11", IDM_VIEW_STATUSBAR],
   [SEPARATOR],
-  ["&Transparent Mode\tCtrl+0", IDM_VIEW_TRANSPARENT],
+  // ["&Transparent Mode\tCtrl+0", IDM_VIEW_TRANSPARENT],
   ["Full Scree&n Mode", menuFullScreenMode],
   ["Scroll &Past Last Line", menuScrollPastLastLine],
   // #if NP2_ENABLE_APP_LOCALIZATION_DLL
   //  [SEPARATOR],
   //  ["&Language", menuLanguage],
   // #endif
-  ["Use &XP Style Open/Save Dialog", IDM_SET_USE_XP_FILE_DIALOG],
+  // ["Use &XP Style Open/Save Dialog", IDM_SET_USE_XP_FILE_DIALOG],
 ];
 
 const menuWindowOptions = [
@@ -1029,21 +1030,22 @@ const menuSettings = [
   ["&Auto Completion Settings...", IDM_VIEW_AUTOCOMPLETION_SETTINGS],
   ["Auto Completion I&gnore Case", IDM_VIEW_AUTOCOMPLETION_IGNORECASE],
   ["Enable LaTe&X Input Method", IDM_SET_LATEX_INPUT_METHOD],
-  ["Select and &Edit Options"],
+  ["Select and &Edit Options", menuSelectAndEditOptions],
   [SEPARATOR],
   ["Appea&rance", menuAppearance],
-  ["Window O&ptions", menuWindowOptions],
+  // ["Window O&ptions", menuWindowOptions],
   ["Window Title Displa&y", menuWindowTitleDisplay],
   [SEPARATOR],
-  ["Single &File Instance", IDM_VIEW_SINGLEFILEINSTANCE],
-  ["File &Change Notification...\tAlt+F5", IDM_VIEW_CHANGENOTIFY],
-  ["A&utoSave Settings...", IDM_SET_FILE_AUTOSAVE],
-  ["Extra Esc &Key Function", menuExtraEscKeyFunction],
+  // ["Single &File Instance", IDM_VIEW_SINGLEFILEINSTANCE],
+  // ["File &Change Notification...\tAlt+F5", IDM_VIEW_CHANGENOTIFY],
+  // ["A&utoSave Settings...", IDM_SET_FILE_AUTOSAVE],
+  // ["Extra Esc &Key Function", menuExtraEscKeyFunction],
   ["Other Sett&ings", menuOtherSettings],
-  [SEPARATOR],
-  ["A&dvanced Settings", menuAdvancedSettings],
-  ["Save Settings &On Exit", IDM_VIEW_SAVESETTINGS],
-  ["Sa&ve Settings Now\tF7", IDM_VIEW_SAVESETTINGSNOW],
+  // [SEPARATOR],
+  // TODO: open .ini settings from menuAdvancedSettings
+  // ["A&dvanced Settings", menuAdvancedSettings],
+  // ["Save Settings &On Exit", IDM_VIEW_SAVESETTINGS],
+  // ["Sa&ve Settings Now\tF7", IDM_VIEW_SAVESETTINGSNOW],
 ];
 
 export const IDM_VIEW_SAVEBEFORERUNNINGTOOLS =
@@ -1088,8 +1090,9 @@ export const IDM_EDIT_URLENCODE = "IDM_EDIT_URLENCODE";
 export const IDM_EDIT_URLDECODE = "IDM_EDIT_URLDECODE";
 
 const menuActionOnSelection = [
+  // TODO: chage to "&Open Link, etc."
   ["&Open File, Folder, Link, etc.", CMD_OPEN_PATH_OR_LINK],
-  ["Open Containing &Folder", CMD_OPEN_CONTAINING_FOLDER],
+  // ["Open Containing &Folder", CMD_OPEN_CONTAINING_FOLDER],
   [SEPARATOR],
   ["Search with &Google", CMD_ONLINE_SEARCH_GOOGLE],
   ["Search with &Bing", CMD_ONLINE_SEARCH_BING],
@@ -1127,21 +1130,23 @@ const menuTextTransliteration = [
 ];
 
 const menuTools = [
-  ["Sa&ve Before Running Tools", IDM_VIEW_SAVEBEFORERUNNINGTOOLS],
-  ["Use &metapath to Open Folder", IDM_SET_OPEN_FOLDER_METAPATH],
-  [SEPARATOR],
-  ["Run as &Administrator", IDM_FILE_RELAUNCH_ELEVATED],
-  ["&Restart", IDM_FILE_RESTART],
+  // ["Sa&ve Before Running Tools", IDM_VIEW_SAVEBEFORERUNNINGTOOLS],
+  // ["Use &metapath to Open Folder", IDM_SET_OPEN_FOLDER_METAPATH],
+  // [SEPARATOR],
+  // ["Run as &Administrator", IDM_FILE_RELAUNCH_ELEVATED],
+  // ["&Restart", IDM_FILE_RESTART],
   ["Launch &New Window\tAlt+N", IDM_FILE_NEWWINDOW],
   ["Launch &Empty Window\tAlt+0", IDM_FILE_NEWWINDOW2],
   [SEPARATOR],
-  ["Execute &Document\tCtrl+L", IDM_FILE_LAUNCH],
-  ["Open Document &With...", IDM_FILE_OPENWITH],
-  ["Run &Command...\tCtrl+R", IDM_FILE_RUN],
-  [SEPARATOR],
+  // ["Execute &Document\tCtrl+L", IDM_FILE_LAUNCH],
+  // ["Open Document &With...", IDM_FILE_OPENWITH],
+  // ["Run &Command...\tCtrl+R", IDM_FILE_RUN],
+  // [SEPARATOR],
   ["Action &on Selection", menuActionOnSelection],
   ["&Base64", menuBase64],
-  ["Text &Transliteration", menuTextTransliteration],
+  // TODO: those require windows-only .dll, maybe reverse engineer
+  // or find in wine?
+  // ["Text &Transliteration", menuTextTransliteration],
   ["&URL Encode\tCtrl+Shift+E", IDM_EDIT_URLENCODE],
   ["UR&L Decode\tCtrl+Shift+R", IDM_EDIT_URLDECODE],
 ];

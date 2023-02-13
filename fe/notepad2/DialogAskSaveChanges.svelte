@@ -1,6 +1,6 @@
 <script>
   import { fnNoOp } from "../util";
-  import { delayedFocus } from "../actions/focus";
+  import { focus } from "../actions/focus";
   import WinDialogBase from "../WinDialogBase.svelte";
 
   export let open = false;
@@ -35,7 +35,7 @@
       }}>No</button
     >
     <button
-      use:delayedFocus
+      use:focus
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
       on:click={close}>Cancel</button
     >

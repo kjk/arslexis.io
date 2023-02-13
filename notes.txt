@@ -1,5 +1,3 @@
-https://www.neodrag.dev/docs/svelte
-
 "editor.getCursor": (): number => {
   return editor.editorView!.state.selection.main.from;
 },

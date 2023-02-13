@@ -13,8 +13,8 @@ export default defineConfig({
       input: {
         main: resolve("fe", "index.html"),
 
-        // notepad2web
-        notepad2web: resolve("fe", "notepad2web", "index.html"),
+        // notepad2
+        notepad2: resolve("fe", "notepad2", "index.html"),
       },
       output: {
         manualChunks: {

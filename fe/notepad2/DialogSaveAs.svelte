@@ -1,6 +1,6 @@
 <script>
   import { len } from "../util";
-  import { delayedFocus } from "../actions/focus";
+  import { focus } from "../actions/focus";
   import WinDialogBase from "../WinDialogBase.svelte";
   import {
     FsFile,
@@ -68,7 +68,7 @@
       <input
         type="text"
         class="mx-4 px-2 py-0.5 border-gray-800 border-1"
-        use:delayedFocus
+        use:focus
         spellcheck="false"
         autocomplete="false"
         on:keydown={handleInputKeyDown}

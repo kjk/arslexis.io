@@ -1,14 +1,5 @@
 /* CodeMirror utilities */
 
-import { basicSetup } from "codemirror";
-import {
-  EditorView,
-  keymap,
-  placeholder as placeholderExt,
-} from "@codemirror/view";
-import { EditorState, Compartment } from "@codemirror/state";
-import { indentWithTab } from "@codemirror/commands";
-import { indentUnit } from "@codemirror/language";
 import { javascript } from "@codemirror/lang-javascript";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
@@ -89,91 +80,9 @@ export function getLangFromFileName(fileName) {
   return null;
 }
 
-/** @typedef { import("@codemirror/state").Extension} Extension */
-
-// all extensions that can be reconfigured
-export class EditorConfigurator {
-  /** @type {EditorView} */
-  editorView;
-  /** @type {Extension[]} */
-  exts = [];
-  readOnlyCompartment = new Compartment();
-  constructor() {
-    this.exts = [this.readOnlyCompartment.of(EditorState.readOnly.of(false))];
-  }
-  setReadOnly(readOnly) {
-    this.editorView.dispatch({
-      effects: this.readOnlyCompartment.reconfigure(
-        EditorState.readOnly.of(readOnly)
-      ),
-    });
-  }
-}
-
-/**
- * @param {boolean} basic
- * @param {boolean} useTab
- * @param {number} tabSize
- * @param {boolean} lineWrapping
- * @param {string} placeholder
- * @param {boolean} editable
- * @param {boolean} readonly
- * @returns {Extension[]}
- */
-export function getBaseExtensions(
-  basic,
-  useTab,
-  tabSize,
-  lineWrapping,
-  placeholder,
-  editable,
-  readonly
-) {
-  /** @type {Extension[]} */
-  const res = [
-    indentUnit.of(" ".repeat(tabSize)),
-    EditorView.editable.of(editable),
-  ];
-
-  if (basic) res.push(basicSetup);
-  if (useTab) res.push(keymap.of([indentWithTab]));
-  if (placeholder) res.push(placeholderExt(placeholder));
-  if (lineWrapping) res.push(EditorView.lineWrapping);
-
-  return res;
-}
-
-/**
- * @param {import("@codemirror/view").EditorView} editorView
- * @param {Compartment} readOnlyCompartment
- * @param {boolean} readOnly
- */
-export function editorViewSetReadOnly(
-  editorView,
-  readOnlyCompartment,
-  readOnly
-) {
-  editorView.dispatch({
-    effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(readOnly)),
-  });
-}
-
-/**
- * @param {*} theme
- * @param {*} styles
- * @returns {Extension[]}
- */
-export function getTheme(theme, styles) {
-  /** @type {Extension[]} */
-  const extensions = [];
-  if (styles) extensions.push(EditorView.theme(styles));
-  if (theme) extensions.push(theme);
-  return extensions;
-}
-
 /**
  * try real hard to put focus in EditorView
- * @param {EditorView} editorView
+ * @param {import("@codemirror/view").EditorView} editorView
  */
 export function focusEditorView(editorView) {
   if (!editorView) {

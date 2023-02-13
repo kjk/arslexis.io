@@ -1,7 +1,6 @@
 <script>
   import Spinners from "./Spinners.svelte";
-  import MenuBar1 from "./MenuBar1.svelte";
-  import MenuBar2 from "./MenuBar2.svelte";
+  import MenuBar from "./MenuBar.svelte";
   import { mainMenuBar } from "./menu-notepadpp.js";
 
   function handleMenuCmd(cmd) {
@@ -55,12 +54,7 @@
 </details>
 
 <details open>
-  <summary>Menu test 1</summary>
-  <MenuBar1 menu={mainMenuBar} />
-</details>
-
-<details open>
-  <summary>Menu test 2</summary>
+  <summary>Menu test</summary>
   <!-- svelte-ignore a11y-invalid-attribute -->
-  <MenuBar2 menuBar={mainMenuBar} on:menucmd={handleMenuCmd} />
+  <MenuBar menuBar={mainMenuBar} on:menucmd={handleMenuCmd} />
 </details>

@@ -1,7 +1,7 @@
 <script>
   // menu based on https://play.tailwindcss.com/0xQBSdXxsK
-  import Menu, { fixMenuName, menuSep } from "./Menu2.svelte";
-  import { onMount, onDestroy, createEventDispatcher } from "svelte";
+  import Menu, { fixMenuName } from "./Menu.svelte";
+  import { onMount, createEventDispatcher } from "svelte";
   import { len, splitMax } from "./util";
   import { parseShortcut } from "./keys";
 
@@ -107,34 +107,32 @@
       // TODO: keyboard navigation
       return;
     }
-    for (let k of keyboardShortcuts) {
-      if (ev.shiftKey != k.shiftKey) {
+    for (let ks of keyboardShortcuts) {
+      if (ev.shiftKey != ks.shiftKey) {
         continue;
       }
-      if (ev.ctrlKey != k.ctrlKey) {
+      if (ev.ctrlKey != ks.ctrlKey) {
         continue;
       }
-      if (ev.altKey != k.altKey) {
+      if (ev.altKey != ks.altKey) {
         continue;
       }
-      if (ev.metaKey != k.metaKey) {
+      if (ev.metaKey != ks.metaKey) {
         continue;
       }
-      if (ev.key != k.key) {
+      if (ev.key != ks.key) {
         continue;
       }
-      console.log("handleKeyDown: dispatching:", k.cmdId);
-      ev.stopPropagation();
-      ev.preventDefault();
-      dispatch("menucmd", k.cmdId);
+      // handler is responsible for stopping propagation of the event
+      dispatch("menucmd", { ev: ev, cmd: ks.cmdId });
     }
   }
 
   onMount(() => {
     document.addEventListener("keydown", handleKeyDown);
-  });
-  onDestroy(() => {
-    document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   });
 </script>
 

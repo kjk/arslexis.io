@@ -4,8 +4,14 @@
 </script>
 
 <script>
-  import MenuBar2 from "../MenuBar2.svelte";
+  import MenuBar from "../MenuBar.svelte";
   import {
+    CMD_CUSTOM_ACTION1,
+    CMD_CUSTOM_ACTION2,
+    CMD_ONLINE_SEARCH_BING,
+    CMD_ONLINE_SEARCH_GOOGLE,
+    CMD_ONLINE_SEARCH_WIKI,
+    IDM_EDIT_CLEARCLIPBOARD,
     IDM_EDIT_CLEARDOCUMENT,
     IDM_EDIT_CONVERTLOWERCASE,
     IDM_EDIT_CONVERTSPACES,
@@ -14,13 +20,21 @@
     IDM_EDIT_CONVERTTABS2,
     IDM_EDIT_CONVERTUPPERCASE,
     IDM_EDIT_COPY,
+    IDM_EDIT_COPYADD,
+    IDM_EDIT_COPYALL,
+    IDM_EDIT_CUT,
     IDM_EDIT_INVERTCASE,
     IDM_EDIT_NUM2BIN,
     IDM_EDIT_NUM2DEC,
     IDM_EDIT_NUM2HEX,
     IDM_EDIT_NUM2OCT,
+    IDM_EDIT_PASTE,
+    IDM_EDIT_REDO,
+    IDM_EDIT_SELECTALL,
     IDM_EDIT_SENTENCECASE,
+    IDM_EDIT_SWAP,
     IDM_EDIT_TITLECASE,
+    IDM_EDIT_UNDO,
     IDM_FILE_NEW,
     IDM_FILE_OPEN,
     IDM_FILE_READONLY_MODE,
@@ -30,25 +44,30 @@
     IDM_HELP_FEATURE_REQUEST,
     IDM_HELP_PROJECT_HOME,
     IDM_HELP_REPORT_ISSUE,
+    IDM_VIEW_LINENUMBERS,
     IDM_VIEW_WORDWRAP,
     mainMenuBar,
   } from "./menu-notepad2";
-  import { EditorView } from "@codemirror/view";
+  import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
+  import { getTheme, getBaseExtensions2 } from "../cmexts";
+
+  import { focusEditorView, getLangFromFileName } from "../cmutil";
   import {
-    editorViewSetReadOnly,
-    focusEditorView,
-    getBaseExtensions,
-    getLangFromFileName,
-    getTheme,
-  } from "../cmutil";
-  import { debounce, len, throwIf } from "../util.js";
+    setClipboard,
+    clearClipboard,
+    debounce,
+    len,
+    throwIf,
+    appendClipboard,
+  } from "../util.js";
   import { onDestroy, onMount } from "svelte";
   import { tooltip } from "../actions/tooltip";
   import DialogAskSaveChanges from "./DialogAskSaveChanges.svelte";
   import DialogNotImplemented from "./DialogNotImplemented.svelte";
   import DialogSaveAs from "./DialogSaveAs.svelte";
   import DialogFileOpen from "./DialogFileOpen.svelte";
+  import DialogAbout from "./DialogAbout.svelte";
   import { FsFile, readFile, saveFile } from "./FsFile";
 
   /** @type {HTMLElement} */
@@ -65,7 +84,8 @@
   let lineEncoding = "Windows (CRLF)";
   let charEncoding = "UTF-8";
   let typingMode = "INS"; // OVR
-  let wordWrap = true;
+
+  let showingAbout = false;
 
   /** @typedef {import("@codemirror/state").EditorSelection} EditorSelection */
   /** @typedef {import("@codemirror/state").SelectionRange} SelectionRange */
@@ -95,16 +115,49 @@
   let readOnly = false;
   let readOnlyCompartment = new Compartment();
   $: setReadOnlyState(readOnly);
-
   /**
-   * @param {boolean} ro
+   * @param {boolean} flag
    */
-  function setReadOnlyState(ro) {
-    if (!editorView) {
-      // might be called before creating view
-      return;
+  function setReadOnlyState(flag) {
+    if (editorView) {
+      editorView.dispatch({
+        effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(flag)),
+      });
     }
-    editorViewSetReadOnly(editorView, readOnlyCompartment, ro);
+  }
+
+  function getCurrentSelectionAsText() {
+    let v = editorView;
+    let s = v.state.sliceDoc(
+      v.state.selection.main.from,
+      v.state.selection.main.to
+    );
+    return s;
+  }
+
+  let wordWrap = false;
+  let wordWrapCompartment = new Compartment();
+  $: setWordWrapState(wordWrap);
+  function setWordWrapState(flag) {
+    if (editorView) {
+      const v = flag ? EditorView.lineWrapping : [];
+      editorView.dispatch({
+        effects: wordWrapCompartment.reconfigure(v),
+      });
+    }
+  }
+
+  //   lineNumbers(),
+  let showLineNumbers = false;
+  let showLineNumbersCompartment = new Compartment();
+  $: setLineNumbersState(showLineNumbers);
+  function setLineNumbersState(flag) {
+    if (editorView) {
+      const v = flag ? lineNumbers() : [];
+      editorView.dispatch({
+        effects: showLineNumbersCompartment.reconfigure(v),
+      });
+    }
   }
 
   /** @type {FsFile} */
@@ -196,6 +249,10 @@
     switch (cmdId) {
       // TODO: much more that depend on selection state
       case IDM_EDIT_COPY:
+      case IDM_EDIT_COPYADD:
+      case IDM_EDIT_PASTE:
+      case IDM_EDIT_SWAP:
+      case IDM_EDIT_CLEARCLIPBOARD:
       case IDM_EDIT_CONVERTUPPERCASE:
       case IDM_EDIT_CONVERTLOWERCASE:
       case IDM_EDIT_INVERTCASE:
@@ -209,6 +266,11 @@
       case IDM_EDIT_NUM2DEC:
       case IDM_EDIT_NUM2BIN:
       case IDM_EDIT_NUM2OCT:
+      case CMD_ONLINE_SEARCH_GOOGLE:
+      case CMD_ONLINE_SEARCH_BING:
+      case CMD_ONLINE_SEARCH_WIKI:
+      case CMD_CUSTOM_ACTION1:
+      case CMD_CUSTOM_ACTION2:
         return hasSelection;
       case IDM_HELP_ABOUT:
         break;
@@ -258,21 +320,19 @@
     let useTab = true;
     let tabSize = 2;
     let styles = undefined;
-    let lineWrapping = false;
     let editable = true;
     let placeholder = "start typing...";
     /** @type {Extension[]}*/
+
+    // TODO: why is this [] and not null or something?
+    // @ts-ignore
+    let wordWrapV = wordWrap ? EditorView.lineWrapping : [];
+    let lineNumV = showLineNumbers ? lineNumbers() : [];
     const exts = [
-      ...getBaseExtensions(
-        basic,
-        useTab,
-        tabSize,
-        lineWrapping,
-        placeholder,
-        editable,
-        false
-      ),
+      ...getBaseExtensions2(basic, useTab, tabSize, placeholder, editable),
       readOnlyCompartment.of(EditorState.readOnly.of(readOnly)),
+      wordWrapCompartment.of(wordWrapV),
+      showLineNumbersCompartment.of(lineNumV),
       ...getTheme(theme, styles),
     ];
     const lang = getLangFromFileName(fileName);
@@ -315,10 +375,13 @@
   }
 
   // this can be invoked via keyboard shortcut of via menu
+  // if via keyboard, arg.detail.ev is set
   // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
-  function handleMenuCmd(cmd) {
-    const cmdId = cmd.detail;
+  async function handleMenuCmd(arg) {
+    const cmdId = arg.detail.cmd;
+    const ev = arg.detail.ev;
     console.log("handleMenuCmd:", cmdId);
+    let stopPropagation = true;
     switch (cmdId) {
       case IDM_FILE_NEW:
         if (isDirty) {
@@ -348,9 +411,38 @@
       case IDM_FILE_READONLY_MODE:
         readOnly = !readOnly;
         break;
+      case IDM_VIEW_LINENUMBERS:
+        showLineNumbers = !showLineNumbers;
+        break;
+      case IDM_EDIT_PASTE:
+      case IDM_EDIT_COPY:
+      case IDM_EDIT_SELECTALL:
+      case IDM_EDIT_CUT:
+      case IDM_EDIT_UNDO:
+      case IDM_EDIT_REDO:
+        // do nothing, let it fall to CodeMirror
+        stopPropagation = false;
+        break;
+      case IDM_EDIT_COPYALL:
+        // copy the whole text to clipbard
+        let s = editorView.state.doc.toString();
+        setClipboard(s);
+        break;
+      case IDM_EDIT_COPYADD:
+        let sel = getCurrentSelectionAsText();
+        if (sel !== "") {
+          // Document must be focused for setting clipboard
+          setTimeout(() => {
+            appendClipboard(sel);
+          }, 500);
+        }
+        break;
       case IDM_EDIT_CLEARDOCUMENT:
         // TODO: ask to save if dirty?
         newEmptyFile();
+        break;
+      case IDM_EDIT_CLEARCLIPBOARD:
+        clearClipboard();
         break;
       case IDM_HELP_PROJECT_HOME:
         // TODO: needs home
@@ -360,12 +452,22 @@
       case IDM_HELP_FEATURE_REQUEST:
         window.open("https://github.com/kjk/notepad2web/issues", "_blank");
         break;
+      case IDM_HELP_ABOUT:
+        showingAbout = true;
+        break;
       default:
         // TODO: not handled
         msgNotImplemented = `Command ${cmdId} not yet implemented!`;
         showingMsgNotImplemented = true;
     }
-    closeMenu();
+    if (ev) {
+      if (stopPropagation) {
+        ev.stopPropagation();
+        ev.preventDefault();
+      }
+    } else {
+      closeMenu();
+    }
   }
 
   function handleOnMount() {
@@ -394,7 +496,7 @@
         <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8h5Z" />
       </svg></a
     >
-    <MenuBar2
+    <MenuBar
       menuDidOpenFn={handleMenuDidOpen}
       menuBar={mainMenuBar}
       on:menucmd={handleMenuCmd}
@@ -440,6 +542,8 @@
     <DialogAskSaveChanges bind:open={showingSaveChanges} filePath="foo.md" />
   {/if}
 
+  <DialogAbout bind:open={showingAbout} />
+
   <DialogNotImplemented
     bind:open={showingMsgNotImplemented}
     msg={msgNotImplemented}
@@ -451,7 +555,11 @@
     grid-template-rows: auto 1fr auto;
   }
 
-  :global(editor) {
+  :global(.codemirror-wrapper) {
+    height: 100%;
+  }
+  :global(.cm-editor) {
     overflow: hidden;
+    height: 100%;
   }
 </style>

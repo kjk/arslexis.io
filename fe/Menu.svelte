@@ -116,15 +116,15 @@
       el = el.parentElement;
     }
     if (!el) {
-      console.log("Menu2.svelte: menuClicked, no div parent for:", ev.target);
+      console.log("Menu.svelte: menuClicked, no div parent for:", ev.target);
       return;
     }
     const cmdId = el.dataset.cmdId; // get data-cmd-id
     if (!cmdId || cmdId === "") {
-      console.log("Menu2.svelte: menuClicked: no data-menu-id on:", el);
+      console.log("Menu.svelte: menuClicked: no data-menu-id on:", el);
       return;
     }
-    dispatch("menucmd", cmdId);
+    dispatch("menucmd", { cmd: cmdId });
   }
 </script>
 

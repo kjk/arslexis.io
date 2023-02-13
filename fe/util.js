@@ -539,3 +539,35 @@ export function splitMax(s, sep, max) {
   parts[max - 1] = restStr;
   return parts.slice(0, max);
 }
+
+/**
+ * @param {string} s
+ */
+export function setClipboard(s) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(s);
+  }
+}
+
+export function clearClipboard() {
+  setClipboard("");
+}
+
+/**
+ * @returns {Promise<string>}
+ */
+export async function getClipboard() {
+  if (navigator.clipboard) {
+    let s = await navigator.clipboard.readText();
+    return s;
+  }
+  return "";
+}
+
+/**
+ * @param {string} s
+ */
+export async function appendClipboard(s) {
+  let curr = await getClipboard();
+  setClipboard(curr + s);
+}

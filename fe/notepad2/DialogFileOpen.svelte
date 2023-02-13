@@ -1,13 +1,8 @@
 <script>
   import { len } from "../util";
-  import { focus, delayedFocus } from "../actions/focus";
+  import { focus } from "../actions/focus";
   import WinDialogBase from "../WinDialogBase.svelte";
-  import {
-    FsFile,
-    fsTypeLocalStorage,
-    getFileList,
-    newLocalStorageFile,
-  } from "./FsFile";
+  import { FsFile, fsTypeLocalStorage, getFileList } from "./FsFile";
 
   export let open = false;
   /** @type {Function} */
