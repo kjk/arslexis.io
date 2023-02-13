@@ -13,6 +13,6 @@ You need to have node installed.
 
 notepad2web is Copyright (c) 2023 Krzysztof Kowalczyk
 
-http://blog.kowalczyk.inf
+http://blog.kowalczyk.info
 
 kkowalczyk@gmail.com
