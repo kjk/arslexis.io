@@ -128,7 +128,7 @@ export const CMD_COPYWINPOS = "CMD_COPYWINPOS";
 const menuCopyToClipboard = [
   ["&File Name", CMD_COPYFILENAME_NOEXT],
   ["File Name and &Ext.\tShift+F9", CMD_COPYFILENAME],
-  ["Full &Path Name\tAlt+Shift+F9", CMD_COPYPATHNAME],
+  // ["Full &Path Name\tAlt+Shift+F9", CMD_COPYPATHNAME],
   [SEPARATOR],
   ["Copy &All\tAlt+A", IDM_EDIT_COPYALL],
   ["Copy A&dd\tCtrl+E", IDM_EDIT_COPYADD],
@@ -348,7 +348,7 @@ const menuInsert = [
   [SEPARATOR],
   ["&File Name", CMD_INSERTFILENAME_NOEXT],
   ["File Name and E&xtension\tCtrl+F9", IDM_EDIT_INSERT_FILENAME],
-  ["Full &Path Name\tCtrl+Shift+F9", IDM_EDIT_INSERT_PATHNAME],
+  // ["Full &Path Name\tCtrl+Shift+F9", IDM_EDIT_INSERT_PATHNAME],
   [SEPARATOR],
   ["Current &Date", IDM_EDIT_INSERT_LOC_DATE],
   ["Current Date &Time", IDM_EDIT_INSERT_LOC_DATETIME],

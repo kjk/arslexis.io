@@ -13,4 +13,3 @@ let cursor = editorView.state.selection.main.from;
 let line = editorView.state.doc.lineAt(cursor);
 let lineNo = line.number;
 let charNo = cursor - line.from;
-
