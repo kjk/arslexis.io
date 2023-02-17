@@ -61,6 +61,7 @@ export function lazyLoadScript(src, opts = {}) {
     if (opts.charset) script.setAttribute("charset", opts.charset);
     if (opts.crossorigin) script.setAttribute("crossorigin", opts.crossorigin);
 
+    // @ts-ignore
     script.onload = function (event) {
       // console.log(`loaded ${src}`);
       resolve(script);
@@ -78,6 +79,7 @@ export function lazyLoadScript(src, opts = {}) {
  * @returns {Promise}
  */
 export function lazyLoadCSS(src, opts = {}) {
+  // @ts-ignore
   return new Promise(function (resolve, reject) {
     if (!src) {
       throw new Error("src parameter must be specified");
@@ -122,6 +124,7 @@ export function lazyLoadCSS(src, opts = {}) {
         return;
       }
     }
+    // @ts-ignore
     link.onload = function (event) {
       // console.log(`loaded ${src}`);
       resolve(link);
@@ -610,4 +613,43 @@ export async function appendClipboard(s) {
 export function locationRemoveSearchParamsNoReload() {
   let path = window.location.pathname;
   window.history.replaceState({}, document.title, path);
+}
+
+export function requestFullScreen() {
+  let el = document.documentElement;
+  let rfs =
+    el.requestFullscreen ||
+    // @ts-ignore
+    el.webkitRequestFullScreen ||
+    // @ts-ignore
+    el.mozRequestFullScreen ||
+    // @ts-ignore
+    el.msRequestFullscreen;
+  rfs.call(el);
+}
+
+export function exitFullScreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+    // @ts-ignore
+  } else if (document.mozCancelFullScreen) {
+    // @ts-ignore
+    document.mozCancelFullScreen();
+    // @ts-ignore
+  } else if (document.webkitCancelFullScreen) {
+    // @ts-ignore
+    document.webkitCancelFullScreen();
+    // @ts-ignore
+  } else if (document.msExitFullscreen) {
+    // @ts-ignore
+    document.msExitFullscreen();
+  }
+}
+
+export function toggleFullScreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen();
+  }
 }

@@ -970,7 +970,9 @@ const menuLanguage = [
 ];
 
 const menuAppearance = [
-  ["Show &Menu\tAlt+F11", IDM_VIEW_MENU],
+  // TODO: Alt-F11 doesn't work in Chrome / Windows
+  // ["Show &Menu\tAlt+F11", IDM_VIEW_MENU],
+  ["Show &Menu", IDM_VIEW_MENU],
   ["S&how Toolbar\tCtrl+F11", IDM_VIEW_TOOLBAR],
   ["Customi&ze Toolbar...", IDM_VIEW_CUSTOMIZE_TOOLBAR],
   ["&Auto Scale Toolbar", IDM_VIEW_AUTO_SCALE_TOOLBAR],

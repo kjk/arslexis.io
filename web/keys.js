@@ -122,6 +122,9 @@ export function serializeShortuct(s) {
  * @returns {Object}
  */
 export function parseShortcut(s) {
+  // if (s.includes("F11")) {
+  //   debugger;
+  // }
   let parts = s.split("\t");
   if (len(parts) > 1) {
     s = parts[0];

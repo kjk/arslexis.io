@@ -78,6 +78,8 @@
     IDM_VIEW_TOOLBAR,
     mainMenuBar,
     IDM_FILE_SAVECOPY,
+    IDM_VIEW_MENU,
+    IDM_VIEW_TOGGLE_FULLSCREEN,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -97,7 +99,8 @@
     filterDataTransferEntries,
     locationRemoveSearchParamsNoReload,
     notepad2Size,
-    getClipboard,
+    requestFullScreen,
+    toggleFullScreen,
   } from "../util.js";
   import { onDestroy, onMount } from "svelte";
   import { tooltip } from "../actions/tooltip";
@@ -119,6 +122,8 @@
   let editorElement = null;
   /** @type {EditorView} */
   let editorView = null;
+
+  let showMenu = true;
 
   // status line
   let showStatusBar = true;
@@ -163,7 +168,7 @@
     }
     // console.log("setToolbarEnabledState: needsRedraw:", needsRedraw);
     if (needsRedraw) {
-      buttonsOrder = buttonsOrder;
+      toolbarButtonsOrder = toolbarButtonsOrder;
     }
   }
   /**
@@ -489,6 +494,8 @@
 
   function isMenuChecked(cmdId) {
     switch (cmdId) {
+      case IDM_VIEW_MENU:
+        return showMenu;
       case IDM_VIEW_WORDWRAP:
         return wordWrap;
       case IDM_FILE_READONLY_MODE:
@@ -498,7 +505,7 @@
       case IDM_VIEW_STATUSBAR:
         return showStatusBar;
       case IDM_VIEW_TOOLBAR:
-        return showingToolbar;
+        return showToolbar;
     }
     return false;
   }
@@ -541,6 +548,9 @@
       // case IDT_FILE_SAVECOPY:
       //   break;
 
+      case IDM_VIEW_MENU:
+        showMenu = !showMenu;
+        break;
       case IDM_VIEW_WORDWRAP:
         wordWrap = !wordWrap;
         break;
@@ -559,7 +569,7 @@
         showStatusBar = !showStatusBar;
         break;
       case IDM_VIEW_TOOLBAR:
-        showingToolbar = !showingToolbar;
+        showToolbar = !showToolbar;
         break;
       case IDM_EDIT_COPY:
       case IDT_EDIT_COPY:
@@ -572,6 +582,7 @@
       case IDT_EDIT_UNDO:
       case IDM_EDIT_REDO:
       case IDT_EDIT_REDO:
+      case IDM_VIEW_TOGGLE_FULLSCREEN:
         if (ev) {
           // do nothing, let it fall to CodeMirror
           stopPropagation = false;
@@ -581,6 +592,9 @@
           let dispatch = v.dispatch;
           let args = { state, dispatch };
           switch (cmdId) {
+            case IDM_VIEW_TOGGLE_FULLSCREEN:
+              toggleFullScreen();
+              break;
             // case IDM_EDIT_CUT:
             // case IDT_EDIT_CUT:
             //   break;
@@ -680,13 +694,13 @@
     newEmptyFile();
   }
 
-  let showingToolbar = true;
+  let showToolbar = true;
   let isToolbarReady = false;
 
   // Notepad2.c. DefaultToolbarButtons
-  let buttonsOrder = [
+  let toolbarButtonsOrder = [
     22, 3, 0, 1, 2, 0, 4, 18, 19, 0, 5, 6, 0, 7, 8, 9, 20, 0, 10, 11, 0, 12, 0,
-    24, 0, 13, 14, 0, 15, 16, 0, 17,
+    24, 0, 13, 14, 0, 15, 16, 0,
   ];
   // order of icons in toolbar bitmap
   // el[0] is id of the command sent by the icon
@@ -815,40 +829,47 @@
     editorView = null;
     // document.removeEventListener("keydown", onKeyDown);
   });
-  let hello = "hello";
 </script>
 
 <svelte:body on:drop={handleDrop} />
 
 <main class="fixed inset-0 grid">
-  <div class="flex items-center shadow text-sm">
-    <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
-      ><svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="1em"
-        height="1em"
-        viewBox="0 0 24 24"
+  {#if showMenu}
+    <div class="flex items-center shadow text-sm">
+      <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
+        ><svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
+          height="1em"
+          viewBox="0 0 24 24"
+        >
+          <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8h5Z" />
+        </svg></a
       >
-        <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8h5Z" />
-      </svg></a
-    >
-    <MenuBar
-      menuDidOpenFn={handleMenuDidOpen}
-      menuBar={mainMenuBar}
-      on:menucmd={handleMenuCmd}
-    />
-    <div class="grow" />
-    {#if isDirty}
-      <div>*&nbsp;</div>
-    {/if}
-    <div class="mr-2">
-      {name}
+      <MenuBar
+        menuDidOpenFn={handleMenuDidOpen}
+        menuBar={mainMenuBar}
+        on:menucmd={handleMenuCmd}
+      />
+      <div class="grow" />
+      {#if isDirty}
+        <div>*&nbsp;</div>
+      {/if}
+      <div class="mr-2">
+        {name}
+      </div>
     </div>
-  </div>
+  {:else}
+    <MenuBar menuBar={null} />
+    <button
+      class="absolute top-[2px] px-2 py-0.5 right-[4px] hover:bg-gray-100 text-gray-600"
+      on:click={() => (showMenu = true)}>show menu</button
+    >
+  {/if}
 
-  {#if showingToolbar && isToolbarReady}
+  {#if showToolbar && isToolbarReady}
     <div class="flex pl-1">
-      {#each buttonsOrder as idx}
+      {#each toolbarButtonsOrder as idx}
         {#if idx === 0}
           <div class="w-[4px]" />
         {:else}

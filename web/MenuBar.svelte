@@ -23,7 +23,13 @@
   function buildKeyboarShortcutsMenu(menu) {
     for (let mi of menu) {
       let s = mi[0];
-      let cmdId = mi[1];
+      let cmdIdOrSubmenu = mi[1];
+      let isSubmenu = Array.isArray(cmdIdOrSubmenu);
+      if (isSubmenu) {
+        buildKeyboarShortcutsMenu(cmdIdOrSubmenu);
+        continue;
+      }
+      let cmdId = cmdIdOrSubmenu;
       let parts = splitMax(s, "\t", 2);
       if (len(parts) < 2) {
         continue;
@@ -108,6 +114,10 @@
       return;
     }
     for (let ks of keyboardShortcuts) {
+      if (ev.key === "F11" && ks.key === "F11") {
+        console.log(ks);
+        // debugger;
+      }
       if (ev.shiftKey != ks.shiftKey) {
         continue;
       }
@@ -136,32 +146,37 @@
   });
 </script>
 
-<div
-  class="z-20 flex w-full items-center gap-2 bg-white py-0 select-none"
-  bind:this={menuBarElement}
->
-  <div class="flex justify-center text-neutral-700 cursor-pointer">
-    {#each menuBar as mi}
-      {@const title = mi[0]}
-      {@const menu = mi[1]}
-      <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-      <div class="parent relative" tabindex="-1" role="menubar">
-        <button
-          class="rounded-md px-3 py-1 hover:bg-black/5 menu-trigger"
-          on:mouseover={handleMouseOver}
-          on:focus={handleFocus}>{fixMenuName(title)}</button
-        >
-        <div
-          class="child invisible absolute top-0 top-full transform opacity-0 transition-all duration-100"
-        >
-          <Menu on:menucmd {menu} />
+{#if !menuBar}
+  <!-- empty element so that we still process keyboard events -->
+  <div />
+{:else}
+  <div
+    class="z-20 flex w-full items-center gap-2 bg-white py-0 select-none"
+    bind:this={menuBarElement}
+  >
+    <div class="flex justify-center text-neutral-700 cursor-pointer">
+      {#each menuBar as mi}
+        {@const title = mi[0]}
+        {@const menu = mi[1]}
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <div class="parent relative" tabindex="-1" role="menubar">
+          <button
+            class="rounded-md px-3 py-1 hover:bg-black/5 menu-trigger"
+            on:mouseover={handleMouseOver}
+            on:focus={handleFocus}>{fixMenuName(title)}</button
+          >
+          <div
+            class="child invisible absolute top-0 top-full transform opacity-0 transition-all duration-100"
+          >
+            <Menu on:menucmd {menu} />
+          </div>
         </div>
-      </div>
-    {/each}
+      {/each}
+    </div>
+    <div class="grow" />
+    <!-- <div class="mr-4">on the right</div> -->
   </div>
-  <div class="grow" />
-  <!-- <div class="mr-4">on the right</div> -->
-</div>
+{/if}
 
 <style>
   .parent:focus-within .child {

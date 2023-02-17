@@ -13,3 +13,12 @@ let cursor = editorView.state.selection.main.from;
 let line = editorView.state.doc.lineAt(cursor);
 let lineNo = line.number;
 let charNo = cursor - line.from;
+
+
+Things present in notepad2 but not in notepad2web:
+* Exit menu and toolbar icon
+* Alt-F11 shortcut for toggle menu
+
+The reason for those are restrictions of the browser.
+Some keyboard shortcuts cannot be intercepted.
+Some functionality is not avialable.
