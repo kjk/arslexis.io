@@ -130,6 +130,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
+  role="menu"
   class="mt-1 rounded-md border border-neutral-50 bg-white py-1 shadow-lg"
   on:click={handleClicked}
 >
@@ -145,6 +146,7 @@
     {:else if isSubmenu}
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <div
+        role="menuitem"
         class="menu-parent{nest} relative my-1"
         on:mouseleave={handleMouseLeave}
         on:mouseover={handleMouseOver}
@@ -181,6 +183,7 @@
     {:else}
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <div
+        role="menuitem"
         data-cmd-id={cmdId}
         class="min-w-[18em] flex items-center justify-between px-3 py-1 whitespace-nowrap"
         on:mouseleave={handleMouseLeave}

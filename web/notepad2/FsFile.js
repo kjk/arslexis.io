@@ -3,7 +3,7 @@ import { genRandomID, splitMax, throwIf } from "../util";
 export const fsTypeLocalStorage = "localstorage";
 
 export class FsFile {
-  type = fsTypeLocalStorage;
+  type = "";
   // id must be unique
   id = "";
   // name doesn't have to be unique
@@ -12,7 +12,8 @@ export class FsFile {
    * @param {string} id
    * @param {string} [name]
    */
-  constructor(id, name) {
+  constructor(type, id, name) {
+    this.type = type;
     this.id = id;
     this.name = name || "";
   }
@@ -33,7 +34,7 @@ function mkLSKey(f) {
 
 export function newLocalStorageFile(name) {
   let id = genRandomID(6);
-  let f = new FsFile(id, name);
+  let f = new FsFile(fsTypeLocalStorage, id, name);
   f.type = fsTypeLocalStorage;
   return f;
 }
@@ -53,9 +54,8 @@ function getFileListLocalStorage() {
     console.log("getFileListLocalStorage: parts:", parts);
     let id = parts[2];
     let name = parts[3];
-    const f = new FsFile(name);
+    const f = new FsFile(fsTypeLocalStorage, id, name);
     f.type = fsTypeLocalStorage;
-    f.id = id;
     console.log("getFileListLocalStorage:", f);
     res.push(f);
   }
@@ -87,7 +87,7 @@ export function deserialize(s) {
       let id = parts[1];
       let name = parts[2];
       console.log("deserialize: id=", id, "name:", name);
-      return new FsFile(id, name);
+      return new FsFile(fsTypeLocalStorage, id, name);
     default:
       // comes from the user so only logging
       console.log(`FsFile:deserialize: invalid type '${type}' in '${s}'`);

@@ -1,6 +1,6 @@
 <script>
   import WinDialogBase from "../WinDialogBase.svelte";
-
+  import { focus } from "../actions/focus";
   export let open = false;
   export let msg = "";
 </script>

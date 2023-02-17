@@ -4,17 +4,17 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  root: "./fe",
+  root: "./web",
   build: {
     sourcemap: true,
     outDir: resolve("dist"),
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
       input: {
-        main: resolve("fe", "index.html"),
+        main: resolve("web", "index.html"),
 
         // notepad2
-        notepad2: resolve("fe", "notepad2", "index.html"),
+        notepad2: resolve("web", "notepad2", "index.html"),
       },
       output: {
         manualChunks: {

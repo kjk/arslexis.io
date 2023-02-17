@@ -145,7 +145,7 @@
       {@const title = mi[0]}
       {@const menu = mi[1]}
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-      <div class="parent relative" tabindex="-1">
+      <div class="parent relative" tabindex="-1" role="menubar">
         <button
           class="rounded-md px-3 py-1 hover:bg-black/5 menu-trigger"
           on:mouseover={handleMouseOver}

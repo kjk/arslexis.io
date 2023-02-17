@@ -19,10 +19,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    // "baseUrl": "./fe",
+    // "baseUrl": "./web",
     "baseUrl": ".",
     "paths": {
-      "*": ["./fe/*"],
+      "*": ["./web/*"],
     },
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.
@@ -34,5 +34,5 @@
    * Use global.d.ts instead of compilerOptions.types
    * to avoid limiting type declarations.
    */
-  "include": ["fe/**/*.d.ts", "fe/**/*.js", "fe/**/*.svelte"]
+  "include": ["web/**/*.d.ts", "web/**/*.js", "web/**/*.svelte"]
 }

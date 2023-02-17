@@ -7,6 +7,32 @@
 <script>
   import MenuBar from "../MenuBar.svelte";
   import {
+    IDT_FILE_NEW,
+    IDT_FILE_OPEN,
+    IDT_FILE_BROWSE,
+    IDT_FILE_SAVE,
+    IDT_EDIT_UNDO,
+    IDT_EDIT_REDO,
+    IDT_EDIT_CUT,
+    IDT_EDIT_COPY,
+    IDT_EDIT_PASTE,
+    IDT_EDIT_FIND,
+    IDT_EDIT_REPLACE,
+    IDT_VIEW_WORDWRAP,
+    IDT_VIEW_ZOOMIN,
+    IDT_VIEW_ZOOMOUT,
+    IDT_VIEW_SCHEME,
+    IDT_VIEW_SCHEMECONFIG,
+    IDT_FILE_EXIT,
+    IDT_FILE_SAVEAS,
+    IDT_FILE_SAVECOPY,
+    IDT_EDIT_DELETE,
+    IDT_FILE_PRINT,
+    IDT_FILE_OPENFAV,
+    IDT_FILE_ADDTOFAV,
+    IDT_VIEW_TOGGLEFOLDS,
+    IDT_FILE_LAUNCH,
+    IDT_VIEW_ALWAYSONTOP,
     CMD_CUSTOM_ACTION1,
     CMD_CUSTOM_ACTION2,
     CMD_ONLINE_SEARCH_BING,
@@ -49,7 +75,9 @@
     IDM_VIEW_LINENUMBERS,
     IDM_VIEW_WORDWRAP,
     IDM_VIEW_STATUSBAR,
+    IDM_VIEW_TOOLBAR,
     mainMenuBar,
+    IDM_FILE_SAVECOPY,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -66,10 +94,10 @@
     appendClipboard,
     preventDragOnElement,
     undoPreventDragOnElement,
-    getAllFileEntries,
     filterDataTransferEntries,
     locationRemoveSearchParamsNoReload,
     notepad2Size,
+    getClipboard,
   } from "../util.js";
   import { onDestroy, onMount } from "svelte";
   import { tooltip } from "../actions/tooltip";
@@ -113,12 +141,38 @@
   let currSelection = null;
   let hasSelection = false;
   $: updateSelectionState(currSelection);
+
+  let hasClipboard = false;
+  async function setToolbarEnabledState() {
+    if (!isToolbarReady) {
+      return;
+    }
+    // TODO: document must be focused to call this
+    // maybe get this from codemirror
+    // hasClipboard = (await getClipboard()) !== "";
+    let needsRedraw = false;
+    for (let i = 0; i < nIcons; i++) {
+      let info = tbIconsInfo[i];
+      let cmdId = info[0];
+      let isEnabled = info[3];
+      let isEnabledNew = isMenuEnabled(cmdId);
+      if (isEnabled !== isEnabledNew) {
+        needsRedraw = true;
+        info[3] = isEnabledNew;
+      }
+    }
+    // console.log("setToolbarEnabledState: needsRedraw:", needsRedraw);
+    if (needsRedraw) {
+      buttonsOrder = buttonsOrder;
+    }
+  }
   /**
    * @param {EditorSelection} sel
    */
   function updateSelectionState(sel) {
     hasSelection = false;
     if (!sel) {
+      setToolbarEnabledState();
       return;
     }
     let n = len(sel.ranges);
@@ -126,13 +180,13 @@
       const r = sel.ranges[i];
       if (!r.empty) {
         hasSelection = true;
-        break;
+        setToolbarEnabledState();
+        return;
       }
     }
-    console.log("hasSelection:", hasSelection);
   }
 
-  console.log("commands:", commands);
+  // console.log("commands:", commands);
 
   let readOnly = false;
   let readOnlyCompartment = new Compartment();
@@ -199,6 +253,16 @@
   let showingOpenFile = false;
   let showingSaveAs = false;
 
+  $: giveEditorFocus(showingMsgNotImplemented);
+  function giveEditorFocus(v) {
+    if (!v) {
+      console.log("giveEditorFocus:", v);
+      if (editorView && !editorView.hasFocus) {
+        focusEditorView(editorView);
+      }
+    }
+  }
+
   /**
    * @param {FsFile} fileIn
    */
@@ -213,6 +277,7 @@
     file = fileIn;
     name = file.name;
     updateStatusLine();
+    setToolbarEnabledState();
   }
 
   /**
@@ -270,6 +335,7 @@
         currSelection = tr.state.selection;
       }
       updateStatusLine();
+      setToolbarEnabledState();
     }
 
     return new EditorView({
@@ -344,27 +410,15 @@
     });
   }
 
-  function closeMenuAndFocusEditor() {
-    let el = document.activeElement;
-    if (!el) {
-      return;
-    }
-    // TODO: do nothing if el is not menu
-
-    // just blur() looses editor focus
-    /** @type {HTMLElement}*/ (el).blur();
-    focusEditorView(editorView);
-  }
-
+  // if currently active element is menu, blur() it (take away focus)
   function closeMenu() {
-    let el = document.activeElement;
-    console.log("closeMenu: active:", el);
-    if (!el) {
-      return;
+    let el = /** @type {HTMLElement}*/ (document.activeElement);
+    if (el) {
+      let role = el.attributes.getNamedItem("role");
+      if (role && role.value === "menubar") {
+        el.blur();
+      }
     }
-    // TODO: do nothing if el is not menu
-    // /** @type {HTMLElement}*/ (el).blur();
-    focusEditorView(editorView);
   }
 
   function newEmptyFile() {
@@ -373,6 +427,9 @@
     initialState = createEditorState("");
     editorView.setState(initialState);
     isDirty = false;
+    focusEditorView(editorView);
+    updateStatusLine();
+    setToolbarEnabledState();
   }
 
   /**
@@ -381,14 +438,18 @@
    * @param {string} cmdId
    */
   function isMenuEnabled(cmdId) {
-    let v = editorView;
-    let state = v.state;
+    if (!editorView) {
+      return false;
+    }
+    let state = editorView.state;
     let n;
     switch (cmdId) {
       // TODO: much more that depend on selection state
+      case IDM_EDIT_CUT:
+      case IDT_EDIT_CUT:
       case IDM_EDIT_COPY:
+      case IDT_EDIT_COPY:
       case IDM_EDIT_COPYADD:
-      case IDM_EDIT_PASTE:
       case IDM_EDIT_SWAP:
       case IDM_EDIT_CLEARCLIPBOARD:
       case IDM_EDIT_CONVERTUPPERCASE:
@@ -409,15 +470,19 @@
       case CMD_ONLINE_SEARCH_WIKI:
       case CMD_CUSTOM_ACTION1:
       case CMD_CUSTOM_ACTION2:
+        // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
         return hasSelection;
+      case IDM_EDIT_PASTE:
+      case IDT_EDIT_PASTE:
+        return hasClipboard;
       case IDM_EDIT_UNDO:
+      case IDT_EDIT_UNDO:
         n = commands.undoDepth(state);
         return n > 0;
       case IDM_EDIT_REDO:
+      case IDT_EDIT_REDO:
         n = commands.redoDepth(state);
         return n > 0;
-      case IDM_HELP_ABOUT:
-        break;
     }
     return true;
   }
@@ -428,6 +493,12 @@
         return wordWrap;
       case IDM_FILE_READONLY_MODE:
         return readOnly;
+      case IDM_VIEW_LINENUMBERS:
+        return showLineNumbers;
+      case IDM_VIEW_STATUSBAR:
+        return showStatusBar;
+      case IDM_VIEW_TOOLBAR:
+        return showingToolbar;
     }
     return false;
   }
@@ -442,17 +513,19 @@
     let stopPropagation = true;
     switch (cmdId) {
       case IDM_FILE_NEW:
+      case IDT_FILE_NEW:
         if (isDirty) {
           // TODO: ask if should save changes
         }
         newEmptyFile();
-        focusEditorView(editorView);
         break;
       case IDM_FILE_OPEN:
+      case IDT_FILE_OPEN:
         showingOpenFile = true;
         // TODO: more
         break;
       case IDM_FILE_SAVE:
+      case IDT_FILE_SAVE:
         if (file === null) {
           // TODO: need to provide callback to call when saving a file
           showingSaveAs = true;
@@ -461,8 +534,13 @@
         }
         break;
       case IDM_FILE_SAVEAS:
+      case IDT_FILE_SAVEAS:
         showingSaveAs = true;
         break;
+      // case IDM_FILE_SAVECOPY:
+      // case IDT_FILE_SAVECOPY:
+      //   break;
+
       case IDM_VIEW_WORDWRAP:
         wordWrap = !wordWrap;
         break;
@@ -479,12 +557,21 @@
         break;
       case IDM_VIEW_STATUSBAR:
         showStatusBar = !showStatusBar;
-      case IDM_EDIT_PASTE:
+        break;
+      case IDM_VIEW_TOOLBAR:
+        showingToolbar = !showingToolbar;
+        break;
       case IDM_EDIT_COPY:
-      case IDM_EDIT_SELECTALL:
+      case IDT_EDIT_COPY:
       case IDM_EDIT_CUT:
+      case IDT_EDIT_CUT:
+      case IDM_EDIT_PASTE:
+      case IDT_EDIT_PASTE:
+      case IDM_EDIT_SELECTALL:
       case IDM_EDIT_UNDO:
+      case IDT_EDIT_UNDO:
       case IDM_EDIT_REDO:
+      case IDT_EDIT_REDO:
         if (ev) {
           // do nothing, let it fall to CodeMirror
           stopPropagation = false;
@@ -494,17 +581,30 @@
           let dispatch = v.dispatch;
           let args = { state, dispatch };
           switch (cmdId) {
-            case IDM_EDIT_PASTE:
-              // TODO: ???
-              break;
+            // case IDM_EDIT_CUT:
+            // case IDT_EDIT_CUT:
+            //   break;
+            // case IDT_EDIT_COPY:
+            // case IDM_EDIT_COPY:
+            //   break;
+            // case IDM_EDIT_PASTE:
+            // case IDT_EDIT_PASTE:
+            //   break;
             case IDM_EDIT_SELECTALL:
               commands.selectAll(args);
               break;
             case IDM_EDIT_UNDO:
+            case IDT_EDIT_UNDO:
               commands.undo(args);
               break;
             case IDM_EDIT_REDO:
+            case IDT_EDIT_REDO:
               commands.redo(args);
+              break;
+            default:
+              // TODO: not handled
+              msgNotImplemented = `Command ${cmdId} not yet implemented!`;
+              showingMsgNotImplemented = true;
           }
         }
         break;
@@ -552,6 +652,15 @@
       }
     } else {
       closeMenu();
+      let showingDialog =
+        showingAbout ||
+        showingMsgNotImplemented ||
+        showingOpenFile ||
+        showingSaveAs ||
+        showingSaveChanges;
+      if (!showingDialog) {
+        focusEditorView(editorView);
+      }
     }
   }
 
@@ -571,10 +680,108 @@
     newEmptyFile();
   }
 
+  let showingToolbar = true;
+  let isToolbarReady = false;
+
+  // Notepad2.c. DefaultToolbarButtons
+  let buttonsOrder = [
+    22, 3, 0, 1, 2, 0, 4, 18, 19, 0, 5, 6, 0, 7, 8, 9, 20, 0, 10, 11, 0, 12, 0,
+    24, 0, 13, 14, 0, 15, 16, 0, 17,
+  ];
+  // order of icons in toolbar bitmap
+  // el[0] is id of the command sent by the icon
+  // el[1] is tooltip for this icon
+  // el[2] is dataURL for Image() for this icon
+  // el[3] is enabled (if true)
+  /** @type {[string, string, string, boolean][]}*/
+  let tbIconsInfo = [
+    [IDT_FILE_NEW, "New", "", true],
+    [IDT_FILE_OPEN, "Open", "", true],
+    [IDT_FILE_BROWSE, "Browse", "", true],
+    [IDT_FILE_SAVE, "Save", "", true],
+    [IDT_EDIT_UNDO, "Undo", "", true],
+    [IDT_EDIT_REDO, "Redo", "", true],
+    [IDT_EDIT_CUT, "Cut", "", true],
+    [IDT_EDIT_COPY, "Copy", "", true],
+    [IDT_EDIT_PASTE, "Paste", "", true],
+    [IDT_EDIT_FIND, "Find", "", true],
+    [IDT_EDIT_REPLACE, "Replace", "", true],
+    [IDT_VIEW_WORDWRAP, "Word Wrap", "", true],
+    [IDT_VIEW_ZOOMIN, "Zoom In", "", true],
+    [IDT_VIEW_ZOOMOUT, "Zoom Out", "", true],
+    [IDT_VIEW_SCHEME, "Select Scheme", "", true],
+    [IDT_VIEW_SCHEMECONFIG, "Customize Schemes", "", true],
+    [IDT_FILE_EXIT, "Exit", "", true],
+    [IDT_FILE_SAVEAS, "Save As", "", true],
+    [IDT_FILE_SAVECOPY, "Save Copy", "", true],
+    [IDT_EDIT_DELETE, "Delete", "", true],
+    [IDT_FILE_PRINT, "Print", "", true],
+    [IDT_FILE_OPENFAV, "Favorites", "", true],
+    [IDT_FILE_ADDTOFAV, "Add to Favorites", "", true],
+    [IDT_VIEW_TOGGLEFOLDS, "Toggle Folds", "", true],
+    [IDT_FILE_LAUNCH, "Execute Document]", "", true],
+    [IDT_VIEW_ALWAYSONTOP, "Always On Top", "", true],
+  ];
+  const nIcons = len(tbIconsInfo);
+  let iconDy = 24;
+  let iconDx = iconDy;
+  function buildIconImages() {
+    let uriBmp = "";
+    switch (iconDy) {
+      case 16:
+        uriBmp = "Toolbar16.bmp";
+        break;
+      case 24:
+        uriBmp = "Toolbar24.bmp";
+        break;
+      default:
+        throwIf(true, `unsupported iconDy of ${iconDy}`);
+    }
+
+    let img = new Image();
+    img.onload = () => {
+      let canvasTmp = document.createElement("canvas");
+      // canvasTmp.setAttribute("willReadFrequently", "true");
+      canvasTmp.width = iconDx;
+      canvasTmp.height = iconDy;
+      let dw = iconDx;
+      let dh = iconDy;
+      let sw = iconDx;
+      let sh = iconDy;
+      let dx = 0;
+      let dy = 0;
+      let sy = 0;
+      for (let i = 0; i < nIcons; i++) {
+        let ctx = canvasTmp.getContext("2d", { willReadFrequently: true });
+        let sx = i * iconDx;
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+        let imgd = ctx.getImageData(0, 0, iconDy, iconDy);
+        let pix = imgd.data;
+        function makePixTransparent(n) {
+          let i = n * 4;
+          let v = pix[i] + pix[i + 1] + pix[i + 2];
+          if (v === 0) {
+            pix[i + 3] = 0;
+          }
+        }
+        let nPixels = iconDx * iconDy;
+        for (let i = 0; i < nPixels; i++) {
+          makePixTransparent(i);
+        }
+        ctx.putImageData(imgd, 0, 0);
+        let dataURL = canvasTmp.toDataURL("image/png");
+        tbIconsInfo[i][2] = dataURL;
+      }
+      isToolbarReady = true;
+      setToolbarEnabledState();
+    };
+    img.src = uriBmp;
+  }
+
   onMount(() => {
+    buildIconImages();
     preventDragOnElement(document);
     editorView = createEditorView();
-
     openInitialFile();
 
     // document.addEventListener("keydown", onKeyDown);
@@ -608,6 +815,7 @@
     editorView = null;
     // document.removeEventListener("keydown", onKeyDown);
   });
+  let hello = "hello";
 </script>
 
 <svelte:body on:drop={handleDrop} />
@@ -637,6 +845,35 @@
       {name}
     </div>
   </div>
+
+  {#if showingToolbar && isToolbarReady}
+    <div class="flex pl-1">
+      {#each buttonsOrder as idx}
+        {#if idx === 0}
+          <div class="w-[4px]" />
+        {:else}
+          {@const info = tbIconsInfo[idx - 1]}
+          {@const cmdId = info[0]}
+          {@const txt = info[1]}
+          {@const dataURL = info[2]}
+          {@const disabled = !info[3]}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <img
+            src={dataURL}
+            alt={txt}
+            use:tooltip={txt}
+            width={iconDx}
+            height={iconDy}
+            class:disabled
+            class="mt-1 px-1 py-1 hover:bg-blue-100"
+            on:click={() => handleMenuCmd({ detail: { cmd: cmdId } })}
+          />
+        {/if}
+      {/each}
+    </div>
+  {:else}
+    <div class="w-0 h-0" />
+  {/if}
 
   <div class="min-h-0 overflow-hidden">
     <div
@@ -684,8 +921,15 @@
 </main>
 
 <style>
+  .disabled {
+    opacity: 0.5;
+  }
+  .disabled:hover {
+    background-color: white;
+  }
+
   main {
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto auto 1fr auto;
   }
 
   :global(.codemirror-wrapper) {

@@ -15,7 +15,7 @@
 # vendor/
 
 node_modules/
-fe/dist/
+web/dist/
 dist/
 package-lock.json
 yarn.lock
