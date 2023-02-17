@@ -241,10 +241,11 @@ export function debounce(func, threshold, execAsap = false) {
 
 /**
  * @param {boolean} cond
+ * @param {string} [msg]
  */
-export function throwIf(cond) {
+export function throwIf(cond, msg) {
   if (cond) {
-    throw new Error("invalid condition");
+    throw new Error(msg || "invalid condition");
   }
 }
 
@@ -368,6 +369,10 @@ export function trapFocus2(parent, e) {
 }
 */
 
+/**
+ * @param {number} n
+ * @returns {string}
+ */
 export function humanizeSize(n) {
   const a = [
     [1024 * 1024 * 1024 * 1024, "TB"],
@@ -384,6 +389,28 @@ export function humanizeSize(n) {
     }
   }
   return `${n} B`;
+}
+
+/**
+ * @param {number} n
+ * @returns {string}
+ */
+export function notepad2Size(n) {
+  const a = [
+    [1024 * 1024 * 1024 * 1024, "TB"],
+    [1024 * 1024 * 1024, "GB"],
+    [1024 * 1024, "MB"],
+    [1024, "kB"],
+  ];
+  for (const el of a) {
+    const size = el[0];
+    if (n >= size) {
+      // @ts-ignore
+      let s = (n / size).toFixed(2);
+      return s.replace(".00", "") + " " + el[1];
+    }
+  }
+  return `${n} bytes`;
 }
 
 export function preventDefaults(e) {
@@ -425,8 +452,14 @@ export async function collectAllDirectoryEntries(directoryReader, queue) {
   }
 }
 
+/**
+ * @param {DataTransferItemList} dataTransferItemList
+ * @returns {Promise<FileSystemEntry[]>}
+ */
 export async function getAllFileEntries(dataTransferItemList) {
+  /** @type {FileSystemEntry[]} */
   let fileEntries = [];
+  /** @type {FileSystemEntry[]} */
   let queue = [];
   let n = dataTransferItemList.length;
   for (let i = 0; i < n; i++) {
@@ -439,6 +472,7 @@ export async function getAllFileEntries(dataTransferItemList) {
     if (entry.isFile) {
       fileEntries.push(entry);
     } else if (entry.isDirectory) {
+      // @ts-ignore
       let reader = entry.createReader();
       await collectAllDirectoryEntries(reader, queue);
     }
@@ -478,10 +512,10 @@ export function filterFiles(files, fnAllowed) {
 
 /**
  * @param {DataTransfer} dt
- * @param {Function} fnAllowed
+ * @param {Function} [fnAllowed]
  * @returns {Promise<FileWithPath[]>}
  */
-export async function filterDataTransferEntries(dt, fnAllowed) {
+export async function filterDataTransferEntries(dt, fnAllowed = null) {
   let fileEntries = await getAllFileEntries(dt.items);
   // convert to File objects
 
@@ -493,6 +527,7 @@ export async function filterDataTransferEntries(dt, fnAllowed) {
       continue;
     }
     let file = await new Promise((resolve, reject) => {
+      // @ts-ignore
       fe.file(resolve, reject);
     });
     path = path.replace(/^\//, "");
@@ -570,4 +605,9 @@ export async function getClipboard() {
 export async function appendClipboard(s) {
   let curr = await getClipboard();
   setClipboard(curr + s);
+}
+
+export function locationRemoveSearchParamsNoReload() {
+  let path = window.location.pathname;
+  window.history.replaceState({}, document.title, path);
 }

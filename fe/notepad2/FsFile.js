@@ -1,4 +1,4 @@
-import { genRandomID, throwIf } from "../util";
+import { genRandomID, splitMax, throwIf } from "../util";
 
 export const fsTypeLocalStorage = "localstorage";
 
@@ -8,7 +8,14 @@ export class FsFile {
   id = "";
   // name doesn't have to be unique
   name = "";
-  content = "";
+  /**
+   * @param {string} id
+   * @param {string} [name]
+   */
+  constructor(id, name) {
+    this.id = id;
+    this.name = name || "";
+  }
 }
 
 // format of the key is:
@@ -25,11 +32,9 @@ function mkLSKey(f) {
 }
 
 export function newLocalStorageFile(name) {
-  let f = new FsFile();
+  let id = genRandomID(6);
+  let f = new FsFile(id, name);
   f.type = fsTypeLocalStorage;
-  f.name = name;
-  f.id = genRandomID(6);
-  f.content = "";
   return f;
 }
 
@@ -46,13 +51,48 @@ function getFileListLocalStorage() {
     }
     const parts = key.split(":", 4);
     console.log("getFileListLocalStorage: parts:", parts);
-    const f = new FsFile();
-    f.id = parts[2];
-    f.name = parts[3];
+    let id = parts[2];
+    let name = parts[3];
+    const f = new FsFile(name);
+    f.type = fsTypeLocalStorage;
+    f.id = id;
     console.log("getFileListLocalStorage:", f);
     res.push(f);
   }
   return res;
+}
+
+/**
+ * must have id and name set
+ * @param {FsFile} f
+ * @returns {string}
+ */
+export function serialize(f) {
+  switch (f.type) {
+    case fsTypeLocalStorage:
+      return "ls--" + f.id + "--" + f.name;
+  }
+  throwIf(true, `invalid FsFile.type ${f.type}`);
+}
+
+/**
+ * @param {string} s
+ * @returns {?FsFile}
+ */
+export function deserialize(s) {
+  let parts = splitMax(s, "--", 3);
+  let type = parts[0];
+  switch (type) {
+    case "ls":
+      let id = parts[1];
+      let name = parts[2];
+      console.log("deserialize: id=", id, "name:", name);
+      return new FsFile(id, name);
+    default:
+      // comes from the user so only logging
+      console.log(`FsFile:deserialize: invalid type '${type}' in '${s}'`);
+  }
+  return null;
 }
 
 /**
@@ -68,27 +108,17 @@ export function readFile(f) {
 }
 
 /**
- * @param {FsFile} file
+ * @param {FsFile} f
  * @param {string} content
  */
-function saveFileLocalStorage(file, content) {
-  const key = mkLSKey(file);
-  localStorage.setItem(key, content);
-  file.content = content;
-}
-
-/**
- * @param {FsFile} file
- * @param {string} content
- */
-export function saveFile(file, content) {
-  console.log("saveFile:", file);
-  switch (file.type) {
+export function writeFile(f, content) {
+  switch (f.type) {
     case fsTypeLocalStorage:
-      saveFileLocalStorage(file, content);
+      const key = mkLSKey(f);
+      localStorage.setItem(key, content);
       break;
     default:
-      throwIf(true);
+      throwIf(true, `invalid FsFile.type ${f.type}`);
   }
 }
 
@@ -102,6 +132,6 @@ export function getFileList(type) {
     case fsTypeLocalStorage:
       return getFileListLocalStorage();
     default:
-      throwIf(true);
+      throwIf(true, `invalid FsFile.type ${type}`);
   }
 }

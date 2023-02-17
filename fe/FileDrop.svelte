@@ -53,6 +53,9 @@
     onfiles(files);
   }
 
+  /**
+   * @param {DragEvent} e
+   */
   async function handleDrop(e) {
     //console.log("handleDrop");
     const files = await filterDataTransferEntries(e.dataTransfer, allowedFile);

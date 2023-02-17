@@ -1,6 +1,7 @@
 <script context="module">
   /** @typedef { import("@codemirror/state").Extension} Extension */
   /** @typedef { import("@codemirror/state").Transaction} Transaction */
+  /** @typedef { import("@codemirror/language").LanguageSupport} LanguageSupport */
 </script>
 
 <script>
@@ -36,6 +37,7 @@
     IDM_EDIT_TITLECASE,
     IDM_EDIT_UNDO,
     IDM_FILE_NEW,
+    IDM_FILE_NEWWINDOW2,
     IDM_FILE_OPEN,
     IDM_FILE_READONLY_MODE,
     IDM_FILE_SAVE,
@@ -46,10 +48,12 @@
     IDM_HELP_REPORT_ISSUE,
     IDM_VIEW_LINENUMBERS,
     IDM_VIEW_WORDWRAP,
+    IDM_VIEW_STATUSBAR,
     mainMenuBar,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
+  import * as commands from "@codemirror/commands";
   import { getTheme, getBaseExtensions2 } from "../cmexts";
 
   import { focusEditorView, getLangFromFileName } from "../cmutil";
@@ -60,6 +64,12 @@
     len,
     throwIf,
     appendClipboard,
+    preventDragOnElement,
+    undoPreventDragOnElement,
+    getAllFileEntries,
+    filterDataTransferEntries,
+    locationRemoveSearchParamsNoReload,
+    notepad2Size,
   } from "../util.js";
   import { onDestroy, onMount } from "svelte";
   import { tooltip } from "../actions/tooltip";
@@ -68,22 +78,32 @@
   import DialogSaveAs from "./DialogSaveAs.svelte";
   import DialogFileOpen from "./DialogFileOpen.svelte";
   import DialogAbout from "./DialogAbout.svelte";
-  import { FsFile, readFile, saveFile } from "./FsFile";
+  import {
+    deserialize,
+    FsFile,
+    newLocalStorageFile,
+    readFile,
+    serialize,
+    writeFile,
+  } from "./FsFile";
 
   /** @type {HTMLElement} */
   let editorElement = null;
   /** @type {EditorView} */
   let editorView = null;
 
-  // state of current document
-  let normalLength = 40;
-  let lineCount = 4;
-  let posLine = 4;
-  let posCol = 1;
-  let pos = 41;
-  let lineEncoding = "Windows (CRLF)";
-  let charEncoding = "UTF-8";
-  let typingMode = "INS"; // OVR
+  // status line
+  let showStatusBar = true;
+  let statusLn1 = 1;
+  let statusLn2 = 1;
+  let statusCol1 = 1;
+  let statusCol2 = 1;
+  let statusSel = 0;
+  let statusSelLn = 0;
+  let statusSize = 0;
+  let statusEncoding = "UTF-8";
+  let statusNewline = "CR+LF";
+  let statusLang = "Text";
 
   let showingAbout = false;
 
@@ -111,6 +131,8 @@
     }
     console.log("hasSelection:", hasSelection);
   }
+
+  console.log("commands:", commands);
 
   let readOnly = false;
   let readOnlyCompartment = new Compartment();
@@ -148,7 +170,7 @@
   }
 
   //   lineNumbers(),
-  let showLineNumbers = false;
+  let showLineNumbers = true;
   let showLineNumbersCompartment = new Compartment();
   $: setLineNumbersState(showLineNumbers);
   function setLineNumbersState(flag) {
@@ -190,6 +212,7 @@
     isDirty = false;
     file = fileIn;
     name = file.name;
+    updateStatusLine();
   }
 
   /**
@@ -199,11 +222,25 @@
     console.log("handleSaveAs:", fileIn);
     initialState = editorView.state;
     let content = initialState.doc.toString();
-    saveFile(fileIn, content);
+    writeFile(fileIn, content);
     focusEditorView(editorView);
     isDirty = false;
     file = fileIn;
     name = file.name;
+  }
+
+  function updateStatusLine() {
+    let v = editorView;
+    let state = v.state;
+    let sel = state.selection.main;
+    let doc = state.doc;
+    statusLn2 = doc.lines;
+    statusSize = doc.length;
+    let pos = sel.from;
+    let line = doc.lineAt(pos);
+    statusLn1 = line.number;
+    statusCol1 = pos - line.from + 1;
+    statusCol2 = line.length + 1;
   }
 
   function createEditorView() {
@@ -232,60 +269,13 @@
       } else {
         currSelection = tr.state.selection;
       }
+      updateStatusLine();
     }
 
     return new EditorView({
       parent: editorElement,
       dispatch: dispatchTransaction,
     });
-  }
-
-  /**
-   * return false if a given cmd should be disabled
-   * based on the state of the app
-   * @param {string} cmdId
-   */
-  function isMenuEnabled(cmdId) {
-    switch (cmdId) {
-      // TODO: much more that depend on selection state
-      case IDM_EDIT_COPY:
-      case IDM_EDIT_COPYADD:
-      case IDM_EDIT_PASTE:
-      case IDM_EDIT_SWAP:
-      case IDM_EDIT_CLEARCLIPBOARD:
-      case IDM_EDIT_CONVERTUPPERCASE:
-      case IDM_EDIT_CONVERTLOWERCASE:
-      case IDM_EDIT_INVERTCASE:
-      case IDM_EDIT_TITLECASE:
-      case IDM_EDIT_SENTENCECASE:
-      case IDM_EDIT_CONVERTSPACES:
-      case IDM_EDIT_CONVERTTABS:
-      case IDM_EDIT_CONVERTSPACES2:
-      case IDM_EDIT_CONVERTTABS2:
-      case IDM_EDIT_NUM2HEX:
-      case IDM_EDIT_NUM2DEC:
-      case IDM_EDIT_NUM2BIN:
-      case IDM_EDIT_NUM2OCT:
-      case CMD_ONLINE_SEARCH_GOOGLE:
-      case CMD_ONLINE_SEARCH_BING:
-      case CMD_ONLINE_SEARCH_WIKI:
-      case CMD_CUSTOM_ACTION1:
-      case CMD_CUSTOM_ACTION2:
-        return hasSelection;
-      case IDM_HELP_ABOUT:
-        break;
-    }
-    return true;
-  }
-
-  function isMenuChecked(cmdId) {
-    switch (cmdId) {
-      case IDM_VIEW_WORDWRAP:
-        return wordWrap;
-      case IDM_FILE_READONLY_MODE:
-        return readOnly;
-    }
-    return false;
   }
 
   function handleMenuDidOpen(menuElement) {
@@ -321,7 +311,7 @@
     let tabSize = 2;
     let styles = undefined;
     let editable = true;
-    let placeholder = "start typing...";
+    let placeholder = "start typing or menu `File/Open` or drag & drop file...";
     /** @type {Extension[]}*/
 
     // TODO: why is this [] and not null or something?
@@ -335,9 +325,18 @@
       showLineNumbersCompartment.of(lineNumV),
       ...getTheme(theme, styles),
     ];
-    const lang = getLangFromFileName(fileName);
+    const lang = /** @type {LanguageSupport} */ (getLangFromFileName(fileName));
+    statusLang = "Text";
     if (lang) {
       exts.push(lang);
+      console.log("lang:", lang);
+      // @ts-ignore
+      if (lang.name) {
+        // @ts-ignore
+        statusLang = lang.name;
+      } else if (lang.language && lang.language.name) {
+        statusLang = lang.language.name;
+      }
     }
     return EditorState.create({
       doc: s ?? undefined,
@@ -359,11 +358,13 @@
 
   function closeMenu() {
     let el = document.activeElement;
+    console.log("closeMenu: active:", el);
     if (!el) {
       return;
     }
     // TODO: do nothing if el is not menu
-    /** @type {HTMLElement}*/ (el).blur();
+    // /** @type {HTMLElement}*/ (el).blur();
+    focusEditorView(editorView);
   }
 
   function newEmptyFile() {
@@ -372,6 +373,63 @@
     initialState = createEditorState("");
     editorView.setState(initialState);
     isDirty = false;
+  }
+
+  /**
+   * return false if a given cmd should be disabled
+   * based on the state of the app
+   * @param {string} cmdId
+   */
+  function isMenuEnabled(cmdId) {
+    let v = editorView;
+    let state = v.state;
+    let n;
+    switch (cmdId) {
+      // TODO: much more that depend on selection state
+      case IDM_EDIT_COPY:
+      case IDM_EDIT_COPYADD:
+      case IDM_EDIT_PASTE:
+      case IDM_EDIT_SWAP:
+      case IDM_EDIT_CLEARCLIPBOARD:
+      case IDM_EDIT_CONVERTUPPERCASE:
+      case IDM_EDIT_CONVERTLOWERCASE:
+      case IDM_EDIT_INVERTCASE:
+      case IDM_EDIT_TITLECASE:
+      case IDM_EDIT_SENTENCECASE:
+      case IDM_EDIT_CONVERTSPACES:
+      case IDM_EDIT_CONVERTTABS:
+      case IDM_EDIT_CONVERTSPACES2:
+      case IDM_EDIT_CONVERTTABS2:
+      case IDM_EDIT_NUM2HEX:
+      case IDM_EDIT_NUM2DEC:
+      case IDM_EDIT_NUM2BIN:
+      case IDM_EDIT_NUM2OCT:
+      case CMD_ONLINE_SEARCH_GOOGLE:
+      case CMD_ONLINE_SEARCH_BING:
+      case CMD_ONLINE_SEARCH_WIKI:
+      case CMD_CUSTOM_ACTION1:
+      case CMD_CUSTOM_ACTION2:
+        return hasSelection;
+      case IDM_EDIT_UNDO:
+        n = commands.undoDepth(state);
+        return n > 0;
+      case IDM_EDIT_REDO:
+        n = commands.redoDepth(state);
+        return n > 0;
+      case IDM_HELP_ABOUT:
+        break;
+    }
+    return true;
+  }
+
+  function isMenuChecked(cmdId) {
+    switch (cmdId) {
+      case IDM_VIEW_WORDWRAP:
+        return wordWrap;
+      case IDM_FILE_READONLY_MODE:
+        return readOnly;
+    }
+    return false;
   }
 
   // this can be invoked via keyboard shortcut of via menu
@@ -411,17 +469,44 @@
       case IDM_FILE_READONLY_MODE:
         readOnly = !readOnly;
         break;
+      case IDM_FILE_NEWWINDOW2:
+        // open empty window
+        let uri = window.location.toString();
+        window.open(uri);
+        break;
       case IDM_VIEW_LINENUMBERS:
         showLineNumbers = !showLineNumbers;
         break;
+      case IDM_VIEW_STATUSBAR:
+        showStatusBar = !showStatusBar;
       case IDM_EDIT_PASTE:
       case IDM_EDIT_COPY:
       case IDM_EDIT_SELECTALL:
       case IDM_EDIT_CUT:
       case IDM_EDIT_UNDO:
       case IDM_EDIT_REDO:
-        // do nothing, let it fall to CodeMirror
-        stopPropagation = false;
+        if (ev) {
+          // do nothing, let it fall to CodeMirror
+          stopPropagation = false;
+        } else {
+          let v = editorView;
+          let state = v.state;
+          let dispatch = v.dispatch;
+          let args = { state, dispatch };
+          switch (cmdId) {
+            case IDM_EDIT_PASTE:
+              // TODO: ???
+              break;
+            case IDM_EDIT_SELECTALL:
+              commands.selectAll(args);
+              break;
+            case IDM_EDIT_UNDO:
+              commands.undo(args);
+              break;
+            case IDM_EDIT_REDO:
+              commands.redo(args);
+          }
+        }
         break;
       case IDM_EDIT_COPYALL:
         // copy the whole text to clipbard
@@ -470,19 +555,62 @@
     }
   }
 
-  function handleOnMount() {
-    editorView = createEditorView();
+  function openInitialFile() {
+    // if has ?file=${fileID}, opens that
+    // otherwise, opens empty file
+    let params = new URLSearchParams(location.search);
+    let fileId = params.get("file");
+    if (fileId) {
+      let file = deserialize(fileId);
+      if (file) {
+        handleFileOpen(file);
+        locationRemoveSearchParamsNoReload();
+        return;
+      }
+    }
     newEmptyFile();
+  }
+
+  onMount(() => {
+    preventDragOnElement(document);
+    editorView = createEditorView();
+
+    openInitialFile();
+
     // document.addEventListener("keydown", onKeyDown);
     focusEditorView(editorView);
+    return () => {
+      undoPreventDragOnElement(document);
+    };
+  });
+
+  async function handleDrop(ev) {
+    console.log("file drop:", ev);
+    console.log("dt:", ev.dataTransfer);
+    let files = await filterDataTransferEntries(ev.dataTransfer);
+    let first = files[0];
+    console.log("first:", first);
+    console.log("first.file:", first.file);
+    let content = await first.file.text();
+    // TODO: open in new window
+    let name = first.file.name;
+    let fs = newLocalStorageFile(name);
+    writeFile(fs, content);
+    let uriName = serialize(fs);
+    let uri = window.location.toString();
+    uri += "?file=" + encodeURIComponent(uriName);
+    window.open(uri);
+    // this opens a new window and will trigger openInitialFile()
+    // from onMount()
   }
-  onMount(handleOnMount);
 
   onDestroy(() => {
     editorView = null;
     // document.removeEventListener("keydown", onKeyDown);
   });
 </script>
+
+<svelte:body on:drop={handleDrop} />
 
 <main class="fixed inset-0 grid">
   <div class="flex items-center shadow text-sm">
@@ -517,14 +645,19 @@
     />
   </div>
 
-  <div class="flex justify-between px-2 bg-gray-50">
-    <div>Normal length: {normalLength}</div>
-    <div>Lines: {lineCount}</div>
-    <div>Ln: {posLine} Col: {posCol} Pos: {pos}</div>
-    <div>{lineEncoding}</div>
-    <div>{charEncoding}</div>
-    <div>{typingMode}</div>
-  </div>
+  {#if showStatusBar}
+    <div class="flex justify-between px-2 bg-gray-50 text-sm">
+      <div>Ln {statusLn1} / {statusLn2}</div>
+      <div>Col {statusCol1} / {statusCol2}</div>
+      <div>Sel {statusSel} Sel Ln {statusSelLn}</div>
+      <div>{notepad2Size(statusSize)}</div>
+      <div>{statusEncoding}</div>
+      <div>{statusNewline}</div>
+      <div>{statusLang}</div>
+    </div>
+  {:else}
+    <div />
+  {/if}
 
   {#if showingOpenFile}
     <DialogFileOpen bind:open={showingOpenFile} handleOpen={handleFileOpen} />
