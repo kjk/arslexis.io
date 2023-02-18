@@ -1,4 +1,4 @@
-import { httpPostJSON } from "httputil";
+import { httpPostJSON } from "./httputil";
 
 export let disableEvents = false;
 

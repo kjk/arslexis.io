@@ -80,13 +80,109 @@
     IDM_FILE_SAVECOPY,
     IDM_VIEW_MENU,
     IDM_VIEW_TOGGLE_FULLSCREEN,
+    IDM_EDIT_URLENCODE,
+    IDM_EDIT_URLDECODE,
+    IDM_EDIT_BASE64_ENCODE,
+    IDM_EDIT_BASE64_SAFE_ENCODE,
+    IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE,
+    IDM_EDIT_BASE64_DECODE,
+    IDM_EDIT_BASE64_DECODE_AS_HEX,
+    IDM_EDIT_DELETE,
+    IDM_EDIT_INDENT,
+    IDM_EDIT_UNINDENT,
+    IDM_LINEENDINGS_CRLF,
+    IDM_LINEENDINGS_LF,
+    IDM_LINEENDINGS_CR,
+    IDM_VIEW_SHOWWHITESPACE,
+    IDM_LEXER_CSS,
+    IDM_LEXER_XML,
+    IDM_LEXER_SCSS,
+    IDM_LEXER_LESS,
+    IDM_LEXER_PHP,
+    IDM_LEXER_MARKDOWN_GITHUB,
+    IDM_LEXER_MARKDOWN_GITLAB,
+    IDM_LEXER_MARKDOWN_PANDOC,
+    IDM_LEXER_HSS,
+    IDM_LEXER_WEB,
+    IDM_LEXER_JSP,
+    IDM_LEXER_ASPX_CS,
+    IDM_LEXER_ASPX_VB,
+    IDM_LEXER_ASP_VBS,
+    IDM_LEXER_ASP_JS,
+    IDM_LEXER_OCTAVE,
+    IDM_LEXER_BASH,
+    IDM_LEXER_MATLAB,
+    IDM_LEXER_SCILAB,
+    IDM_LEXER_M4,
+    IDM_LEXER_XSD,
+    IDM_LEXER_XSLT,
+    IDM_LEXER_DTD,
+    IDM_LEXER_ANT_BUILD,
+    IDM_LEXER_CSHELL,
+    IDM_LEXER_MAVEN_POM,
+    IDM_LEXER_MAVEN_SETTINGS,
+    IDM_LEXER_IVY_MODULE,
+    IDM_LEXER_IVY_SETTINGS,
+    IDM_LEXER_PMD_RULESET,
+    IDM_LEXER_CHECKSTYLE,
+    IDM_LEXER_APACHE,
+    IDM_LEXER_TOMCAT,
+    IDM_LEXER_WEB_JAVA,
+    IDM_LEXER_STRUTS,
+    IDM_LEXER_HIB_CFG,
+    IDM_LEXER_HIB_MAP,
+    IDM_LEXER_SPRING_BEANS,
+    IDM_LEXER_JBOSS,
+    IDM_LEXER_PROPERTY_LIST,
+    IDM_LEXER_ANDROID_MANIFEST,
+    IDM_LEXER_ANDROID_LAYOUT,
+    IDM_LEXER_CSV,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
   import * as commands from "@codemirror/commands";
-  import { getTheme, getBaseExtensions2 } from "../cmexts";
+  import {
+    keymap,
+    highlightSpecialChars,
+    highlightWhitespace,
+    highlightTrailingWhitespace,
+    highlightActiveLine,
+    highlightActiveLineGutter,
+    drawSelection,
+    dropCursor,
+    rectangularSelection,
+    crosshairCursor,
+    scrollPastEnd,
+    placeholder as placeholderExt,
+  } from "@codemirror/view";
+  import {
+    defaultHighlightStyle,
+    syntaxHighlighting,
+    indentOnInput,
+    bracketMatching,
+    foldGutter,
+    foldKeymap,
+  } from "@codemirror/language";
+  import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+  import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
+  import {
+    autocompletion,
+    completionKeymap,
+    closeBrackets,
+    closeBracketsKeymap,
+  } from "@codemirror/autocomplete";
+  import { lintKeymap } from "@codemirror/lint";
 
-  import { focusEditorView, getLangFromFileName } from "../cmutil";
+  import { indentWithTab } from "@codemirror/commands";
+  import { indentUnit } from "@codemirror/language";
+
+  import { getTheme } from "../cmexts";
+  import {
+    getLangFromFileName,
+    getLangFromLexer,
+    getLangName,
+  } from "../cmlangs";
+  import { focusEditorView } from "../cmutil";
   import {
     setClipboard,
     clearClipboard,
@@ -99,7 +195,6 @@
     filterDataTransferEntries,
     locationRemoveSearchParamsNoReload,
     notepad2Size,
-    requestFullScreen,
     toggleFullScreen,
   } from "../util.js";
   import { onDestroy, onMount } from "svelte";
@@ -117,6 +212,7 @@
     serialize,
     writeFile,
   } from "./FsFile";
+  import { logNpEvent } from "./events";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -135,7 +231,6 @@
   let statusSelLn = 0;
   let statusSize = 0;
   let statusEncoding = "UTF-8";
-  let statusNewline = "CR+LF";
   let statusLang = "Text";
 
   let showingAbout = false;
@@ -193,6 +288,61 @@
 
   // console.log("commands:", commands);
 
+  let showWhitespace = true;
+  let showWhitespaceCompartment = new Compartment();
+  $: setShowWhitespace(showWhitespace);
+  function setShowWhitespace(flag) {
+    if (editorView) {
+      const v = flag ? highlightWhitespace() : [];
+      editorView.dispatch({
+        effects: showWhitespaceCompartment.reconfigure(v),
+      });
+    }
+  }
+
+  let showTrailingWhitespace = true;
+  let showTrailingWhitespaceCompartment = new Compartment();
+  $: setShowTrailingWhitespace(showTrailingWhitespace);
+  function setShowTrailingWhitespace(flag) {
+    if (editorView) {
+      const v = flag ? highlightTrailingWhitespace() : [];
+      editorView.dispatch({
+        effects: showTrailingWhitespaceCompartment.reconfigure(v),
+      });
+    }
+  }
+
+  // we use Scintila terminology, it's language in CodeMirror
+  let lexer = null;
+  let lexerCompartment = new Compartment();
+  $: setLexer(lexer);
+  function setLexer(lexer) {
+    if (editorView) {
+      let v = getLangFromLexer(lexer);
+      if (v) {
+        console.log("lang:", v);
+        statusLang = getLangName(v);
+        editorView.dispatch({
+          effects: lexerCompartment.reconfigure(v),
+        });
+      }
+    }
+  }
+
+  let lineSeparator = null;
+  let lineSeparatorStatus = "any";
+  let lineSeparatorCompartment = new Compartment();
+  $: setLineSeparator(lineSeparator);
+  function setLineSeparator(sep) {
+    if (editorView) {
+      editorView.dispatch({
+        effects: lineSeparatorCompartment.reconfigure(
+          EditorState.lineSeparator.of(sep)
+        ),
+      });
+    }
+  }
+
   let readOnly = false;
   let readOnlyCompartment = new Compartment();
   $: setReadOnlyState(readOnly);
@@ -216,7 +366,7 @@
     return s;
   }
 
-  let wordWrap = false;
+  let wordWrap = true;
   let wordWrapCompartment = new Compartment();
   $: setWordWrapState(wordWrap);
   function setWordWrapState(flag) {
@@ -350,7 +500,7 @@
   }
 
   function handleMenuDidOpen(menuElement) {
-    console.log("handleMenuDidOpen:", menuElement);
+    // console.log("handleMenuDidOpen:", menuElement);
     // perf note: this seems to complete in 1-3 ms
     const nodes = menuElement.querySelectorAll("[data-cmd-id]");
     for (let node of nodes.values()) {
@@ -370,45 +520,79 @@
     }
   }
 
+  /** @typedef { import("@codemirror/state").Extension} Extension */
+
   /**
    * @param {string} s
    * @param {string} fileName
    * @returns {EditorState}
    */
   function createEditorState(s, fileName = "") {
-    let basic = true;
     let theme = undefined;
-    let useTab = true;
     let tabSize = 2;
     let styles = undefined;
-    let editable = true;
-    let placeholder = "start typing or menu `File/Open` or drag & drop file...";
+    let placeholder =
+      "Welcome to notepad2web - a web re-implementation of notepad2 Windows text editor.\nYou can save files in the browser (localStorage) or open files from the file system (if supported by your browser).\nStart typing...";
     /** @type {Extension[]}*/
 
     // TODO: why is this [] and not null or something?
     // @ts-ignore
     let wordWrapV = wordWrap ? EditorView.lineWrapping : [];
     let lineNumV = showLineNumbers ? lineNumbers() : [];
+    let showWhitespaceV = showWhitespace ? highlightWhitespace() : [];
+    let showTrailingWhitespaceV = showTrailingWhitespace
+      ? highlightTrailingWhitespace()
+      : [];
+
+    let lexerV = getLangFromFileName(fileName);
+    statusLang = "Text";
+    if (lexerV) {
+      console.log("lang:", lexerV);
+      statusLang = getLangName(lexerV);
+    } else {
+      lexerV = [];
+    }
+
     const exts = [
-      ...getBaseExtensions2(basic, useTab, tabSize, placeholder, editable),
+      indentUnit.of(" ".repeat(tabSize)),
+      EditorView.editable.of(true), // ???
+      highlightActiveLineGutter(),
+      highlightSpecialChars(),
+      history(),
+      foldGutter(),
+      drawSelection(),
+      dropCursor(),
+      EditorState.allowMultipleSelections.of(true),
+      indentOnInput(),
+      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+      bracketMatching(),
+      closeBrackets(),
+      autocompletion(),
+      rectangularSelection(),
+      crosshairCursor(),
+      highlightActiveLine(),
+      highlightSelectionMatches(),
+      keymap.of([
+        ...closeBracketsKeymap,
+        ...defaultKeymap,
+        ...searchKeymap,
+        ...historyKeymap,
+        ...foldKeymap,
+        ...completionKeymap,
+        ...lintKeymap,
+      ]),
+      keymap.of([indentWithTab]),
+      placeholderExt(placeholder),
       readOnlyCompartment.of(EditorState.readOnly.of(readOnly)),
+      lineSeparatorCompartment.of(EditorState.lineSeparator.of(lineSeparator)),
+      showWhitespaceCompartment.of(showWhitespaceV),
+      showTrailingWhitespaceCompartment.of(showTrailingWhitespaceV),
       wordWrapCompartment.of(wordWrapV),
       showLineNumbersCompartment.of(lineNumV),
+      // scrollPastEnd(), // TODO: not sure what it does
       ...getTheme(theme, styles),
+      lexerCompartment.of(lexerV),
     ];
-    const lang = /** @type {LanguageSupport} */ (getLangFromFileName(fileName));
-    statusLang = "Text";
-    if (lang) {
-      exts.push(lang);
-      console.log("lang:", lang);
-      // @ts-ignore
-      if (lang.name) {
-        // @ts-ignore
-        statusLang = lang.name;
-      } else if (lang.language && lang.language.name) {
-        statusLang = lang.language.name;
-      }
-    }
     return EditorState.create({
       doc: s ?? undefined,
       extensions: exts,
@@ -455,6 +639,7 @@
       case IDM_EDIT_COPY:
       case IDT_EDIT_COPY:
       case IDM_EDIT_COPYADD:
+      case IDM_EDIT_SELECTALL:
       case IDM_EDIT_SWAP:
       case IDM_EDIT_CLEARCLIPBOARD:
       case IDM_EDIT_CONVERTUPPERCASE:
@@ -473,8 +658,15 @@
       case CMD_ONLINE_SEARCH_GOOGLE:
       case CMD_ONLINE_SEARCH_BING:
       case CMD_ONLINE_SEARCH_WIKI:
+      case IDM_EDIT_BASE64_ENCODE:
+      case IDM_EDIT_BASE64_SAFE_ENCODE:
+      case IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
+      case IDM_EDIT_BASE64_DECODE:
+      case IDM_EDIT_BASE64_DECODE_AS_HEX:
       case CMD_CUSTOM_ACTION1:
       case CMD_CUSTOM_ACTION2:
+      case IDM_EDIT_URLENCODE:
+      case IDM_EDIT_URLDECODE:
         // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
         return hasSelection;
       case IDM_EDIT_PASTE:
@@ -506,6 +698,14 @@
         return showStatusBar;
       case IDM_VIEW_TOOLBAR:
         return showToolbar;
+      case IDM_LINEENDINGS_CRLF:
+        return lineSeparator == "\r\n";
+      case IDM_LINEENDINGS_LF:
+        return lineSeparator == "\n";
+      case IDM_LINEENDINGS_CR:
+        return lineSeparator == "\r";
+      case IDM_VIEW_SHOWWHITESPACE:
+        return showWhitespace;
     }
     return false;
   }
@@ -557,6 +757,9 @@
       case IDM_FILE_READONLY_MODE:
         readOnly = !readOnly;
         break;
+      case IDM_VIEW_SHOWWHITESPACE:
+        showWhitespace = !showWhitespace;
+        break;
       case IDM_FILE_NEWWINDOW2:
         // open empty window
         let uri = window.location.toString();
@@ -571,6 +774,22 @@
       case IDM_VIEW_TOOLBAR:
         showToolbar = !showToolbar;
         break;
+      // TODO: notepad2 changes line endings
+      // not sure if that transfer to CM as it stores text
+      // in lines. Does it re-split the doc when
+      // EditorState.lineSeparator changes?
+      case IDM_LINEENDINGS_CRLF:
+        lineSeparator = "\r\n";
+        lineSeparatorStatus = "CR+LF";
+        break;
+      case IDM_LINEENDINGS_CR:
+        lineSeparator = "\r";
+        lineSeparatorStatus = "CR";
+        break;
+      case IDM_LINEENDINGS_LF:
+        lineSeparator = "\n";
+        lineSeparatorStatus = "LF";
+        break;
       case IDM_EDIT_COPY:
       case IDT_EDIT_COPY:
       case IDM_EDIT_CUT:
@@ -583,6 +802,8 @@
       case IDM_EDIT_REDO:
       case IDT_EDIT_REDO:
       case IDM_VIEW_TOGGLE_FULLSCREEN:
+      case IDM_EDIT_INDENT:
+      case IDM_EDIT_UNINDENT:
         if (ev) {
           // do nothing, let it fall to CodeMirror
           stopPropagation = false;
@@ -604,6 +825,12 @@
             // case IDM_EDIT_PASTE:
             // case IDT_EDIT_PASTE:
             //   break;
+            case IDM_EDIT_INDENT:
+              commands.indentMore(args);
+              break;
+            case IDM_EDIT_UNINDENT:
+              commands.indentLess(args);
+              break;
             case IDM_EDIT_SELECTALL:
               commands.selectAll(args);
               break;
@@ -621,6 +848,11 @@
               showingMsgNotImplemented = true;
           }
         }
+        break;
+      case IDM_EDIT_DELETE:
+      case IDT_EDIT_DELETE:
+        // TODO: possibly deleteCharBackward()
+        commands.deleteCharForward(editorView);
         break;
       case IDM_EDIT_COPYALL:
         // copy the whole text to clipbard
@@ -655,6 +887,11 @@
         showingAbout = true;
         break;
       default:
+        let lex = getLangFromLexer(cmdId);
+        if (lex) {
+          lexer = cmdId;
+          break;
+        }
         // TODO: not handled
         msgNotImplemented = `Command ${cmdId} not yet implemented!`;
         showingMsgNotImplemented = true;
@@ -675,6 +912,10 @@
       if (!showingDialog) {
         focusEditorView(editorView);
       }
+    }
+    console.log("showingMsgNotImplemented:", showingMsgNotImplemented);
+    if (!showingMsgNotImplemented) {
+      logNpEvent(cmdId);
     }
   }
 
@@ -910,7 +1151,7 @@
       <div>Sel {statusSel} Sel Ln {statusSelLn}</div>
       <div>{notepad2Size(statusSize)}</div>
       <div>{statusEncoding}</div>
-      <div>{statusNewline}</div>
+      <div>{lineSeparatorStatus}</div>
       <div>{statusLang}</div>
     </div>
   {:else}

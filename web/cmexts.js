@@ -149,26 +149,6 @@ export function getBaseExtensions(
   return res;
 }
 
-export function getBaseExtensions2(
-  basic,
-  useTab,
-  tabSize,
-  placeholder,
-  editable
-) {
-  /** @type {Extension[]} */
-  const res = [
-    indentUnit.of(" ".repeat(tabSize)),
-    EditorView.editable.of(editable),
-  ];
-
-  if (basic) res.push(basicSetup);
-  if (useTab) res.push(keymap.of([indentWithTab]));
-  if (placeholder) res.push(placeholderExt(placeholder));
-
-  return res;
-}
-
 /**
  * @param {import("@codemirror/view").EditorView} editorView
  * @param {Compartment} readOnlyCompartment
