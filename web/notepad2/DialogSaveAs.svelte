@@ -15,22 +15,40 @@
   /** @type {Function} */
   export let handleSave;
 
+  let selectedFile = null;
+
   let fileList = getFileList(fsTypeLocalStorage);
 
-  function fileClicked(clickedName) {
-    console.log("fileClicked:", clickedName);
-    name = clickedName;
+  /**
+   * @param {FsFile} clickedFile
+   */
+  function fileClicked(clickedFile) {
+    console.log("fileClicked:", clickedFile);
+    selectedFile = clickedFile;
+    name = clickedFile.name;
   }
 
-  function fileDblClicked(clickedName) {
-    console.log("fileDblClicked:", clickedName);
+  /**
+   * @param {FsFile} clickedFile
+   */
+  function fileDblClicked(clickedFile) {
+    console.log("fileDblClicked:", clickedFile);
     // name = clickedName;
   }
 
-  function saveMe(name) {
-    open = false;
+  function save() {
+    if (selectedFile && selectedFile.name == name) {
+      // if changed name since selecting,
+      handleSave(selectedFile);
+      open = false;
+      return;
+    }
+    if (name === "") {
+      return;
+    }
     let f = newLocalStorageFile(name);
     handleSave(f);
+    open = false;
   }
 
   /**
@@ -38,9 +56,7 @@
    */
   function handleInputKeyDown(ev) {
     if (ev.key === "Enter") {
-      if (name !== "") {
-        saveMe(name);
-      }
+      save();
     }
   }
 </script>
@@ -53,7 +69,8 @@
         {#each fileList as f}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div
-            class="hover:bg-gray-100"
+            aria-selected={selectedFile === f}
+            class="aria-selected:bg-gray-50 hover:bg-gray-100 aria-selected:hover:bg-gray-100"
             on:dblclick={() => fileDblClicked(f)}
             on:click={() => fileClicked(f)}
           >
@@ -80,10 +97,9 @@
   <!-- bottom -->
   <div slot="bottom" class="flex justify-end text-xs select-none">
     <button
-      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
-      on:click={() => {
-        saveMe(name);
-      }}>Save</button
+      disabled={name === ""}
+      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:bg-gray-50 disabled:border-gray-100"
+      on:click={save}>Save</button
     >
     <button
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"

@@ -659,7 +659,7 @@ const menuZoom = [
 const menuView = [
   ["Default &Code Font...\tAlt+F12", IDM_VIEW_DEFAULT_CODE_FONT],
   ["&Default Text Font...", IDM_VIEW_DEFAULT_TEXT_FONT],
-  ["C&aret Style", menuCaretStyle],
+  // ["C&aret Style", menuCaretStyle],
   [SEPARATOR],
   ["Word W&rap\tCtrl+Shift+W", IDM_VIEW_WORDWRAP],
   ["&Long Line Marker\tCtrl+Shift+L", IDM_VIEW_LONGLINEMARKER],
@@ -952,10 +952,10 @@ const menuScrollPastLastLine = [
   ["1/&4 Page", IDM_VIEW_SCROLLPASTLASTLINE_QUARTER],
 ];
 
-const menuFullScreenMode = [
-  ["On &Startup", IDM_VIEW_FULLSCREEN_ON_START],
-  ["Hide &Title", IDM_VIEW_FULLSCREEN_HIDE_TITLE],
-];
+// const menuFullScreenMode = [
+//   ["On &Startup", IDM_VIEW_FULLSCREEN_ON_START],
+//   ["Hide &Title", IDM_VIEW_FULLSCREEN_HIDE_TITLE],
+// ];
 
 const menuLanguage = [
   ["&System Language", IDM_LANG_USER_DEFAULT],
@@ -980,7 +980,7 @@ const menuAppearance = [
   ["Show Stat&usbar\tShift+F11", IDM_VIEW_STATUSBAR],
   [SEPARATOR],
   // ["&Transparent Mode\tCtrl+0", IDM_VIEW_TRANSPARENT],
-  ["Full Scree&n Mode", menuFullScreenMode],
+  // ["Full Scree&n Mode", menuFullScreenMode],
   ["Scroll &Past Last Line", menuScrollPastLastLine],
   // #if NP2_ENABLE_APP_LOCALIZATION_DLL
   //  [SEPARATOR],
@@ -1059,7 +1059,7 @@ const menuSettings = [
   ["&Long Line Settings...", IDM_VIEW_LONGLINESETTINGS],
   ["&Auto Completion Settings...", IDM_VIEW_AUTOCOMPLETION_SETTINGS],
   ["Auto Completion I&gnore Case", IDM_VIEW_AUTOCOMPLETION_IGNORECASE],
-  ["Enable LaTe&X Input Method", IDM_SET_LATEX_INPUT_METHOD],
+  // ["Enable LaTe&X Input Method", IDM_SET_LATEX_INPUT_METHOD],
   ["Select and &Edit Options", menuSelectAndEditOptions],
   [SEPARATOR],
   ["Appea&rance", menuAppearance],

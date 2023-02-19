@@ -192,6 +192,7 @@ export function parseShortcut(s) {
       res.key = "Delete";
       break;
     case "backspace":
+    case "back":
       res.key = "Backspace";
       break;
     case "esc":

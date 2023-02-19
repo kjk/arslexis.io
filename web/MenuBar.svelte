@@ -105,7 +105,7 @@
    * @param {KeyboardEvent} ev
    */
   function handleKeyDown(ev) {
-    // console.log("handleKeyDown:", ev);
+    console.log("handleKeyDown:", ev);
     let menuEl = /** @type {HTMLElement} */ (document.activeElement);
     // console.log("menuEl:", menuEl);
     let isMenuOpen = menuEl && menuEl.classList.contains("menu-trigger");
@@ -114,10 +114,6 @@
       return;
     }
     for (let ks of keyboardShortcuts) {
-      if (ev.key === "F11" && ks.key === "F11") {
-        console.log(ks);
-        // debugger;
-      }
       if (ev.shiftKey != ks.shiftKey) {
         continue;
       }
@@ -134,6 +130,7 @@
         continue;
       }
       // handler is responsible for stopping propagation of the event
+      console.log("handleKeyDown: ks", ks);
       dispatch("menucmd", { ev: ev, cmd: ks.cmdId });
     }
   }

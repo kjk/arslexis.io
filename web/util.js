@@ -653,3 +653,15 @@ export function toggleFullScreen() {
     document.exitFullscreen();
   }
 }
+
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+export function stripExt(name) {
+  let pos = name.lastIndexOf(".");
+  if (pos > 0) {
+    return name.slice(0, pos);
+  }
+  return name;
+}
