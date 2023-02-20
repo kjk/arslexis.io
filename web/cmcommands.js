@@ -2,12 +2,18 @@
 /** @typedef {import("@codemirror/state").EditorSelection} EditorSelection */
 /** @typedef {import("@codemirror/state").TextIterator} TextIterator */
 
-import { Base64 } from "js-base64";
+import {
+  b64Decode,
+  b64DecodeAsHex,
+  b64EncodeHtmlImage,
+  b64EncodeStandard,
+  b64EncodeURLSafe,
+} from "./strutil";
 import { len } from "./util";
 
 /**
- *
  * @param {EditorSelection} sel
+ * @returns {boolean}
  */
 function isEmptySelection(sel) {
   if (len(sel.ranges) > 1) {
@@ -20,7 +26,7 @@ function isEmptySelection(sel) {
  * @param {*} param0
  * @param {Function} fn
  * @param {string} userEvent
- * @returns
+ * @returns {boolean}
  */
 function runOnSelIter({ state, dispatch }, fn, userEvent) {
   if (state.readOnly) return false;
@@ -43,7 +49,7 @@ function runOnSelIter({ state, dispatch }, fn, userEvent) {
  * @param {*} param0
  * @param {Function} fn
  * @param {string} userEvent
- * @returns
+ * @returns {boolean}
  */
 function runOnIter({ state, dispatch }, fn, userEvent) {
   if (state.readOnly) return false;
@@ -99,9 +105,10 @@ export function* iterLines(iter) {
   }
 }
 
-let rxLeadingWS = /^\s+/;
+const rxLeadingWS = /^\s+/;
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function deleteLeadingWhitespace({ state, dispatch }) {
   /**
@@ -124,9 +131,10 @@ export function deleteLeadingWhitespace({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.leadingwhitespace");
 }
 
-let rxTrailingWS = /\s+$/;
+const rxTrailingWS = /\s+$/;
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function deleteTrailingWhitespace({ state, dispatch }) {
   /**
@@ -150,7 +158,8 @@ export function deleteTrailingWhitespace({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function deleteFirstChar({ state, dispatch }) {
   /**
@@ -172,7 +181,8 @@ export function deleteFirstChar({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function deleteLastChar({ state, dispatch }) {
   /**
@@ -194,7 +204,8 @@ export function deleteLastChar({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function duplicateSelection({ state, dispatch }) {
   if (state.readOnly) return false;
@@ -217,7 +228,8 @@ export function duplicateSelection({ state, dispatch }) {
 
 /**
  * replace 2 or more consequitive blank lines with single blank line
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function mergeBlankLines({ state, dispatch }) {
   /**
@@ -245,7 +257,8 @@ export function mergeBlankLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function removeBlankLines({ state, dispatch }) {
   /**
@@ -267,9 +280,10 @@ export function removeBlankLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
  * @param {string} before
  * @param {string} after
+ * @returns {boolean}
  */
 export function encloseSelection({ state, dispatch }, before, after) {
   if (state.readOnly) return false;
@@ -296,7 +310,8 @@ export function encloseSelection({ state, dispatch }, before, after) {
 /**
  * TODO: more efficient implementation which uses line lengths
  * to optimize back searches and use less memory
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function mergeDuplicateLines({ state, dispatch }) {
   /**
@@ -322,7 +337,8 @@ export function mergeDuplicateLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function deleteDuplicateLines({ state, dispatch }) {
   /**
@@ -366,7 +382,8 @@ export function strCompressWS(s) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function compressWhitespace({ state, dispatch }) {
   /**
@@ -390,7 +407,8 @@ export function compressWhitespace({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
 export function padWithSpaces({ state, dispatch }) {
   /**
@@ -424,84 +442,67 @@ export function padWithSpaces({ state, dispatch }) {
 }
 
 /**
- * @param {string} s
- * @returns {string}
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {Function} convertFn
+ * @returns {boolean}
  */
-function b64pad(s) {
-  let n = 4 - (len(s) % 4);
-  switch (n) {
-    case 1:
-      return s + "=";
-    case 2:
-      return s + "==";
-    case 3:
-      return s + "===";
+export function replaceSelections({ state, dispatch }, convertFn) {
+  if (state.readOnly) return false;
+  let changes = [];
+  let sel = state.selection;
+
+  // TOOD: if empty selection, set selection to after befor
+  for (let { from, to } of sel.ranges) {
+    if (from === to) {
+      continue;
+    }
+    let s = state.sliceDoc(from, to);
+    let insert = convertFn(s);
+    changes.push({ from, to });
+    // TODO: make this as a selection
+    changes.push({ from, insert });
+    if (!changes.length) return false;
+    dispatch(state.update({ changes, userEvent: "input.replaceselection" }));
+    return true;
   }
-  return s;
 }
 
 /**
- * @param {string} s
- * @returns {string}
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
-export function b64EncodeStandard(s) {
-  let res = Base64.encode(s, false /* url safe */);
-  return b64pad(res);
+export function cmdBase64EncodeStandard({ state, dispatch }) {
+  return replaceSelections({ state, dispatch }, b64EncodeStandard);
 }
 
 /**
- * @param {string} s
- * @returns {string}
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
-export function b64EncodeURLSafe(s) {
-  let res = Base64.encode(s, true /* url safe */);
-  return b64pad(res);
+export function cmdBase64EncodeURLSafe({ state, dispatch }) {
+  return replaceSelections({ state, dispatch }, b64EncodeURLSafe);
 }
 
 /**
- * @param {string} s
- * @returns {string}
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
-export function b64EncodeHtmlImage(s) {
-  let res = b64EncodeStandard(s);
-  res = `<img src="data:image/py;base64,${res}" />`;
-  return res;
+export function cmdBase64EncodeHtmlImage({ state, dispatch }) {
+  return replaceSelections({ state, dispatch }, b64EncodeHtmlImage);
 }
 
 /**
- * @param {string} s
- * @returns {string}
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
-export function b64Decode(s) {
-  let res = Base64.decode(s);
-  return res;
-}
-
-const hexTable = new TextEncoder().encode("0123456789ABCDEF");
-const space = " ".charCodeAt(0); // stupid auto-formatter
-/**
- * @param {string} s
- * @returns {string}
- */
-export function strToHex(s) {
-  let bytes = new TextEncoder().encode(s);
-  let n = len(bytes);
-  let dst = new Uint8Array(n * 3);
-  let i = 0;
-  for (let b of bytes) {
-    dst[i] = hexTable[b >> 4];
-    dst[i + 1] = hexTable[b & 0x0f];
-    dst[i + 2] = space;
-    i += 3;
-  }
-  return new TextDecoder().decode(dst);
+export function cmdBase64Decode({ state, dispatch }) {
+  return replaceSelections({ state, dispatch }, b64Decode);
 }
 
 /**
- * @param {string} s
- * @returns {string}
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
  */
-export function b64DecodeAsHex(s) {
-  let res = b64Decode(s);
-  return strToHex(res);
+export function cmdBase64DecodeAsHex({ state, dispatch }) {
+  return replaceSelections({ state, dispatch }, b64DecodeAsHex);
 }

@@ -1,7 +1,7 @@
 // import { EditorState } from "@codemirror/state";
 import { describe, it } from "vitest";
 import ist from "ist";
-import { prstr } from "./testhelpers";
+import { streq } from "./testhelpers";
 import { runCmd, mkState, runCmd2 } from "./cmtesthelper";
 import {
   iterLines,
@@ -18,65 +18,9 @@ import {
   mergeDuplicateLines,
   deleteDuplicateLines,
   compressWhitespace,
-  b64EncodeStandard,
-  b64EncodeURLSafe,
-  b64EncodeHtmlImage,
-  b64Decode,
-  b64DecodeAsHex,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
-
-function prstrNonEq(got, want) {
-  if (got !== want) {
-    console.log("want:", prstr(want));
-    console.log("got :", prstr(got));
-  }
-}
-
-function streq(got, want) {
-  if (got !== want) {
-    console.log("want:", prstr(want));
-    console.log("got :", prstr(got));
-  }
-  ist(got, want);
-}
-
-describe("base64", () => {
-  // order: string, standard, url-safe, html image, decode as hex
-  const a = [
-    [
-      "as?-. fd",
-      "YXM/LS4gZmQ=",
-      "YXM_LS4gZmQ=",
-      `<img src="data:image/py;base64,YXM/LS4gZmQ=" />`,
-      "61 73 3F 2D 2E 20 66 64 ",
-    ],
-  ];
-  it("b64", () => {
-    for (let el of a) {
-      let s = el[0];
-
-      let got = b64EncodeStandard(s);
-      streq(got, el[1]);
-
-      let dec = b64Decode(got);
-      streq(dec, s);
-
-      got = b64EncodeURLSafe(s);
-      streq(got, el[2]);
-
-      dec = b64Decode(got);
-      streq(dec, s);
-
-      dec = b64DecodeAsHex(got);
-      streq(dec, el[4]);
-
-      got = b64EncodeHtmlImage(s);
-      streq(got, el[3]);
-    }
-  });
-});
 
 describe("iterLines", () => {
   function t(s, lines) {
@@ -85,9 +29,8 @@ describe("iterLines", () => {
     for (let got of iterLines(state.doc.iter())) {
       let want = lines[i];
       ist(got[0], want[0]);
-      prstrNonEq(got[1], want[1]);
-      ist(got[1], want[1]);
-      ist(got[2], want[2]);
+      streq(got[1], want[1]);
+      streq(got[2], want[2]);
       i++;
     }
   }
@@ -133,8 +76,7 @@ describe("iterLines", () => {
 
 function tt(from, to, cmd) {
   let got = runCmd(from, cmd);
-  prstrNonEq(got, to);
-  ist(got, to);
+  streq(got, to);
 }
 
 describe("deleteLeadingWhitespace", () => {
@@ -246,8 +188,7 @@ describe("removeBlankLines", () => {
 describe("encloseSelection", () => {
   function t(from, before, after, to) {
     let got = runCmd2(from, encloseSelection, before, after);
-    prstrNonEq(got, to);
-    ist(got, to);
+    streq(got, to);
   }
 
   it("encloseSelection", () => {
@@ -305,8 +246,7 @@ describe("strCompressWS", () => {
   it("strCompressWS", () => {
     function t(s, want) {
       let got = strCompressWS(s);
-      prstrNonEq(got, want);
-      ist(got, want);
+      streq(got, want);
     }
     t("", "");
     t(" ", " ");

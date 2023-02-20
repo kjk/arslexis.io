@@ -1,3 +1,5 @@
+import ist from "ist";
+
 export function prstr(s) {
   let res = "'";
   for (let c of s) {
@@ -10,4 +12,19 @@ export function prstr(s) {
     }
   }
   return res + "'";
+}
+
+export function prstrNonEq(got, want) {
+  if (got !== want) {
+    console.log("want:", prstr(want));
+    console.log("got :", prstr(got));
+  }
+}
+
+export function streq(got, want) {
+  if (got !== want) {
+    console.log("want:", prstr(want));
+    console.log("got :", prstr(got));
+  }
+  ist(got, want);
 }

@@ -231,6 +231,11 @@
     removeBlankLines,
     padWithSpaces,
     compressWhitespace,
+    cmdBase64EncodeStandard,
+    cmdBase64EncodeURLSafe,
+    cmdBase64EncodeHtmlImage,
+    cmdBase64Decode,
+    cmdBase64DecodeAsHex,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -997,6 +1002,21 @@
         break;
       case IDM_EDIT_COMPRESSWS:
         compressWhitespace(args);
+        break;
+      case IDM_EDIT_BASE64_ENCODE:
+        cmdBase64EncodeStandard(args);
+        break;
+      case IDM_EDIT_BASE64_SAFE_ENCODE:
+        cmdBase64EncodeURLSafe(args);
+        break;
+      case IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
+        cmdBase64EncodeHtmlImage(args);
+        break;
+      case IDM_EDIT_BASE64_DECODE:
+        cmdBase64Decode(args);
+        break;
+      case IDM_EDIT_BASE64_DECODE_AS_HEX:
+        cmdBase64DecodeAsHex(args);
         break;
 
       // those are handled by CodeMirror
