@@ -12,6 +12,7 @@ import {
   deleteFirstChar,
   deleteLastChar,
   duplicateSelection,
+  mergeBlankLines,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -29,13 +30,19 @@ describe("iterLines", () => {
     let i = 0;
     for (let got of iterLines(state.doc.iter())) {
       let want = lines[i];
-      prstrNonEq(got[1], want[1]);
       ist(got[0], want[0]);
+      prstrNonEq(got[1], want[1]);
       ist(got[1], want[1]);
       i++;
     }
   }
   it("iterLines", () => {
+    t("\n\nfoo\n", [
+      [0, ""],
+      [1, ""],
+      [2, "foo"],
+      [5, ""],
+    ]);
     t("  ", [[0, "  "]]);
     t("  foo", [[0, "  foo"]]);
     t("a\nbc", [
@@ -69,11 +76,15 @@ describe("iterLines", () => {
   });
 });
 
+function tt(from, to, cmd) {
+  let got = runCmd(from, cmd);
+  prstrNonEq(got, to);
+  ist(got, to);
+}
+
 describe("deleteLeadingWhitespace", () => {
   function t(from, to) {
-    let got = runCmd(from, deleteLeadingWhitespace);
-    prstrNonEq(got, to);
-    ist(got, to);
+    tt(from, to, deleteLeadingWhitespace);
   }
 
   it("deleteLeadingWhitespace", () => {
@@ -89,12 +100,10 @@ describe("deleteLeadingWhitespace", () => {
 
 describe("deleteTrailingWhitespace", () => {
   function t(from, to) {
-    let got = runCmd(from, deleteTrailingWhitespace);
-    prstrNonEq(got, to);
-    ist(got, to);
+    tt(from, to, deleteTrailingWhitespace);
   }
 
-  it("deleteLeadingWhitespace", () => {
+  it("deleteTrailingWhitespace", () => {
     t("", "|");
     t("  ", "|");
     t("foo  ", "|foo");
@@ -107,9 +116,7 @@ describe("deleteTrailingWhitespace", () => {
 
 describe("deleteFirstChar", () => {
   function t(from, to) {
-    let got = runCmd(from, deleteFirstChar);
-    prstrNonEq(got, to);
-    ist(got, to);
+    tt(from, to, deleteFirstChar);
   }
 
   it("deleteFirstChar", () => {
@@ -123,9 +130,7 @@ describe("deleteFirstChar", () => {
 
 describe("deleteLastChar", () => {
   function t(from, to) {
-    let got = runCmd(from, deleteLastChar);
-    prstrNonEq(got, to);
-    ist(got, to);
+    tt(from, to, deleteLastChar);
   }
 
   it("deleteLastChar", () => {
@@ -139,9 +144,7 @@ describe("deleteLastChar", () => {
 
 describe("duplicateSelection", () => {
   function t(from, to) {
-    let got = runCmd(from, duplicateSelection);
-    prstrNonEq(got, to);
-    ist(got, to);
+    tt(from, to, duplicateSelection);
   }
 
   it("duplicateSelection", () => {
@@ -153,11 +156,24 @@ describe("duplicateSelection", () => {
   });
 });
 
+describe("mergeBlankLines", () => {
+  function t(from, to) {
+    tt(from, to, mergeBlankLines);
+  }
+
+  it("mergeBlankLines", () => {
+    t("", "|");
+    t("\n\nab\n\n\r\n\r\n\rcc4", "|\nab\n\ncc4");
+    t("ab\n\n\ncc1", "|ab\n\ncc1");
+    t("ab\r\r\r\rcc2", "|ab\n\ncc2");
+    t("ab\n\n\r\n\r\n\rcc3", "|ab\n\ncc3");
+    t("<ab\n\n\n\n\rcc>3a", "<ab\n\ncc>3a");
+  });
+});
+
 describe("padWithSpaces", () => {
   function t(from, to) {
-    let got = runCmd(from, padWithSpaces);
-    prstrNonEq(got, to);
-    ist(got, to);
+    tt(from, to, padWithSpaces);
   }
   it("padWithSpaces", () => {
     t("f\nf ", "|f \nf ");

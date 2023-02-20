@@ -75,7 +75,7 @@ function runOnIter({ state, dispatch }, fn, userEvent) {
  */
 export function* iterLines(iter) {
   let pos = 0;
-  let prevWasLineBreak = false;
+  let prevWasLineBreak = true;
   while (true) {
     iter.next();
     if (iter.done) {
@@ -232,33 +232,24 @@ function collectLineLengths(iter) {
   return res;
 }
 
-function* iterLineInfos(lineInfos) {
-  let n = len(lineInfos) / 2;
-  for (let i = 0; i < n; i++) {
-    yield [lineInfos[i * 2], lineInfos[i * 2 + 1]];
-  }
-}
-
 /**
- * if more than one blank line,
+ * replace 2 or more consequitive blank lines with single blank line
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function mergeBlankLines({ state, dispatch }) {
-  if (state.readOnly) return false;
-  let changes = [];
-  let doc = state.doc;
-  let docLen = doc.length;
-  let sel = state.selection;
-  function mergeBlanksIter(iter, start = 0) {
-    let ll = collectLineLengths(iter);
-    let nLines = len(ll) / 2;
+  /**
+   * @param {TextIterator} iter
+   * @param {any[]} changes
+   * @param {number} start
+   */
+  function iter(iter, changes, start = 0) {
     let prevWasBlank = false;
-    for (let i = 0; i < nLines; i++) {
-      let llen = ll[i * 2 + 1];
-      if (llen == 0) {
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      if (len(s) === 0) {
         if (prevWasBlank) {
-          let from = start + ll[i * 2];
-          let to = Math.min(from + 1, docLen);
+          let from = start + li[0];
+          let to = from + 1;
           changes.push({ from, to });
         }
         prevWasBlank = true;
@@ -267,18 +258,7 @@ export function mergeBlankLines({ state, dispatch }) {
       }
     }
   }
-  if (isEmptySelection(sel)) {
-    mergeBlanksIter(doc.iter());
-  } else {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
-      let iter = doc.iterRange(from, to);
-      mergeBlanksIter(iter, from);
-    }
-  }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "input.mergeblanklines" }));
-  return true;
+  return runOnIter({ state, dispatch }, iter, "delete.mergeblanklines");
 }
 
 /**
