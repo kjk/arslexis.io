@@ -10,6 +10,7 @@ import {
   padWithSpaces,
   strCompressWS,
   deleteFirstChar,
+  deleteLastChar,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -116,6 +117,22 @@ describe("deleteFirstChar", () => {
     t("<ab>", "<b>");
     t("<ab\nc\ndada>", "<b\n\nada>");
     t("glo<ab\nc\ndada>bal", "glo<b\n\nada>bal");
+  });
+});
+
+describe("deleteLastChar", () => {
+  function t(from, to) {
+    let got = runCmd(from, deleteLastChar);
+    prstrNonEq(got, to);
+    ist(got, to);
+  }
+
+  it("deleteLastChar", () => {
+    t("", "|");
+    t("ab", "|ab");
+    t("<ab>", "<a>");
+    t("<ab\nc\ndada>", "<a\n\ndad>");
+    t("glo<ab\nc\ndada>bal", "glo<a\n\ndad>bal");
   });
 });
 

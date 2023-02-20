@@ -146,36 +146,6 @@ export function deleteTrailingWhitespace({ state, dispatch }) {
 }
 
 /**
- * dir > 0 : delete end of line
- * dir < 0 : delete start of line
- * @param {TextIterator} iter
- * @param {number} start
- * @param {number} dir
- */
-function delCharIter(changes, iter, start, dir) {
-  for (let pos = 0, prev = ""; ; ) {
-    iter.next();
-    if (iter.lineBreak || iter.done) {
-      let from = start + pos - prev.length;
-      if (dir > 0) {
-        from = from + prev.length - 1;
-        if (iter.done) {
-          // TODO: shouldn't delete last if not at end of line
-          // check that from + 1 is end of this line. bail if not
-        }
-      }
-      let to = from + 1;
-      changes.push({ from, to });
-      if (iter.done) break;
-      prev = "";
-    } else {
-      prev = iter.value;
-    }
-    pos += iter.value.length;
-  }
-}
-
-/**
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function deleteFirstChar({ state, dispatch }) {
@@ -194,35 +164,29 @@ export function deleteFirstChar({ state, dispatch }) {
       }
     }
   }
-  runOnSelIter({ state, dispatch }, iter, "delete.firstchar");
+  return runOnSelIter({ state, dispatch }, iter, "delete.firstchar");
 }
 
 /**
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function deleteLastChar({ state, dispatch }) {
-  if (state.readOnly) return false;
-  let changes = [];
-  let doc = state.doc;
-  let sel = state.selection;
-  if (isEmptySelection(sel)) {
-    let from = sel.ranges[0].from;
-    let line = doc.lineAt(from);
-    if (line.length > 0) {
-      from = line.from + line.length - 1;
-      let to = from + 1;
-      console.log("deleteLastChar: from:", from, "to:", to);
-      changes.push({ from, to });
-    }
-  } else {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
-      delCharIter(changes, doc.iterRange(from, to), from, 1);
+  /**
+   * @param {TextIterator} iter
+   * @param {any[]} changes
+   * @param {number} start
+   */
+  function iter(iter, changes, start = 0) {
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      if (len(s) > 0) {
+        let from = start + li[0] + len(s) - 1;
+        let to = from + 1;
+        changes.push({ from, to });
+      }
     }
   }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "delete.lastchar" }));
-  return true;
+  return runOnSelIter({ state, dispatch }, iter, "delete.lastchar");
 }
 
 /**
