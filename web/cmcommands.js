@@ -15,7 +15,14 @@ function isEmptySelection(sel) {
   return sel.ranges[0].empty;
 }
 
-function runOnIter({ state, dispatch }, fn) {
+/**
+ *
+ * @param {*} param0
+ * @param {Function} fn
+ * @param {string} userEvent
+ * @returns
+ */
+function runOnIter({ state, dispatch }, fn, userEvent) {
   if (state.readOnly) return false;
   let changes = [];
   let doc = state.doc;
@@ -29,7 +36,7 @@ function runOnIter({ state, dispatch }, fn) {
     }
   }
   if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "delete.eadingwhitespace" }));
+  dispatch(state.update({ changes, userEvent }));
   return true;
 }
 
@@ -88,50 +95,32 @@ export function deleteLeadingWhitespace({ state, dispatch }) {
       }
     }
   }
-  runOnIter({ state, dispatch }, iter);
+  runOnIter({ state, dispatch }, iter, "delete.leadingwhitespace");
 }
 
+let rxTrailingWS = /\s+$/;
 /**
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function deleteTrailingWhitespace({ state, dispatch }) {
-  if (state.readOnly) return false;
-  let changes = [];
   /**
    * @param {TextIterator} iter
+   * @param {any[]} changes
    * @param {number} start
    */
-  function delIter(iter, start = 0) {
-    for (let pos = 0, prev = ""; ; ) {
-      iter.next();
-      if (iter.lineBreak || iter.done) {
-        let trailing = prev.search(/\s+$/);
-        if (trailing > -1) {
-          let from = pos + start - (prev.length - trailing);
-          let to = pos + start;
-          changes.push({ from: from, to: to });
-        }
-        if (iter.done) break;
-        prev = "";
-      } else {
-        prev = iter.value;
+  function iter(iter, changes, start = 0) {
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      let m = s.match(rxTrailingWS);
+      if (m != null) {
+        let n = m[0].length;
+        let from = start + li[0] + len(s) - n;
+        let to = from + n;
+        changes.push({ from, to });
       }
-      pos += iter.value.length;
     }
   }
-  let doc = state.doc;
-  let sel = state.selection;
-  if (isEmptySelection(sel)) {
-    delIter(doc.iter());
-  } else {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
-      delIter(doc.iterRange(from, to), from);
-    }
-  }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "delete.trailingwhitespace" }));
-  return true;
+  runOnIter({ state, dispatch }, iter, "delete.trailinghitespace");
 }
 
 /**
