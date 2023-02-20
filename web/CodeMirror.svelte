@@ -30,7 +30,6 @@
   export let readonly = false;
   export let placeholder = undefined;
 
-  const is_browser = typeof window !== "undefined";
   const dispatch = createEventDispatcher();
 
   let element;

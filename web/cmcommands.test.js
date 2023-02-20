@@ -18,6 +18,11 @@ import {
   mergeDuplicateLines,
   deleteDuplicateLines,
   compressWhitespace,
+  b64EncodeStandard,
+  b64EncodeURLSafe,
+  b64EncodeHtmlImage,
+  b64Decode,
+  b64DecodeAsHex,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -28,6 +33,50 @@ function prstrNonEq(got, want) {
     console.log("got :", prstr(got));
   }
 }
+
+function streq(got, want) {
+  if (got !== want) {
+    console.log("want:", prstr(want));
+    console.log("got :", prstr(got));
+  }
+  ist(got, want);
+}
+
+describe("base64", () => {
+  // order: string, standard, url-safe, html image, decode as hex
+  const a = [
+    [
+      "as?-. fd",
+      "YXM/LS4gZmQ=",
+      "YXM_LS4gZmQ=",
+      `<img src="data:image/py;base64,YXM/LS4gZmQ=" />`,
+      "61 73 3F 2D 2E 20 66 64 ",
+    ],
+  ];
+  it("b64", () => {
+    for (let el of a) {
+      let s = el[0];
+
+      let got = b64EncodeStandard(s);
+      streq(got, el[1]);
+
+      let dec = b64Decode(got);
+      streq(dec, s);
+
+      got = b64EncodeURLSafe(s);
+      streq(got, el[2]);
+
+      dec = b64Decode(got);
+      streq(dec, s);
+
+      dec = b64DecodeAsHex(got);
+      streq(dec, el[4]);
+
+      got = b64EncodeHtmlImage(s);
+      streq(got, el[3]);
+    }
+  });
+});
 
 describe("iterLines", () => {
   function t(s, lines) {

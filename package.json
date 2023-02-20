@@ -41,6 +41,7 @@
     "@neodrag/svelte": "^2.0.3",
     "@zip.js/zip.js": "^2.6.65",
     "codemirror": "^6.0.1",
+    "js-base64": "^3.7.5",
     "marked": "^4.2.12"
   }
 }

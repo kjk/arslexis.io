@@ -1,6 +1,6 @@
 // commands
 
-const menuDiv = "---";
+// const menuDiv = "---";
 const menuSep = "---";
 const SEPARATOR = "---";
 
@@ -45,16 +45,16 @@ export const CMD_RECODEDEFAULT = "CMD_RECODEDEFAULT";
 export const IDM_RECODE_SELECT = "IDM_RECODE_SELECT";
 export const CMD_RELOADNOFILEVARS = "CMD_RELOADNOFILEVARS";
 
-const menuReload = [
-  ["As UTF-&8\tShift+F8", CMD_RELOADUTF8],
-  ["As &ANSI\tCtrl+Shift+A", CMD_RELOADANSI],
-  ["As &OEM\tCtrl+Shift+O", CMD_RELOADOEM],
-  menuSep,
-  ["&Default Encoding\tCtrl+Alt+F", CMD_RECODEDEFAULT],
-  ["&With Encoding...\tF8", IDM_RECODE_SELECT],
-  menuSep,
-  ["&No File Variables\tAlt+F8", CMD_RELOADNOFILEVARS],
-];
+// const menuReload = [
+//   ["As UTF-&8\tShift+F8", CMD_RELOADUTF8],
+//   ["As &ANSI\tCtrl+Shift+A", CMD_RELOADANSI],
+//   ["As &OEM\tCtrl+Shift+O", CMD_RELOADOEM],
+//   menuSep,
+//   ["&Default Encoding\tCtrl+Alt+F", CMD_RECODEDEFAULT],
+//   ["&With Encoding...\tF8", IDM_RECODE_SELECT],
+//   menuSep,
+//   ["&No File Variables\tAlt+F8", CMD_RELOADNOFILEVARS],
+// ];
 
 export const IDM_ENCODING_ANSI = "IDM_ENCODING_ANSI";
 export const IDM_ENCODING_UTF8 = "IDM_ENCODING_UTF8";
@@ -64,16 +64,16 @@ export const IDM_ENCODING_UNICODEREV = "IDM_ENCODING_UNICODEREV";
 export const IDM_ENCODING_SELECT = "IDM_ENCODING_SELECT";
 export const IDM_ENCODING_SETDEFAULT = "IDM_ENCODING_SETDEFAULT";
 
-const menuEncoding = [
-  ["&ANSI", IDM_ENCODING_ANSI],
-  ["UTF-&8", IDM_ENCODING_UTF8],
-  ["UTF-8 B&OM", IDM_ENCODING_UTF8SIGN],
-  ["UTF-16&LE BOM", IDM_ENCODING_UNICODE],
-  ["UTF-16&BE BOM", IDM_ENCODING_UNICODEREV],
-  ["&More...\tF9", IDM_ENCODING_SELECT],
-  [SEPARATOR],
-  ["&Default...", IDM_ENCODING_SETDEFAULT],
-];
+// const menuEncoding = [
+//   ["&ANSI", IDM_ENCODING_ANSI],
+//   ["UTF-&8", IDM_ENCODING_UTF8],
+//   ["UTF-8 B&OM", IDM_ENCODING_UTF8SIGN],
+//   ["UTF-16&LE BOM", IDM_ENCODING_UNICODE],
+//   ["UTF-16&BE BOM", IDM_ENCODING_UNICODEREV],
+//   ["&More...\tF9", IDM_ENCODING_SELECT],
+//   [SEPARATOR],
+//   ["&Default...", IDM_ENCODING_SETDEFAULT],
+// ];
 
 export const IDM_LINEENDINGS_CRLF = "IDM_LINEENDINGS_CRLF";
 export const IDM_LINEENDINGS_LF = "IDM_LINEENDINGS_LF";
@@ -989,14 +989,14 @@ const menuAppearance = [
   // ["Use &XP Style Open/Save Dialog", IDM_SET_USE_XP_FILE_DIALOG],
 ];
 
-const menuWindowOptions = [
-  ["Always On &Top\tAlt+Shift+T", IDM_VIEW_ALWAYSONTOP],
-  ["Minimi&ze to Tray", IDM_VIEW_MINTOTRAY],
-  [SEPARATOR],
-  ["&Reuse Window", IDM_VIEW_REUSEWINDOW],
-  ["&Sticky Window Position", IDM_VIEW_STICKY_WINDOW_POSITION],
-  ["Clear Position &History", IDM_VIEW_CLEARWINPOS],
-];
+// const menuWindowOptions = [
+//   ["Always On &Top\tAlt+Shift+T", IDM_VIEW_ALWAYSONTOP],
+//   ["Minimi&ze to Tray", IDM_VIEW_MINTOTRAY],
+//   [SEPARATOR],
+//   ["&Reuse Window", IDM_VIEW_REUSEWINDOW],
+//   ["&Sticky Window Position", IDM_VIEW_STICKY_WINDOW_POSITION],
+//   ["Clear Position &History", IDM_VIEW_CLEARWINPOS],
+// ];
 
 const menuWindowTitleDisplay = [
   ["&File Name Only", IDM_VIEW_SHOWFILENAMEONLY],
@@ -1005,52 +1005,52 @@ const menuWindowTitleDisplay = [
   ["&Text Excerpt", IDM_VIEW_SHOWEXCERPT],
 ];
 
-const menuExtraEscKeyFunction = [
-  ["&None", IDM_VIEW_NOESCFUNC],
-  ["&Minimize Notepad2", IDM_VIEW_ESCMINIMIZE],
-  ["E&xit Notepad2", IDM_VIEW_ESCEXIT],
-];
+// const menuExtraEscKeyFunction = [
+//   ["&None", IDM_VIEW_NOESCFUNC],
+//   ["&Minimize Notepad2", IDM_VIEW_ESCMINIMIZE],
+//   ["E&xit Notepad2", IDM_VIEW_ESCEXIT],
+// ];
 
 const menuOtherSettings = [
   ["Remember Recent &Files", IDM_VIEW_NOSAVERECENT],
   ["Remember &Search Options", IDM_VIEW_NOSAVEFINDREPL],
 ];
 
-const menuRenderingTechnology = [
-  ["&Legacy GDI", IDM_SET_RENDER_TECH_GDI],
-  ["&Direct2D", IDM_SET_RENDER_TECH_D2D],
-  ["Direct2D &Retain", IDM_SET_RENDER_TECH_D2DRETAIN],
-  ["Direct2D &GDI DC", IDM_SET_RENDER_TECH_D2DDC],
-];
+// const menuRenderingTechnology = [
+//   ["&Legacy GDI", IDM_SET_RENDER_TECH_GDI],
+//   ["&Direct2D", IDM_SET_RENDER_TECH_D2D],
+//   ["Direct2D &Retain", IDM_SET_RENDER_TECH_D2DRETAIN],
+//   ["Direct2D &GDI DC", IDM_SET_RENDER_TECH_D2DDC],
+// ];
 
-const menuFontQuality = [
-  ["&Default", IDM_VIEW_FONTQUALITY_DEFAULT],
-  ["&None", IDM_VIEW_FONTQUALITY_NONE],
-  ["&Standard", IDM_VIEW_FONTQUALITY_STANDARD],
-  ["&ClearType", IDM_VIEW_FONTQUALITY_CLEARTYPE],
-];
+// const menuFontQuality = [
+//   ["&Default", IDM_VIEW_FONTQUALITY_DEFAULT],
+//   ["&None", IDM_VIEW_FONTQUALITY_NONE],
+//   ["&Standard", IDM_VIEW_FONTQUALITY_STANDARD],
+//   ["&ClearType", IDM_VIEW_FONTQUALITY_CLEARTYPE],
+// ];
 
-const menuRtlLayoutGdi = [
-  ["&Edit Window", IDM_SET_RTL_LAYOUT_EDIT],
-  ["&Other Window", IDM_SET_RTL_LAYOUT_OTHER],
-];
+// const menuRtlLayoutGdi = [
+//   ["&Edit Window", IDM_SET_RTL_LAYOUT_EDIT],
+//   ["&Other Window", IDM_SET_RTL_LAYOUT_OTHER],
+// ];
 
-const menuBiDirectionalD2D = [
-  ["&None", IDM_SET_BIDIRECTIONAL_NONE],
-  ["&Left to Right", IDM_SET_BIDIRECTIONAL_L2R],
-  ["&Right to Left", IDM_SET_BIDIRECTIONAL_R2L],
-];
+// const menuBiDirectionalD2D = [
+//   ["&None", IDM_SET_BIDIRECTIONAL_NONE],
+//   ["&Left to Right", IDM_SET_BIDIRECTIONAL_L2R],
+//   ["&Right to Left", IDM_SET_BIDIRECTIONAL_R2L],
+// ];
 
-const menuAdvancedSettings = [
-  ["Ren&dering Technology", menuRenderingTechnology],
-  ["Font &Quality", menuFontQuality],
-  ["&RTL Layout (GDI)", menuRtlLayoutGdi],
-  ["&Bidirectional (Direct2D)", menuBiDirectionalD2D],
-  ["Use &Inline Mode IME", IDM_SET_USE_INLINE_IME],
-  [SEPARATOR],
-  ["&System Integration...", IDM_SET_SYSTEM_INTEGRATION],
-  ["&Open Notepad2.ini\tCtrl+F7", CMD_OPENINIFILE],
-];
+// const menuAdvancedSettings = [
+//   ["Ren&dering Technology", menuRenderingTechnology],
+//   ["Font &Quality", menuFontQuality],
+//   ["&RTL Layout (GDI)", menuRtlLayoutGdi],
+//   ["&Bidirectional (Direct2D)", menuBiDirectionalD2D],
+//   ["Use &Inline Mode IME", IDM_SET_USE_INLINE_IME],
+//   [SEPARATOR],
+//   ["&System Integration...", IDM_SET_SYSTEM_INTEGRATION],
+//   ["&Open Notepad2.ini\tCtrl+F7", CMD_OPENINIFILE],
+// ];
 
 const menuSettings = [
   ["Insert Tabs as &Spaces", IDM_VIEW_TABSASSPACES],
@@ -1140,24 +1140,24 @@ const menuBase64 = [
   ["Decode as &Hex", IDM_EDIT_BASE64_DECODE_AS_HEX],
 ];
 
-const menuTextTransliteration = [
-  ["Halfwidth Form to Full&width", IDM_EDIT_MAP_FULLWIDTH],
-  ["Fullwidth Form to H&alfwidth", IDM_EDIT_MAP_HALFWIDTH],
-  [SEPARATOR],
-  ["Chinese Traditional to &Simplified", IDM_EDIT_MAP_SIMPLIFIED_CHINESE],
-  ["Chinese Simplified to &Traditional", IDM_EDIT_MAP_TRADITIONAL_CHINESE],
-  [SEPARATOR],
-  ["Japanese Katakana to &Hiragana", IDM_EDIT_MAP_HIRAGANA],
-  ["Japanese Hiragana to &Katakana", IDM_EDIT_MAP_KATAKANA],
-  [SEPARATOR],
-  ["Korean Han&ja to Hangul", IDM_EDIT_MAP_HANJA_HANGUL],
-  ["Korean Han&gul Decomposition", IDM_EDIT_MAP_HANGUL_DECOMPOSITION],
-  [SEPARATOR],
-  ["&Bengali to Latin", IDM_EDIT_MAP_BENGALI_LATIN],
-  ["C&yrillic to Latin", IDM_EDIT_MAP_CYRILLIC_LATIN],
-  ["&Devanagari to Latin", IDM_EDIT_MAP_DEVANAGARI_LATIN],
-  ["&Malayalam to Latin", IDM_EDIT_MAP_MALAYALAM_LATIN],
-];
+// const menuTextTransliteration = [
+//   ["Halfwidth Form to Full&width", IDM_EDIT_MAP_FULLWIDTH],
+//   ["Fullwidth Form to H&alfwidth", IDM_EDIT_MAP_HALFWIDTH],
+//   [SEPARATOR],
+//   ["Chinese Traditional to &Simplified", IDM_EDIT_MAP_SIMPLIFIED_CHINESE],
+//   ["Chinese Simplified to &Traditional", IDM_EDIT_MAP_TRADITIONAL_CHINESE],
+//   [SEPARATOR],
+//   ["Japanese Katakana to &Hiragana", IDM_EDIT_MAP_HIRAGANA],
+//   ["Japanese Hiragana to &Katakana", IDM_EDIT_MAP_KATAKANA],
+//   [SEPARATOR],
+//   ["Korean Han&ja to Hangul", IDM_EDIT_MAP_HANJA_HANGUL],
+//   ["Korean Han&gul Decomposition", IDM_EDIT_MAP_HANGUL_DECOMPOSITION],
+//   [SEPARATOR],
+//   ["&Bengali to Latin", IDM_EDIT_MAP_BENGALI_LATIN],
+//   ["C&yrillic to Latin", IDM_EDIT_MAP_CYRILLIC_LATIN],
+//   ["&Devanagari to Latin", IDM_EDIT_MAP_DEVANAGARI_LATIN],
+//   ["&Malayalam to Latin", IDM_EDIT_MAP_MALAYALAM_LATIN],
+// ];
 
 const menuTools = [
   // ["Sa&ve Before Running Tools", IDM_VIEW_SAVEBEFORERUNNINGTOOLS],
