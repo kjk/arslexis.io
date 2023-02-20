@@ -13,6 +13,7 @@ import {
   deleteLastChar,
   duplicateSelection,
   mergeBlankLines,
+  removeBlankLines,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -168,6 +169,23 @@ describe("mergeBlankLines", () => {
     t("ab\r\r\r\rcc2", "|ab\n\ncc2");
     t("ab\n\n\r\n\r\n\rcc3", "|ab\n\ncc3");
     t("<ab\n\n\n\n\rcc>3a", "<ab\n\ncc>3a");
+  });
+});
+
+describe("removeBlankLines", () => {
+  function t(from, to) {
+    tt(from, to, removeBlankLines);
+  }
+
+  it("removeBlankLines", () => {
+    t("", "|");
+    t("\n\nab\n\n\r\n\r\n\rcc4", "|ab\ncc4");
+    t("ab\n\n\ncc1\n", "|ab\ncc1\n");
+    t("ab\n\n\ncc1\n\n", "|ab\ncc1\n");
+    t("ab\r\r\r\rcc2", "|ab\ncc2");
+    t("ab\n\n\r\n\r\n\rcc3", "|ab\ncc3");
+    t("<ab\n\n\n\n\rcc>3a", "<ab\ncc>3a");
+    t("<ab\n\ncc>3a\n<c\n\n\nd>\n", "<ab\ncc>3a\n<c\nd>\n");
   });
 });
 

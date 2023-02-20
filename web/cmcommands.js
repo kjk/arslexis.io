@@ -265,39 +265,22 @@ export function mergeBlankLines({ state, dispatch }) {
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function removeBlankLines({ state, dispatch }) {
-  if (state.readOnly) return false;
-  let changes = [];
-  let doc = state.doc;
-  let sel = state.selection;
-  let docLen = doc.length;
   /**
    * @param {TextIterator} iter
+   * @param {any[]} changes
    * @param {number} start
    */
-  function removeBlanksIter(iter, start = 0) {
-    let ll = collectLineLengths(iter);
-    let nLines = len(ll) / 2;
-    for (let i = 0; i < nLines; i++) {
-      let llen = ll[i * 2 + 1];
-      if (llen == 0) {
-        let from = start + ll[i * 2];
-        let to = Math.min(from + 1, docLen);
+  function iter(iter, changes, start = 0) {
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      if (len(s) === 0) {
+        let from = start + li[0];
+        let to = from + 1;
         changes.push({ from, to });
       }
     }
   }
-
-  if (isEmptySelection(sel)) {
-    removeBlanksIter(doc.iter());
-  } else {
-    for (let { from, to } of sel.ranges) {
-      let iter = doc.iterRange(from, to);
-      removeBlanksIter(iter, from);
-    }
-  }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "input.removeblanklines" }));
-  return true;
+  return runOnIter({ state, dispatch }, iter, "delete.mergeblanklines");
 }
 
 /**
