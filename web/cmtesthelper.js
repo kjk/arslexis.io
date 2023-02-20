@@ -52,7 +52,26 @@ export function cmd(state, command) {
   return state;
 }
 
+export function cmd2(state, command, arg1, arg2) {
+  command(
+    {
+      state,
+      dispatch(tr) {
+        state = tr.state;
+      },
+    },
+    arg1,
+    arg2
+  );
+  return state;
+}
+
 export function runCmd(from, command, exts = []) {
   let state = mkState(from, exts);
   return stateStr(cmd(state, command));
+}
+
+export function runCmd2(from, command, arg1, arg2, exts = []) {
+  let state = mkState(from, exts);
+  return stateStr(cmd2(state, command, arg1, arg2));
 }

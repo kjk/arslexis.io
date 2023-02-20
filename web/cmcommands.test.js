@@ -2,7 +2,7 @@
 import { describe, it } from "vitest";
 import ist from "ist";
 import { prstr } from "./testhelpers";
-import { runCmd, mkState } from "./cmtesthelper";
+import { runCmd, mkState, runCmd2 } from "./cmtesthelper";
 import {
   iterLines,
   deleteLeadingWhitespace,
@@ -14,6 +14,7 @@ import {
   duplicateSelection,
   mergeBlankLines,
   removeBlankLines,
+  encloseSelection,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -186,6 +187,21 @@ describe("removeBlankLines", () => {
     t("ab\n\n\r\n\r\n\rcc3", "|ab\ncc3");
     t("<ab\n\n\n\n\rcc>3a", "<ab\ncc>3a");
     t("<ab\n\ncc>3a\n<c\n\n\nd>\n", "<ab\ncc>3a\n<c\nd>\n");
+  });
+});
+
+describe("encloseSelection", () => {
+  function t(from, before, after, to) {
+    let got = runCmd2(from, encloseSelection, before, after);
+    prstrNonEq(got, to);
+    ist(got, to);
+  }
+
+  it("encloseSelection", () => {
+    t("", "a", "b", "|ab");
+    t("a<b>c", "ll", "", "all<b>c");
+    t("a<b>c", "", "ll", "a<b>llc");
+    t("a<b>c", "ll", "xx", "all<b>xxc");
   });
 });
 

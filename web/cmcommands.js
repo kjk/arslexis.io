@@ -280,7 +280,7 @@ export function removeBlankLines({ state, dispatch }) {
       }
     }
   }
-  return runOnIter({ state, dispatch }, iter, "delete.mergeblanklines");
+  return runOnIter({ state, dispatch }, iter, "delete.removeblanklines");
 }
 
 /**
@@ -306,7 +306,7 @@ export function encloseSelection({ state, dispatch }, before, after) {
     }
   }
   if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "input.removeblanklines" }));
+  dispatch(state.update({ changes, userEvent: "input.encloseSelection" }));
   return true;
 }
 
