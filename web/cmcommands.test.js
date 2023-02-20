@@ -11,14 +11,15 @@ import {
   strCompressWS,
   deleteFirstChar,
   deleteLastChar,
+  duplicateSelection,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
 
 function prstrNonEq(got, want) {
   if (got !== want) {
-    console.log("got :", prstr(got));
     console.log("want:", prstr(want));
+    console.log("got :", prstr(got));
   }
 }
 
@@ -133,6 +134,22 @@ describe("deleteLastChar", () => {
     t("<ab>", "<a>");
     t("<ab\nc\ndada>", "<a\n\ndad>");
     t("glo<ab\nc\ndada>bal", "glo<a\n\ndad>bal");
+  });
+});
+
+describe("duplicateSelection", () => {
+  function t(from, to) {
+    let got = runCmd(from, duplicateSelection);
+    prstrNonEq(got, to);
+    ist(got, to);
+  }
+
+  it("duplicateSelection", () => {
+    t("", "|");
+    t("ab", "|ab");
+    t("<>ab", "|>ab");
+    t("<ab>", "<ab>ab");
+    t("<ab>\n<c>\ndad<a><>", "<ab>ab\n<c>c\ndad<a>a>");
   });
 });
 
