@@ -236,6 +236,8 @@
     cmdBase64EncodeHtmlImage,
     cmdBase64Decode,
     cmdBase64DecodeAsHex,
+    cmdUrlEncode,
+    cmdUrlDecode,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -1017,6 +1019,12 @@
         break;
       case IDM_EDIT_BASE64_DECODE_AS_HEX:
         cmdBase64DecodeAsHex(args);
+        break;
+      case IDM_EDIT_URLENCODE:
+        cmdUrlEncode(args);
+        break;
+      case IDM_EDIT_URLDECODE:
+        cmdUrlDecode(args);
         break;
 
       // those are handled by CodeMirror

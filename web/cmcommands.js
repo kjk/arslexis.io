@@ -8,6 +8,8 @@ import {
   b64EncodeHtmlImage,
   b64EncodeStandard,
   b64EncodeURLSafe,
+  urlDecode,
+  urlEncode,
 } from "./strutil";
 import { len } from "./util";
 
@@ -505,4 +507,20 @@ export function cmdBase64Decode({ state, dispatch }) {
  */
 export function cmdBase64DecodeAsHex({ state, dispatch }) {
   return replaceSelections({ state, dispatch }, b64DecodeAsHex);
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
+ */
+export function cmdUrlEncode({ state, dispatch }) {
+  return replaceSelections({ state, dispatch }, urlEncode);
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
+ */
+export function cmdUrlDecode({ state, dispatch }) {
+  return replaceSelections({ state, dispatch }, urlDecode);
 }
