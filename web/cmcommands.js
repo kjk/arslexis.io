@@ -215,27 +215,6 @@ export function duplicateSelection({ state, dispatch }) {
 }
 
 /**
- * for each line in iter returns 2 array elements: line position, length
- * @param {TextIterator} iter
- * @returns {number[]}
- */
-function collectLineLengths(iter) {
-  let res = [];
-  for (let pos = 0, prev = ""; ; ) {
-    iter.next();
-    if (iter.lineBreak || iter.done) {
-      res.push(pos - prev.length, prev.length);
-      if (iter.done) break;
-      prev = "";
-    } else {
-      prev = iter.value;
-    }
-    pos += iter.value.length;
-  }
-  return res;
-}
-
-/**
  * replace 2 or more consequitive blank lines with single blank line
  * @param {{state: EditorState, dispatch: any}} arg
  */
@@ -389,53 +368,45 @@ export function strCompressWS(s) {
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function compressWhitespace({ state, dispatch }) {
-  if (state.readOnly) return false;
-  let changes = [];
-
   /**
    * @param {TextIterator} iter
+   * @param {any[]} changes
    * @param {number} start
    */
-  function iter(iter, start = 0) {
-    let pos = 0;
-    while (true) {
-      if (iter.done) return;
-      if (!iter.lineBreak) {
+  function iter(iter, changes, start = 0) {
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      let s2 = strCompressWS(s);
+      if (s !== s2) {
+        let from = start + li[0];
+        let to = from + len(s);
+        changes.push({ from, to });
+        changes.push({ from: to, insert: s2 });
       }
-      pos += iter.value.length;
     }
+  }
+  return runOnIter({ state, dispatch }, iter, "delete.compresswhitespace");
+}
 
-    for (let pos = 0; ; ) {
-      iter.next();
-      if (iter.lineBreak || iter.done) {
-        let m = prev.match(/^\s+/);
-        if (m != null) {
-          let n = m[0].length;
-          let lineLen = prev.length;
-          let from = start + pos - lineLen;
-          let to = from + n;
-          changes.push({ from: from, to: to });
-        }
-        if (iter.done) break;
-        prev = "";
-      } else {
-        prev = iter.value;
-      }
+/**
+ * for each line in iter returns 2 array elements: line position, length
+ * @param {TextIterator} iter
+ * @returns {number[]}
+ */
+function collectLineLengths(iter) {
+  let res = [];
+  for (let pos = 0, prev = ""; ; ) {
+    iter.next();
+    if (iter.lineBreak || iter.done) {
+      res.push(pos - prev.length, prev.length);
+      if (iter.done) break;
+      prev = "";
+    } else {
+      prev = iter.value;
     }
+    pos += iter.value.length;
   }
-  let doc = state.doc;
-  let sel = state.selection;
-  if (isEmptySelection(sel)) {
-    iter(doc.iter());
-  } else {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
-      iter(doc.iterRange(from, to), from);
-    }
-  }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "edit.compressWhitespace" }));
-  return true;
+  return res;
 }
 
 /**

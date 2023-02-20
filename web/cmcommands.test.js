@@ -17,6 +17,7 @@ import {
   encloseSelection,
   mergeDuplicateLines,
   deleteDuplicateLines,
+  compressWhitespace,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -251,7 +252,7 @@ describe("padWithSpaces", () => {
   });
 });
 
-describe("compressWhitespace", () => {
+describe("strCompressWS", () => {
   it("strCompressWS", () => {
     function t(s, want) {
       let got = strCompressWS(s);
@@ -263,5 +264,18 @@ describe("compressWhitespace", () => {
     t("  ", " ");
     t("as  \t\nb", "as b");
     t("as  \t\nb\t\t", "as b ");
+    t("\t\ta  b", " a b");
+    t("\t\tf \t ", " f ");
+  });
+});
+
+describe("compressWhitespace", () => {
+  function t(from, to) {
+    tt(from, to, compressWhitespace);
+  }
+  it("compressWhitespace", () => {
+    t("fo   \nf ", "|fo \nf ");
+    t("\t\tf \t \nf  ", "| f \nf ");
+    t("f \t \nf  \n", "|f \nf \n");
   });
 });
