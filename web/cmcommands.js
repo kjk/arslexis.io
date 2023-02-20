@@ -345,61 +345,37 @@ export function mergeDuplicateLines({ state, dispatch }) {
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function deleteDuplicateLines({ state, dispatch }) {
-  if (state.readOnly) return false;
-
-  let doc = state.doc;
-  let sel = state.selection;
-  if (isEmptySelection(sel)) {
-    return;
-  }
-  let changes = [];
-  let docLen = doc.length;
-  /** @type {Map<string, number[]>} */
-  let seenLines = new Map();
-
   /**
    * @param {TextIterator} iter
+   * @param {any[]} changes
    * @param {number} start
    */
-  function delIter(iter, start = 0) {
-    for (let pos = 0; ; ) {
-      iter.next();
-      if (iter.done) break;
-      // TODO: not sure if can be different lineSeparator
-      let s = iter.value;
-      if (s !== "\n") {
-        if (seenLines.has(s)) {
-          seenLines.get(s).push(pos);
-        } else {
-          seenLines.set(s, [pos]);
+  function iter(iter, changes, start = 0) {
+    /** @type {Map<string, number[]>} */
+    let seenLines = new Map();
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      if (seenLines.has(s)) {
+        let first = seenLines.get(s);
+        if (first[0] === 0) {
+          let from = start;
+          let to = from + first[1] + first[2];
+          changes.push({ from, to });
+          first[0] = 1;
         }
-      }
-      pos += iter.value.length;
-    }
-    for (let kv of seenLines) {
-      let a = kv[1];
-      if (len(a) < 2) {
-        continue;
-      }
-      let slen = len(kv[0]) + 1;
-      for (let pos of a) {
-        let from = start + pos;
-        let to = Math.min(from + slen, docLen);
+        let from = start + li[0];
+        let to = from + len(s) + len(li[2]);
         changes.push({ from, to });
+      } else {
+        let v = [0, start + li[0], len(li[1]) + len(li[2])];
+        seenLines.set(s, v);
       }
     }
   }
-  for (let range of sel.ranges) {
-    let { from, to } = range;
-    delIter(doc.iterRange(from, to), from);
-  }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "delete.deleteduplicatelines" }));
-  return true;
+  return runOnIter({ state, dispatch }, iter, "delete.deleteduplicatelines");
 }
 
 const wsRx = /\s{2,}/g;
-
 /**
  * @param {string} s
  * @returns {string}

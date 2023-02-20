@@ -16,6 +16,7 @@ import {
   removeBlankLines,
   encloseSelection,
   mergeDuplicateLines,
+  deleteDuplicateLines,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -217,6 +218,25 @@ describe("mergeDuplicateLines", () => {
     t("a\n<a\na\na\n>", "a\n<a\n>");
     t("a\n<ab\nab\nd\nab\n>dd", "a\n<ab\nd\n>dd");
     t("<ab\nab\nab>", "<ab\n>");
+  });
+});
+
+describe("deleteDuplicateLines", () => {
+  function t(from, to) {
+    tt(from, to, deleteDuplicateLines);
+  }
+
+  it("deleteDuplicateLines", () => {
+    t("", "|");
+    t(
+      `<
+foo
+foo
+
+asd
+foo>`,
+      "<asd\n>"
+    );
   });
 });
 
