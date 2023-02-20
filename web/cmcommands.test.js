@@ -277,5 +277,8 @@ describe("compressWhitespace", () => {
     t("fo   \nf ", "|fo \nf ");
     t("\t\tf \t \nf  ", "| f \nf ");
     t("f \t \nf  \n", "|f \nf \n");
+    t("<fo   \nf >", "<fo \nf >");
+    t("<\t\tf \t \nf  >", "< f \n>f "); // TODO: why?
+    t("<f \t \nf  \n>", "<f \nf \n>");
   });
 });
