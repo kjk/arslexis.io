@@ -389,65 +389,35 @@ export function compressWhitespace({ state, dispatch }) {
 }
 
 /**
- * for each line in iter returns 2 array elements: line position, length
- * @param {TextIterator} iter
- * @returns {number[]}
- */
-function collectLineLengths(iter) {
-  let res = [];
-  for (let pos = 0, prev = ""; ; ) {
-    iter.next();
-    if (iter.lineBreak || iter.done) {
-      res.push(pos - prev.length, prev.length);
-      if (iter.done) break;
-      prev = "";
-    } else {
-      prev = iter.value;
-    }
-    pos += iter.value.length;
-  }
-  return res;
-}
-
-/**
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function padWithSpaces({ state, dispatch }) {
-  if (state.readOnly) return false;
-  let changes = [];
-  function iter(iter, start = 0) {
-    let linesInfo = collectLineLengths(iter);
-    let nLines = len(linesInfo) / 2;
+  /**
+   * @param {TextIterator} iter
+   * @param {any[]} changes
+   * @param {number} start
+   */
+  function iter(iter, changes, start = 0) {
+    let lines = [];
     let max = 0;
-    for (let i = 0; i < nLines; i++) {
-      if (linesInfo[i * 2 + 1] > max) {
-        max = linesInfo[i * 2 + 1];
+    for (let li of iterLines(iter)) {
+      // must make copy
+      lines.push([li[0], li[1], li[2]]);
+      let n = len(li[1]);
+      if (n > max) {
+        max = n;
       }
     }
-    if (max === 0) {
-      return;
-    }
-    for (let i = 0; i < nLines; i++) {
-      let n = max - linesInfo[i * 2 + 1];
+
+    for (let li of lines) {
+      let llen = len(li[1]);
+      let n = max - llen;
       if (n > 0) {
+        let from = start + li[0] + llen;
         let insert = " ".repeat(n); // TODO: faster? Maybe splice of a larger string?
-        let from = start + linesInfo[i * 2] + linesInfo[i * 2 + 1];
         changes.push({ from, insert });
       }
     }
   }
-  let doc = state.doc;
-  let sel = state.selection;
-  if (isEmptySelection(sel)) {
-    iter(doc.iter());
-  } else {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
-      iter(doc.iterRange(from, to), from);
-    }
-  }
-
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "edit.padWithSpaces" }));
-  return true;
+  return runOnIter({ state, dispatch }, iter, "delete.padwithspaces");
 }
