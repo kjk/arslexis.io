@@ -16,7 +16,29 @@ function isEmptySelection(sel) {
 }
 
 /**
- *
+ * @param {*} param0
+ * @param {Function} fn
+ * @param {string} userEvent
+ * @returns
+ */
+function runOnSelIter({ state, dispatch }, fn, userEvent) {
+  if (state.readOnly) return false;
+  let changes = [];
+  let doc = state.doc;
+  let sel = state.selection;
+  if (isEmptySelection(sel)) {
+    return false;
+  }
+  for (let range of sel.ranges) {
+    let { from, to } = range;
+    fn(doc.iterRange(from, to), changes, from);
+  }
+  if (!changes.length) return false;
+  dispatch(state.update({ changes, userEvent }));
+  return true;
+}
+
+/**
  * @param {*} param0
  * @param {Function} fn
  * @param {string} userEvent
@@ -95,7 +117,7 @@ export function deleteLeadingWhitespace({ state, dispatch }) {
       }
     }
   }
-  runOnIter({ state, dispatch }, iter, "delete.leadingwhitespace");
+  return runOnIter({ state, dispatch }, iter, "delete.leadingwhitespace");
 }
 
 let rxTrailingWS = /\s+$/;
@@ -120,7 +142,7 @@ export function deleteTrailingWhitespace({ state, dispatch }) {
       }
     }
   }
-  runOnIter({ state, dispatch }, iter, "delete.trailinghitespace");
+  return runOnIter({ state, dispatch }, iter, "delete.trailinghitespace");
 }
 
 /**
@@ -157,28 +179,22 @@ function delCharIter(changes, iter, start, dir) {
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function deleteFirstChar({ state, dispatch }) {
-  if (state.readOnly) return false;
-  let changes = [];
-
-  let doc = state.doc;
-  let sel = state.selection;
-  if (isEmptySelection(sel)) {
-    let from = sel.ranges[0].from;
-    let line = doc.lineAt(from);
-    if (line.length > 0) {
-      from = line.from;
-      let to = from + 1;
-      changes.push({ from, to });
-    }
-  } else {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
-      delCharIter(changes, doc.iterRange(from, to), from, -1);
+  /**
+   * @param {TextIterator} iter
+   * @param {any[]} changes
+   * @param {number} start
+   */
+  function iter(iter, changes, start = 0) {
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      if (len(s) > 0) {
+        let from = start + li[0];
+        let to = from + 1;
+        changes.push({ from, to });
+      }
     }
   }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "delete.firstchar" }));
-  return true;
+  runOnSelIter({ state, dispatch }, iter, "delete.firstchar");
 }
 
 /**

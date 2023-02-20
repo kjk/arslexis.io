@@ -9,6 +9,7 @@ import {
   deleteTrailingWhitespace,
   padWithSpaces,
   strCompressWS,
+  deleteFirstChar,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -99,6 +100,22 @@ describe("deleteTrailingWhitespace", () => {
     t("  f  oo  ", "|  f  oo");
     t("f  oo  \t\t", "|f  oo");
     t("  oo\t  \tf  \t", "|  oo\t  \tf");
+  });
+});
+
+describe("deleteFirstChar", () => {
+  function t(from, to) {
+    let got = runCmd(from, deleteFirstChar);
+    prstrNonEq(got, to);
+    ist(got, to);
+  }
+
+  it("deleteFirstChar", () => {
+    t("", "|");
+    t("ab", "|ab");
+    t("<ab>", "<b>");
+    t("<ab\nc\ndada>", "<b\n\nada>");
+    t("glo<ab\nc\ndada>bal", "glo<b\n\nada>bal");
   });
 });
 
