@@ -230,6 +230,7 @@
     mergeDuplicateLines,
     removeBlankLines,
     padWithSpaces,
+    compressWhitespace,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -994,8 +995,9 @@
       case IDM_EDIT_PADWITHSPACES:
         padWithSpaces(args);
         break;
-      // case IDM_EDIT_COMPRESSWS:
-      //   break;
+      case IDM_EDIT_COMPRESSWS:
+        compressWhitespace(args);
+        break;
 
       // those are handled by CodeMirror
       case IDM_EDIT_COPY:
