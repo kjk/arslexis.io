@@ -15,50 +15,80 @@ function isEmptySelection(sel) {
   return sel.ranges[0].empty;
 }
 
-/**
- * @param {{state: EditorState, dispatch: any}} arg
- */
-export function deleteLeadingWhitespace({ state, dispatch }) {
+function runOnIter({ state, dispatch }, fn) {
   if (state.readOnly) return false;
   let changes = [];
-
-  /**
-   * @param {TextIterator} iter
-   * @param {number} start
-   */
-  function delIter(iter, start = 0) {
-    for (let pos = 0, prev = ""; ; ) {
-      iter.next();
-      if (iter.lineBreak || iter.done) {
-        let m = prev.match(/^\s+/);
-        if (m != null) {
-          let n = m[0].length;
-          let lineLen = prev.length;
-          let from = start + pos - lineLen;
-          let to = from + n;
-          changes.push({ from: from, to: to });
-        }
-        if (iter.done) break;
-        prev = "";
-      } else {
-        prev = iter.value;
-      }
-      pos += iter.value.length;
-    }
-  }
   let doc = state.doc;
   let sel = state.selection;
   if (isEmptySelection(sel)) {
-    delIter(doc.iter());
+    fn(doc.iter(), changes);
   } else {
     for (let range of sel.ranges) {
       let { from, to } = range;
-      delIter(doc.iterRange(from, to), from);
+      fn(doc.iterRange(from, to), changes, from);
     }
   }
   if (!changes.length) return false;
   dispatch(state.update({ changes, userEvent: "delete.eadingwhitespace" }));
   return true;
+}
+
+// TOD: perf: return without allocating. perf.link says it's faster (but https://jsbench.me/ doesn't)
+// https://perf.link/#eyJpZCI6InVuZm51MDVrdG4yIiwidGl0bGUiOiJGaW5kaW5nIG51bWJlcnMgaW4gYW4gYXJyYXkgb2YgMTAwMCIsImJlZm9yZSI6ImZ1bmN0aW9uKiB0ZXN0MShuKSB7XG4gIGZvciAobGV0IGkgPSAwOyBpIDwgbjsgaSsrKSB7XG4gICAgeWllbGQgW2ksIGldO1xuICB9XG59XG5cbmxldCByZXMgPSBbMCwgMF07XG5mdW5jdGlvbiogdGVzdDIobikge1xuICBmb3IgKGxldCBpID0gMDsgaSA8IG47IGkrKykge1xuICAgIHJlc1swXSA9IGk7XG4gICAgcmVzWzFdID0gaTtcbiAgICB5aWVsZCByZXM7XG4gIH1cbn0iLCJ0ZXN0cyI6W3sibmFtZSI6IkZpbmQgaXRlbSAxMDAiLCJjb2RlIjoiXG50ZXN0MSgxMDAwKTsiLCJydW5zIjpbMjAwODAwMCw2MjIwMDAsMzUxMDAwLDI5NTYwMDAsMTI3MTAwMCwxOTIxMDAwLDU2NzAwMDAsNjg1NDAwMCw1MDczMDAwLDI2MDAwMDAsNTIwNTAwMCw3MzExMDAwLDM1MDkwMDAsNjQ3MDAwLDQyMzEwMDAsNzQwNTAwMCwwLDI1MzMwMDAsMTE1OTAwMCw2MTcwMDAsMzAzNjAwMCw0Nzc2MDAwLDE4NzkwMDAsMzQ5ODAwMCwyNzYyMDAwLDM2NTAwMCwyNDMwMDAsMjcwODAwMCw2OTEwMDAsMzY5NjAwMCw5NzAwMDAsMzA0NDAwMCwxODM3MDAwLDI4NjYwMDAsMjM3NTAwMCwyMjMxMDAwLDQ1MTYwMDAsMTQyMzAwMCwyMTY5MDAwLDc4MDAwMDAsMTU3MzAwMCwyNjg1MDAwLDU3NzAwMCwyMzM2MDAwLDQzMDgwMDAsMjMyNjAwMCwxNzQzMDAwLDE0NzAwMDAsMzg2NzAwMCwyNDIzMDAwLDIyMjgwMDAsMTI3OTAwMCw2NzgwMDAsMTcyNzAwMCwyMzI4MDAwLDE4MTAwMCwyNzYyMDAwLDU0MzkwMDAsMTQwMjAwMCwzMDUyMDAwLDk2OTAwMCwxNzY5MDAwLDE0MjEwMDAsMjA0NTAwMCw1NTUwMDAsMTQ2MjAwMCw1OTg0MDAwLDIyNDMwMDAsNDYyNzAwMCwyMDMzMDAwLDI1NjQwMDAsMzIzMTAwMCwxMDkxMDAwLDMxODAwMCw0NjE1MDAwLDM4MDIwMDAsMzA3ODAwMCwyNjkxMDAwLDE0NjcwMDAsNjE3MTAwMCw3NTMzMDAwLDQyMjcwMDAsMTA1MjAwMCw3Njk2MDAwLDYxNTAwMCwyNDQ5MDAwLDExMzYwMDAsMTk4OTAwMCw2NjAwMDAsMzEwMzAwMCwxMjgxMDAwLDI0NTgwMDAsMTEwNzAwMCwxNTgzMDAwLDIzNzUwMDAsMzUyNTAwMCwxNTg5MDAwLDI2OTkwMDAsNjMwMDAsMjU4OTAwMF0sIm9wcyI6MjYxMDc3MH0seyJuYW1lIjoiRmluZCBpdGVtIDEwMCIsImNvZGUiOiJcbnRlc3QyKDEwMDApOyIsInJ1bnMiOlsyMzQwMDAwLDYyMTAwMCwxMzY2MDAwLDE0ODkwMDAsMjM4MDAwLDE1MzgwMDAsNDQzMzAwMCw2MTcxMDAwLDM4NjQwMDAsNjg4MzAwMCw0MDYzMDAwLDYxNzEwMDAsMTUzMDAwMCw2MTcxMDAwLDI2NjgwMDAsNDY0NDAwMCwzMDc3MDAwLDQyMTEwMDAsMTE0MDAwLDYxNzEwMDAsMTM5OTAwMCwzNjg1MDAwLDMxNjgwMDAsMjM0MDAwMCwxODQ0MDAwLDM2OTAwMCw3MDE2MDAwLDE3NjAwMDAsNDMyODAwMCwxMjE3MDAwLDU5NDAwMCwxMDAzMDAwLDYxODIwMDAsODk0MDAwLDE4MTAwMCw1NDg3MDAwLDEyNzgwMDAsNjg5MjAwMCwxMzE5MDAwLDk4NTAwMCw0MzU2MDAwLDg3MjAwMCw2Njc1MDAwLDE1OTEwMDAsMTE1MzAwMCwxMTE0MDAwLDYxNzEwMDAsNzY0MTAwMCw2MTcxMDAwLDQ4ODAwMCw2MTcxMDAwLDEzMzEwMDAsNjk5NTAwMCw5NjEwMDAsMjk2MDAwLDczMDQwMDAsNzcxMDAwLDIyOTgwMDAsNTgyMDAwLDY3MzAwMDAsNzczMzAwMCw2ODQ4MDAwLDY5MjUwMDAsMzAwMDAsNjE3MTAwMCwxMjYyMDAwLDIyNzkwMDAsNjc4NTAwMCwzMjc3MDAwLDYwNjkwMDAsMTM4NzAwMCw4MDUwMDAsMzAxMDAwLDI0NDIwMDAsMzI5MTAwMCwxNTU3MDAwLDY1NDMwMDAsMTY2MDAwMCw2NTQyMDAwLDYxNzEwMDAsNjE3MTAwMCwzODAyMDAwLDcyOTkwMDAsNzA2NTAwMCw3MDEyMDAwLDQ4NjEwMDAsMTAwMCw2NTEwMDAwLDYxNzEwMDAsMTg0OTAwMCw1MDA3MDAwLDU2NzAwMCwzMDk1MDAwLDcxMDEwMDAsMzU4MDAwLDEwMDAsNzAwNjAwMCwxODM0MDAwLDYxNzEwMDAsMTc3ODAwMF0sIm9wcyI6MzUxMTEyMH1dLCJ1cGRhdGVkIjoiMjAyMy0wMi0yMFQwMDoxNDo1OS43NThaIn0%3D
+
+// iterates content of lines, skipping newline characaters
+// for each element returns [pos, line string]
+// TODO: make it faster by not allocating an array for each result
+// re-use a single global array
+/**
+ * @param {TextIterator} iter
+ * @returns {*}
+ */
+export function* iterLines(iter) {
+  let pos = 0;
+  let prevWasLineBreak = false;
+  while (true) {
+    iter.next();
+    if (iter.done) {
+      return;
+    }
+    if (iter.lineBreak) {
+      if (prevWasLineBreak) {
+        // emit empty lines
+        yield [pos, ""];
+      }
+      prevWasLineBreak = true;
+    } else {
+      prevWasLineBreak = false;
+      yield [pos, iter.value];
+    }
+    pos += len(iter.value);
+  }
+}
+
+let rxLeadingWS = /^\s+/;
+/**
+ * @param {{state: EditorState, dispatch: any}} arg
+ */
+export function deleteLeadingWhitespace({ state, dispatch }) {
+  /**
+   * @param {TextIterator} iter
+   * @param {any[]} changes
+   * @param {number} start
+   */
+  function iter(iter, changes, start = 0) {
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      let m = s.match(rxLeadingWS);
+      if (m != null) {
+        let n = m[0].length;
+        let from = li[0] + start;
+        let to = from + n;
+        changes.push({ from, to });
+      }
+    }
+  }
+  runOnIter({ state, dispatch }, iter);
 }
 
 /**
@@ -213,7 +243,7 @@ export function duplicateSelection({ state, dispatch }) {
 }
 
 /**
- * for each line in iter, returns line position and length
+ * for each line in iter returns 2 array elements: line position, length
  * @param {TextIterator} iter
  * @returns {number[]}
  */
@@ -231,6 +261,13 @@ function collectLineLengths(iter) {
     pos += iter.value.length;
   }
   return res;
+}
+
+function* iterLineInfos(lineInfos) {
+  let n = len(lineInfos) / 2;
+  for (let i = 0; i < n; i++) {
+    yield [lineInfos[i * 2], lineInfos[i * 2 + 1]];
+  }
 }
 
 /**
@@ -348,21 +385,23 @@ export function encloseSelection({ state, dispatch }, before, after) {
  */
 export function mergeDuplicateLines({ state, dispatch }) {
   if (state.readOnly) return false;
+
+  let doc = state.doc;
+  let sel = state.selection;
+  if (isEmptySelection(sel)) {
+    return;
+  }
+  let docLen = doc.length;
   let changes = [];
 
   /** @type {Map<string, undefined>} */
   let seenLines = new Map();
-
-  let doc = state.doc;
-  let sel = state.selection;
-  let docLen = doc.length;
 
   /**
    * @param {TextIterator} iter
    * @param {number} start
    */
   function delIter(iter, start = 0) {
-    // debugger;
     for (let pos = 0, prev = ""; ; ) {
       iter.next();
       if (iter.lineBreak || iter.done) {
@@ -391,5 +430,169 @@ export function mergeDuplicateLines({ state, dispatch }) {
   }
   if (!changes.length) return false;
   dispatch(state.update({ changes, userEvent: "delete.mergeduplicatelines" }));
+  return true;
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg
+ */
+export function deleteDuplicateLines({ state, dispatch }) {
+  if (state.readOnly) return false;
+
+  let doc = state.doc;
+  let sel = state.selection;
+  if (isEmptySelection(sel)) {
+    return;
+  }
+  let changes = [];
+  let docLen = doc.length;
+  /** @type {Map<string, number[]>} */
+  let seenLines = new Map();
+
+  /**
+   * @param {TextIterator} iter
+   * @param {number} start
+   */
+  function delIter(iter, start = 0) {
+    for (let pos = 0; ; ) {
+      iter.next();
+      if (iter.done) break;
+      // TODO: not sure if can be different lineSeparator
+      let s = iter.value;
+      if (s !== "\n") {
+        if (seenLines.has(s)) {
+          seenLines.get(s).push(pos);
+        } else {
+          seenLines.set(s, [pos]);
+        }
+      }
+      pos += iter.value.length;
+    }
+    for (let kv of seenLines) {
+      let a = kv[1];
+      if (len(a) < 2) {
+        continue;
+      }
+      let slen = len(kv[0]) + 1;
+      for (let pos of a) {
+        let from = start + pos;
+        let to = Math.min(from + slen, docLen);
+        changes.push({ from, to });
+      }
+    }
+  }
+  for (let range of sel.ranges) {
+    let { from, to } = range;
+    delIter(doc.iterRange(from, to), from);
+  }
+  if (!changes.length) return false;
+  dispatch(state.update({ changes, userEvent: "delete.deleteduplicatelines" }));
+  return true;
+}
+
+const wsRx = /\s{2,}/g;
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function strCompressWS(s) {
+  // TODO: also remove single space from the beginning?
+  return s.replaceAll(wsRx, " ");
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg
+ */
+export function compressWhitespace({ state, dispatch }) {
+  if (state.readOnly) return false;
+  let changes = [];
+
+  /**
+   * @param {TextIterator} iter
+   * @param {number} start
+   */
+  function iter(iter, start = 0) {
+    let pos = 0;
+    while (true) {
+      if (iter.done) return;
+      if (!iter.lineBreak) {
+      }
+      pos += iter.value.length;
+    }
+
+    for (let pos = 0; ; ) {
+      iter.next();
+      if (iter.lineBreak || iter.done) {
+        let m = prev.match(/^\s+/);
+        if (m != null) {
+          let n = m[0].length;
+          let lineLen = prev.length;
+          let from = start + pos - lineLen;
+          let to = from + n;
+          changes.push({ from: from, to: to });
+        }
+        if (iter.done) break;
+        prev = "";
+      } else {
+        prev = iter.value;
+      }
+    }
+  }
+  let doc = state.doc;
+  let sel = state.selection;
+  if (isEmptySelection(sel)) {
+    iter(doc.iter());
+  } else {
+    for (let range of sel.ranges) {
+      let { from, to } = range;
+      iter(doc.iterRange(from, to), from);
+    }
+  }
+  if (!changes.length) return false;
+  dispatch(state.update({ changes, userEvent: "edit.compressWhitespace" }));
+  return true;
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg
+ */
+export function padWithSpaces({ state, dispatch }) {
+  if (state.readOnly) return false;
+  let changes = [];
+  function iter(iter, start = 0) {
+    let linesInfo = collectLineLengths(iter);
+    let nLines = len(linesInfo) / 2;
+    let max = 0;
+    for (let i = 0; i < nLines; i++) {
+      if (linesInfo[i * 2 + 1] > max) {
+        max = linesInfo[i * 2 + 1];
+      }
+    }
+    if (max === 0) {
+      return;
+    }
+    for (let i = 0; i < nLines; i++) {
+      let n = max - linesInfo[i * 2 + 1];
+      if (n > 0) {
+        let insert = " ".repeat(n); // TODO: faster? Maybe splice of a larger string?
+        let from = start + linesInfo[i * 2] + linesInfo[i * 2 + 1];
+        changes.push({ from, insert });
+      }
+    }
+  }
+  let doc = state.doc;
+  let sel = state.selection;
+  if (isEmptySelection(sel)) {
+    iter(doc.iter());
+  } else {
+    for (let range of sel.ranges) {
+      let { from, to } = range;
+      iter(doc.iterRange(from, to), from);
+    }
+  }
+
+  if (!changes.length) return false;
+  dispatch(state.update({ changes, userEvent: "edit.padWithSpaces" }));
   return true;
 }

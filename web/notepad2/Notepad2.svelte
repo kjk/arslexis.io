@@ -118,6 +118,9 @@
     IDM_EDIT_LINECOMMENT,
     IDM_EDIT_STREAMCOMMENT,
     IDM_EDIT_MERGEDUPLICATELINE,
+    IDM_EDIT_REMOVEDUPLICATELINE,
+    IDM_EDIT_COMPRESSWS,
+    IDM_EDIT_PADWITHSPACES,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -216,6 +219,7 @@
   } from "./FsFile";
   import { logNpEvent } from "./events";
   import {
+    deleteDuplicateLines,
     deleteFirstChar,
     deleteLastChar,
     deleteLeadingWhitespace,
@@ -225,6 +229,7 @@
     mergeBlankLines,
     mergeDuplicateLines,
     removeBlankLines,
+    padWithSpaces,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -653,12 +658,17 @@
       // @ts-ignore
     ].concat(standardKeymap);
 
+    // possibilities:
+    // "▶", "▼"
+    // "+", "−"
+    // "⊞", "⊟"
+    let foldClose = "⊞";
+    let foldOpen = "⊟";
     const exts = [
       EditorView.editable.of(true), // ???
       highlightActiveLineGutter(),
       highlightSpecialChars(),
       history(),
-      foldGutter(),
       drawSelection(),
       dropCursor(),
       indentOnInput(),
@@ -690,6 +700,10 @@
       wordWrapCompartment.of(wordWrapV),
       enableMultipleSelectionCompartment.of(multipleSelectionV),
       showLineNumbersCompartment.of(lineNumV),
+      foldGutter({
+        closedText: foldClose,
+        openText: foldOpen,
+      }),
       // scrollPastEnd(), // TODO: not sure what it does
       lexerCompartment.of(lexerV),
       ...getTheme(theme, styles),
@@ -974,6 +988,14 @@
       case IDM_EDIT_MERGEDUPLICATELINE:
         mergeDuplicateLines(args);
         break;
+      case IDM_EDIT_REMOVEDUPLICATELINE:
+        deleteDuplicateLines(args);
+        break;
+      case IDM_EDIT_PADWITHSPACES:
+        padWithSpaces(args);
+        break;
+      // case IDM_EDIT_COMPRESSWS:
+      //   break;
 
       // those are handled by CodeMirror
       case IDM_EDIT_COPY:
@@ -1134,7 +1156,7 @@
   // Notepad2.c. DefaultToolbarButtons
   let toolbarButtonsOrder = [
     22, 3, 0, 1, 2, 0, 4, 18, 19, 0, 5, 6, 0, 7, 8, 9, 20, 0, 10, 11, 0, 12, 0,
-    24, 0, 13, 14, 0, 15, 16, 0,
+    24, 0, 15, 16, 0,
   ];
   // order of icons in toolbar bitmap
   // el[0] is id of the command sent by the icon

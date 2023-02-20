@@ -18,7 +18,11 @@ let charNo = cursor - line.from;
 Things present in notepad2 but not in notepad2web:
 * Exit menu and toolbar icon
 * Alt-F11 shortcut for toggle menu
+* zoom in / out : using browser zooming instead
 
 The reason for those are restrictions of the browser.
 Some keyboard shortcuts cannot be intercepted.
-Some functionality is not avialable.
+Some functionality is not avialable in the browser.
+Some functionality can't be implemented in Code Mirror.
+Some functionality is too hard to implement in Code Mirror.
+

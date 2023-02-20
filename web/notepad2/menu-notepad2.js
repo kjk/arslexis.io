@@ -649,12 +649,12 @@ const menuToggleFolds = [
   ["Level 1&0", IDM_VIEW_FOLD_LEVEL10],
 ];
 
-const menuZoom = [
-  ["Zoom &In\tCtrl++", IDM_VIEW_ZOOMIN],
-  ["Zoom &Out\tCtrl+-", IDM_VIEW_ZOOMOUT],
-  ["Zoom &Level...", IDM_VIEW_ZOOM_LEVEL],
-  ["&Reset Zoom\tCtrl+\\", IDM_VIEW_RESETZOOM],
-];
+// const menuZoom = [
+//   ["Zoom &In\tCtrl++", IDM_VIEW_ZOOMIN],
+//   ["Zoom &Out\tCtrl+-", IDM_VIEW_ZOOMOUT],
+//   ["Zoom &Level...", IDM_VIEW_ZOOM_LEVEL],
+//   ["&Reset Zoom\tCtrl+\\", IDM_VIEW_RESETZOOM],
+// ];
 
 const menuView = [
   ["Default &Code Font...\tAlt+F12", IDM_VIEW_DEFAULT_CODE_FONT],
@@ -683,7 +683,7 @@ const menuView = [
   ["Show Code &Folding\tCtrl+Shift+Alt+F", IDM_VIEW_SHOW_FOLDING],
   ["&Toggle Folds", menuToggleFolds],
   [SEPARATOR],
-  ["&Zoom", menuZoom],
+  // ["&Zoom", menuZoom],
   ["Toggle Full &Screen\tF11", IDM_VIEW_TOGGLE_FULLSCREEN],
 ];
 
