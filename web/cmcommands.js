@@ -62,36 +62,39 @@ function runOnIter({ state, dispatch }, fn, userEvent) {
   return true;
 }
 
-// TOD: perf: return without allocating. perf.link says it's faster (but https://jsbench.me/ doesn't)
-// https://perf.link/#eyJpZCI6InVuZm51MDVrdG4yIiwidGl0bGUiOiJGaW5kaW5nIG51bWJlcnMgaW4gYW4gYXJyYXkgb2YgMTAwMCIsImJlZm9yZSI6ImZ1bmN0aW9uKiB0ZXN0MShuKSB7XG4gIGZvciAobGV0IGkgPSAwOyBpIDwgbjsgaSsrKSB7XG4gICAgeWllbGQgW2ksIGldO1xuICB9XG59XG5cbmxldCByZXMgPSBbMCwgMF07XG5mdW5jdGlvbiogdGVzdDIobikge1xuICBmb3IgKGxldCBpID0gMDsgaSA8IG47IGkrKykge1xuICAgIHJlc1swXSA9IGk7XG4gICAgcmVzWzFdID0gaTtcbiAgICB5aWVsZCByZXM7XG4gIH1cbn0iLCJ0ZXN0cyI6W3sibmFtZSI6IkZpbmQgaXRlbSAxMDAiLCJjb2RlIjoiXG50ZXN0MSgxMDAwKTsiLCJydW5zIjpbMjAwODAwMCw2MjIwMDAsMzUxMDAwLDI5NTYwMDAsMTI3MTAwMCwxOTIxMDAwLDU2NzAwMDAsNjg1NDAwMCw1MDczMDAwLDI2MDAwMDAsNTIwNTAwMCw3MzExMDAwLDM1MDkwMDAsNjQ3MDAwLDQyMzEwMDAsNzQwNTAwMCwwLDI1MzMwMDAsMTE1OTAwMCw2MTcwMDAsMzAzNjAwMCw0Nzc2MDAwLDE4NzkwMDAsMzQ5ODAwMCwyNzYyMDAwLDM2NTAwMCwyNDMwMDAsMjcwODAwMCw2OTEwMDAsMzY5NjAwMCw5NzAwMDAsMzA0NDAwMCwxODM3MDAwLDI4NjYwMDAsMjM3NTAwMCwyMjMxMDAwLDQ1MTYwMDAsMTQyMzAwMCwyMTY5MDAwLDc4MDAwMDAsMTU3MzAwMCwyNjg1MDAwLDU3NzAwMCwyMzM2MDAwLDQzMDgwMDAsMjMyNjAwMCwxNzQzMDAwLDE0NzAwMDAsMzg2NzAwMCwyNDIzMDAwLDIyMjgwMDAsMTI3OTAwMCw2NzgwMDAsMTcyNzAwMCwyMzI4MDAwLDE4MTAwMCwyNzYyMDAwLDU0MzkwMDAsMTQwMjAwMCwzMDUyMDAwLDk2OTAwMCwxNzY5MDAwLDE0MjEwMDAsMjA0NTAwMCw1NTUwMDAsMTQ2MjAwMCw1OTg0MDAwLDIyNDMwMDAsNDYyNzAwMCwyMDMzMDAwLDI1NjQwMDAsMzIzMTAwMCwxMDkxMDAwLDMxODAwMCw0NjE1MDAwLDM4MDIwMDAsMzA3ODAwMCwyNjkxMDAwLDE0NjcwMDAsNjE3MTAwMCw3NTMzMDAwLDQyMjcwMDAsMTA1MjAwMCw3Njk2MDAwLDYxNTAwMCwyNDQ5MDAwLDExMzYwMDAsMTk4OTAwMCw2NjAwMDAsMzEwMzAwMCwxMjgxMDAwLDI0NTgwMDAsMTEwNzAwMCwxNTgzMDAwLDIzNzUwMDAsMzUyNTAwMCwxNTg5MDAwLDI2OTkwMDAsNjMwMDAsMjU4OTAwMF0sIm9wcyI6MjYxMDc3MH0seyJuYW1lIjoiRmluZCBpdGVtIDEwMCIsImNvZGUiOiJcbnRlc3QyKDEwMDApOyIsInJ1bnMiOlsyMzQwMDAwLDYyMTAwMCwxMzY2MDAwLDE0ODkwMDAsMjM4MDAwLDE1MzgwMDAsNDQzMzAwMCw2MTcxMDAwLDM4NjQwMDAsNjg4MzAwMCw0MDYzMDAwLDYxNzEwMDAsMTUzMDAwMCw2MTcxMDAwLDI2NjgwMDAsNDY0NDAwMCwzMDc3MDAwLDQyMTEwMDAsMTE0MDAwLDYxNzEwMDAsMTM5OTAwMCwzNjg1MDAwLDMxNjgwMDAsMjM0MDAwMCwxODQ0MDAwLDM2OTAwMCw3MDE2MDAwLDE3NjAwMDAsNDMyODAwMCwxMjE3MDAwLDU5NDAwMCwxMDAzMDAwLDYxODIwMDAsODk0MDAwLDE4MTAwMCw1NDg3MDAwLDEyNzgwMDAsNjg5MjAwMCwxMzE5MDAwLDk4NTAwMCw0MzU2MDAwLDg3MjAwMCw2Njc1MDAwLDE1OTEwMDAsMTE1MzAwMCwxMTE0MDAwLDYxNzEwMDAsNzY0MTAwMCw2MTcxMDAwLDQ4ODAwMCw2MTcxMDAwLDEzMzEwMDAsNjk5NTAwMCw5NjEwMDAsMjk2MDAwLDczMDQwMDAsNzcxMDAwLDIyOTgwMDAsNTgyMDAwLDY3MzAwMDAsNzczMzAwMCw2ODQ4MDAwLDY5MjUwMDAsMzAwMDAsNjE3MTAwMCwxMjYyMDAwLDIyNzkwMDAsNjc4NTAwMCwzMjc3MDAwLDYwNjkwMDAsMTM4NzAwMCw4MDUwMDAsMzAxMDAwLDI0NDIwMDAsMzI5MTAwMCwxNTU3MDAwLDY1NDMwMDAsMTY2MDAwMCw2NTQyMDAwLDYxNzEwMDAsNjE3MTAwMCwzODAyMDAwLDcyOTkwMDAsNzA2NTAwMCw3MDEyMDAwLDQ4NjEwMDAsMTAwMCw2NTEwMDAwLDYxNzEwMDAsMTg0OTAwMCw1MDA3MDAwLDU2NzAwMCwzMDk1MDAwLDcxMDEwMDAsMzU4MDAwLDEwMDAsNzAwNjAwMCwxODM0MDAwLDYxNzEwMDAsMTc3ODAwMF0sIm9wcyI6MzUxMTEyMH1dLCJ1cGRhdGVkIjoiMjAyMy0wMi0yMFQwMDoxNDo1OS43NThaIn0%3D
+// perf: returning global value because is faster than allocating result many times
+// perf bench: https://t.co/RthoIWXE2o
 
 // iterates content of lines, skipping newline characaters
 // for each element returns [pos, line string]
-// TODO: make it faster by not allocating an array for each result
-// re-use a single global array
+let iterLinesRes = [0, "", ""];
 /**
  * @param {TextIterator} iter
  * @returns {*}
  */
 export function* iterLines(iter) {
   let pos = 0;
-  let prevWasLineBreak = true;
+  iterLinesRes[0] = 0;
+  iterLinesRes[1] = "";
   while (true) {
     iter.next();
     if (iter.done) {
+      iterLinesRes[2] = "";
+      yield iterLinesRes;
       return;
     }
     if (iter.lineBreak) {
-      if (prevWasLineBreak) {
-        // emit empty lines
-        yield [pos, ""];
-      }
-      prevWasLineBreak = true;
+      iterLinesRes[2] = iter.value;
+      yield iterLinesRes;
+      pos += len(iter.value);
+      iterLinesRes[0] = pos;
+      iterLinesRes[1] = "";
     } else {
-      prevWasLineBreak = false;
-      yield [pos, iter.value];
+      // delay emiting line to next lineBreak or done
+      iterLinesRes[0] = pos;
+      iterLinesRes[1] = iter.value;
+      pos += len(iter.value);
     }
-    pos += len(iter.value);
   }
 }
 
@@ -249,7 +252,7 @@ export function mergeBlankLines({ state, dispatch }) {
       if (len(s) === 0) {
         if (prevWasBlank) {
           let from = start + li[0];
-          let to = from + 1;
+          let to = from + len(li[2]);
           changes.push({ from, to });
         }
         prevWasBlank = true;
@@ -275,7 +278,7 @@ export function removeBlankLines({ state, dispatch }) {
       let s = li[1];
       if (len(s) === 0) {
         let from = start + li[0];
-        let to = from + 1;
+        let to = from + len(li[2]);
         changes.push({ from, to });
       }
     }
@@ -316,53 +319,26 @@ export function encloseSelection({ state, dispatch }, before, after) {
  * @param {{state: EditorState, dispatch: any}} arg
  */
 export function mergeDuplicateLines({ state, dispatch }) {
-  if (state.readOnly) return false;
-
-  let doc = state.doc;
-  let sel = state.selection;
-  if (isEmptySelection(sel)) {
-    return;
-  }
-  let docLen = doc.length;
-  let changes = [];
-
-  /** @type {Map<string, undefined>} */
-  let seenLines = new Map();
-
   /**
    * @param {TextIterator} iter
+   * @param {any[]} changes
    * @param {number} start
    */
-  function delIter(iter, start = 0) {
-    for (let pos = 0, prev = ""; ; ) {
-      iter.next();
-      if (iter.lineBreak || iter.done) {
-        if (prev !== "") {
-          if (seenLines.has(prev)) {
-            let from = start + pos - prev.length - 1;
-            let to = Math.min(from + prev.length + 1, docLen);
-            changes.push({ from, to });
-          } else {
-            seenLines.set(prev);
-          }
-        }
-        if (iter.done) break;
-        prev = "";
+  function iter(iter, changes, start = 0) {
+    /** @type {Set<string>} */
+    let seenLines = new Set();
+    for (let li of iterLines(iter)) {
+      let s = li[1];
+      if (seenLines.has(s)) {
+        let from = start + li[0];
+        let to = from + len(s) + len(li[2]);
+        changes.push({ from, to });
       } else {
-        prev = iter.value;
+        seenLines.add(s);
       }
-      pos += iter.value.length;
     }
   }
-  if (!isEmptySelection(sel)) {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
-      delIter(doc.iterRange(from, to), from);
-    }
-  }
-  if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "delete.mergeduplicatelines" }));
-  return true;
+  return runOnIter({ state, dispatch }, iter, "delete.mergeduplicatelines");
 }
 
 /**

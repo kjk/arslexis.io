@@ -15,6 +15,7 @@ import {
   mergeBlankLines,
   removeBlankLines,
   encloseSelection,
+  mergeDuplicateLines,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -35,45 +36,46 @@ describe("iterLines", () => {
       ist(got[0], want[0]);
       prstrNonEq(got[1], want[1]);
       ist(got[1], want[1]);
+      ist(got[2], want[2]);
       i++;
     }
   }
   it("iterLines", () => {
     t("\n\nfoo\n", [
-      [0, ""],
-      [1, ""],
-      [2, "foo"],
-      [5, ""],
+      [0, "", "\n"],
+      [1, "", "\n"],
+      [2, "foo", "\n"],
+      [6, "", ""],
     ]);
-    t("  ", [[0, "  "]]);
-    t("  foo", [[0, "  foo"]]);
+    t("  ", [[0, "  ", ""]]);
+    t("  foo", [[0, "  foo", ""]]);
     t("a\nbc", [
-      [0, "a"],
-      [2, "bc"],
+      [0, "a", "\n"],
+      [2, "bc", ""],
     ]);
     t("a\r\nbc", [
-      [0, "a"],
-      [2, "bc"],
+      [0, "a", "\n"],
+      [2, "bc", ""],
     ]);
     t("a\rbc", [
-      [0, "a"],
-      [2, "bc"],
+      [0, "a", "\n"],
+      [2, "bc", ""],
     ]);
     t("a\r\rbc", [
-      [0, "a"],
-      [2, ""],
-      [3, "bc"],
+      [0, "a", "\n"],
+      [2, "", "\n"],
+      [3, "bc", ""],
     ]);
     t("a\n \nbc", [
-      [0, "a"],
-      [2, " "],
-      [4, "bc"],
+      [0, "a", "\n"],
+      [2, " ", "\n"],
+      [4, "bc", ""],
     ]);
     t("a\n \nbc\r\nl", [
-      [0, "a"],
-      [2, " "],
-      [4, "bc"],
-      [7, "l"],
+      [0, "a", "\n"],
+      [2, " ", "\n"],
+      [4, "bc", "\n"],
+      [7, "l", ""],
     ]);
   });
 });
@@ -202,6 +204,19 @@ describe("encloseSelection", () => {
     t("a<b>c", "ll", "", "all<b>c");
     t("a<b>c", "", "ll", "a<b>llc");
     t("a<b>c", "ll", "xx", "all<b>xxc");
+  });
+});
+
+describe("mergeDuplicateLines", () => {
+  function t(from, to) {
+    tt(from, to, mergeDuplicateLines);
+  }
+
+  it("mergeDuplicateLines", () => {
+    t("", "|");
+    t("a\n<a\na\na\n>", "a\n<a\n>");
+    t("a\n<ab\nab\nd\nab\n>dd", "a\n<ab\nd\n>dd");
+    t("<ab\nab\nab>", "<ab\n>");
   });
 });
 
