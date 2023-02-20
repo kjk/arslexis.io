@@ -238,6 +238,7 @@
     cmdBase64DecodeAsHex,
     cmdUrlEncode,
     cmdUrlDecode,
+    swapSelectionsWithClipboard,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -805,6 +806,8 @@
       case IDT_EDIT_REDO:
         n = commands.redoDepth(state);
         return n > 0;
+      case IDM_EDIT_SWAP:
+        return hasSelection && hasClipboard;
     }
     return true;
   }
@@ -953,6 +956,9 @@
         break;
       case IDM_EDIT_DELETELINELEFT:
         commands.deleteToLineStart(editorView);
+        break;
+      case IDM_EDIT_SWAP:
+        swapSelectionsWithClipboard(args);
         break;
       case IDM_EDIT_TRIMLINES:
         deleteTrailingWhitespace(args);

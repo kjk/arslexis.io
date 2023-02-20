@@ -11,7 +11,7 @@ import {
   urlDecode,
   urlEncode,
 } from "./strutil";
-import { len } from "./util";
+import { getClipboard, len, setClipboard } from "./util";
 
 /**
  * @param {EditorSelection} sel
@@ -463,10 +463,10 @@ export function replaceSelections({ state, dispatch }, convertFn) {
     changes.push({ from, to });
     // TODO: make this as a selection
     changes.push({ from, insert });
-    if (!changes.length) return false;
-    dispatch(state.update({ changes, userEvent: "input.replaceselection" }));
-    return true;
   }
+  if (!changes.length) return false;
+  dispatch(state.update({ changes, userEvent: "input.replaceselection" }));
+  return true;
 }
 
 /**
@@ -523,4 +523,49 @@ export function cmdUrlEncode({ state, dispatch }) {
  */
 export function cmdUrlDecode({ state, dispatch }) {
   return replaceSelections({ state, dispatch }, urlDecode);
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {string} insert
+ * @returns {string}
+ */
+export function replaceSelectionsWithStr({ state, dispatch }, insert) {
+  let changes = [];
+  let sel = state.selection;
+  let res = "";
+  for (let { from, to } of sel.ranges) {
+    if (from === to) {
+      continue;
+    }
+    let s = state.sliceDoc(from, to);
+    res += s;
+    changes.push({ from, to });
+    // TODO: make this as a selection
+    changes.push({ from, insert });
+  }
+  if (!changes.length) return "";
+  dispatch(state.update({ changes, userEvent: "input.replaceselection" }));
+  return res;
+}
+
+/**
+ * Note: works differently than notepad2 if multiple selection, but notepad2
+ * seems to be wrong
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {Promise<boolean>}
+ */
+export async function swapSelectionsWithClipboard({ state, dispatch }) {
+  if (state.readOnly) return false;
+  let sel = state.selection;
+  if (isEmptySelection(sel)) {
+    return false;
+  }
+  let cp = await getClipboard();
+  if (cp === "") {
+    return false;
+  }
+  let nc = replaceSelectionsWithStr({ state, dispatch }, cp);
+  setClipboard(nc);
+  return true;
 }
