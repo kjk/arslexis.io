@@ -245,9 +245,16 @@ const menuLines = [
   ["Alig&n Lines...\tAlt+J", IDM_EDIT_ALIGN],
   [SEPARATOR],
   ["&Duplicate Line\tCtrl+D", IDM_EDIT_DUPLICATELINE],
-  ["Cu&t Line\tCtrl+Shift+X", IDM_EDIT_CUTLINE],
-  ["&Copy Line\tCtrl+Shift+C", IDM_EDIT_COPYLINE],
-  ["D&elete Line\tCtrl+Shift+D", IDM_EDIT_DELETELINE],
+
+  // TODO: Ctrl+Shift+X,C,D seem to be intercepted by browser
+  // or is it another bug in my matching?
+  ["Cu&t Line", IDM_EDIT_CUTLINE],
+  // ["Cu&t Line\tCtrl+Shift+X", IDM_EDIT_CUTLINE],
+  ["&Copy Line", IDM_EDIT_COPYLINE],
+  // ["&Copy Line\tCtrl+Shift+C", IDM_EDIT_COPYLINE],
+  ["D&elete Line", IDM_EDIT_DELETELINE],
+  // ["D&elete Line\tCtrl+Shift+D", IDM_EDIT_DELETELINE],
+
   [SEPARATOR],
   ["&Join Lines\tCtrl+J", IDM_EDIT_JOINLINES],
   ["Column &Wrap...", IDM_EDIT_COLUMNWRAP],

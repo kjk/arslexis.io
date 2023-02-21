@@ -615,3 +615,56 @@ export function duplicateLine({ state, dispatch }) {
   dispatch(state.update({ changes, userEvent: "input.duplicateline" }));
   return true;
 }
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
+ */
+export function cutLine({ state, dispatch }) {
+  if (state.readOnly) return false;
+  let sel = state.selection;
+  // find the line where last selection ends
+  let pos = sel.ranges[len(sel.ranges) - 1].to;
+  let doc = state.doc;
+  let l = doc.lineAt(pos);
+  let s = doc.sliceString(l.from, l.to) + "\n";
+  // TODO: will it work with different line endings?
+  let changes = [{ from: l.from, to: l.to + 1 }];
+  dispatch(state.update({ changes, userEvent: "input.cutline" }));
+  setClipboard(s);
+  return true;
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
+ */
+export function copyLine({ state, dispatch }) {
+  let sel = state.selection;
+  // find the line where last selection ends
+  let pos = sel.ranges[len(sel.ranges) - 1].to;
+  let doc = state.doc;
+  let l = doc.lineAt(pos);
+  // TODO: will it work with different line endings?
+  let s = doc.sliceString(l.from, l.to) + "\n";
+  setClipboard(s);
+  return true;
+}
+
+// /**
+//  * @param {{state: EditorState, dispatch: any}} arg0
+//  * @returns {boolean}
+//  */
+// export function deleteLine({ state, dispatch }) {
+//   if (state.readOnly) return false;
+//   let sel = state.selection;
+//   // find the line where last selection ends
+//   let pos = sel.ranges[len(sel.ranges) - 1].to;
+//   let doc = state.doc;
+//   let l = doc.lineAt(pos);
+//   // TODO: will it work with different line endings?
+//   let changes = [{ from: l.from, to: l.to + 1 }];
+//   dispatch(state.update({ changes, userEvent: "input.deleteline" }));
+//   setClipboard(s);
+//   return true;
+// }

@@ -128,6 +128,9 @@
     IDM_EDIT_COLUMNWRAP,
     IDM_EDIT_SPLITLINES,
     IDM_EDIT_JOINLINESEX,
+    IDM_EDIT_CUTLINE,
+    IDM_EDIT_COPYLINE,
+    IDM_EDIT_DELETELINE,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -248,6 +251,8 @@
     swapSelectionsWithClipboard,
     transposeLines,
     duplicateLine,
+    cutLine,
+    copyLine,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -1009,6 +1014,15 @@
         break;
       case IDM_EDIT_DUPLICATELINE:
         duplicateLine(args);
+        break;
+      case IDM_EDIT_CUTLINE:
+        cutLine(args);
+        break;
+      case IDM_EDIT_COPYLINE:
+        copyLine(args);
+        break;
+      case IDM_EDIT_DELETELINE:
+        commands.deleteLine(editorView);
         break;
       case CMD_COPYFILENAME_NOEXT:
         copyFileNameToClipboard(1);
