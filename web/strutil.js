@@ -65,6 +65,30 @@ export function b64Decode(s) {
   return res;
 }
 
+const hexTableStr = "0123456789abcdef";
+
+/**
+ * @returns {string}
+ */
+export function uuidv4() {
+  const rnd = crypto.getRandomValues(new Uint8Array(16));
+  let res = "";
+  for (let i = 0; i < 16; i++) {
+    let b = rnd[i];
+    switch (i) {
+      case 4:
+      case 6:
+      case 8:
+      case 10:
+        res += "-";
+        break;
+    }
+    res += hexTableStr[b >> 4];
+    res += hexTableStr[b & 0x0f];
+  }
+  return res;
+}
+
 const hexTable = new TextEncoder().encode("0123456789ABCDEF");
 const space = " ".charCodeAt(0); // stupid auto-formatter
 /**

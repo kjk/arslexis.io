@@ -133,6 +133,7 @@
     IDM_EDIT_DELETELINE,
     IDM_EDIT_INSERT_LOC_DATE,
     IDM_EDIT_INSERT_LOC_DATETIME,
+    IDM_EDIT_INSERT_GUID,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -267,6 +268,7 @@
     toBin,
     insertText,
   } from "../cmcommands";
+  import { uuidv4 } from "../strutil";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -1138,6 +1140,9 @@
         break;
       case IDM_EDIT_INSERT_LOC_DATETIME:
         insertText(editorView, genCurrentDateTime);
+        break;
+      case IDM_EDIT_INSERT_GUID:
+        insertText(editorView, uuidv4);
         break;
 
       // those are handled by CodeMirror
