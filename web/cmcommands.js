@@ -8,6 +8,7 @@ import {
   b64EncodeHtmlImage,
   b64EncodeStandard,
   b64EncodeURLSafe,
+  parseNumFlexible,
   strCompressWS,
   urlDecode,
   urlEncode,
@@ -713,8 +714,10 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
     }
     let s = state.sliceDoc(from, to);
     let insert = fn(s);
-    changes.push({ from, to });
-    changes.push({ from, insert });
+    if (s !== null) {
+      changes.push({ from, to });
+      changes.push({ from, insert });
+    }
   }
   if (!changes.length) return false;
   dispatch(state.update({ changes, userEvent: "input.replaceselectionwith" }));
@@ -767,4 +770,53 @@ export function sentanceCase(s) {
   // TODO: Upper case after each .
   throwIf(true, "NYI");
   return s;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function toHex(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return "0x" + n.toString(16);
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function toDec(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return n.toString(10);
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function toOct(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return "0O" + n.toString(8);
+}
+
+/**
+ * TODO: not exactly the same as notepad2
+ * @param {string} s
+ * @returns {string}
+ */
+export function toBin(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return "0b" + n.toString(2);
 }

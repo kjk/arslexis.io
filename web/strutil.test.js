@@ -10,7 +10,9 @@ import {
   urlEncode,
   urlDecode,
   strCompressWS,
+  parseNumFlexible,
 } from "./strutil";
+import ist from "ist";
 
 describe("strUtils", () => {
   it("strCompressWS", () => {
@@ -78,5 +80,14 @@ describe("strUtils", () => {
       let dec = urlDecode(got);
       streq(dec, s);
     }
+  });
+
+  it("num", () => {
+    ist(parseNumFlexible("1234"), 1234);
+    ist(parseNumFlexible("0x4d2"), 1234);
+    ist(parseNumFlexible("0b100_11010010"), 1234);
+    ist(parseNumFlexible("0O2322"), 1234);
+    ist(parseNumFlexible("0o2322"), 1234);
+    ist(parseNumFlexible("a1234"), null);
   });
 });

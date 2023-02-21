@@ -259,6 +259,10 @@
     convertLowerCase,
     invertCase,
     titleCase,
+    toDec,
+    toHex,
+    toOct,
+    toBin,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -1107,12 +1111,16 @@
       case IDM_EDIT_CONVERTTABS2:
         break;
       case IDM_EDIT_NUM2HEX:
+        replaceSelectionsWith(args, toHex);
         break;
       case IDM_EDIT_NUM2DEC:
+        replaceSelectionsWith(args, toDec);
         break;
       case IDM_EDIT_NUM2BIN:
+        replaceSelectionsWith(args, toBin);
         break;
       case IDM_EDIT_NUM2OCT:
+        replaceSelectionsWith(args, toOct);
         break;
 
       // those are handled by CodeMirror
