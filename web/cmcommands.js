@@ -569,3 +569,31 @@ export async function swapSelectionsWithClipboard({ state, dispatch }) {
   setClipboard(nc);
   return true;
 }
+
+/**
+ * swaps current line with the line before it
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {Promise<boolean>}
+ */
+export async function transposeLines({ state, dispatch }) {
+  if (state.readOnly) return false;
+  let sel = state.selection;
+  // find the line where last selection ends
+  let pos = sel.ranges[len(sel.ranges) - 1].to;
+  let doc = state.doc;
+  let l = doc.lineAt(pos);
+  if (l.number < 2) {
+    // if first line, nothing to do
+    return false;
+  }
+  let lineBefore = doc.line(l.number - 1);
+  let lineS = doc.sliceString(l.from, l.to);
+  let lineBeforeS = doc.sliceString(lineBefore.from, lineBefore.to);
+  let changes = [];
+  changes.push({ from: l.from, to: l.to });
+  changes.push({ from: lineBefore.from, to: lineBefore.to });
+  changes.push({ from: l.from, insert: lineBeforeS });
+  changes.push({ from: lineBefore.from, insert: lineS });
+  dispatch(state.update({ changes, userEvent: "input.transposelines" }));
+  return true;
+}

@@ -121,6 +121,7 @@
     IDM_EDIT_REMOVEDUPLICATELINE,
     IDM_EDIT_COMPRESSWS,
     IDM_EDIT_PADWITHSPACES,
+    IDM_EDIT_LINETRANSPOSE,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -239,6 +240,7 @@
     cmdUrlEncode,
     cmdUrlDecode,
     swapSelectionsWithClipboard,
+    transposeLines,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -808,6 +810,9 @@
         return n > 0;
       case IDM_EDIT_SWAP:
         return hasSelection && hasClipboard;
+      case IDM_EDIT_LINETRANSPOSE:
+        // TODO: if not at first line
+        break;
     }
     return true;
   }
@@ -980,6 +985,9 @@
         break;
       case IDM_EDIT_MERGEBLANKLINES:
         mergeBlankLines(args);
+        break;
+      case IDM_EDIT_LINETRANSPOSE:
+        transposeLines(args);
         break;
       case CMD_COPYFILENAME_NOEXT:
         copyFileNameToClipboard(1);

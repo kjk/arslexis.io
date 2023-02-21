@@ -18,6 +18,7 @@ import {
   mergeDuplicateLines,
   deleteDuplicateLines,
   compressWhitespace,
+  transposeLines,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -269,5 +270,16 @@ describe("compressWhitespace", () => {
     t("<fo   \nf >", "<fo \nf >");
     t("<\t\tf \t \nf  >", "< f \n>f "); // TODO: why?
     t("<f \t \nf  \n>", "<f \nf \n>");
+  });
+});
+
+describe("transposeLines", () => {
+  function t(from, to) {
+    tt(from, to, transposeLines);
+  }
+  it("transposeLines", () => {
+    t("aa\nbb\nc|c", "aa\ncc\n|bb");
+    t("aa\nb|b\ncc", "bb\n|aa\ncc");
+    t("a|a\nbb\ncc", "a|a\nbb\ncc");
   });
 });
