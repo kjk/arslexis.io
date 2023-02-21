@@ -76,32 +76,32 @@ function runOnIter({ state, dispatch }, fn, userEvent) {
 
 // iterates content of lines, skipping newline characaters
 // for each element returns [pos, line string]
-let iterLinesRes = [0, "", ""];
 /**
  * @param {TextIterator} iter
  * @returns {*}
  */
 export function* iterLines(iter) {
   let pos = 0;
-  iterLinesRes[0] = 0;
-  iterLinesRes[1] = "";
+  let res = [0, "", ""];
+  res[0] = 0;
+  res[1] = "";
   while (true) {
     iter.next();
     if (iter.done) {
-      iterLinesRes[2] = "";
-      yield iterLinesRes;
+      res[2] = "";
+      yield res;
       return;
     }
     if (iter.lineBreak) {
-      iterLinesRes[2] = iter.value;
-      yield iterLinesRes;
+      res[2] = iter.value;
+      yield res;
       pos += len(iter.value);
-      iterLinesRes[0] = pos;
-      iterLinesRes[1] = "";
+      res[0] = pos;
+      res[1] = "";
     } else {
       // delay emiting line to next lineBreak or done
-      iterLinesRes[0] = pos;
-      iterLinesRes[1] = iter.value;
+      res[0] = pos;
+      res[1] = iter.value;
       pos += len(iter.value);
     }
   }
