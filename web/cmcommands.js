@@ -12,7 +12,7 @@ import {
   urlDecode,
   urlEncode,
 } from "./strutil";
-import { getClipboard, len, setClipboard } from "./util";
+import { getClipboard, len, setClipboard, throwIf } from "./util";
 
 /**
  * @param {EditorSelection} sel
@@ -697,4 +697,74 @@ export function joinLines({ state, dispatch }) {
   // TODO: preserve selection as in notepad2?
   dispatch(state.update({ changes, userEvent: "input.joinlines" }));
   return true;
+}
+
+/**
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @param {Function} fn
+ * @returns {boolean}
+ */
+export function replaceSelectionsWith({ state, dispatch }, fn) {
+  let changes = [];
+  let sel = state.selection;
+  for (let { from, to } of sel.ranges) {
+    if (from === to) {
+      continue;
+    }
+    let s = state.sliceDoc(from, to);
+    let insert = fn(s);
+    changes.push({ from, to });
+    changes.push({ from, insert });
+  }
+  if (!changes.length) return false;
+  dispatch(state.update({ changes, userEvent: "input.replaceselectionwith" }));
+  return true;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function convertUpperCase(s) {
+  return s.toUpperCase();
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function convertLowerCase(s) {
+  return s.toLowerCase();
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function invertCase(s) {
+  let res = s.replace(/\w{1}/g, function (val) {
+    return val === val.toLowerCase() ? val.toUpperCase() : val.toLowerCase();
+  });
+  return res;
+}
+
+/**
+ * TODO: not exactly the same as notepad2
+ * @param {string} s
+ * @returns {string}
+ */
+export function titleCase(s) {
+  return s.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
+  });
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function sentanceCase(s) {
+  // TODO: Upper case after each .
+  throwIf(true, "NYI");
+  return s;
 }

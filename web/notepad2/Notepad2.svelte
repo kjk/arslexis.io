@@ -254,6 +254,11 @@
     cutLine,
     copyLine,
     joinLines,
+    replaceSelectionsWith,
+    convertUpperCase,
+    convertLowerCase,
+    invertCase,
+    titleCase,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -1078,6 +1083,36 @@
         break;
       case IDM_EDIT_URLDECODE:
         cmdUrlDecode(args);
+        break;
+      case IDM_EDIT_CONVERTUPPERCASE:
+        replaceSelectionsWith(args, convertUpperCase);
+        break;
+      case IDM_EDIT_CONVERTLOWERCASE:
+        replaceSelectionsWith(args, convertLowerCase);
+        break;
+      case IDM_EDIT_INVERTCASE:
+        replaceSelectionsWith(args, invertCase);
+        break;
+      case IDM_EDIT_TITLECASE:
+        replaceSelectionsWith(args, titleCase);
+        break;
+      case IDM_EDIT_SENTENCECASE:
+        break;
+      case IDM_EDIT_CONVERTSPACES:
+        break;
+      case IDM_EDIT_CONVERTTABS:
+        break;
+      case IDM_EDIT_CONVERTSPACES2:
+        break;
+      case IDM_EDIT_CONVERTTABS2:
+        break;
+      case IDM_EDIT_NUM2HEX:
+        break;
+      case IDM_EDIT_NUM2DEC:
+        break;
+      case IDM_EDIT_NUM2BIN:
+        break;
+      case IDM_EDIT_NUM2OCT:
         break;
 
       // those are handled by CodeMirror
