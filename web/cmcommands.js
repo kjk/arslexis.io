@@ -688,6 +688,7 @@ export function joinLines({ state, dispatch }) {
  * @returns {boolean}
  */
 export function replaceSelectionsWith({ state, dispatch }, fn) {
+  if (state.readOnly) return false;
   let changes = [];
   let ranges = [];
   let sel = state.selection;
@@ -709,6 +710,36 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
       changes,
       selection: EditorSelection.create(ranges),
       userEvent: "input.replaceselectionwith",
+    })
+  );
+  return true;
+}
+
+/**
+ * Insert at cursor position or replace first selection with
+ * text returned by fn
+ * note: notepad2 differs in handling selection. it uses last
+ * selection user made. CodeMirror normalizes selections so they
+ * are in order in the document, not ordered by timeline of user
+ * selections
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @param {Function} fn
+ * @returns {boolean}
+ */
+export function insertText({ state, dispatch }, fn) {
+  if (state.readOnly) return false;
+  let insert = fn();
+  if (insert === "") {
+    return false;
+  }
+  let sel = state.selection.ranges[0];
+  let changes = [];
+  changes.push(sel); // remove selection, if any
+  changes.push({ from: sel.from, insert });
+  dispatch(
+    state.update({
+      changes,
+      userEvent: "input.insert",
     })
   );
   return true;

@@ -131,6 +131,7 @@
     IDM_EDIT_CUTLINE,
     IDM_EDIT_COPYLINE,
     IDM_EDIT_DELETELINE,
+    IDM_EDIT_INSERT_LOC_DATE,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -263,6 +264,7 @@
     toHex,
     toOct,
     toBin,
+    insertText,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -899,6 +901,13 @@
     }
   }
 
+  /**
+   * @returns {string}
+   */
+  function genCurrentDate() {
+    return new Date().toISOString().split("T")[0];
+  }
+
   // this can be invoked via keyboard shortcut of via menu
   // if via keyboard, arg.detail.ev is set
   // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
@@ -1121,6 +1130,9 @@
         break;
       case IDM_EDIT_NUM2OCT:
         replaceSelectionsWith(args, toOct);
+        break;
+      case IDM_EDIT_INSERT_LOC_DATE:
+        insertText(args, genCurrentDate);
         break;
 
       // those are handled by CodeMirror
