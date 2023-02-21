@@ -723,12 +723,12 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
  * are in order in the document, not ordered by timeline of user
  * selections
  * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} fn
+ * @param {Function|string} fnOrStr
  * @returns {boolean}
  */
-export function insertText({ state, dispatch }, fn) {
+export function insertText({ state, dispatch }, fnOrStr) {
   if (state.readOnly) return false;
-  let insert = fn();
+  let insert = typeof fnOrStr === "string" ? fnOrStr : fnOrStr();
   if (insert === "") {
     return false;
   }

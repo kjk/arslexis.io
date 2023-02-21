@@ -134,6 +134,32 @@
     IDM_EDIT_INSERT_LOC_DATE,
     IDM_EDIT_INSERT_LOC_DATETIME,
     IDM_EDIT_INSERT_GUID,
+    IDM_INSERT_UNICODE_ALM,
+    IDM_INSERT_UNICODE_ZWSP,
+    IDM_INSERT_UNICODE_LS,
+    IDM_INSERT_UNICODE_PS,
+    IDM_INSERT_UNICODE_US,
+    IDM_INSERT_UNICODE_RS,
+    IDM_INSERT_UNICODE_IAFS,
+    IDM_INSERT_UNICODE_AAFS,
+    IDM_INSERT_UNICODE_ISS,
+    IDM_INSERT_UNICODE_ASS,
+    IDM_INSERT_UNICODE_NODS,
+    IDM_INSERT_UNICODE_NADS,
+    IDM_INSERT_UNICODE_PDF,
+    IDM_INSERT_UNICODE_PDI,
+    IDM_INSERT_UNICODE_FSI,
+    IDM_INSERT_UNICODE_RLI,
+    IDM_INSERT_UNICODE_LRI,
+    IDM_INSERT_UNICODE_RLO,
+    IDM_INSERT_UNICODE_LRO,
+    IDM_INSERT_UNICODE_RLE,
+    IDM_INSERT_UNICODE_LRE,
+    IDM_INSERT_UNICODE_RLM,
+    IDM_INSERT_UNICODE_LRM,
+    IDM_INSERT_UNICODE_ZWNJ,
+    IDM_INSERT_UNICODE_ZWJ,
+    IDM_INSERT_UNICODE_WJ,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -269,6 +295,7 @@
     insertText,
   } from "../cmcommands";
   import { uuidv4 } from "../strutil";
+  import { findUnicodeStrByMenuID } from "./unicodeChars";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -1143,6 +1170,35 @@
         break;
       case IDM_EDIT_INSERT_GUID:
         insertText(editorView, uuidv4);
+        break;
+      case IDM_INSERT_UNICODE_WJ:
+      case IDM_INSERT_UNICODE_ZWJ:
+      case IDM_INSERT_UNICODE_ZWNJ:
+      case IDM_INSERT_UNICODE_LRM:
+      case IDM_INSERT_UNICODE_RLM:
+      case IDM_INSERT_UNICODE_LRE:
+      case IDM_INSERT_UNICODE_RLE:
+      case IDM_INSERT_UNICODE_LRO:
+      case IDM_INSERT_UNICODE_RLO:
+      case IDM_INSERT_UNICODE_LRI:
+      case IDM_INSERT_UNICODE_RLI:
+      case IDM_INSERT_UNICODE_FSI:
+      case IDM_INSERT_UNICODE_PDI:
+      case IDM_INSERT_UNICODE_PDF:
+      case IDM_INSERT_UNICODE_NADS:
+      case IDM_INSERT_UNICODE_NODS:
+      case IDM_INSERT_UNICODE_ASS:
+      case IDM_INSERT_UNICODE_ISS:
+      case IDM_INSERT_UNICODE_AAFS:
+      case IDM_INSERT_UNICODE_IAFS:
+      case IDM_INSERT_UNICODE_ALM:
+      case IDM_INSERT_UNICODE_RS:
+      case IDM_INSERT_UNICODE_US:
+      case IDM_INSERT_UNICODE_LS:
+      case IDM_INSERT_UNICODE_PS:
+      case IDM_INSERT_UNICODE_ZWSP:
+        let us = findUnicodeStrByMenuID(cmdId);
+        insertText(editorView, us);
         break;
 
       // those are handled by CodeMirror

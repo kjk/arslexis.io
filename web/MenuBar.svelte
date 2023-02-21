@@ -157,7 +157,7 @@
   <div />
 {:else}
   <div
-    class="z-20 flex w-full items-center gap-2 bg-white py-0 select-none"
+    class="z-20 flex w-full items-center gap-2 bg-white py-0 select-none text-xs"
     bind:this={menuBarElement}
   >
     <div class="flex justify-center text-neutral-700 cursor-pointer">
