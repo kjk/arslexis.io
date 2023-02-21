@@ -132,6 +132,7 @@
     IDM_EDIT_COPYLINE,
     IDM_EDIT_DELETELINE,
     IDM_EDIT_INSERT_LOC_DATE,
+    IDM_EDIT_INSERT_LOC_DATETIME,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -907,6 +908,12 @@
   function genCurrentDate() {
     return new Date().toISOString().split("T")[0];
   }
+  /**
+   * @returns {string}
+   */
+  function genCurrentDateTime() {
+    return new Date().toISOString().split(".")[0].replace("T", " ");
+  }
 
   // this can be invoked via keyboard shortcut of via menu
   // if via keyboard, arg.detail.ev is set
@@ -1128,6 +1135,9 @@
         break;
       case IDM_EDIT_INSERT_LOC_DATE:
         insertText(editorView, genCurrentDate);
+        break;
+      case IDM_EDIT_INSERT_LOC_DATETIME:
+        insertText(editorView, genCurrentDateTime);
         break;
 
       // those are handled by CodeMirror

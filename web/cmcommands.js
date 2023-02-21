@@ -734,11 +734,16 @@ export function insertText({ state, dispatch }, fn) {
   }
   let sel = state.selection.ranges[0];
   let changes = [];
-  changes.push(sel); // remove selection, if any
+  changes.push(sel); // remove text in this selection, if any
   changes.push({ from: sel.from, insert });
+  // put the cursor at the end of text
+  let ranges = [
+    EditorSelection.range(sel.from + len(insert), sel.from + len(insert)),
+  ];
   dispatch(
     state.update({
       changes,
+      selection: EditorSelection.create(ranges),
       userEvent: "input.insert",
     })
   );
