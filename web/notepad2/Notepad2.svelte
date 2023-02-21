@@ -914,12 +914,7 @@
   async function handleMenuCmd(arg) {
     const cmdId = arg.detail.cmd;
     const ev = arg.detail.ev;
-    console.log("handleMenuCmd:", cmdId);
     let stopPropagation = true;
-    let v = editorView;
-    let state = v.state;
-    let dispatch = v.dispatch;
-    let args = { state, dispatch };
     switch (cmdId) {
       case IDM_FILE_NEW:
       case IDT_FILE_NEW:
@@ -1005,46 +1000,46 @@
         commands.deleteToLineStart(editorView);
         break;
       case IDM_EDIT_SWAP:
-        swapSelectionsWithClipboard(args);
+        swapSelectionsWithClipboard(editorView);
         break;
       case IDM_EDIT_TRIMLINES:
-        deleteTrailingWhitespace(args);
+        deleteTrailingWhitespace(editorView);
         break;
       case IDM_EDIT_TRIMLEAD:
-        deleteLeadingWhitespace(args);
+        deleteLeadingWhitespace(editorView);
         break;
       case IDM_EDIT_STRIP1STCHAR:
-        deleteFirstChar(args);
+        deleteFirstChar(editorView);
         break;
       case IDM_EDIT_STRIPLASTCHAR:
-        deleteLastChar(args);
+        deleteLastChar(editorView);
         break;
       case IDM_EDIT_SELECTIONDUPLICATE:
-        duplicateSelection(args);
+        duplicateSelection(editorView);
         break;
       case IDM_EDIT_REMOVEBLANKLINES:
-        removeBlankLines(args);
+        removeBlankLines(editorView);
         break;
       case IDM_EDIT_MERGEBLANKLINES:
-        mergeBlankLines(args);
+        mergeBlankLines(editorView);
         break;
       case IDM_EDIT_LINETRANSPOSE:
-        transposeLines(args);
+        transposeLines(editorView);
         break;
       case IDM_EDIT_DUPLICATELINE:
-        duplicateLine(args);
+        duplicateLine(editorView);
         break;
       case IDM_EDIT_CUTLINE:
-        cutLine(args);
+        cutLine(editorView);
         break;
       case IDM_EDIT_COPYLINE:
-        copyLine(args);
+        copyLine(editorView);
         break;
       case IDM_EDIT_DELETELINE:
         commands.deleteLine(editorView);
         break;
       case IDM_EDIT_JOINLINES:
-        joinLines(args);
+        joinLines(editorView);
         break;
       case CMD_COPYFILENAME_NOEXT:
         copyFileNameToClipboard(1);
@@ -1053,61 +1048,61 @@
         copyFileNameToClipboard(0);
         break;
       case CMD_ENCLOSE_TRIPLE_SQ:
-        encloseSelection(args, `'''`, `'''`);
+        encloseSelection(editorView, `'''`, `'''`);
         break;
       case CMD_ENCLOSE_TRIPLE_DQ:
-        encloseSelection(args, `"""`, `"""`);
+        encloseSelection(editorView, `"""`, `"""`);
         break;
       case CMD_ENCLOSE_TRIPLE_BT:
-        encloseSelection(args, "```", "```");
+        encloseSelection(editorView, "```", "```");
         break;
       case IDM_EDIT_STREAMCOMMENT:
-        commands.blockComment(args);
+        commands.blockComment(editorView);
         break;
       case IDM_EDIT_MERGEDUPLICATELINE:
-        mergeDuplicateLines(args);
+        mergeDuplicateLines(editorView);
         break;
       case IDM_EDIT_REMOVEDUPLICATELINE:
-        deleteDuplicateLines(args);
+        deleteDuplicateLines(editorView);
         break;
       case IDM_EDIT_PADWITHSPACES:
-        padWithSpaces(args);
+        padWithSpaces(editorView);
         break;
       case IDM_EDIT_COMPRESSWS:
-        compressWhitespace(args);
+        compressWhitespace(editorView);
         break;
       case IDM_EDIT_BASE64_ENCODE:
-        cmdBase64EncodeStandard(args);
+        cmdBase64EncodeStandard(editorView);
         break;
       case IDM_EDIT_BASE64_SAFE_ENCODE:
-        cmdBase64EncodeURLSafe(args);
+        cmdBase64EncodeURLSafe(editorView);
         break;
       case IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
-        cmdBase64EncodeHtmlImage(args);
+        cmdBase64EncodeHtmlImage(editorView);
         break;
       case IDM_EDIT_BASE64_DECODE:
-        cmdBase64Decode(args);
+        cmdBase64Decode(editorView);
         break;
       case IDM_EDIT_BASE64_DECODE_AS_HEX:
-        cmdBase64DecodeAsHex(args);
+        cmdBase64DecodeAsHex(editorView);
         break;
       case IDM_EDIT_URLENCODE:
-        cmdUrlEncode(args);
+        cmdUrlEncode(editorView);
         break;
       case IDM_EDIT_URLDECODE:
-        cmdUrlDecode(args);
+        cmdUrlDecode(editorView);
         break;
       case IDM_EDIT_CONVERTUPPERCASE:
-        replaceSelectionsWith(args, convertUpperCase);
+        replaceSelectionsWith(editorView, convertUpperCase);
         break;
       case IDM_EDIT_CONVERTLOWERCASE:
-        replaceSelectionsWith(args, convertLowerCase);
+        replaceSelectionsWith(editorView, convertLowerCase);
         break;
       case IDM_EDIT_INVERTCASE:
-        replaceSelectionsWith(args, invertCase);
+        replaceSelectionsWith(editorView, invertCase);
         break;
       case IDM_EDIT_TITLECASE:
-        replaceSelectionsWith(args, titleCase);
+        replaceSelectionsWith(editorView, titleCase);
         break;
       case IDM_EDIT_SENTENCECASE:
         break;
@@ -1120,19 +1115,19 @@
       case IDM_EDIT_CONVERTTABS2:
         break;
       case IDM_EDIT_NUM2HEX:
-        replaceSelectionsWith(args, toHex);
+        replaceSelectionsWith(editorView, toHex);
         break;
       case IDM_EDIT_NUM2DEC:
-        replaceSelectionsWith(args, toDec);
+        replaceSelectionsWith(editorView, toDec);
         break;
       case IDM_EDIT_NUM2BIN:
-        replaceSelectionsWith(args, toBin);
+        replaceSelectionsWith(editorView, toBin);
         break;
       case IDM_EDIT_NUM2OCT:
-        replaceSelectionsWith(args, toOct);
+        replaceSelectionsWith(editorView, toOct);
         break;
       case IDM_EDIT_INSERT_LOC_DATE:
-        insertText(args, genCurrentDate);
+        insertText(editorView, genCurrentDate);
         break;
 
       // those are handled by CodeMirror
@@ -1170,30 +1165,30 @@
             // case IDT_EDIT_PASTE:
             //   break;
             case IDM_EDIT_INDENT:
-              commands.indentMore(args);
+              commands.indentMore(editorView);
               break;
             case IDM_EDIT_UNINDENT:
-              commands.indentLess(args);
+              commands.indentLess(editorView);
               break;
             case IDM_EDIT_SELECTALL:
-              commands.selectAll(args);
+              commands.selectAll(editorView);
               break;
             case IDM_EDIT_UNDO:
             case IDT_EDIT_UNDO:
-              commands.undo(args);
+              commands.undo(editorView);
               break;
             case IDM_EDIT_REDO:
             case IDT_EDIT_REDO:
-              commands.redo(args);
+              commands.redo(editorView);
               break;
             case IDM_EDIT_MOVELINEDOWN:
-              commands.moveLineDown(args);
+              commands.moveLineDown(editorView);
               break;
             case IDM_EDIT_MOVELINEUP:
-              commands.moveLineUp(args);
+              commands.moveLineUp(editorView);
               break;
             case IDM_EDIT_LINECOMMENT:
-              commands.toggleComment(args);
+              commands.toggleComment(editorView);
               break;
             default:
               // TODO: not handled

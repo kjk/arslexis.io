@@ -105,7 +105,16 @@
    * @param {KeyboardEvent} ev
    */
   function handleKeyDown(ev) {
-    console.log("handleKeyDown:", ev);
+    if (false) {
+      const sev = {
+        key: ev.key,
+        shiftKey: ev.shiftKey,
+        ctrlKey: ev.ctrlKey,
+        altKey: ev.altKey,
+        metaKey: ev.metaKey,
+      };
+      console.log("handleKeyDown:", sev);
+    }
     let menuEl = /** @type {HTMLElement} */ (document.activeElement);
     // console.log("menuEl:", menuEl);
     let isMenuOpen = menuEl && menuEl.classList.contains("menu-trigger");
@@ -130,7 +139,7 @@
         continue;
       }
       // handler is responsible for stopping propagation of the event
-      console.log("handleKeyDown: ks", ks);
+      // console.log("handleKeyDown: ks", ks);
       dispatch("menucmd", { ev: ev, cmd: ks.cmdId });
     }
   }
