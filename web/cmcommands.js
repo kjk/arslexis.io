@@ -1,5 +1,4 @@
 /** @typedef { import("@codemirror/state").EditorState} EditorState */
-/** @typedef {import("@codemirror/state").EditorSelection} EditorSelection */
 /** @typedef {import("@codemirror/state").TextIterator} TextIterator */
 
 import {
@@ -13,6 +12,7 @@ import {
   urlDecode,
   urlEncode,
 } from "./strutil";
+import { EditorSelection } from "@codemirror/state";
 import { getClipboard, len, setClipboard, throwIf } from "./util";
 
 /**
@@ -652,24 +652,6 @@ export function copyLine({ state }) {
   return true;
 }
 
-// /**
-//  * @param {{state: EditorState, dispatch: Function}} arg0
-//  * @returns {boolean}
-//  */
-// export function deleteLine({ state, dispatch }) {
-//   if (state.readOnly) return false;
-//   let sel = state.selection;
-//   // find the line where last selection ends
-//   let pos = sel.ranges[len(sel.ranges) - 1].to;
-//   let doc = state.doc;
-//   let l = doc.lineAt(pos);
-//   // TODO: will it work with different line endings?
-//   let changes = [{ from: l.from, to: l.to + 1 }];
-//   dispatch(state.update({ changes, userEvent: "input.deleteline" }));
-//   setClipboard(s);
-//   return true;
-// }
-
 /**
  * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
@@ -707,6 +689,7 @@ export function joinLines({ state, dispatch }) {
  */
 export function replaceSelectionsWith({ state, dispatch }, fn) {
   let changes = [];
+  let ranges = [];
   let sel = state.selection;
   for (let { from, to } of sel.ranges) {
     if (from === to) {
@@ -717,10 +700,17 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
     if (s !== null) {
       changes.push({ from, to });
       changes.push({ from, insert });
+      ranges.push(EditorSelection.range(from, from + len(insert)));
     }
   }
   if (!changes.length) return false;
-  dispatch(state.update({ changes, userEvent: "input.replaceselectionwith" }));
+  dispatch(
+    state.update({
+      changes,
+      selection: EditorSelection.create(ranges),
+      userEvent: "input.replaceselectionwith",
+    })
+  );
   return true;
 }
 
