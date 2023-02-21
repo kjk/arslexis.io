@@ -114,40 +114,26 @@ export function urlDecode(s) {
 }
 
 const code0 = "0".charCodeAt(0);
-const code7 = "7".charCodeAt(0);
 const code9 = "9".charCodeAt(0);
-const codeA = "a".charCodeAt(0);
-const codeH = "h".charCodeAt(0);
+const codeA = "A".charCodeAt(0);
+const codeZ = "Z".charCodeAt(0);
+const codea = "a".charCodeAt(0);
+const codez = "z".charCodeAt(0);
 const codeX = "x".charCodeAt(0);
 const codeB = "b".charCodeAt(0);
 const codeO = "O".charCodeAt(0);
 const codeo = "o".charCodeAt(0);
 const codeUnder = "_".charCodeAt(0);
 
-function isCharDec(c) {
-  return c >= code0 && c <= code9;
-}
-
-function hexToNum(c) {
+function codeToNum(c) {
   if (c >= code0 && c <= code9) {
     return c - code0;
   }
-  if (c >= codeA && c <= codeH) {
+  if (c >= codeA && c <= codeZ) {
     return 10 + c - codeA;
   }
-  return -1;
-}
-
-function decToNum(c) {
-  if (c >= code0 && c <= code9) {
-    return c - code0;
-  }
-  return -1;
-}
-
-function octToNum(c) {
-  if (c >= code0 && c <= code7) {
-    return c - code0;
+  if (c >= codea && c <= codez) {
+    return 10 + c - codea;
   }
   return -1;
 }
@@ -159,7 +145,7 @@ function octToNum(c) {
 export function parseNumFlexible(s) {
   let res = 0;
   let slen = s.length;
-  let n;
+  let c, n;
   /* states:
   0 - initial
   1 - after 0
@@ -170,13 +156,14 @@ export function parseNumFlexible(s) {
   */
   let state = 0;
   for (let i = 0; i < slen; i++) {
-    let c = s.charCodeAt(i);
+    c = s.charCodeAt(i);
+    n = codeToNum(c);
     switch (state) {
       case 0:
-        if (c === code0) {
+        if (n === 0) {
           state = 1;
-        } else if (isCharDec(c)) {
-          res = c - code0;
+        } else if (n >= 0 && n <= 9) {
+          res = n;
           state = 2;
         } else {
           return null;
@@ -190,47 +177,41 @@ export function parseNumFlexible(s) {
           state = 5;
         } else if (c === codeO || c === codeo) {
           state = 4;
-        } else if (isCharDec(c)) {
+        } else if (n >= 0 && n < 10) {
+          res = n;
           state = 2;
-          res = c - code0;
         } else {
           return null;
         }
         break;
       case 2:
-        n = decToNum(c);
-        if (n < 0) {
-          return null;
-        } else {
+        if (n >= 0 && n < 10) {
           res = res * 10 + n;
+        } else {
+          return null;
         }
         break;
       case 3:
-        n = hexToNum(c);
-        if (n < 0) {
-          return null;
-        } else {
+        if (n >= 0 && n < 16) {
           res = res * 16 + n;
+        } else {
+          return null;
         }
         break;
       case 4:
-        n = octToNum(c);
-        if (n < 0) {
-          return null;
-        } else {
+        if (n >= 0 && n < 8) {
           res = res * 8 + n;
+        } else {
+          return null;
         }
         break;
       case 5:
         if (c === codeUnder) {
           // do nothing
+        } else if (n >= 0 && n < 2) {
+          res = res * 2 + n;
         } else {
-          n = c - code0;
-          if (n < 2) {
-            res = res * 2 + n;
-          } else {
-            return null;
-          }
+          return null;
         }
         break;
       default:
@@ -238,12 +219,4 @@ export function parseNumFlexible(s) {
     }
   }
   return res;
-}
-
-/**
- * @param {string} s
- * @returns {string}
- */
-export function numToHex(s) {
-  return s;
 }
