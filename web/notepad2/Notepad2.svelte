@@ -122,6 +122,12 @@
     IDM_EDIT_COMPRESSWS,
     IDM_EDIT_PADWITHSPACES,
     IDM_EDIT_LINETRANSPOSE,
+    IDM_EDIT_DUPLICATELINE,
+    IDM_EDIT_SORTLINES,
+    IDM_EDIT_JOINLINES,
+    IDM_EDIT_COLUMNWRAP,
+    IDM_EDIT_SPLITLINES,
+    IDM_EDIT_JOINLINESEX,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -241,6 +247,7 @@
     cmdUrlDecode,
     swapSelectionsWithClipboard,
     transposeLines,
+    duplicateLine,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -793,23 +800,34 @@
       case IDM_EDIT_URLENCODE:
       case IDM_EDIT_URLDECODE:
       case IDM_EDIT_SELECTIONDUPLICATE:
+      case IDM_EDIT_SORTLINES:
+      case IDM_EDIT_JOINLINES:
+      case IDM_EDIT_COLUMNWRAP:
+      case IDM_EDIT_SPLITLINES:
+      case IDM_EDIT_JOINLINESEX:
         // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
         return hasSelection;
+
       case IDM_EDIT_COPYALL:
         return editorView.state.doc.length > 0;
+
       case IDM_EDIT_PASTE:
       case IDT_EDIT_PASTE:
         return hasClipboard;
+
       case IDM_EDIT_UNDO:
       case IDT_EDIT_UNDO:
         n = commands.undoDepth(state);
         return n > 0;
+
       case IDM_EDIT_REDO:
       case IDT_EDIT_REDO:
         n = commands.redoDepth(state);
         return n > 0;
+
       case IDM_EDIT_SWAP:
         return hasSelection && hasClipboard;
+
       case IDM_EDIT_LINETRANSPOSE:
         // TODO: if not at first line
         break;
@@ -988,6 +1006,9 @@
         break;
       case IDM_EDIT_LINETRANSPOSE:
         transposeLines(args);
+        break;
+      case IDM_EDIT_DUPLICATELINE:
+        duplicateLine(args);
         break;
       case CMD_COPYFILENAME_NOEXT:
         copyFileNameToClipboard(1);

@@ -19,6 +19,7 @@ import {
   deleteDuplicateLines,
   compressWhitespace,
   transposeLines,
+  duplicateLine,
 } from "./cmcommands";
 
 // let exts = [EditorState.readOnly.of(false)];
@@ -80,12 +81,12 @@ function tt(from, to, cmd) {
   streq(got, to);
 }
 
-describe("deleteLeadingWhitespace", () => {
-  function t(from, to) {
-    tt(from, to, deleteLeadingWhitespace);
-  }
-
+describe("commands", () => {
   it("deleteLeadingWhitespace", () => {
+    function t(from, to) {
+      tt(from, to, deleteLeadingWhitespace);
+    }
+
     t("", "|");
     t("  ", "|");
     t("  foo", "|foo");
@@ -94,14 +95,12 @@ describe("deleteLeadingWhitespace", () => {
     t("\t\tf  oo  ", "|f  oo  ");
     t("\t  \tf  oo  ", "|f  oo  ");
   });
-});
-
-describe("deleteTrailingWhitespace", () => {
-  function t(from, to) {
-    tt(from, to, deleteTrailingWhitespace);
-  }
 
   it("deleteTrailingWhitespace", () => {
+    function t(from, to) {
+      tt(from, to, deleteTrailingWhitespace);
+    }
+
     t("", "|");
     t("  ", "|");
     t("foo  ", "|foo");
@@ -110,56 +109,47 @@ describe("deleteTrailingWhitespace", () => {
     t("f  oo  \t\t", "|f  oo");
     t("  oo\t  \tf  \t", "|  oo\t  \tf");
   });
-});
-
-describe("deleteFirstChar", () => {
-  function t(from, to) {
-    tt(from, to, deleteFirstChar);
-  }
 
   it("deleteFirstChar", () => {
+    function t(from, to) {
+      tt(from, to, deleteFirstChar);
+    }
     t("", "|");
     t("ab", "|ab");
     t("<ab>", "<b>");
     t("<ab\nc\ndada>", "<b\n\nada>");
     t("glo<ab\nc\ndada>bal", "glo<b\n\nada>bal");
   });
-});
-
-describe("deleteLastChar", () => {
-  function t(from, to) {
-    tt(from, to, deleteLastChar);
-  }
 
   it("deleteLastChar", () => {
+    function t(from, to) {
+      tt(from, to, deleteLastChar);
+    }
+
     t("", "|");
     t("ab", "|ab");
     t("<ab>", "<a>");
     t("<ab\nc\ndada>", "<a\n\ndad>");
     t("glo<ab\nc\ndada>bal", "glo<a\n\ndad>bal");
   });
-});
-
-describe("duplicateSelection", () => {
-  function t(from, to) {
-    tt(from, to, duplicateSelection);
-  }
 
   it("duplicateSelection", () => {
+    function t(from, to) {
+      tt(from, to, duplicateSelection);
+    }
+
     t("", "|");
     t("ab", "|ab");
     t("<>ab", "|>ab");
     t("<ab>", "<ab>ab");
     t("<ab>\n<c>\ndad<a><>", "<ab>ab\n<c>c\ndad<a>a>");
   });
-});
-
-describe("mergeBlankLines", () => {
-  function t(from, to) {
-    tt(from, to, mergeBlankLines);
-  }
 
   it("mergeBlankLines", () => {
+    function t(from, to) {
+      tt(from, to, mergeBlankLines);
+    }
+
     t("", "|");
     t("\n\nab\n\n\r\n\r\n\rcc4", "|\nab\n\ncc4");
     t("ab\n\n\ncc1", "|ab\n\ncc1");
@@ -167,14 +157,12 @@ describe("mergeBlankLines", () => {
     t("ab\n\n\r\n\r\n\rcc3", "|ab\n\ncc3");
     t("<ab\n\n\n\n\rcc>3a", "<ab\n\ncc>3a");
   });
-});
-
-describe("removeBlankLines", () => {
-  function t(from, to) {
-    tt(from, to, removeBlankLines);
-  }
 
   it("removeBlankLines", () => {
+    function t(from, to) {
+      tt(from, to, removeBlankLines);
+    }
+
     t("", "|");
     t("\n\nab\n\n\r\n\r\n\rcc4", "|ab\ncc4");
     t("ab\n\n\ncc1\n", "|ab\ncc1\n");
@@ -184,41 +172,32 @@ describe("removeBlankLines", () => {
     t("<ab\n\n\n\n\rcc>3a", "<ab\ncc>3a");
     t("<ab\n\ncc>3a\n<c\n\n\nd>\n", "<ab\ncc>3a\n<c\nd>\n");
   });
-});
-
-describe("encloseSelection", () => {
-  function t(from, before, after, to) {
-    let got = runCmd2(from, encloseSelection, before, after);
-    streq(got, to);
-  }
 
   it("encloseSelection", () => {
+    function t(from, before, after, to) {
+      let got = runCmd2(from, encloseSelection, before, after);
+      streq(got, to);
+    }
     t("", "a", "b", "|ab");
     t("a<b>c", "ll", "", "all<b>c");
     t("a<b>c", "", "ll", "a<b>llc");
     t("a<b>c", "ll", "xx", "all<b>xxc");
   });
-});
-
-describe("mergeDuplicateLines", () => {
-  function t(from, to) {
-    tt(from, to, mergeDuplicateLines);
-  }
 
   it("mergeDuplicateLines", () => {
+    function t(from, to) {
+      tt(from, to, mergeDuplicateLines);
+    }
     t("", "|");
     t("a\n<a\na\na\n>", "a\n<a\n>");
     t("a\n<ab\nab\nd\nab\n>dd", "a\n<ab\nd\n>dd");
     t("<ab\nab\nab>", "<ab\n>");
   });
-});
-
-describe("deleteDuplicateLines", () => {
-  function t(from, to) {
-    tt(from, to, deleteDuplicateLines);
-  }
 
   it("deleteDuplicateLines", () => {
+    function t(from, to) {
+      tt(from, to, deleteDuplicateLines);
+    }
     t("", "|");
     t(
       `<
@@ -230,40 +209,20 @@ foo>`,
       "<asd\n>"
     );
   });
-});
 
-describe("padWithSpaces", () => {
-  function t(from, to) {
-    tt(from, to, padWithSpaces);
-  }
   it("padWithSpaces", () => {
+    function t(from, to) {
+      tt(from, to, padWithSpaces);
+    }
     t("f\nf ", "|f \nf ");
     t("f \nf  ", "|f  \nf  ");
     t("f \nf  \n", "|f  \nf  \n   ");
   });
-});
 
-describe("strCompressWS", () => {
-  it("strCompressWS", () => {
-    function t(s, want) {
-      let got = strCompressWS(s);
-      streq(got, want);
-    }
-    t("", "");
-    t(" ", " ");
-    t("  ", " ");
-    t("as  \t\nb", "as b");
-    t("as  \t\nb\t\t", "as b ");
-    t("\t\ta  b", " a b");
-    t("\t\tf \t ", " f ");
-  });
-});
-
-describe("compressWhitespace", () => {
-  function t(from, to) {
-    tt(from, to, compressWhitespace);
-  }
   it("compressWhitespace", () => {
+    function t(from, to) {
+      tt(from, to, compressWhitespace);
+    }
     t("fo   \nf ", "|fo \nf ");
     t("\t\tf \t \nf  ", "| f \nf ");
     t("f \t \nf  \n", "|f \nf \n");
@@ -271,15 +230,22 @@ describe("compressWhitespace", () => {
     t("<\t\tf \t \nf  >", "< f \n>f "); // TODO: why?
     t("<f \t \nf  \n>", "<f \nf \n>");
   });
-});
 
-describe("transposeLines", () => {
-  function t(from, to) {
-    tt(from, to, transposeLines);
-  }
   it("transposeLines", () => {
+    function t(from, to) {
+      tt(from, to, transposeLines);
+    }
     t("aa\nbb\nc|c", "aa\ncc\n|bb");
     t("aa\nb|b\ncc", "bb\n|aa\ncc");
     t("a|a\nbb\ncc", "a|a\nbb\ncc");
+  });
+
+  it("duplicateLine", () => {
+    function t(from, to) {
+      tt(from, to, duplicateLine);
+    }
+    t("a|a\nbb\ncc", "a|a\naa\nbb\ncc");
+    t("aa\n|bb\ncc", "aa\n|bb\nbb\ncc");
+    t("aa\nbb\ncc|", "aa\nbb\ncc|\ncc");
   });
 });

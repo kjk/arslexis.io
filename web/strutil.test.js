@@ -9,25 +9,35 @@ import {
   b64DecodeAsHex,
   urlEncode,
   urlDecode,
+  strCompressWS,
 } from "./strutil";
 
-/*
+describe("strUtils", () => {
+  it("strCompressWS", () => {
+    function t(s, want) {
+      let got = strCompressWS(s);
+      streq(got, want);
+    }
+    t("", "");
+    t(" ", " ");
+    t("  ", " ");
+    t("as  \t\nb", "as b");
+    t("as  \t\nb\t\t", "as b ");
+    t("\t\ta  b", " a b");
+    t("\t\tf \t ", " f ");
+  });
 
-lo + _ as / me ? lost - \ .
-*/
-
-describe("base64", () => {
-  // order: string, standard, url-safe, html image, decode as hex
-  const a = [
-    [
-      "as?-. fd",
-      "YXM/LS4gZmQ=",
-      "YXM_LS4gZmQ=",
-      `<img src="data:image/py;base64,YXM/LS4gZmQ=" />`,
-      "61 73 3F 2D 2E 20 66 64 ",
-    ],
-  ];
   it("b64", () => {
+    // order: string, standard, url-safe, html image, decode as hex
+    const a = [
+      [
+        "as?-. fd",
+        "YXM/LS4gZmQ=",
+        "YXM_LS4gZmQ=",
+        `<img src="data:image/py;base64,YXM/LS4gZmQ=" />`,
+        "61 73 3F 2D 2E 20 66 64 ",
+      ],
+    ];
     for (let el of a) {
       let s = el[0];
 
@@ -50,9 +60,7 @@ describe("base64", () => {
       streq(got, el[3]);
     }
   });
-});
 
-describe("urlEncodeDecode", () => {
   it("urlEncodeDecode", () => {
     const a = [
       [

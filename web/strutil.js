@@ -1,6 +1,16 @@
 import { Base64 } from "js-base64";
 import { len } from "./util";
 
+const wsRx = /\s{2,}/g;
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function strCompressWS(s) {
+  // TODO: also remove single space from the beginning?
+  return s.replaceAll(wsRx, " ");
+}
+
 /**
  * @param {string} s
  * @returns {string}

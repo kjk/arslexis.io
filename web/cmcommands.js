@@ -8,6 +8,7 @@ import {
   b64EncodeHtmlImage,
   b64EncodeStandard,
   b64EncodeURLSafe,
+  strCompressWS,
   urlDecode,
   urlEncode,
 } from "./strutil";
@@ -373,16 +374,6 @@ export function deleteDuplicateLines({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.deleteduplicatelines");
 }
 
-const wsRx = /\s{2,}/g;
-/**
- * @param {string} s
- * @returns {string}
- */
-export function strCompressWS(s) {
-  // TODO: also remove single space from the beginning?
-  return s.replaceAll(wsRx, " ");
-}
-
 /**
  * @param {{state: EditorState, dispatch: any}} arg0
  * @returns {boolean}
@@ -573,9 +564,9 @@ export async function swapSelectionsWithClipboard({ state, dispatch }) {
 /**
  * swaps current line with the line before it
  * @param {{state: EditorState, dispatch: any}} arg0
- * @returns {Promise<boolean>}
+ * @returns {boolean}
  */
-export async function transposeLines({ state, dispatch }) {
+export function transposeLines({ state, dispatch }) {
   if (state.readOnly) return false;
   let sel = state.selection;
   // find the line where last selection ends
@@ -595,5 +586,32 @@ export async function transposeLines({ state, dispatch }) {
   changes.push({ from: l.from, insert: lineBeforeS });
   changes.push({ from: lineBefore.from, insert: lineS });
   dispatch(state.update({ changes, userEvent: "input.transposelines" }));
+  return true;
+}
+
+/**
+ * @param {{state: EditorState, dispatch: any}} arg0
+ * @returns {boolean}
+ */
+export function duplicateLine({ state, dispatch }) {
+  if (state.readOnly) return false;
+  let sel = state.selection;
+  // find the line where last selection ends
+  let pos = sel.ranges[len(sel.ranges) - 1].to;
+  let doc = state.doc;
+  let l = doc.lineAt(pos);
+  let insert = doc.sliceString(l.from, l.to);
+  let from = 0;
+  // TODO: why does it ad dto selection?
+  if (l.number >= doc.lines) {
+    from = doc.length;
+    insert = "\n" + insert;
+  } else {
+    let nextLine = doc.line(l.number + 1);
+    from = nextLine.from;
+    insert = insert + "\n";
+  }
+  let changes = [{ from, insert }];
+  dispatch(state.update({ changes, userEvent: "input.duplicateline" }));
   return true;
 }
