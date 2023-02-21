@@ -26,7 +26,7 @@ function isEmptySelection(sel) {
 }
 
 /**
- * @param {*} param0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @param {Function} fn
  * @param {string} userEvent
  * @returns {boolean}
@@ -49,7 +49,7 @@ function runOnSelIter({ state, dispatch }, fn, userEvent) {
 }
 
 /**
- * @param {*} param0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @param {Function} fn
  * @param {string} userEvent
  * @returns {boolean}
@@ -110,7 +110,7 @@ export function* iterLines(iter) {
 
 const rxLeadingWS = /^\s+/;
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function deleteLeadingWhitespace({ state, dispatch }) {
@@ -136,7 +136,7 @@ export function deleteLeadingWhitespace({ state, dispatch }) {
 
 const rxTrailingWS = /\s+$/;
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function deleteTrailingWhitespace({ state, dispatch }) {
@@ -161,7 +161,7 @@ export function deleteTrailingWhitespace({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function deleteFirstChar({ state, dispatch }) {
@@ -184,7 +184,7 @@ export function deleteFirstChar({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function deleteLastChar({ state, dispatch }) {
@@ -207,7 +207,7 @@ export function deleteLastChar({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function duplicateSelection({ state, dispatch }) {
@@ -231,7 +231,7 @@ export function duplicateSelection({ state, dispatch }) {
 
 /**
  * replace 2 or more consequitive blank lines with single blank line
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function mergeBlankLines({ state, dispatch }) {
@@ -260,7 +260,7 @@ export function mergeBlankLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function removeBlankLines({ state, dispatch }) {
@@ -283,7 +283,7 @@ export function removeBlankLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @param {string} before
  * @param {string} after
  * @returns {boolean}
@@ -313,7 +313,7 @@ export function encloseSelection({ state, dispatch }, before, after) {
 /**
  * TODO: more efficient implementation which uses line lengths
  * to optimize back searches and use less memory
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function mergeDuplicateLines({ state, dispatch }) {
@@ -340,7 +340,7 @@ export function mergeDuplicateLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function deleteDuplicateLines({ state, dispatch }) {
@@ -375,7 +375,7 @@ export function deleteDuplicateLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function compressWhitespace({ state, dispatch }) {
@@ -400,7 +400,7 @@ export function compressWhitespace({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function padWithSpaces({ state, dispatch }) {
@@ -435,7 +435,7 @@ export function padWithSpaces({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @param {Function} convertFn
  * @returns {boolean}
  */
@@ -461,7 +461,7 @@ export function replaceSelections({ state, dispatch }, convertFn) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cmdBase64EncodeStandard({ state, dispatch }) {
@@ -469,7 +469,7 @@ export function cmdBase64EncodeStandard({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cmdBase64EncodeURLSafe({ state, dispatch }) {
@@ -477,7 +477,7 @@ export function cmdBase64EncodeURLSafe({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cmdBase64EncodeHtmlImage({ state, dispatch }) {
@@ -485,7 +485,7 @@ export function cmdBase64EncodeHtmlImage({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cmdBase64Decode({ state, dispatch }) {
@@ -493,7 +493,7 @@ export function cmdBase64Decode({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cmdBase64DecodeAsHex({ state, dispatch }) {
@@ -501,7 +501,7 @@ export function cmdBase64DecodeAsHex({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cmdUrlEncode({ state, dispatch }) {
@@ -509,7 +509,7 @@ export function cmdUrlEncode({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cmdUrlDecode({ state, dispatch }) {
@@ -517,7 +517,7 @@ export function cmdUrlDecode({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @param {string} insert
  * @returns {string}
  */
@@ -543,7 +543,7 @@ export function replaceSelectionsWithStr({ state, dispatch }, insert) {
 /**
  * Note: works differently than notepad2 if multiple selection, but notepad2
  * seems to be wrong
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {Promise<boolean>}
  */
 export async function swapSelectionsWithClipboard({ state, dispatch }) {
@@ -563,7 +563,7 @@ export async function swapSelectionsWithClipboard({ state, dispatch }) {
 
 /**
  * swaps current line with the line before it
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function transposeLines({ state, dispatch }) {
@@ -590,7 +590,7 @@ export function transposeLines({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function duplicateLine({ state, dispatch }) {
@@ -617,7 +617,7 @@ export function duplicateLine({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState, dispatch: Function}} arg0
  * @returns {boolean}
  */
 export function cutLine({ state, dispatch }) {
@@ -636,10 +636,10 @@ export function cutLine({ state, dispatch }) {
 }
 
 /**
- * @param {{state: EditorState, dispatch: any}} arg0
+ * @param {{state: EditorState}} arg0
  * @returns {boolean}
  */
-export function copyLine({ state, dispatch }) {
+export function copyLine({ state }) {
   let sel = state.selection;
   // find the line where last selection ends
   let pos = sel.ranges[len(sel.ranges) - 1].to;
@@ -652,7 +652,7 @@ export function copyLine({ state, dispatch }) {
 }
 
 // /**
-//  * @param {{state: EditorState, dispatch: any}} arg0
+//  * @param {{state: EditorState, dispatch: Function}} arg0
 //  * @returns {boolean}
 //  */
 // export function deleteLine({ state, dispatch }) {
@@ -668,3 +668,33 @@ export function copyLine({ state, dispatch }) {
 //   setClipboard(s);
 //   return true;
 // }
+
+/**
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @returns {boolean}
+ */
+export function joinLines({ state, dispatch }) {
+  if (state.readOnly) return false;
+  let sel = state.selection;
+  // find the lines where last selection ends
+  let lastSel = sel.ranges[len(sel.ranges) - 1];
+  let doc = state.doc;
+  let startLine = doc.lineAt(lastSel.from);
+  let endLine = doc.lineAt(lastSel.to);
+  if (startLine.number === endLine.number) {
+    return false;
+  }
+  let from = startLine.from;
+  let to = Math.min(endLine.to + 1, doc.length);
+  let changes = [];
+  changes.push({ from, to });
+  let s = "";
+  for (let i = startLine.number; i <= endLine.number; i++) {
+    let l = doc.line(i);
+    s += l.text + " ";
+  }
+  changes.push({ from, insert: s });
+  // TODO: preserve selection as in notepad2?
+  dispatch(state.update({ changes, userEvent: "input.joinlines" }));
+  return true;
+}

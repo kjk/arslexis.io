@@ -253,6 +253,7 @@
     duplicateLine,
     cutLine,
     copyLine,
+    joinLines,
   } from "../cmcommands";
 
   /** @type {HTMLElement} */
@@ -1023,6 +1024,9 @@
         break;
       case IDM_EDIT_DELETELINE:
         commands.deleteLine(editorView);
+        break;
+      case IDM_EDIT_JOINLINES:
+        joinLines(args);
         break;
       case CMD_COPYFILENAME_NOEXT:
         copyFileNameToClipboard(1);
