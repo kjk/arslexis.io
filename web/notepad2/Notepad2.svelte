@@ -160,6 +160,13 @@
     IDM_INSERT_UNICODE_ZWNJ,
     IDM_INSERT_UNICODE_ZWJ,
     IDM_INSERT_UNICODE_WJ,
+    CMD_INSERTFILENAME_NOEXT,
+    IDM_EDIT_INSERT_FILENAME,
+    IDM_EDIT_INSERT_PATHNAME,
+    IDM_EDIT_INSERT_UTC_DATETIME,
+    IDM_EDIT_INSERT_TIMESTAMP,
+    IDM_EDIT_INSERT_TIMESTAMP_MS,
+    IDM_EDIT_INSERT_TIMESTAMP_US,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -819,7 +826,6 @@
       case IDM_EDIT_COPY:
       case IDT_EDIT_COPY:
       case IDM_EDIT_COPYADD:
-      case IDM_EDIT_SELECTALL:
       case IDM_EDIT_CLEARCLIPBOARD:
       case IDM_EDIT_CONVERTUPPERCASE:
       case IDM_EDIT_CONVERTLOWERCASE:
@@ -912,20 +918,32 @@
     return false;
   }
 
-  // 0 - file name
-  // 1 - file name, no extension
-  // 2 - full path (NYI)
-  function copyFileNameToClipboard(type) {
-    let toCopy = "";
+  /**
+   * @param {number} type
+   * 0 - file name
+   * 1 - file name, no extension
+   * 2 - full path (NYI)
+   * @returns {string}
+   */
+  function getFileName(type) {
     switch (type) {
       case 0:
-        toCopy = name;
-        break;
+        return name;
       case 1:
-        toCopy = stripExt(name);
-        break;
+        return stripExt(name);
+      case 2:
+        throwIf(true, "NYI");
       default:
+        throwIf(true, `invalid type ${type}`);
     }
+    return "";
+  }
+
+  /**
+   * @param {number} type
+   */
+  function copyFileNameToClipboard(type) {
+    const toCopy = getFileName(type);
     if (toCopy !== "") {
       setClipboard(toCopy);
     }
@@ -935,13 +953,50 @@
    * @returns {string}
    */
   function genCurrentDate() {
+    // TODO: not sure if right, maybe use local date, not UTC
     return new Date().toISOString().split("T")[0];
   }
   /**
    * @returns {string}
    */
   function genCurrentDateTime() {
+    // TODO: not sure if right, maybe use local date, not UTC
     return new Date().toISOString().split(".")[0].replace("T", " ");
+  }
+  /**
+   * @returns {string}
+   */
+  function getUTCDate() {
+    return new Date().toISOString();
+  }
+  /**
+   * @returns {string}
+   */
+  function getUnixTimestampSeconds() {
+    return (Date.now() / 1000).toFixed();
+  }
+  const isPerformanceSupported =
+    performance && performance.now && performance.timeOrigin;
+  /**
+   * @returns {string}
+   */
+  function getUnixTimestampMs() {
+    if (isPerformanceSupported) {
+      return (performance.timeOrigin + performance.now()).toFixed();
+    }
+    return Date.now().toString();
+  }
+  /**
+   * @returns {string}
+   */
+  function getUnixTimestampUs() {
+    if (isPerformanceSupported) {
+      return (
+        (performance.timeOrigin + window.performance.now()) *
+        1000
+      ).toFixed();
+    }
+    return (Date.now() * 1000).toString();
   }
 
   // this can be invoked via keyboard shortcut of via menu
@@ -1168,6 +1223,19 @@
       case IDM_EDIT_INSERT_LOC_DATETIME:
         insertText(editorView, genCurrentDateTime);
         break;
+      case IDM_EDIT_INSERT_UTC_DATETIME:
+        insertText(editorView, getUTCDate);
+        break;
+      case IDM_EDIT_INSERT_TIMESTAMP:
+        insertText(editorView, getUnixTimestampSeconds);
+        break;
+      case IDM_EDIT_INSERT_TIMESTAMP_MS:
+        insertText(editorView, getUnixTimestampMs);
+        break;
+      case IDM_EDIT_INSERT_TIMESTAMP_US:
+        insertText(editorView, getUnixTimestampUs);
+        break;
+
       case IDM_EDIT_INSERT_GUID:
         insertText(editorView, uuidv4);
         break;
@@ -1200,6 +1268,15 @@
         let us = findUnicodeStrByMenuID(cmdId);
         insertText(editorView, us);
         break;
+      case IDM_EDIT_INSERT_FILENAME:
+        insertText(editorView, getFileName(0));
+        break;
+      case CMD_INSERTFILENAME_NOEXT:
+        insertText(editorView, getFileName(1));
+        break;
+      // case IDM_EDIT_INSERT_PATHNAME:
+      //   insertText(editorView, getFileName(2));
+      //   break;
 
       // those are handled by CodeMirror
       case IDM_EDIT_COPY:
@@ -1495,7 +1572,7 @@
 
 <main class="fixed inset-0 grid">
   {#if showMenu}
-    <div class="flex items-center shadow text-sm">
+    <div class="flex items-center shadow text-xs">
       <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
         ><svg
           xmlns="http://www.w3.org/2000/svg"
@@ -1511,13 +1588,10 @@
         menuBar={mainMenuBar}
         on:menucmd={handleMenuCmd}
       />
-      <div class="grow" />
-      {#if isDirty}
-        <div>*&nbsp;</div>
-      {/if}
-      <div class="mr-2">
-        {name}
+      <div class="italic text-gray-500">
+        {#if isDirty}*&nbsp;{/if}{name}
       </div>
+      <div class="grow" />
     </div>
   {:else}
     <MenuBar menuBar={null} />

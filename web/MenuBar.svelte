@@ -157,10 +157,10 @@
   <div />
 {:else}
   <div
-    class="z-20 flex w-full items-center gap-2 bg-white py-0 select-none text-xs"
+    class="z-20 flex items-center gap-2 bg-white py-0 select-none"
     bind:this={menuBarElement}
   >
-    <div class="flex justify-center text-neutral-700 cursor-pointer">
+    <div class="flex justify-center cursor-pointer">
       {#each menuBar as mi}
         {@const title = mi[0]}
         {@const menu = mi[1]}

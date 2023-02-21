@@ -356,7 +356,8 @@ export const IDM_EDIT_INSERT_TIMESTAMP_NS = "IDM_EDIT_INSERT_TIMESTAMP_NS";
 const menuOtherTimestamps = [
   ["&Millisecond (ms)", IDM_EDIT_INSERT_TIMESTAMP_MS],
   ["Micro&second (us)", IDM_EDIT_INSERT_TIMESTAMP_US],
-  ["&Nanosecond (ns)", IDM_EDIT_INSERT_TIMESTAMP_NS],
+  // note: resolution not supported in browsers
+  // ["&Nanosecond (ns)", IDM_EDIT_INSERT_TIMESTAMP_NS],
 ];
 
 export const IDM_EDIT_COMPLETEWORD = "IDM_EDIT_COMPLETEWORD";
@@ -643,17 +644,17 @@ const menuToggleFolds = [
   ["&All Levels\tShift+Alt+A", IDM_VIEW_FOLD_ALL],
   ["&Current Block\tAlt+C", IDM_VIEW_FOLD_CURRENT_BLOCK],
   ["Current &Level", IDM_VIEW_FOLD_CURRENT_LEVEL],
-  [SEPARATOR],
-  ["Level &1\tAlt+1", IDM_VIEW_FOLD_LEVEL1],
-  ["Level &2\tAlt+2", IDM_VIEW_FOLD_LEVEL2],
-  ["Level &3\tAlt+3", IDM_VIEW_FOLD_LEVEL3],
-  ["Level &4\tAlt+4", IDM_VIEW_FOLD_LEVEL4],
-  ["Level &5\tAlt+5", IDM_VIEW_FOLD_LEVEL5],
-  ["Level &6\tAlt+6", IDM_VIEW_FOLD_LEVEL6],
-  ["Level &7\tAlt+7", IDM_VIEW_FOLD_LEVEL7],
-  ["Level &8\tAlt+8", IDM_VIEW_FOLD_LEVEL8],
-  ["Level &9\tAlt+9", IDM_VIEW_FOLD_LEVEL9],
-  ["Level 1&0", IDM_VIEW_FOLD_LEVEL10],
+  // [SEPARATOR],
+  // ["Level &1\tAlt+1", IDM_VIEW_FOLD_LEVEL1],
+  // ["Level &2\tAlt+2", IDM_VIEW_FOLD_LEVEL2],
+  // ["Level &3\tAlt+3", IDM_VIEW_FOLD_LEVEL3],
+  // ["Level &4\tAlt+4", IDM_VIEW_FOLD_LEVEL4],
+  // ["Level &5\tAlt+5", IDM_VIEW_FOLD_LEVEL5],
+  // ["Level &6\tAlt+6", IDM_VIEW_FOLD_LEVEL6],
+  // ["Level &7\tAlt+7", IDM_VIEW_FOLD_LEVEL7],
+  // ["Level &8\tAlt+8", IDM_VIEW_FOLD_LEVEL8],
+  // ["Level &9\tAlt+9", IDM_VIEW_FOLD_LEVEL9],
+  // ["Level 1&0", IDM_VIEW_FOLD_LEVEL10],
 ];
 
 // const menuZoom = [
@@ -938,17 +939,17 @@ export const CMD_OPENINIFILE = "CMD_OPENINIFILE";
 export const IDM_VIEW_SAVESETTINGS = "IDM_VIEW_SAVESETTINGS";
 export const IDM_VIEW_SAVESETTINGSNOW = "IDM_VIEW_SAVESETTINGSNOW";
 
-const menuLineSelectionMode = [
-  ["&None", IDM_LINE_SELECTION_MODE_NONE],
-  ["&Visual Studio", IDM_LINE_SELECTION_MODE_VS],
-  ["Nor&mal", IDM_LINE_SELECTION_MODE_NORMAL],
-];
+// const menuLineSelectionMode = [
+//   ["&None", IDM_LINE_SELECTION_MODE_NONE],
+//   ["&Visual Studio", IDM_LINE_SELECTION_MODE_VS],
+//   ["Nor&mal", IDM_LINE_SELECTION_MODE_NORMAL],
+// ];
 
 const menuSelectAndEditOptions = [
   ["Enable &Multiple Selection", IDM_SET_MULTIPLE_SELECTION],
   ["Copy &Selection as Find Text", IDM_SET_SELECTIONASFINDTEXT],
   ["Copy &Paste Buffer as Find Text", IDM_SET_PASTEBUFFERASFINDTEXT],
-  ["Line Selection &Mode", menuLineSelectionMode],
+  // ["Line Selection &Mode", menuLineSelectionMode],
 ];
 
 const menuScrollPastLastLine = [
