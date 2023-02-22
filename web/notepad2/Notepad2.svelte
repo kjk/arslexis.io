@@ -874,6 +874,57 @@
   }
 
   /**
+   * @param {number} type
+   * 0 - file name
+   * 1 - file name, no extension
+   * 2 - full path (NYI)
+   * @returns {string}
+   */
+  function getFileName(type) {
+    switch (type) {
+      case 0:
+        return name;
+      case 1:
+        return stripExt(name);
+      case 2:
+        throwIf(true, "NYI");
+      default:
+        throwIf(true, `invalid type ${type}`);
+    }
+    return "";
+  }
+
+  /**
+   * @param {number} type
+   */
+  function copyFileNameToClipboard(type) {
+    const toCopy = getFileName(type);
+    if (toCopy !== "") {
+      setClipboard(toCopy);
+    }
+  }
+
+  function launchSelectionWithGoogle() {
+    let s = getCurrentSelection(128);
+    let uri = "https://www.google.com/search?q=" + encodeURIComponent(s);
+    window.open(uri);
+  }
+
+  function launchSelectionWithBing() {
+    let s = getCurrentSelection(128);
+    let uri = "https://www.bing.com/search?q=" + encodeURIComponent(s);
+    window.open(uri);
+  }
+
+  function launchSelectionWithWikipedia() {
+    let s = getCurrentSelection(128);
+    let uri =
+      "https://en.wikipedia.org/wiki/Special:Search?search=" +
+      encodeURIComponent(s);
+    window.open(uri);
+  }
+
+  /**
    * return false if a given cmd should be disabled
    * based on the state of the app
    * @param {string} cmdId
@@ -924,6 +975,9 @@
       case IDM_EDIT_SPLITLINES:
       case IDM_EDIT_JOINLINESEX:
       case IDM_VIEW_SHOWEXCERPT:
+      case CMD_ONLINE_SEARCH_GOOGLE:
+      case CMD_ONLINE_SEARCH_BING:
+      case CMD_ONLINE_SEARCH_WIKI:
         // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
         return hasSelection;
 
@@ -987,43 +1041,13 @@
     return false;
   }
 
-  /**
-   * @param {number} type
-   * 0 - file name
-   * 1 - file name, no extension
-   * 2 - full path (NYI)
-   * @returns {string}
-   */
-  function getFileName(type) {
-    switch (type) {
-      case 0:
-        return name;
-      case 1:
-        return stripExt(name);
-      case 2:
-        throwIf(true, "NYI");
-      default:
-        throwIf(true, `invalid type ${type}`);
-    }
-    return "";
-  }
-
-  /**
-   * @param {number} type
-   */
-  function copyFileNameToClipboard(type) {
-    const toCopy = getFileName(type);
-    if (toCopy !== "") {
-      setClipboard(toCopy);
-    }
-  }
-
   // this can be invoked via keyboard shortcut of via menu
   // if via keyboard, arg.detail.ev is set
   // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
   async function handleMenuCmd(arg) {
     const cmdId = arg.detail.cmd;
     const ev = arg.detail.ev;
+    let s = "";
     let stopPropagation = true;
     switch (cmdId) {
       case IDM_FILE_NEW:
@@ -1266,7 +1290,7 @@
       case IDM_VIEW_SHOWEXCERPT:
         fileNameDisplay = cmdId;
         if (cmdId === IDM_VIEW_SHOWEXCERPT) {
-          let s = getCurrentSelection(128);
+          s = getCurrentSelection(128);
           fileNameExcerpt = `"` + sanitizeString(s) + `"`;
         }
         break;
@@ -1312,6 +1336,15 @@
       // case IDM_EDIT_INSERT_PATHNAME:
       //   insertText(editorView, getFileName(2));
       //   break;
+      case CMD_ONLINE_SEARCH_GOOGLE:
+        launchSelectionWithGoogle();
+        break;
+      case CMD_ONLINE_SEARCH_BING:
+        launchSelectionWithBing();
+        break;
+      case CMD_ONLINE_SEARCH_WIKI:
+        launchSelectionWithWikipedia();
+        break;
 
       // those are handled by CodeMirror
       case IDM_EDIT_COPY:
