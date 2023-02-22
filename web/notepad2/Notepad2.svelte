@@ -182,6 +182,8 @@
     IDM_EDIT_XHTML_ESCAPE_CHAR,
     IDM_EDIT_XHTML_UNESCAPE_CHAR,
     IDM_VIEW_SHOW_FOLDING,
+    IDM_EDIT_ENCLOSESELECTION,
+    IDM_EDIT_INSERT_XMLTAG,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -311,6 +313,7 @@
     selectToDocStart,
     selectToDocEnd,
     insertAfterSelection,
+    encloseSelections,
   } from "../cmcommands";
   import {
     uuidv4,
@@ -341,6 +344,8 @@
     getUnixTimestampUs,
     getUTCDate,
   } from "../dateutil";
+  import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
+  import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -411,7 +416,12 @@
     setToolbarEnabledState();
   }
 
-  /**
+  function handleEncloseSelectionOk(before, after) {
+    encloseSelections(editorView, before, after);
+    focusEditor();
+  }
+
+  /*
    * @param {number} max
    * @returns {string}
    */
@@ -429,6 +439,10 @@
       }
     }
     return res;
+  }
+
+  function focusEditor() {
+    focusEditorView(editorView);
   }
 
   /**
@@ -622,13 +636,14 @@
   let showingOpenFile = false;
   let showingSaveAs = false;
 
+  let showingEncloseSelection = false;
+  let showingInsertXmlTag = false;
+
   $: giveEditorFocus(showingMsgNotImplemented);
   function giveEditorFocus(v) {
     if (!v) {
       // console.log("giveEditorFocus:", v);
-      if (editorView && !editorView.hasFocus) {
-        focusEditorView(editorView);
-      }
+      focusEditor();
     }
   }
 
@@ -641,7 +656,7 @@
     let state = createEditorState(content, fileIn.name);
     initialState = state;
     editorView.setState(initialState);
-    focusEditorView(editorView);
+    focusEditor();
     isDirty = false;
     file = fileIn;
     name = file.name;
@@ -657,7 +672,7 @@
     initialState = editorView.state;
     let content = initialState.doc.toString();
     writeFile(fileIn, content);
-    focusEditorView(editorView);
+    focusEditor();
     isDirty = false;
     file = fileIn;
     name = file.name;
@@ -890,7 +905,7 @@
     initialState = createEditorState("");
     editorView.setState(initialState);
     isDirty = false;
-    focusEditorView(editorView);
+    focusEditor();
     updateStatusLine();
     setToolbarEnabledState();
   }
@@ -1066,8 +1081,6 @@
       case IDM_VIEW_SHOWFILENAMEONLY:
       case IDM_VIEW_SHOWEXCERPT:
         return fileNameDisplay == cmdId;
-      case IDM_VIEW_SHOW_FOLDING:
-        return showFolding;
     }
     return false;
   }
@@ -1080,7 +1093,12 @@
     const ev = arg.detail.ev;
     let s = "";
     let stopPropagation = true;
+    let fromMenu = !ev;
+    // if invoked from menu we need to give editor focus back
+    // unless we're showing a dialog
+    let retakeEditorFocus = fromMenu;
     switch (cmdId) {
+      // those potentially show dialogs
       case IDM_FILE_NEW:
       case IDT_FILE_NEW:
         if (isDirty) {
@@ -1088,9 +1106,14 @@
         }
         newEmptyFile();
         break;
+      case IDM_EDIT_CLEARDOCUMENT:
+        // TODO: ask to save if dirty?
+        newEmptyFile();
+        break;
       case IDM_FILE_OPEN:
       case IDT_FILE_OPEN:
         showingOpenFile = true;
+        retakeEditorFocus = false;
         // TODO: more
         break;
       case IDM_FILE_SAVE:
@@ -1098,6 +1121,7 @@
         if (file === null) {
           // TODO: need to provide callback to call when saving a file
           showingSaveAs = true;
+          retakeEditorFocus = false;
         } else {
           handleSaveAs(file);
         }
@@ -1105,6 +1129,18 @@
       case IDM_FILE_SAVEAS:
       case IDT_FILE_SAVEAS:
         showingSaveAs = true;
+        retakeEditorFocus = false;
+        break;
+      case IDM_EDIT_ENCLOSESELECTION:
+        showingEncloseSelection = true;
+        retakeEditorFocus = false;
+        break;
+      case IDM_EDIT_INSERT_XMLTAG:
+        showingInsertXmlTag = true;
+        retakeEditorFocus = false;
+        break;
+      case IDM_HELP_ABOUT:
+        showingAbout = true;
         break;
       // case IDM_FILE_SAVECOPY:
       // case IDT_FILE_SAVECOPY:
@@ -1302,16 +1338,16 @@
       case IDM_EDIT_TITLECASE:
         replaceSelectionsWith(editorView, titleCase);
         break;
-      case IDM_EDIT_SENTENCECASE:
-        break;
-      case IDM_EDIT_CONVERTSPACES:
-        break;
-      case IDM_EDIT_CONVERTTABS:
-        break;
-      case IDM_EDIT_CONVERTSPACES2:
-        break;
-      case IDM_EDIT_CONVERTTABS2:
-        break;
+      // case IDM_EDIT_SENTENCECASE:
+      //   break;
+      // case IDM_EDIT_CONVERTSPACES:
+      //   break;
+      // case IDM_EDIT_CONVERTTABS:
+      //   break;
+      // case IDM_EDIT_CONVERTSPACES2:
+      //   break;
+      // case IDM_EDIT_CONVERTTABS2:
+      //   break;
       case IDM_EDIT_NUM2HEX:
         replaceSelectionsWith(editorView, toHex);
         break;
@@ -1429,6 +1465,7 @@
       case IDM_EDIT_MOVELINEUP:
       case IDM_EDIT_LINECOMMENT:
         if (ev) {
+          // if invoked via keyboard, CodeMirror has already handled it
           stopPropagation = false;
         } else {
           switch (cmdId) {
@@ -1474,6 +1511,7 @@
               // TODO: not handled
               msgNotImplemented = `Command ${cmdId} not yet implemented!`;
               showingMsgNotImplemented = true;
+              retakeEditorFocus = false;
           }
         }
         break;
@@ -1491,14 +1529,11 @@
         let sel = getCurrentSelectionAsText();
         if (sel !== "") {
           // Document must be focused for setting clipboard
+          // TODO: more reliable way
           setTimeout(() => {
             appendClipboard(sel);
           }, 500);
         }
-        break;
-      case IDM_EDIT_CLEARDOCUMENT:
-        // TODO: ask to save if dirty?
-        newEmptyFile();
         break;
       case IDM_EDIT_CLEARCLIPBOARD:
         clearClipboard();
@@ -1511,9 +1546,6 @@
       case IDM_HELP_FEATURE_REQUEST:
         window.open("https://github.com/kjk/notepad2web/issues", "_blank");
         break;
-      case IDM_HELP_ABOUT:
-        showingAbout = true;
-        break;
       default:
         let lex = getLangFromLexer(cmdId);
         if (lex) {
@@ -1524,21 +1556,16 @@
         msgNotImplemented = `Command ${cmdId} not yet implemented!`;
         showingMsgNotImplemented = true;
     }
-    if (ev) {
+    if (fromMenu) {
+      closeMenu();
+      if (retakeEditorFocus) {
+        focusEditor();
+      }
+    } else {
+      throwIf(!ev);
       if (stopPropagation) {
         ev.stopPropagation();
         ev.preventDefault();
-      }
-    } else {
-      closeMenu();
-      let showingDialog =
-        showingAbout ||
-        showingMsgNotImplemented ||
-        showingOpenFile ||
-        showingSaveAs ||
-        showingSaveChanges;
-      if (!showingDialog) {
-        focusEditorView(editorView);
       }
     }
     // console.log("showingMsgNotImplemented:", showingMsgNotImplemented);
@@ -1668,7 +1695,7 @@
     openInitialFile();
 
     // document.addEventListener("keydown", onKeyDown);
-    focusEditorView(editorView);
+    focusEditor();
     return () => {
       undoPreventDragOnElement(document);
     };
@@ -1799,6 +1826,16 @@
   {/if}
 
   <DialogAbout bind:open={showingAbout} />
+
+  <DialogEncloseSelection
+    bind:open={showingEncloseSelection}
+    handleOk={handleEncloseSelectionOk}
+  />
+
+  <DialogInsertXmlTag
+    bind:open={showingInsertXmlTag}
+    handleOk={handleEncloseSelectionOk}
+  />
 
   <DialogNotImplemented
     bind:open={showingMsgNotImplemented}

@@ -5,7 +5,7 @@
  * @param {import("@codemirror/view").EditorView} editorView
  */
 export function focusEditorView(editorView) {
-  if (!editorView) {
+  if (!editorView || editorView.hasFocus) {
     return;
   }
   let max = 10; // limit to 1 sec

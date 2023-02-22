@@ -715,6 +715,66 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
   return true;
 }
 
+export function iterSelections(
+  { state, dispatch },
+  fn,
+  eventName,
+  skipEmpty = false
+) {
+  if (state.readOnly) return false;
+  let changes = [];
+  let ranges = [];
+  let sel = state.selection;
+  for (let { from, to } of sel.ranges) {
+    if (skipEmpty && from === to) {
+      continue;
+    }
+    fn(state, { from, to }, changes);
+  }
+  if (len(changes) + len(ranges) === 0) {
+    return false;
+  }
+  let update = {
+    changes,
+    userEvent: eventName,
+  };
+  if (len(ranges) > 0) {
+    update["selection"] = EditorSelection.create(ranges);
+  }
+
+  dispatch(state.update(update));
+  return true;
+}
+
+export function encloseSelections({ state, dispatch }, before, after) {
+  function iterFn(state, { from, to }, changes, ranges) {
+    if (len(before) > 0) {
+      changes.push({ from, insert: before });
+    }
+    if (len(after) > 0) {
+      changes.push({ from: to, insert: after });
+    }
+  }
+  iterSelections({ state, dispatch }, iterFn, "input.encloseselections", false);
+}
+
+export function insertAfterSelection2({ state, dispatch }, fn) {
+  function iterFn(state, { from, to }, changes, ranges) {
+    let s = state.sliceDoc(from, to);
+    let insert = fn(s);
+    if (s !== null) {
+      changes.push({ from: to, insert });
+      ranges.push(EditorSelection.range(to, to + len(insert)));
+    }
+  }
+  iterSelections(
+    { state, dispatch },
+    iterFn,
+    "input.replaceselectionwith",
+    true
+  );
+}
+
 /**
  * @param {{state: EditorState, dispatch: Function}} arg0
  * @param {Function} fn
