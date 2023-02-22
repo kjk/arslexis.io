@@ -17,6 +17,8 @@ import { python } from "@codemirror/lang-python";
 import { php } from "@codemirror/lang-php";
 import { cpp } from "@codemirror/lang-cpp";
 import { json } from "@codemirror/lang-json";
+import { svelte } from "@replit/codemirror-lang-svelte";
+
 // TODO: more https://github.com/codemirror/legacy-modes
 import { lua } from "@codemirror/legacy-modes/mode/lua";
 import { go } from "@codemirror/legacy-modes/mode/go";
@@ -97,6 +99,7 @@ const langs = [
   [sql(), "IDM_LEXER_SQL", ".sql"],
   [python(), "IDM_LEXER_PYTHON", ".py"],
   [cpp(), "IDM_LEXER_CPP", ".c", ".cpp", ".c++", ".cxx", ".h", ".hpp", ".hxx"],
+  [svelte(), "IDM_LEXER_SVELTE", ".svelte"],
   [php(), IDM_LEXER_PHP, ".php"],
   [StreamLanguage.define(lua), "IDM_LEXER_LUA", ".lua"],
   [StreamLanguage.define(go), "IDM_LEXER_GO", ".go"],

@@ -181,6 +181,7 @@
     IDM_EDIT_UNESCAPECCHARS,
     IDM_EDIT_XHTML_ESCAPE_CHAR,
     IDM_EDIT_XHTML_UNESCAPE_CHAR,
+    IDM_VIEW_SHOW_FOLDING,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -771,6 +772,15 @@
       lexerV = [];
     }
 
+    // possibilities:
+    // "▶", "▼"
+    // "+", "−"
+    // "⊞", "⊟"
+    let foldGutterExt = foldGutter({
+      closedText: "⊞",
+      openText: "⊟",
+    });
+
     /** @type {KeyBinding} */
     const indentWithTab2 = {
       key: "Tab",
@@ -816,12 +826,6 @@
       // @ts-ignore
     ].concat(standardKeymap);
 
-    // possibilities:
-    // "▶", "▼"
-    // "+", "−"
-    // "⊞", "⊟"
-    let foldClose = "⊞";
-    let foldOpen = "⊟";
     const exts = [
       EditorView.editable.of(true), // ???
       highlightActiveLineGutter(),
@@ -858,10 +862,7 @@
       wordWrapCompartment.of(wordWrapV),
       enableMultipleSelectionCompartment.of(multipleSelectionV),
       showLineNumbersCompartment.of(lineNumV),
-      foldGutter({
-        closedText: foldClose,
-        openText: foldOpen,
-      }),
+      foldGutterExt,
       // scrollPastEnd(), // TODO: not sure what it does
       lexerCompartment.of(lexerV),
       ...getTheme(theme, styles),
@@ -1065,6 +1066,8 @@
       case IDM_VIEW_SHOWFILENAMEONLY:
       case IDM_VIEW_SHOWEXCERPT:
         return fileNameDisplay == cmdId;
+      case IDM_VIEW_SHOW_FOLDING:
+        return showFolding;
     }
     return false;
   }
@@ -1169,6 +1172,9 @@
       case IDM_VIEW_TABSASSPACES:
         tabsAsSpaces = !tabsAsSpaces;
         break;
+      // case IDM_VIEW_SHOW_FOLDING:
+      //   showFolding = !showFolding;
+      //   break;
       // TODO: notepad2 changes line endings
       // not sure if that transfer to CM as it stores text
       // in lines. Does it re-split the doc when
