@@ -1122,12 +1122,14 @@
       case IDM_EDIT_UNESCAPECCHARS:
         replaceSelectionsWith(editorView, unescapeCChars);
         break;
-      // case IDM_EDIT_XHTML_ESCAPE_CHAR:
-      //   replaceSelectionsWith(editorView, xhtmlEscapeChars);
-      //   break;
-      // case IDM_EDIT_XHTML_UNESCAPE_CHAR:
-      //   replaceSelectionsWith(editorView, xhtmlUnEscapeChars);
-      //   break;
+      case IDM_EDIT_XHTML_ESCAPE_CHAR:
+        // TODO: if XML, needs use xhtmlEscapeCharsForXML
+        replaceSelectionsWith(editorView, xhtmlEscapeChars);
+        break;
+      case IDM_EDIT_XHTML_UNESCAPE_CHAR:
+        // TODO: if XML, needs use xhtmlUnEscapeCharsForXML
+        replaceSelectionsWith(editorView, xhtmlUnEscapeChars);
+        break;
 
       case IDM_EDIT_SELTODOCSTART:
         selectToDocStart(editorView);

@@ -416,19 +416,42 @@ const cEscapes = [
   ["'", "\\'"],
 ];
 
-/**
- * @param {string} s
- * @returns {string}
- */
-export function escapeCChars(s) {
+const xmlEscapes = [
+  ["&", "&amp;"],
+  ['"', "&quot;"],
+  ["'", "&apos;"],
+  ["<", "&lt;"],
+  [">", "&gt;"],
+  // only for xml mode
+  [" ", "&nbsp;"],
+  ["\t", "&emsp;"],
+];
+
+function escapeByTable(s, table, n = -1, reverse = false) {
   let ns = s;
-  for (let a of cEscapes) {
-    ns = ns.replace(a[0], a[1]);
+  if (n < 0) {
+    n = len(table);
+  }
+  for (let i = 0; i < n; i++) {
+    let a = table[i];
+    if (reverse) {
+      ns = ns.replaceAll(a[1], a[0]);
+    } else {
+      ns = ns.replaceAll(a[0], a[1]);
+    }
   }
   if (s === ns) {
     return null;
   }
   return ns;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function escapeCChars(s) {
+  return escapeByTable(s, cEscapes, len(cEscapes));
 }
 
 /**
@@ -436,15 +459,7 @@ export function escapeCChars(s) {
  * @returns {string}
  */
 export function unescapeCChars(s) {
-  let ns = s;
-  for (let a of cEscapes) {
-    // reverses escapeCChars()
-    ns = ns.replace(a[1], a[0]);
-  }
-  if (s === ns) {
-    return null;
-  }
-  return ns;
+  return escapeByTable(s, cEscapes, len(cEscapes), true);
 }
 
 /**
@@ -452,13 +467,31 @@ export function unescapeCChars(s) {
  * @returns {string}
  */
 export function xhtmlEscapeChars(s) {
-  return s;
+  let n = len(xmlEscapes) - 2;
+  return escapeByTable(s, xmlEscapes, n);
 }
 
 /**
  * @param {string} s
  * @returns {string}
  */
-export function xhtmlUnEscapeChars(s) {
-  return s;
+export function xhtmlEscapeCharsForXML(s) {
+  return escapeByTable(s, xmlEscapes);
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function xhtmlUnEscapeChars(s, forXml = false) {
+  let n = len(xmlEscapes) - 2;
+  return escapeByTable(s, xmlEscapes, n, true);
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function xhtmlUnEscapeCharsForXML(s) {
+  return escapeByTable(s, xmlEscapes, -1, true);
 }

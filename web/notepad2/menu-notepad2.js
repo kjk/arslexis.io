@@ -393,7 +393,7 @@ const menuInsert = [
   ["Time/Date (&Short Form)\tCtrl+F5", IDM_EDIT_INSERT_SHORTDATE],
   ["Time/Date (&Long Form)\tCtrl+Shift+F5", IDM_EDIT_INSERT_LONGDATE],
   [SEPARATOR],
-  ["&Encoding Identifier\tCtrl+F8", IDM_EDIT_INSERT_ENCODING],
+  // ["&Encoding Identifier\tCtrl+F8", IDM_EDIT_INSERT_ENCODING],
   ["Script She&bang Line", IDM_EDIT_INSERT_SHEBANG],
 ];
 
