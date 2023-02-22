@@ -167,6 +167,8 @@
     IDM_EDIT_INSERT_TIMESTAMP,
     IDM_EDIT_INSERT_TIMESTAMP_MS,
     IDM_EDIT_INSERT_TIMESTAMP_US,
+    IDM_EDIT_INSERT_SHORTDATE,
+    IDM_EDIT_INSERT_LONGDATE,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState, Compartment } from "@codemirror/state";
@@ -303,6 +305,16 @@
   } from "../cmcommands";
   import { uuidv4 } from "../strutil";
   import { findUnicodeStrByMenuID } from "./unicodeChars";
+  import {
+    getCurrentDate,
+    getCurrentDateTime,
+    getLongDate,
+    getShortDate,
+    getUnixTimestampMs,
+    getUnixTimestampSeconds,
+    getUnixTimestampUs,
+    getUTCDate,
+  } from "../dateutil";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -949,56 +961,6 @@
     }
   }
 
-  /**
-   * @returns {string}
-   */
-  function genCurrentDate() {
-    // TODO: not sure if right, maybe use local date, not UTC
-    return new Date().toISOString().split("T")[0];
-  }
-  /**
-   * @returns {string}
-   */
-  function genCurrentDateTime() {
-    // TODO: not sure if right, maybe use local date, not UTC
-    return new Date().toISOString().split(".")[0].replace("T", " ");
-  }
-  /**
-   * @returns {string}
-   */
-  function getUTCDate() {
-    return new Date().toISOString();
-  }
-  /**
-   * @returns {string}
-   */
-  function getUnixTimestampSeconds() {
-    return (Date.now() / 1000).toFixed();
-  }
-  const isPerformanceSupported =
-    performance && performance.now && performance.timeOrigin;
-  /**
-   * @returns {string}
-   */
-  function getUnixTimestampMs() {
-    if (isPerformanceSupported) {
-      return (performance.timeOrigin + performance.now()).toFixed();
-    }
-    return Date.now().toString();
-  }
-  /**
-   * @returns {string}
-   */
-  function getUnixTimestampUs() {
-    if (isPerformanceSupported) {
-      return (
-        (performance.timeOrigin + window.performance.now()) *
-        1000
-      ).toFixed();
-    }
-    return (Date.now() * 1000).toString();
-  }
-
   // this can be invoked via keyboard shortcut of via menu
   // if via keyboard, arg.detail.ev is set
   // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
@@ -1218,10 +1180,10 @@
         replaceSelectionsWith(editorView, toOct);
         break;
       case IDM_EDIT_INSERT_LOC_DATE:
-        insertText(editorView, genCurrentDate);
+        insertText(editorView, getCurrentDate);
         break;
       case IDM_EDIT_INSERT_LOC_DATETIME:
-        insertText(editorView, genCurrentDateTime);
+        insertText(editorView, getCurrentDateTime);
         break;
       case IDM_EDIT_INSERT_UTC_DATETIME:
         insertText(editorView, getUTCDate);
@@ -1234,6 +1196,12 @@
         break;
       case IDM_EDIT_INSERT_TIMESTAMP_US:
         insertText(editorView, getUnixTimestampUs);
+        break;
+      case IDM_EDIT_INSERT_SHORTDATE:
+        insertText(editorView, getShortDate);
+        break;
+      case IDM_EDIT_INSERT_LONGDATE:
+        insertText(editorView, getLongDate);
         break;
 
       case IDM_EDIT_INSERT_GUID:

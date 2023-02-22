@@ -12,6 +12,20 @@ export function strCompressWS(s) {
 }
 
 /**
+ *
+ * @param {string} s
+ * @param {number} n
+ * @param {string} c
+ * @returns
+ */
+export function leftPad(s, n, c = " ") {
+  while (len(s) < n) {
+    s = c + s;
+  }
+  return s;
+}
+
+/**
  * @param {string} s
  * @returns {string}
  */
