@@ -418,7 +418,6 @@
 
   function handleEncloseSelectionOk(before, after) {
     encloseSelections(editorView, before, after);
-    focusEditor();
   }
 
   /*
@@ -442,6 +441,7 @@
   }
 
   function focusEditor() {
+    console.log("focusEditor");
     focusEditorView(editorView);
   }
 
@@ -639,14 +639,6 @@
   let showingEncloseSelection = false;
   let showingInsertXmlTag = false;
 
-  $: giveEditorFocus(showingMsgNotImplemented);
-  function giveEditorFocus(v) {
-    if (!v) {
-      // console.log("giveEditorFocus:", v);
-      focusEditor();
-    }
-  }
-
   /**
    * @param {FsFile} fileIn
    */
@@ -656,7 +648,6 @@
     let state = createEditorState(content, fileIn.name);
     initialState = state;
     editorView.setState(initialState);
-    focusEditor();
     isDirty = false;
     file = fileIn;
     name = file.name;
@@ -672,7 +663,6 @@
     initialState = editorView.state;
     let content = initialState.doc.toString();
     writeFile(fileIn, content);
-    focusEditor();
     isDirty = false;
     file = fileIn;
     name = file.name;
@@ -905,7 +895,6 @@
     initialState = createEditorState("");
     editorView.setState(initialState);
     isDirty = false;
-    focusEditor();
     updateStatusLine();
     setToolbarEnabledState();
   }
@@ -1141,6 +1130,7 @@
         break;
       case IDM_HELP_ABOUT:
         showingAbout = true;
+        retakeEditorFocus = false;
         break;
       // case IDM_FILE_SAVECOPY:
       // case IDT_FILE_SAVECOPY:
@@ -1559,6 +1549,7 @@
     if (fromMenu) {
       closeMenu();
       if (retakeEditorFocus) {
+        console.log("retakeEditorFocus:", retakeEditorFocus);
         focusEditor();
       }
     } else {
@@ -1717,6 +1708,27 @@
     window.open(uri);
     // this opens a new window and will trigger openInitialFile()
     // from onMount()
+  }
+
+  // if we're transitioning from showing some dialog to not showing it,
+  // this will trigger and if it's false, it means we've closed a dialog
+  // and therefore should focus editor
+  $: retakeFocusIf(
+    !(
+      showingAbout ||
+      showingEncloseSelection ||
+      showingInsertXmlTag ||
+      showingMsgNotImplemented ||
+      showingMsgNotImplemented ||
+      showingOpenFile ||
+      showingSaveAs ||
+      showingSaveChanges
+    )
+  );
+  function retakeFocusIf(shouldRetake) {
+    if (shouldRetake) {
+      focusEditor();
+    }
   }
 
   onDestroy(() => {
