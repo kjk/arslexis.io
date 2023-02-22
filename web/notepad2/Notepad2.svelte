@@ -172,6 +172,8 @@
     IDM_VIEW_SHOWFULLPATH,
     IDM_VIEW_SHOWEXCERPT,
     IDM_VIEW_SHOWFILENAMEFIRST,
+    IDM_EDIT_SELTODOCSTART,
+    IDM_EDIT_SELTODOCEND,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -297,6 +299,12 @@
     copyLine,
     joinLines,
     replaceSelectionsWith,
+    insertText,
+    selectToDocStart,
+    selectToDocEnd,
+  } from "../cmcommands";
+  import {
+    uuidv4,
     convertUpperCase,
     convertLowerCase,
     invertCase,
@@ -305,9 +313,7 @@
     toHex,
     toOct,
     toBin,
-    insertText,
-  } from "../cmcommands";
-  import { uuidv4 } from "../strutil";
+  } from "../strutil";
   import { findUnicodeStrByMenuID } from "./unicodeChars";
   import {
     getCurrentDate,
@@ -1079,6 +1085,13 @@
       // case IDT_FILE_SAVECOPY:
       //   break;
 
+      case IDM_EDIT_SELTODOCSTART:
+        selectToDocStart(editorView);
+        break;
+      case IDM_EDIT_SELTODOCEND:
+        selectToDocEnd(editorView);
+        break;
+
       case IDM_VIEW_MENU:
         showMenu = !showMenu;
         break;
@@ -1324,8 +1337,8 @@
       case IDM_INSERT_UNICODE_LS:
       case IDM_INSERT_UNICODE_PS:
       case IDM_INSERT_UNICODE_ZWSP:
-        let us = findUnicodeStrByMenuID(cmdId);
-        insertText(editorView, us);
+        s = findUnicodeStrByMenuID(cmdId);
+        insertText(editorView, s);
         break;
       case IDM_EDIT_INSERT_FILENAME:
         insertText(editorView, getFileName(0));
@@ -1420,7 +1433,7 @@
         break;
       case IDM_EDIT_COPYALL:
         // copy the whole text to clipbard
-        let s = editorView.state.doc.toString();
+        s = editorView.state.doc.toString();
         setClipboard(s);
         break;
       case IDM_EDIT_COPYADD:

@@ -258,3 +258,100 @@ export function parseNumFlexible(s) {
   }
   return res;
 }
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function convertUpperCase(s) {
+  return s.toUpperCase();
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function convertLowerCase(s) {
+  return s.toLowerCase();
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function invertCase(s) {
+  let res = s.replace(/\w{1}/g, function (val) {
+    return val === val.toLowerCase() ? val.toUpperCase() : val.toLowerCase();
+  });
+  return res;
+}
+
+/**
+ * TODO: not exactly the same as notepad2
+ * @param {string} s
+ * @returns {string}
+ */
+export function titleCase(s) {
+  return s.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
+  });
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function toHex(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return "0x" + n.toString(16);
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function toDec(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return n.toString(10);
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function toOct(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return "0O" + n.toString(8);
+}
+
+/**
+ * TODO: not exactly the same as notepad2
+ * @param {string} s
+ * @returns {string}
+ */
+export function toBin(s) {
+  let n = parseNumFlexible(s);
+  if (n === null) {
+    return null;
+  }
+  return "0b" + n.toString(2);
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function sentanceCase(s) {
+  // TODO: Upper case after each .
+  throwIf(true, "NYI");
+  return s;
+}
