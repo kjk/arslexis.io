@@ -174,6 +174,13 @@
     IDM_VIEW_SHOWFILENAMEFIRST,
     IDM_EDIT_SELTODOCSTART,
     IDM_EDIT_SELTODOCEND,
+    IDM_EDIT_CHAR2HEX,
+    IDM_EDIT_HEX2CHAR,
+    IDM_EDIT_SHOW_HEX,
+    IDM_EDIT_ESCAPECCHARS,
+    IDM_EDIT_UNESCAPECCHARS,
+    IDM_EDIT_XHTML_ESCAPE_CHAR,
+    IDM_EDIT_XHTML_UNESCAPE_CHAR,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -302,6 +309,7 @@
     insertText,
     selectToDocStart,
     selectToDocEnd,
+    insertAfterSelection,
   } from "../cmcommands";
   import {
     uuidv4,
@@ -313,6 +321,13 @@
     toHex,
     toOct,
     toBin,
+    charToHex,
+    hexToChar,
+    showHex,
+    escapeChars,
+    unescapeChars,
+    xhtmlEscapeChars,
+    xhtmlUnEscapeChars,
   } from "../strutil";
   import { findUnicodeStrByMenuID } from "./unicodeChars";
   import {
@@ -984,6 +999,13 @@
       case CMD_ONLINE_SEARCH_GOOGLE:
       case CMD_ONLINE_SEARCH_BING:
       case CMD_ONLINE_SEARCH_WIKI:
+      case IDM_EDIT_CHAR2HEX:
+      case IDM_EDIT_HEX2CHAR:
+      case IDM_EDIT_SHOW_HEX:
+      case IDM_EDIT_ESCAPECCHARS:
+      case IDM_EDIT_UNESCAPECCHARS:
+      case IDM_EDIT_XHTML_ESCAPE_CHAR:
+      case IDM_EDIT_XHTML_UNESCAPE_CHAR:
         // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
         return hasSelection;
 
@@ -1085,13 +1107,34 @@
       // case IDT_FILE_SAVECOPY:
       //   break;
 
+      case IDM_EDIT_CHAR2HEX:
+        replaceSelectionsWith(editorView, charToHex);
+        break;
+      // case IDM_EDIT_HEX2CHAR:
+      //   replaceSelectionsWith(editorView, hexToChar);
+      //   break;
+      case IDM_EDIT_SHOW_HEX:
+        insertAfterSelection(editorView, showHex);
+        break;
+      // case IDM_EDIT_ESCAPECCHARS:
+      //   replaceSelectionsWith(editorView, escapeChars);
+      //   break;
+      // case IDM_EDIT_UNESCAPECCHARS:
+      //   replaceSelectionsWith(editorView, unescapeChars);
+      //   break;
+      // case IDM_EDIT_XHTML_ESCAPE_CHAR:
+      //   replaceSelectionsWith(editorView, xhtmlEscapeChars);
+      //   break;
+      // case IDM_EDIT_XHTML_UNESCAPE_CHAR:
+      //   replaceSelectionsWith(editorView, xhtmlUnEscapeChars);
+      //   break;
+
       case IDM_EDIT_SELTODOCSTART:
         selectToDocStart(editorView);
         break;
       case IDM_EDIT_SELTODOCEND:
         selectToDocEnd(editorView);
         break;
-
       case IDM_VIEW_MENU:
         showMenu = !showMenu;
         break;

@@ -716,6 +716,38 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
 }
 
 /**
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @param {Function} fn
+ * @returns {boolean}
+ */
+export function insertAfterSelection({ state, dispatch }, fn) {
+  if (state.readOnly) return false;
+  let changes = [];
+  let ranges = [];
+  let sel = state.selection;
+  for (let { from, to } of sel.ranges) {
+    if (from === to) {
+      continue;
+    }
+    let s = state.sliceDoc(from, to);
+    let insert = fn(s);
+    if (s !== null) {
+      changes.push({ from: to, insert });
+      ranges.push(EditorSelection.range(to, to + len(insert)));
+    }
+  }
+  if (!changes.length) return false;
+  dispatch(
+    state.update({
+      changes,
+      selection: EditorSelection.create(ranges),
+      userEvent: "input.replaceselectionwith",
+    })
+  );
+  return true;
+}
+
+/**
  * Insert at cursor position or replace first selection with
  * text returned by fn
  * note: notepad2 differs in handling selection. it uses last

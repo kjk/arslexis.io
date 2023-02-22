@@ -80,6 +80,15 @@ export function b64Decode(s) {
 }
 
 const hexTableStr = "0123456789abcdef";
+const hexTableUStr = "0123456789ABCDEF";
+
+function byteToHex(b) {
+  return hexTableStr[b >> 4] + hexTableStr[b & 0x0f];
+}
+
+function byteToHexU(b) {
+  return hexTableUStr[b >> 4] + hexTableUStr[b & 0x0f];
+}
 
 /**
  * @returns {string}
@@ -97,8 +106,7 @@ export function uuidv4() {
         res += "-";
         break;
     }
-    res += hexTableStr[b >> 4];
-    res += hexTableStr[b & 0x0f];
+    res += byteToHex(b);
   }
   return res;
 }
@@ -110,11 +118,11 @@ const space = " ".charCodeAt(0); // stupid auto-formatter
  * @returns {string}
  */
 export function strToHex(s) {
-  let bytes = new TextEncoder().encode(s);
-  let n = len(bytes);
-  let dst = new Uint8Array(n * 3);
+  const bytes = new TextEncoder().encode(s);
+  const n = len(bytes);
+  const dst = new Uint8Array(n * 3);
   let i = 0;
-  for (let b of bytes) {
+  for (const b of bytes) {
     dst[i] = hexTable[b >> 4];
     dst[i + 1] = hexTable[b & 0x0f];
     dst[i + 2] = space;
@@ -353,5 +361,83 @@ export function toBin(s) {
 export function sentanceCase(s) {
   // TODO: Upper case after each .
   throwIf(true, "NYI");
+  return s;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function charToHex(s) {
+  if (len(s) === 0) {
+    return null;
+  }
+  let res = "";
+  for (let c of s) {
+    let n = c.charCodeAt(0);
+    if (n < 256) {
+      res += "\\x" + n.toString(16);
+    } else {
+      res += "\\u" + n.toString(16);
+    }
+  }
+  return res;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function hexToChar(s) {
+  return s;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function showHex(s) {
+  if (len(s) === 0) {
+    return null;
+  }
+  const bytes = new TextEncoder().encode(s);
+  let res = "[";
+  const hexNums = new Array(len(bytes));
+  let i = 0;
+  for (const b of bytes) {
+    hexNums[i++] = byteToHexU(b);
+  }
+  return res + hexNums.join(" ") + "]";
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function escapeChars(s) {
+  return s;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function unescapeChars(s) {
+  return s;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function xhtmlEscapeChars(s) {
+  return s;
+}
+
+/**
+ * @param {string} s
+ * @returns {string}
+ */
+export function xhtmlUnEscapeChars(s) {
   return s;
 }
