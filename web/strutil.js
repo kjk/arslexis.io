@@ -410,20 +410,41 @@ export function showHex(s) {
   return res + hexNums.join(" ") + "]";
 }
 
+const cEscapes = [
+  ["\\", "\\\\"],
+  ['"', '\\"'],
+  ["'", "\\'"],
+];
+
 /**
  * @param {string} s
  * @returns {string}
  */
-export function escapeChars(s) {
-  return s;
+export function escapeCChars(s) {
+  let ns = s;
+  for (let a of cEscapes) {
+    ns = ns.replace(a[0], a[1]);
+  }
+  if (s === ns) {
+    return null;
+  }
+  return ns;
 }
 
 /**
  * @param {string} s
  * @returns {string}
  */
-export function unescapeChars(s) {
-  return s;
+export function unescapeCChars(s) {
+  let ns = s;
+  for (let a of cEscapes) {
+    // reverses escapeCChars()
+    ns = ns.replace(a[1], a[0]);
+  }
+  if (s === ns) {
+    return null;
+  }
+  return ns;
 }
 
 /**

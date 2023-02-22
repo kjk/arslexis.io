@@ -324,10 +324,10 @@
     charToHex,
     hexToChar,
     showHex,
-    escapeChars,
-    unescapeChars,
     xhtmlEscapeChars,
     xhtmlUnEscapeChars,
+    escapeCChars,
+    unescapeCChars,
   } from "../strutil";
   import { findUnicodeStrByMenuID } from "./unicodeChars";
   import {
@@ -1116,12 +1116,12 @@
       case IDM_EDIT_SHOW_HEX:
         insertAfterSelection(editorView, showHex);
         break;
-      // case IDM_EDIT_ESCAPECCHARS:
-      //   replaceSelectionsWith(editorView, escapeChars);
-      //   break;
-      // case IDM_EDIT_UNESCAPECCHARS:
-      //   replaceSelectionsWith(editorView, unescapeChars);
-      //   break;
+      case IDM_EDIT_ESCAPECCHARS:
+        replaceSelectionsWith(editorView, escapeCChars);
+        break;
+      case IDM_EDIT_UNESCAPECCHARS:
+        replaceSelectionsWith(editorView, unescapeCChars);
+        break;
       // case IDM_EDIT_XHTML_ESCAPE_CHAR:
       //   replaceSelectionsWith(editorView, xhtmlEscapeChars);
       //   break;
