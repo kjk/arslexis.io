@@ -3,7 +3,6 @@
   /** @typedef { import("@codemirror/state").Extension} Extension */
   /** @typedef { import("@codemirror/state").Transaction} Transaction */
   /** @typedef { import("@codemirror/language").LanguageSupport} LanguageSupport */
-  /** @typedef {import("@codemirror/state").EditorSelection} EditorSelection */
   /** @typedef {import("@codemirror/state").SelectionRange} SelectionRange */
 </script>
 
@@ -169,9 +168,14 @@
     IDM_EDIT_INSERT_TIMESTAMP_US,
     IDM_EDIT_INSERT_SHORTDATE,
     IDM_EDIT_INSERT_LONGDATE,
+    IDM_VIEW_SHOWFILENAMEONLY,
+    IDM_VIEW_SHOWFULLPATH,
+    IDM_VIEW_SHOWEXCERPT,
+    IDM_VIEW_SHOWFILENAMEFIRST,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
-  import { EditorState, Compartment } from "@codemirror/state";
+  import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
+
   import * as commands from "@codemirror/commands";
   import {
     keymap,
@@ -370,20 +374,50 @@
    * @param {EditorSelection} sel
    */
   function updateSelectionState(sel) {
-    hasSelection = false;
-    if (!sel) {
-      setToolbarEnabledState();
-      return;
+    function nonEmptySelection() {
+      if (!sel) {
+        return false;
+      }
+      for (let r of sel.ranges) {
+        if (!r.empty) {
+          return true;
+        }
+      }
+      return false;
     }
-    let n = len(sel.ranges);
-    for (let i = 0; i < n; i++) {
-      const r = sel.ranges[i];
-      if (!r.empty) {
-        hasSelection = true;
-        setToolbarEnabledState();
-        return;
+    hasSelection = nonEmptySelection();
+    setToolbarEnabledState();
+  }
+
+  /**
+   * @param {number} max
+   * @returns {string}
+   */
+  function getCurrentSelection(max) {
+    let res = "";
+    for (let r of currSelection.ranges) {
+      if (r.empty) {
+        continue;
+      }
+      let sLen = Math.min(r.to - r.from, max - len(res));
+      let s = editorView.state.sliceDoc(r.from, r.from + sLen);
+      res += s;
+      if (len(res) >= max) {
+        return res;
       }
     }
+    return res;
+  }
+
+  /**
+   * @param {string} s
+   * @returns {string}
+   */
+  function sanitizeString(s) {
+    s = s.replace(/\s+/g, " ");
+    s = s.replace(/\s+$/g, "");
+    s = s.replace(/^\s+/g, "");
+    return s;
   }
 
   // console.log("commands:", commands);
@@ -537,6 +571,25 @@
   let initialState = null;
   let isDirty = false;
 
+  let fileNameDisplay = IDM_VIEW_SHOWFILENAMEONLY;
+  let fileNameExcerpt = "";
+  let showingFileName = "";
+
+  $: updateFileNameDisplay(isDirty, fileNameDisplay, name);
+  function updateFileNameDisplay(isDirty, fileNameDisplay, name) {
+    switch (fileNameDisplay) {
+      case IDM_VIEW_SHOWFILENAMEONLY:
+        showingFileName = name;
+        break;
+      case IDM_VIEW_SHOWEXCERPT:
+        showingFileName = fileNameExcerpt;
+        break;
+    }
+    if (isDirty) {
+      showingFileName = "* " + showingFileName;
+    }
+  }
+
   // dialogs
   let msgNotImplemented = "";
   let showingMsgNotImplemented = false;
@@ -550,7 +603,7 @@
   $: giveEditorFocus(showingMsgNotImplemented);
   function giveEditorFocus(v) {
     if (!v) {
-      console.log("giveEditorFocus:", v);
+      // console.log("giveEditorFocus:", v);
       if (editorView && !editorView.hasFocus) {
         focusEditorView(editorView);
       }
@@ -870,6 +923,7 @@
       case IDM_EDIT_COLUMNWRAP:
       case IDM_EDIT_SPLITLINES:
       case IDM_EDIT_JOINLINESEX:
+      case IDM_VIEW_SHOWEXCERPT:
         // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
         return hasSelection;
 
@@ -926,6 +980,9 @@
         return enableMultipleSelection;
       case IDM_VIEW_TABSASSPACES:
         return tabsAsSpaces;
+      case IDM_VIEW_SHOWFILENAMEONLY:
+      case IDM_VIEW_SHOWEXCERPT:
+        return fileNameDisplay == cmdId;
     }
     return false;
   }
@@ -1203,6 +1260,16 @@
       case IDM_EDIT_INSERT_LONGDATE:
         insertText(editorView, getLongDate);
         break;
+      case IDM_VIEW_SHOWFILENAMEONLY:
+      // case IDM_VIEW_SHOWFILENAMEFIRST:
+      // case IDM_VIEW_SHOWFULLPATH:
+      case IDM_VIEW_SHOWEXCERPT:
+        fileNameDisplay = cmdId;
+        if (cmdId === IDM_VIEW_SHOWEXCERPT) {
+          let s = getCurrentSelection(128);
+          fileNameExcerpt = `"` + sanitizeString(s) + `"`;
+        }
+        break;
 
       case IDM_EDIT_INSERT_GUID:
         insertText(editorView, uuidv4);
@@ -1377,7 +1444,7 @@
         focusEditorView(editorView);
       }
     }
-    console.log("showingMsgNotImplemented:", showingMsgNotImplemented);
+    // console.log("showingMsgNotImplemented:", showingMsgNotImplemented);
     if (!showingMsgNotImplemented) {
       logNpEvent(cmdId);
     }
@@ -1511,12 +1578,10 @@
   });
 
   async function handleDrop(ev) {
-    console.log("file drop:", ev);
+    // console.log("file drop:", ev);
     console.log("dt:", ev.dataTransfer);
     let files = await filterDataTransferEntries(ev.dataTransfer);
     let first = files[0];
-    console.log("first:", first);
-    console.log("first.file:", first.file);
     let content = await first.file.text();
     // TODO: open in new window
     let name = first.file.name;
@@ -1540,7 +1605,7 @@
 
 <main class="fixed inset-0 grid">
   {#if showMenu}
-    <div class="flex items-center shadow text-xs">
+    <div class="flex flex-nowrap items-center shadow text-xs">
       <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
         ><svg
           xmlns="http://www.w3.org/2000/svg"
@@ -1556,8 +1621,8 @@
         menuBar={mainMenuBar}
         on:menucmd={handleMenuCmd}
       />
-      <div class="italic text-gray-500">
-        {#if isDirty}*&nbsp;{/if}{name}
+      <div class="truncate italic text-gray-500">
+        {showingFileName}
       </div>
       <div class="grow" />
     </div>

@@ -1008,8 +1008,9 @@ const menuAppearance = [
 
 const menuWindowTitleDisplay = [
   ["&File Name Only", IDM_VIEW_SHOWFILENAMEONLY],
-  ["File Name and &Directory", IDM_VIEW_SHOWFILENAMEFIRST],
-  ["Full &Path Name", IDM_VIEW_SHOWFULLPATH],
+  // TODO:
+  // ["File Name and &Directory", IDM_VIEW_SHOWFILENAMEFIRST],
+  // ["Full &Path Name", IDM_VIEW_SHOWFULLPATH],
   ["&Text Excerpt", IDM_VIEW_SHOWEXCERPT],
 ];
 

@@ -142,7 +142,7 @@
     {@const submenu = mi[1]}
     {@const isSubmenu = Array.isArray(submenu)}
     {#if isDiv}
-      <div class="border-y border-gray-200 mt-2 mb-2" />
+      <div class="border-y border-gray-200 mt-1 mb-1" />
     {:else if isSubmenu}
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <div
