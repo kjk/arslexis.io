@@ -191,6 +191,9 @@
     CMD_JUMP2SELSTART,
     CMD_JUMP2SELEND,
     IDM_VIEW_MATCHBRACES,
+    IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE,
+    IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK,
+    IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -469,36 +472,33 @@
   let showWhitespaceCompartment = new Compartment();
   $: setShowWhitespace(showWhitespace);
   function setShowWhitespace(flag) {
-    if (editorView) {
-      const v = flag ? highlightWhitespace() : [];
-      editorView.dispatch({
-        effects: showWhitespaceCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = flag ? highlightWhitespace() : [];
+    editorView.dispatch({
+      effects: showWhitespaceCompartment.reconfigure(v),
+    });
   }
 
   let showTrailingWhitespace = true;
   let showTrailingWhitespaceCompartment = new Compartment();
   $: setShowTrailingWhitespace(showTrailingWhitespace);
   function setShowTrailingWhitespace(flag) {
-    if (editorView) {
-      const v = flag ? highlightTrailingWhitespace() : [];
-      editorView.dispatch({
-        effects: showTrailingWhitespaceCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = flag ? highlightTrailingWhitespace() : [];
+    editorView.dispatch({
+      effects: showTrailingWhitespaceCompartment.reconfigure(v),
+    });
   }
 
   let enableMultipleSelection = true;
   let enableMultipleSelectionCompartment = new Compartment();
   $: setEnableMultipleSelection(enableMultipleSelection);
   function setEnableMultipleSelection(flag) {
-    if (editorView) {
-      const v = EditorState.allowMultipleSelections.of(flag);
-      editorView.dispatch({
-        effects: enableMultipleSelectionCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = EditorState.allowMultipleSelections.of(flag);
+    editorView.dispatch({
+      effects: enableMultipleSelectionCompartment.reconfigure(v),
+    });
   }
 
   // we use Scintila terminology, it's language in CodeMirror
@@ -506,16 +506,15 @@
   let lexerCompartment = new Compartment();
   $: setLexer(lexer);
   function setLexer(lexer) {
-    if (editorView) {
-      const v = getLangFromLexer(lexer);
-      if (v) {
-        console.log("lang:", v);
-        statusLang = getLangName(v);
-        editorView.dispatch({
-          // @ts-ignore
-          effects: lexerCompartment.reconfigure(v),
-        });
-      }
+    if (!editorView) return;
+    const v = getLangFromLexer(lexer);
+    if (v) {
+      console.log("lang:", v);
+      statusLang = getLangName(v);
+      editorView.dispatch({
+        // @ts-ignore
+        effects: lexerCompartment.reconfigure(v),
+      });
     }
   }
 
@@ -524,36 +523,33 @@
   let lineSeparatorCompartment = new Compartment();
   $: setLineSeparator(lineSeparator);
   function setLineSeparator(sep) {
-    if (editorView) {
-      const v = EditorState.lineSeparator.of(sep);
-      editorView.dispatch({
-        effects: lineSeparatorCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = EditorState.lineSeparator.of(sep);
+    editorView.dispatch({
+      effects: lineSeparatorCompartment.reconfigure(v),
+    });
   }
 
   let visualBraceMatching = true;
   let visualBraceMatchingCompartment = new Compartment();
   $: setVisualBraceMatching(visualBraceMatching);
   function setVisualBraceMatching(flag) {
-    if (editorView) {
-      const v = flag ? bracketMatching() : [];
-      editorView.dispatch({
-        effects: visualBraceMatchingCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = flag ? bracketMatching() : [];
+    editorView.dispatch({
+      effects: visualBraceMatchingCompartment.reconfigure(v),
+    });
   }
 
   let tabSize = 4;
   let tabSizeCompartment = new Compartment();
   $: setTabSize(tabSize);
   function setTabSize(ts) {
-    if (editorView) {
-      const v = EditorState.tabSize.of(ts);
-      editorView.dispatch({
-        effects: tabSizeCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = EditorState.tabSize.of(ts);
+    editorView.dispatch({
+      effects: tabSizeCompartment.reconfigure(v),
+    });
   }
 
   let tabsAsSpaces = true;
@@ -561,13 +557,12 @@
   let tabsCompartment = new Compartment();
   $: setTabsState(tabsAsSpaces, tabSpaces);
   function setTabsState(tabsAsSpaces, tabSpaces) {
-    if (editorView) {
-      const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
-      const v = indentUnit.of(indentChar);
-      editorView.dispatch({
-        effects: tabsCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
+    const v = indentUnit.of(indentChar);
+    editorView.dispatch({
+      effects: tabsCompartment.reconfigure(v),
+    });
   }
 
   let readOnly = false;
@@ -577,12 +572,39 @@
    * @param {boolean} flag
    */
   function setReadOnlyState(flag) {
-    if (editorView) {
-      const v = EditorState.readOnly.of(flag);
-      editorView.dispatch({
-        effects: readOnlyCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = EditorState.readOnly.of(flag);
+    editorView.dispatch({
+      effects: readOnlyCompartment.reconfigure(v),
+    });
+  }
+
+  let activeLineAltCSS = `.cm-activeLine {
+      outline: 1px dotted gray;
+      outline-offset: -3px;
+      background-color: transparent !important;
+}`;
+  /** @type {HTMLStyleElement} */
+  let activeLineCSSElement = null;
+  // TODO: only on mount
+  activeLineCSSElement = document.createElement("style");
+  activeLineCSSElement.innerHTML = activeLineAltCSS;
+  // sheet.innerHTML = ".cm-activeLine {background-color: #ffffa5 !important}";
+  document.body.appendChild(activeLineCSSElement);
+  let lineHighlightType = IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK;
+  let lineHighlightTypeCompartment = new Compartment();
+  $: setLineHighlightType(lineHighlightType);
+
+  function setLineHighlightType(lht) {
+    if (!editorView) return;
+    activeLineCSSElement.disabled = lht != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
+    const v =
+      lht === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE ? [] : highlightActiveLine();
+    // TODO: for IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK should be
+    // yellow background but for that we should rather change the theme
+    editorView.dispatch({
+      effects: lineHighlightTypeCompartment.reconfigure(v),
+    });
   }
 
   function getCurrentSelectionAsText() {
@@ -598,12 +620,11 @@
   let wordWrapCompartment = new Compartment();
   $: setWordWrapState(wordWrap);
   function setWordWrapState(flag) {
-    if (editorView) {
-      const v = flag ? EditorView.lineWrapping : [];
-      editorView.dispatch({
-        effects: wordWrapCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = flag ? EditorView.lineWrapping : [];
+    editorView.dispatch({
+      effects: wordWrapCompartment.reconfigure(v),
+    });
   }
 
   //   lineNumbers(),
@@ -611,12 +632,11 @@
   let showLineNumbersCompartment = new Compartment();
   $: setLineNumbersState(showLineNumbers);
   function setLineNumbersState(flag) {
-    if (editorView) {
-      const v = flag ? lineNumbers() : [];
-      editorView.dispatch({
-        effects: showLineNumbersCompartment.reconfigure(v),
-      });
-    }
+    if (!editorView) return;
+    const v = flag ? lineNumbers() : [];
+    editorView.dispatch({
+      effects: showLineNumbersCompartment.reconfigure(v),
+    });
   }
 
   /** @type {FsFile} */
@@ -808,7 +828,10 @@
     const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
     const tabStateV = indentUnit.of(indentChar);
     const visualBraceMatchingV = visualBraceMatching ? bracketMatching() : [];
-
+    const lineHighlihtTypeV =
+      lineHighlightType === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE
+        ? []
+        : highlightActiveLine();
     let lexerV = getLangFromFileName(fileName);
     statusLang = "Text";
     if (lexerV) {
@@ -886,7 +909,7 @@
       autocompletion(),
       rectangularSelection(),
       crosshairCursor(),
-      highlightActiveLine(),
+      lineHighlightTypeCompartment.of(lineHighlihtTypeV),
       highlightSelectionMatches(),
       keymap.of([
         ...closeBracketsKeymap,
@@ -909,14 +932,17 @@
       enableMultipleSelectionCompartment.of(multipleSelectionV),
       showLineNumbersCompartment.of(lineNumV),
       foldGutterExt,
-      // scrollPastEnd(), // TODO: not sure what it does
+      // scrollPastEnd(),
       lexerCompartment.of(lexerV),
       ...getTheme(theme, styles),
     ];
-    return EditorState.create({
+    let res = EditorState.create({
       doc: s ?? undefined,
       extensions: exts,
     });
+    activeLineCSSElement.disabled =
+      lineHighlightType != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
+    return res;
   }
 
   // if currently active element is menu, blur() it (take away focus)
@@ -1097,11 +1123,11 @@
       case IDM_VIEW_TOOLBAR:
         return showToolbar;
       case IDM_LINEENDINGS_CRLF:
-        return lineSeparator == "\r\n";
+        return lineSeparator === "\r\n";
       case IDM_LINEENDINGS_LF:
-        return lineSeparator == "\n";
+        return lineSeparator === "\n";
       case IDM_LINEENDINGS_CR:
-        return lineSeparator == "\r";
+        return lineSeparator === "\r";
       case IDM_VIEW_SHOWWHITESPACE:
         return showWhitespace;
       case IDM_SET_MULTIPLE_SELECTION:
@@ -1110,9 +1136,13 @@
         return tabsAsSpaces;
       case IDM_VIEW_SHOWFILENAMEONLY:
       case IDM_VIEW_SHOWEXCERPT:
-        return fileNameDisplay == cmdId;
+        return fileNameDisplay === cmdId;
       case IDM_VIEW_MATCHBRACES:
         return visualBraceMatching;
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
+        return lineHighlightType === cmdId;
     }
     return false;
   }
@@ -1174,6 +1204,12 @@
 
       case IDM_DUMP_SELECTIONS:
         dumpSelections(editorView);
+        break;
+
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
+        lineHighlightType = cmdId;
         break;
 
       case IDM_EDIT_CHAR2HEX:
