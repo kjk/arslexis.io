@@ -184,6 +184,8 @@
     IDM_VIEW_SHOW_FOLDING,
     IDM_EDIT_ENCLOSESELECTION,
     IDM_EDIT_INSERT_XMLTAG,
+    CMD_CTRLBACK,
+    CMD_CTRLDEL,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -1468,6 +1470,8 @@
       case IDM_EDIT_MOVELINEDOWN:
       case IDM_EDIT_MOVELINEUP:
       case IDM_EDIT_LINECOMMENT:
+      case CMD_CTRLBACK:
+      case CMD_CTRLDEL:
         if (ev) {
           // if invoked via keyboard, CodeMirror has already handled it
           stopPropagation = false;
