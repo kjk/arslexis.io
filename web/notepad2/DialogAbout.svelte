@@ -32,6 +32,12 @@
       class="ml-2 underline focus-within:outline"
       rel="noreferrer"
       target="_blank"
+      href="https://twitter.com/kjk">follow me on Twitter</a
+    >
+    <a
+      class="ml-2 underline focus-within:outline"
+      rel="noreferrer"
+      target="_blank"
       href="https://github.com/kjk/notepad2web">see source code</a
     >
 

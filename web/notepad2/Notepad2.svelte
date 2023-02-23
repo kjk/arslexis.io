@@ -346,6 +346,7 @@
   } from "../dateutil";
   import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
   import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
+  import { tick } from "svelte";
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -638,8 +639,8 @@
   let showingInsertXmlTag = false;
 
   let showingAbout = false;
-  let isShowingDialog = false;
 
+  let isShowingDialog = false;
   $: isShowingDialog =
     showingMsgNotImplemented ||
     showingOpenFile ||
@@ -654,6 +655,7 @@
   // and therefore should focus editor
   $: retakeFocusIf(!isShowingDialog);
   function retakeFocusIf(shouldRetake) {
+    console.log("retakeFocus:", shouldRetake);
     if (shouldRetake) {
       focusEditor();
     }
@@ -1104,7 +1106,6 @@
     let fromMenu = !ev;
     // if invoked from menu we need to give editor focus back
     // unless we're showing a dialog
-    let retakeEditorFocus = fromMenu;
     switch (cmdId) {
       // those potentially show dialogs
       case IDM_FILE_NEW:
@@ -1121,7 +1122,6 @@
       case IDM_FILE_OPEN:
       case IDT_FILE_OPEN:
         showingOpenFile = true;
-        retakeEditorFocus = false;
         // TODO: more
         break;
       case IDM_FILE_SAVE:
@@ -1129,7 +1129,6 @@
         if (file === null) {
           // TODO: need to provide callback to call when saving a file
           showingSaveAs = true;
-          retakeEditorFocus = false;
         } else {
           handleSaveAs(file);
         }
@@ -1137,19 +1136,15 @@
       case IDM_FILE_SAVEAS:
       case IDT_FILE_SAVEAS:
         showingSaveAs = true;
-        retakeEditorFocus = false;
         break;
       case IDM_EDIT_ENCLOSESELECTION:
         showingEncloseSelection = true;
-        retakeEditorFocus = false;
         break;
       case IDM_EDIT_INSERT_XMLTAG:
         showingInsertXmlTag = true;
-        retakeEditorFocus = false;
         break;
       case IDM_HELP_ABOUT:
         showingAbout = true;
-        retakeEditorFocus = false;
         break;
       // case IDM_FILE_SAVECOPY:
       // case IDT_FILE_SAVECOPY:
@@ -1520,7 +1515,6 @@
               // TODO: not handled
               msgNotImplemented = `Command ${cmdId} not yet implemented!`;
               showingMsgNotImplemented = true;
-              retakeEditorFocus = false;
           }
         }
         break;
@@ -1567,10 +1561,12 @@
     }
     if (fromMenu) {
       closeMenu();
-      if (retakeEditorFocus) {
-        console.log("retakeEditorFocus:", retakeEditorFocus);
-        focusEditor();
-      }
+      // need to delay until isShowingDialog is re-calculated
+      tick().then(() => {
+        if (!isShowingDialog) {
+          focusEditor();
+        }
+      });
     } else {
       throwIf(!ev);
       if (stopPropagation) {
