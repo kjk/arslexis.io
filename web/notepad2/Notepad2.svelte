@@ -190,6 +190,7 @@
     IDM_DUMP_SELECTIONS,
     CMD_JUMP2SELSTART,
     CMD_JUMP2SELEND,
+    IDM_VIEW_MATCHBRACES,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -531,6 +532,18 @@
     }
   }
 
+  let visualBraceMatching = true;
+  let visualBraceMatchingCompartment = new Compartment();
+  $: setVisualBraceMatching(visualBraceMatching);
+  function setVisualBraceMatching(flag) {
+    if (editorView) {
+      const v = flag ? bracketMatching() : [];
+      editorView.dispatch({
+        effects: visualBraceMatchingCompartment.reconfigure(v),
+      });
+    }
+  }
+
   let tabSize = 4;
   let tabSizeCompartment = new Compartment();
   $: setTabSize(tabSize);
@@ -794,6 +807,7 @@
       : [];
     const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
     const tabStateV = indentUnit.of(indentChar);
+    const visualBraceMatchingV = visualBraceMatching ? bracketMatching() : [];
 
     let lexerV = getLangFromFileName(fileName);
     statusLang = "Text";
@@ -867,7 +881,7 @@
       dropCursor(),
       indentOnInput(),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      bracketMatching(),
+      visualBraceMatchingCompartment.of(visualBraceMatchingV),
       closeBrackets(),
       autocompletion(),
       rectangularSelection(),
@@ -1097,6 +1111,8 @@
       case IDM_VIEW_SHOWFILENAMEONLY:
       case IDM_VIEW_SHOWEXCERPT:
         return fileNameDisplay == cmdId;
+      case IDM_VIEW_MATCHBRACES:
+        return visualBraceMatching;
     }
     return false;
   }
@@ -1221,6 +1237,9 @@
         break;
       case IDM_VIEW_TABSASSPACES:
         tabsAsSpaces = !tabsAsSpaces;
+        break;
+      case IDM_VIEW_MATCHBRACES:
+        visualBraceMatching = !visualBraceMatching;
         break;
       // case IDM_VIEW_SHOW_FOLDING:
       //   showFolding = !showFolding;
