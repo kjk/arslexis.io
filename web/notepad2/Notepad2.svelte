@@ -187,6 +187,7 @@
     CMD_CTRLBACK,
     CMD_CTRLDEL,
     noMenuCommands,
+    IDM_DUMP_SELECTIONS,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -317,6 +318,7 @@
     selectToDocEnd,
     insertAfterSelection,
     encloseSelections,
+    dumpSelections,
   } from "../cmcommands";
   import {
     uuidv4,
@@ -1153,6 +1155,10 @@
       // case IDT_FILE_SAVECOPY:
       //   break;
 
+      case IDM_DUMP_SELECTIONS:
+        dumpSelections(editorView);
+        break;
+
       case IDM_EDIT_CHAR2HEX:
         replaceSelectionsWith(editorView, charToHex);
         break;
@@ -1739,7 +1745,7 @@
 <svelte:body on:drop={handleDrop} />
 
 <main class="fixed inset-0 grid">
-  <div class="flex flex-nowrap items-center shadow text-xs">
+  <div class="flex flex-nowrap items-center shadow text-xs z-10">
     {#if showMenu}
       <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
         ><svg
@@ -1769,12 +1775,12 @@
         {noMenuCommands}
         on:menucmd={handleMenuCmd}
       />
-      <div class="absolute flex top-[2px] px-2 py-0.5 right-[4px] text-sm">
-        <div class="truncate italic text-gray-500">
+      <div class="absolute flex top-[2px] right-[4px] text-sm">
+        <div class="py-0.5 truncate italic text-gray-500">
           {shownFileName}
         </div>
         <button
-          class="ml-2 hover:bg-gray-100 text-gray-600"
+          class="ml-2 px-2 py-0.5 hover:bg-gray-100 text-gray-600"
           on:click={() => (showMenu = true)}>show menu</button
         >
       </div>

@@ -715,6 +715,13 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
   return true;
 }
 
+/**
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @param {Function} fn
+ * @param {string} eventName
+ * @param {boolean} skipEmpty
+ * @returns {boolean}
+ */
 export function iterSelections(
   { state, dispatch },
   fn,
@@ -746,6 +753,30 @@ export function iterSelections(
   return true;
 }
 
+/**
+ * for debugging
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @returns {boolean}
+ */
+export function dumpSelections({ state, dispatch }) {
+  console.log("dumpSelections:");
+  function iterFn(state, { from, to }, changes, ranges) {
+    console.log(`  range: ${from} => ${to}`);
+  }
+  return iterSelections(
+    { state, dispatch },
+    iterFn,
+    "input.dumpeselections",
+    false
+  );
+}
+
+/**
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @param {string} before
+ * @param {string} after
+ * @returns {boolean}
+ */
 export function encloseSelections({ state, dispatch }, before, after) {
   function iterFn(state, { from, to }, changes, ranges) {
     if (len(before) > 0) {
@@ -755,9 +786,19 @@ export function encloseSelections({ state, dispatch }, before, after) {
       changes.push({ from: to, insert: after });
     }
   }
-  iterSelections({ state, dispatch }, iterFn, "input.encloseselections", false);
+  return iterSelections(
+    { state, dispatch },
+    iterFn,
+    "input.encloseselections",
+    false
+  );
 }
 
+/**
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @param {Function} fn
+ * @returns {boolean}
+ */
 export function insertAfterSelection2({ state, dispatch }, fn) {
   function iterFn(state, { from, to }, changes, ranges) {
     let s = state.sliceDoc(from, to);
@@ -767,7 +808,7 @@ export function insertAfterSelection2({ state, dispatch }, fn) {
       ranges.push(EditorSelection.range(to, to + len(insert)));
     }
   }
-  iterSelections(
+  return iterSelections(
     { state, dispatch },
     iterFn,
     "input.replaceselectionwith",
