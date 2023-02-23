@@ -253,7 +253,7 @@ export function throwIf(cond, msg) {
 }
 
 /**
- * "foo.txt" => ".txt"
+ * "foo.TXT" => ".txt"
  * "foo" => ""
  * @param {string} fileName
  * @returns {string}
@@ -262,7 +262,7 @@ export function getFileExt(fileName) {
   let parts = fileName.split(".");
   let n = parts.length;
   if (n > 1) {
-    return "." + parts[n - 1];
+    return "." + parts[n - 1].toLowerCase();
   }
   return "";
 }
