@@ -1,8 +1,6 @@
 // commands
 
-// const menuDiv = "---";
-const menuSep = "---";
-const SEPARATOR = "---";
+const MENU_SEPARATOR = "---";
 
 export const IDT_FILE_NEW = "IDT_FILE_NEW";
 export const IDT_FILE_OPEN = "IDT_FILE_OPEN";
@@ -84,7 +82,7 @@ const menuLineEndings = [
   ["&Windows (CR+LF)", IDM_LINEENDINGS_CRLF],
   ["&Unix/macOS (LF)", IDM_LINEENDINGS_LF],
   ["Classic &Mac OS (CR)", IDM_LINEENDINGS_CR],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Default...", IDM_LINEENDINGS_SETDEFAULT],
 ];
 
@@ -122,11 +120,11 @@ const menuFile = [
   ["Save &As...\tF6", IDM_FILE_SAVEAS],
   // ["Save Back&up", IDM_FILE_SAVEBACKUP],
   // ["Save Cop&y...\tMod+F6", IDM_FILE_SAVECOPY],
-  menuSep,
+  MENU_SEPARATOR,
   ["File &Mode", menuFileMode],
   // ["Re&vert\tF5", IDM_FILE_REVERT],
   // ["Reloa&d", menuReload],
-  menuSep,
+  MENU_SEPARATOR,
   // ["&Encoding", menuEncoding],
   ["Line Endin&gs", menuLineEndings],
   // menuSep,
@@ -136,7 +134,7 @@ const menuFile = [
   // ["Propert&ies...", IDM_FILE_PROPERTIES],
   // ["Open &Containing Folder", IDM_FILE_OPEN_CONTAINING_FOLDER],
   // ["Create Desktop Lin&k", IDM_FILE_CREATELINK],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Browse...\tCtrl+M", IDM_FILE_BROWSE],
   ["&Favorites", menuFavorites],
   ["Recent (&History)...\tAlt+H", IDM_FILE_RECENT],
@@ -156,7 +154,7 @@ const menuCopyToClipboard = [
   ["&File Name", CMD_COPYFILENAME_NOEXT],
   ["File Name and &Ext.\tShift+F9", CMD_COPYFILENAME],
   // ["Full &Path Name\tAlt+Shift+F9", CMD_COPYPATHNAME],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Copy &All\tAlt+A", IDM_EDIT_COPYALL],
   ["Copy A&dd\tCtrl+E", IDM_EDIT_COPYADD],
   // ["Copy as &RTF", IDM_EDIT_COPYRTF],
@@ -186,17 +184,17 @@ export const IDM_EDIT_COMPRESSWS = "IDM_EDIT_COMPRESSWS";
 
 const menuSelection = [
   ["&Duplicate\tAlt+D", IDM_EDIT_SELECTIONDUPLICATE],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["T&oggle Line Comment\tCtrl+/", IDM_EDIT_LINECOMMENT],
   ["Block &Comment\tCtrl+Q", IDM_EDIT_STREAMCOMMENT],
   ["&Indent\tTab", IDM_EDIT_INDENT],
   ["&Unindent\tShift+Tab", IDM_EDIT_UNINDENT],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Strip &Trailing Blanks\tAlt+T", IDM_EDIT_TRIMLINES],
   ["Strip &First Character\tAlt+Z", IDM_EDIT_STRIP1STCHAR],
   ["Strip &Last Character\tAlt+L", IDM_EDIT_STRIPLASTCHAR],
   ["Strip Leading Blan&ks", IDM_EDIT_TRIMLEAD],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Merge &Blank Lines\tAlt+B", IDM_EDIT_MERGEBLANKLINES],
   ["&Remove Blank Lines\tAlt+R", IDM_EDIT_REMOVEBLANKLINES],
   ["&Merge Duplicate Lines", IDM_EDIT_MERGEDUPLICATELINE],
@@ -214,7 +212,7 @@ export const CMD_ENCLOSE_TRIPLE_BT = "CMD_ENCLOSE_TRIPLE_BT";
 const menuEncloseSelection = [
   ["&With...\tAlt+Q", IDM_EDIT_ENCLOSESELECTION],
   ["&HTML/XML Tag...\tAlt+X", IDM_EDIT_INSERT_XMLTAG],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Triple &Single Quotes\tCtrl+3", CMD_ENCLOSE_TRIPLE_SQ],
   ["Triple &Double Quotes\tCtrl+6", CMD_ENCLOSE_TRIPLE_DQ],
   ["Triple &Backticks\tCtrl+9", CMD_ENCLOSE_TRIPLE_BT],
@@ -239,11 +237,11 @@ const menuLines = [
   ["Move &Up\tAlt+Up", IDM_EDIT_MOVELINEUP],
   ["Mo&ve Down\tAlt+Down", IDM_EDIT_MOVELINEDOWN],
   ["T&ranspose\tAlt+S", IDM_EDIT_LINETRANSPOSE],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["S&ort Lines...\tAlt+O", IDM_EDIT_SORTLINES],
   ["&Modify Lines...\tAlt+M", IDM_EDIT_MODIFYLINES],
   ["Alig&n Lines...\tAlt+J", IDM_EDIT_ALIGN],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Duplicate Line\tCtrl+D", IDM_EDIT_DUPLICATELINE],
 
   // TODO: Ctrl+Shift+X,C,D seem to be intercepted by browser
@@ -255,7 +253,7 @@ const menuLines = [
   ["D&elete Line", IDM_EDIT_DELETELINE],
   // ["D&elete Line\tCtrl+Shift+D", IDM_EDIT_DELETELINE],
 
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Join Lines\tCtrl+J", IDM_EDIT_JOINLINES],
   ["Column &Wrap...", IDM_EDIT_COLUMNWRAP],
   ["&Split Lines\tCtrl+I", IDM_EDIT_SPLITLINES],
@@ -281,12 +279,12 @@ const menuConvert = [
   ["In&vert Case\tCtrl+Alt+U", IDM_EDIT_INVERTCASE],
   ["Title &Case\tCtrl+Alt+I", IDM_EDIT_TITLECASE],
   ["&Sentence Case\tCtrl+Alt+O", IDM_EDIT_SENTENCECASE],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Tabify Selection\tCtrl+Shift+T", IDM_EDIT_CONVERTSPACES],
   ["U&ntabify Selection\tCtrl+Shift+S", IDM_EDIT_CONVERTTABS],
   ["Tabify &Indent\tCtrl+Alt+T", IDM_EDIT_CONVERTSPACES2],
   ["Untabi&fy Indent\tCtrl+Alt+S", IDM_EDIT_CONVERTTABS2],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["To &Hexadecimal\tCtrl+Alt+H", IDM_EDIT_NUM2HEX],
   ["To &Decimal\tCtrl+Alt+D", IDM_EDIT_NUM2DEC],
   ["To &Binary\tCtrl+Alt+B", IDM_EDIT_NUM2BIN],
@@ -376,15 +374,15 @@ export const IDM_EDIT_INSERT_SHEBANG = "IDM_EDIT_INSERT_SHEBANG";
 
 const menuInsert = [
   ["Complete &Word\tAlt+/", IDM_EDIT_COMPLETEWORD],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&HTML/XML Tag...\tAlt+X", IDM_EDIT_INSERT_XMLTAG],
   ["New &GUID", IDM_EDIT_INSERT_GUID],
   ["Unicode &Control Character", menuUnicodeControl],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&File Name", CMD_INSERTFILENAME_NOEXT],
   ["File Name and E&xtension\tCtrl+F9", IDM_EDIT_INSERT_FILENAME],
   // ["Full &Path Name\tCtrl+Shift+F9", IDM_EDIT_INSERT_PATHNAME],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Current &Date", IDM_EDIT_INSERT_LOC_DATE],
   ["Current Date &Time", IDM_EDIT_INSERT_LOC_DATETIME],
   ["&UTC Date Time", IDM_EDIT_INSERT_UTC_DATETIME],
@@ -392,7 +390,7 @@ const menuInsert = [
   ["&Other Timestamps", menuOtherTimestamps],
   ["Time/Date (&Short Form)\tCtrl+F5", IDM_EDIT_INSERT_SHORTDATE],
   ["Time/Date (&Long Form)\tCtrl+Shift+F5", IDM_EDIT_INSERT_LONGDATE],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   // ["&Encoding Identifier\tCtrl+F8", IDM_EDIT_INSERT_ENCODING],
   ["Script She&bang Line", IDM_EDIT_INSERT_SHEBANG],
 ];
@@ -414,18 +412,18 @@ const menuSpecial = [
   ["C&har to Hex\tCtrl+Alt+X", IDM_EDIT_CHAR2HEX],
   ["Hex to Cha&r\tCtrl+Alt+C", IDM_EDIT_HEX2CHAR],
   ["&Show Hex Code", IDM_EDIT_SHOW_HEX],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Esca&pe C Chars\tCtrl+Alt+E", IDM_EDIT_ESCAPECCHARS],
   ["&Unescape C Chars\tCtrl+Alt+R", IDM_EDIT_UNESCAPECCHARS],
   ["Escape HT&ML/XML Chars\tAlt+Shift+X", IDM_EDIT_XHTML_ESCAPE_CHAR],
   ["Unescape HTML/&XML Chars\tAlt+Shift+H", IDM_EDIT_XHTML_UNESCAPE_CHAR],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Delete &Line Left\tCtrl+Shift+Back", IDM_EDIT_DELETELINELEFT],
   ["Delete Li&ne Right\tCtrl+Shift+Del", IDM_EDIT_DELETELINERIGHT],
   ["Delete Word Le&ft\tCtrl+Back", CMD_CTRLBACK],
   ["Delete Word Ri&ght\tCtrl+Del", CMD_CTRLDEL],
-  [SEPARATOR],
-  ["Update &Timestamps\tShift+F5", CMD_TIMESTAMPS],
+  // [SEPARATOR],
+  // ["Update &Timestamps\tShift+F5", CMD_TIMESTAMPS],
 ];
 
 export const IDM_EDIT_UNDO = "IDM_EDIT_UNDO";
@@ -462,13 +460,13 @@ const menuFindAndReplace = [
   ["Find &Previous\tShift+F3", IDM_EDIT_FINDPREV],
   ["R&eplace...\tCtrl+H", IDM_EDIT_REPLACE],
   ["Repl&ace Next\tF4", IDM_EDIT_REPLACENEXT],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Find Matching &Brace\tCtrl+B", IDM_EDIT_FINDMATCHINGBRACE],
   ["Select to Matching B&race\tCtrl+Shift+B", IDM_EDIT_SELTOMATCHINGBRACE],
   ["Select &Word\tCtrl+Alt+Space", IDM_EDIT_SELECTWORD],
   ["Select &Lines (Expand Selection)\tCtrl+Shift+Space", IDM_EDIT_SELECTLINE],
   ["Select Lines in &Current Block\tAlt+Shift+]", IDM_EDIT_SELECTLINE_BLOCK],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Select to Document Star&t", IDM_EDIT_SELTODOCSTART],
   ["Select to Document En&d", IDM_EDIT_SELTODOCEND],
   ["Select to Ne&xt\tCtrl+Alt+F2", IDM_EDIT_SELTONEXT],
@@ -483,10 +481,10 @@ export const BME_EDIT_BOOKMARKCLEAR = "BME_EDIT_BOOKMARKCLEAR";
 
 const menuBookmarks = [
   ["&Toggle\tCtrl+F2", BME_EDIT_BOOKMARKTOGGLE],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Goto &Next\tF2", BME_EDIT_BOOKMARKNEXT],
   ["Goto &Previous\tShift+F2", BME_EDIT_BOOKMARKPREV],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Select All\tAlt+F6", BME_EDIT_BOOKMARKSELECT],
   ["&Clear All\tAlt+F2", BME_EDIT_BOOKMARKCLEAR],
 ];
@@ -508,7 +506,7 @@ const menuGoto = [
   //MENUITEM SEPARATOR
   //MENUITEM "Navigate &Backward\tAlt+Left",	IDM_EDIT_NAVIGATE_BACKWARD
   //MENUITEM "Navigate &Forward\tAlt+Right",	IDM_EDIT_NAVIGATE_FORWARD
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Goto Blo&ck Start\tAlt+[", IDM_EDIT_GOTO_BLOCK_START],
   ["Goto Bloc&k End\tAlt+]", IDM_EDIT_GOTO_BLOCK_END],
   ["Goto &Previous Block\tAlt+Comma (<,)", IDM_EDIT_GOTO_PREVIOUS_BLOCK],
@@ -521,7 +519,7 @@ const menuGoto = [
     "Goto N&ext Sibling Block\tCtrl+Alt+Period (>.)",
     IDM_EDIT_GOTO_NEXT_SIBLING_BLOCK,
   ],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Goto &Selection Start\tCtrl+Shift+Comma (<,)", CMD_JUMP2SELSTART],
   ["Goto Selec&tion End\tCtrl+Shift+Period (>.)", CMD_JUMP2SELEND],
 ];
@@ -529,18 +527,18 @@ const menuGoto = [
 const menuEdit = [
   ["&Undo\tCtrl+Z\tCmd+Z", IDM_EDIT_UNDO],
   ["&Redo\tCtrl+Y\tShift+Cmd+Z", IDM_EDIT_REDO],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Cu&t\tMod+X", IDM_EDIT_CUT],
   ["&Copy\tMod+C", IDM_EDIT_COPY],
   ["&Paste\tMod+V", IDM_EDIT_PASTE],
   ["&Delete\tDelete", IDM_EDIT_DELETE],
   ["Select &All\tMod+A", IDM_EDIT_SELECTALL],
   ["S&wap\tCtrl+K", IDM_EDIT_SWAP],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Clear Docu&ment", IDM_EDIT_CLEARDOCUMENT],
   ["Clear Clip&board", IDM_EDIT_CLEARCLIPBOARD],
   ["Cop&y to Clipboard", menuCopyToClipboard],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Selection", menuSelection],
   ["&Enclose Selection", menuEncloseSelection],
   ["&Lines", menuLines],
@@ -562,12 +560,12 @@ export const IDM_VIEW_CARET_STYLE_SELECTION = "IDM_VIEW_CARET_STYLE_SELECTION";
 
 const menuCaretStyle = [
   ["Block (&OVR Mode)", IDM_VIEW_CARET_STYLE_BLOCK_OVR],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Block (&INS Mode)", IDM_VIEW_CARET_STYLE_BLOCK],
   ["Line Width &1", IDM_VIEW_CARET_STYLE_WIDTH1],
   ["Line Width &2", IDM_VIEW_CARET_STYLE_WIDTH2],
   ["Line Width &3", IDM_VIEW_CARET_STYLE_WIDTH3],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&No Blink", IDM_VIEW_CARET_STYLE_NOBLINK],
   ["Draw Block Caret in &Selection", IDM_VIEW_CARET_STYLE_SELECTION],
 ];
@@ -585,7 +583,7 @@ const menuHighlightCurrentLine = [
   ["&No Highlight", IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE],
   ["Background &Color\tCtrl+Shift+I", IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK],
   ["Outline &Frame\tCtrl+Shift+F", IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Highlight &Subline", IDM_VIEW_HIGHLIGHTCURRENTLINE_SUBLINE],
 ];
 
@@ -668,29 +666,29 @@ const menuView = [
   ["Default &Code Font...\tAlt+F12", IDM_VIEW_DEFAULT_CODE_FONT],
   ["&Default Text Font...", IDM_VIEW_DEFAULT_TEXT_FONT],
   // ["C&aret Style", menuCaretStyle],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Word W&rap\tCtrl+Shift+W", IDM_VIEW_WORDWRAP],
   ["&Long Line Marker\tCtrl+Shift+L", IDM_VIEW_LONGLINEMARKER],
   ["Indentation &Guides\tCtrl+Shift+G", IDM_VIEW_SHOWINDENTGUIDES],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Show &Whitespace\tCtrl+Shift+8", IDM_VIEW_SHOWWHITESPACE],
   ["Show Line &Endings\tCtrl+Shift+9", IDM_VIEW_SHOWEOLS],
   ["Show Wrap S&ymbols\tCtrl+Shift+0", IDM_VIEW_WORDWRAPSYMBOLS],
   ["Un&icode Control Character", IDM_VIEW_UNICODE_CONTROL_CHAR],
   //MENUITEM "S&how CallTips",						IDM_VIEW_SHOWCALLTIPS
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Visual Brace Matching\tCtrl+Shift+V", IDM_VIEW_MATCHBRACES],
   ["Highlight Current &Block", IDM_VIEW_HIGHLIGHTCURRENT_BLOCK],
   ["Highlight C&urrent Line", menuHighlightCurrentLine],
   ["Mar&k Occurrences", menuMarkOccurences],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   // TODO: needs a different shortuct
   ["Line &Numbers\tCtrl+Shift+N", IDM_VIEW_LINENUMBERS],
   ["Bookmark &Margin\tCtrl+Shift+M", IDM_VIEW_MARGIN],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Show Code &Folding\tCtrl+Shift+Alt+F", IDM_VIEW_SHOW_FOLDING],
   ["&Toggle Folds", menuToggleFolds],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   // ["&Zoom", menuZoom],
   ["Toggle Full &Screen\tF11", IDM_VIEW_TOGGLE_FULLSCREEN],
 ];
@@ -839,11 +837,11 @@ const menuScheme = [
   ["&Syntax Scheme...\tF12", IDM_VIEW_SCHEME],
   ["&Customize Schemes...\tCtrl+F12", IDM_VIEW_SCHEME_CONFIG],
   ["&Favorite Schemes...", IDM_VIEW_SCHEME_FAVORITE],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Use &2nd Global Styles\tShift+F12", IDM_VIEW_USE2NDGLOBALSTYLE],
   ["&Use Default Code Style", IDM_VIEW_USEDEFAULT_CODESTYLE],
   ["St&yle Theme", menuStyleTheme],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&Text File", menuTextFile],
   ["CSV File...", IDM_LEXER_CSV],
   ["CSS Style S&heet", menuCssStyleSheet],
@@ -980,13 +978,13 @@ const menuLanguage = [
 
 const menuAppearance = [
   // TODO: Alt-F11 doesn't work in Chrome / Windows
-  // ["Show &Menu\tAlt+F11", IDM_VIEW_MENU],
-  ["Show &Menu", IDM_VIEW_MENU],
+  ["Show &Menu\tAlt+F11", IDM_VIEW_MENU],
+  // ["Show &Menu", IDM_VIEW_MENU],
   ["S&how Toolbar\tCtrl+F11", IDM_VIEW_TOOLBAR],
   ["Customi&ze Toolbar...", IDM_VIEW_CUSTOMIZE_TOOLBAR],
   ["&Auto Scale Toolbar", IDM_VIEW_AUTO_SCALE_TOOLBAR],
   ["Show Stat&usbar\tShift+F11", IDM_VIEW_STATUSBAR],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   // ["&Transparent Mode\tCtrl+0", IDM_VIEW_TRANSPARENT],
   // ["Full Scree&n Mode", menuFullScreenMode],
   ["Scroll &Past Last Line", menuScrollPastLastLine],
@@ -1070,11 +1068,11 @@ const menuSettings = [
   ["Auto Completion I&gnore Case", IDM_VIEW_AUTOCOMPLETION_IGNORECASE],
   // ["Enable LaTe&X Input Method", IDM_SET_LATEX_INPUT_METHOD],
   ["Select and &Edit Options", menuSelectAndEditOptions],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Appea&rance", menuAppearance],
   // ["Window O&ptions", menuWindowOptions],
   ["Window Title Displa&y", menuWindowTitleDisplay],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   // ["Single &File Instance", IDM_VIEW_SINGLEFILEINSTANCE],
   // ["File &Change Notification...\tAlt+F5", IDM_VIEW_CHANGENOTIFY],
   // ["A&utoSave Settings...", IDM_SET_FILE_AUTOSAVE],
@@ -1132,11 +1130,11 @@ const menuActionOnSelection = [
   // TODO: chage to "&Open Link, etc."
   ["&Open File, Folder, Link, etc.", CMD_OPEN_PATH_OR_LINK],
   // ["Open Containing &Folder", CMD_OPEN_CONTAINING_FOLDER],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Search with &Google", CMD_ONLINE_SEARCH_GOOGLE],
   ["Search with &Bing", CMD_ONLINE_SEARCH_BING],
   ["Search on &Wikipedia", CMD_ONLINE_SEARCH_WIKI],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["Custom Action &1\tCtrl+Shift+1", CMD_CUSTOM_ACTION1],
   ["Custom Action &2\tCtrl+Shift+2", CMD_CUSTOM_ACTION2],
 ];
@@ -1176,7 +1174,7 @@ const menuTools = [
   // ["&Restart", IDM_FILE_RESTART],
   ["Launch &New Window\tAlt+N", IDM_FILE_NEWWINDOW],
   ["Launch &Empty Window\tAlt+0", IDM_FILE_NEWWINDOW2],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   // ["Execute &Document\tCtrl+L", IDM_FILE_LAUNCH],
   // ["Open Document &With...", IDM_FILE_OPENWITH],
   // ["Run &Command...\tCtrl+R", IDM_FILE_RUN],
@@ -1208,7 +1206,7 @@ const menuHelp = [
   // [SEPARATOR],
   // ["Online &Wiki", IDM_HELP_ONLINE_WIKI],
   // ["&Command Line Help", IDM_CMDLINE_HELP],
-  [SEPARATOR],
+  [MENU_SEPARATOR],
   ["&About Notepad2\tF1", IDM_HELP_ABOUT],
 ];
 
@@ -1221,3 +1219,7 @@ export const mainMenuBar = [
   ["&Tools", menuTools],
   ["&Help", menuHelp],
 ];
+
+export const IDM_DUMP_SELECTIONS = "IDM_DUMP_SELECTIONS";
+
+export const noMenuCommands = [["Dump Selections\tAlt-Y", IDM_DUMP_SELECTIONS]];

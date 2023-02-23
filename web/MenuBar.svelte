@@ -8,7 +8,8 @@
   const dispatch = createEventDispatcher();
 
   export let menuBar; // definition of the menubar
-
+  export let noMenuCommands = null; // for commands that have shortcuts but no menu
+  export let hidden = false;
   // function called when menu has been opened
   // allows the owner to modify the menu by changing DOM
   /** @type {Function} */
@@ -50,6 +51,9 @@
     for (let mi of menuBar) {
       let menu = mi[1];
       buildKeyboarShortcutsMenu(menu);
+    }
+    if (noMenuCommands) {
+      buildKeyboarShortcutsMenu(noMenuCommands);
     }
   }
 
@@ -152,10 +156,7 @@
   });
 </script>
 
-{#if !menuBar}
-  <!-- empty element so that we still process keyboard events -->
-  <div />
-{:else}
+{#if !hidden}
   <div
     class="z-20 flex items-center gap-2 bg-white py-0 select-none"
     bind:this={menuBarElement}

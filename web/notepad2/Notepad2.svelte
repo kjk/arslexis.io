@@ -186,6 +186,7 @@
     IDM_EDIT_INSERT_XMLTAG,
     CMD_CTRLBACK,
     CMD_CTRLDEL,
+    noMenuCommands,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -1738,8 +1739,8 @@
 <svelte:body on:drop={handleDrop} />
 
 <main class="fixed inset-0 grid">
-  {#if showMenu}
-    <div class="flex flex-nowrap items-center shadow text-xs">
+  <div class="flex flex-nowrap items-center shadow text-xs">
+    {#if showMenu}
       <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
         ><svg
           xmlns="http://www.w3.org/2000/svg"
@@ -1753,20 +1754,32 @@
       <MenuBar
         menuDidOpenFn={handleMenuDidOpen}
         menuBar={mainMenuBar}
+        {noMenuCommands}
         on:menucmd={handleMenuCmd}
       />
       <div class="truncate italic text-gray-500">
         {shownFileName}
       </div>
       <div class="grow" />
-    </div>
-  {:else}
-    <MenuBar menuBar={null} />
-    <button
-      class="absolute top-[2px] px-2 py-0.5 right-[4px] hover:bg-gray-100 text-gray-600"
-      on:click={() => (showMenu = true)}>show menu</button
-    >
-  {/if}
+    {:else}
+      <MenuBar
+        hidden={true}
+        menuDidOpenFn={handleMenuDidOpen}
+        menuBar={mainMenuBar}
+        {noMenuCommands}
+        on:menucmd={handleMenuCmd}
+      />
+      <div class="absolute flex top-[2px] px-2 py-0.5 right-[4px] text-sm">
+        <div class="truncate italic text-gray-500">
+          {shownFileName}
+        </div>
+        <button
+          class="ml-2 hover:bg-gray-100 text-gray-600"
+          on:click={() => (showMenu = true)}>show menu</button
+        >
+      </div>
+    {/if}
+  </div>
 
   {#if showToolbar && isToolbarReady}
     <div class="flex pl-1">

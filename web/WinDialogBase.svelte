@@ -80,14 +80,14 @@
     >
       <!-- title area -->
       <div
-        class="flex items-center bg-blue-50 py-2  cursor-grab"
+        class="flex items-center bg-blue-50 py-2 cursor-grab"
         bind:this={dragHandle}
       >
         <div class="grow ml-2">
           {title}
         </div>
         <button
-          class="btn-dlg hover:bg-gray-200 mr-2 text-gray-700"
+          class="btn-dlg hover:bg-blue-200 mr-2 text-gray-700"
           on:click={close}
         >
           <Close size={20} />
