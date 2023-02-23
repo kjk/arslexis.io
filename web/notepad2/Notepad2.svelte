@@ -366,8 +366,6 @@
   let statusEncoding = "UTF-8";
   let statusLang = "Text";
 
-  let showingAbout = false;
-
   /** @type {EditorSelection} */
   let currSelection = null;
   let hasSelection = false;
@@ -609,20 +607,20 @@
 
   let fileNameDisplay = IDM_VIEW_SHOWFILENAMEONLY;
   let fileNameExcerpt = "";
-  let showingFileName = "";
+  let shownFileName = ""; // what we show to the user
 
   $: updateFileNameDisplay(isDirty, fileNameDisplay, name);
   function updateFileNameDisplay(isDirty, fileNameDisplay, name) {
     switch (fileNameDisplay) {
       case IDM_VIEW_SHOWFILENAMEONLY:
-        showingFileName = name;
+        shownFileName = name;
         break;
       case IDM_VIEW_SHOWEXCERPT:
-        showingFileName = fileNameExcerpt;
+        shownFileName = fileNameExcerpt;
         break;
     }
     if (isDirty) {
-      showingFileName = "* " + showingFileName;
+      shownFileName = "* " + shownFileName;
     }
   }
 
@@ -639,6 +637,27 @@
   let showingEncloseSelection = false;
   let showingInsertXmlTag = false;
 
+  let showingAbout = false;
+  let isShowingDialog = false;
+
+  $: isShowingDialog =
+    showingMsgNotImplemented ||
+    showingOpenFile ||
+    showingSaveAs ||
+    showingSaveChanges ||
+    showingEncloseSelection ||
+    showingInsertXmlTag ||
+    showingAbout;
+
+  // if we're transitioning from showing some dialog to not showing it,
+  // this will trigger and if it's false, it means we've closed a dialog
+  // and therefore should focus editor
+  $: retakeFocusIf(!isShowingDialog);
+  function retakeFocusIf(shouldRetake) {
+    if (shouldRetake) {
+      focusEditor();
+    }
+  }
   /**
    * @param {FsFile} fileIn
    */
@@ -1710,27 +1729,6 @@
     // from onMount()
   }
 
-  // if we're transitioning from showing some dialog to not showing it,
-  // this will trigger and if it's false, it means we've closed a dialog
-  // and therefore should focus editor
-  $: retakeFocusIf(
-    !(
-      showingAbout ||
-      showingEncloseSelection ||
-      showingInsertXmlTag ||
-      showingMsgNotImplemented ||
-      showingMsgNotImplemented ||
-      showingOpenFile ||
-      showingSaveAs ||
-      showingSaveChanges
-    )
-  );
-  function retakeFocusIf(shouldRetake) {
-    if (shouldRetake) {
-      focusEditor();
-    }
-  }
-
   onDestroy(() => {
     editorView = null;
     // document.removeEventListener("keydown", onKeyDown);
@@ -1758,7 +1756,7 @@
         on:menucmd={handleMenuCmd}
       />
       <div class="truncate italic text-gray-500">
-        {showingFileName}
+        {shownFileName}
       </div>
       <div class="grow" />
     </div>
