@@ -105,11 +105,13 @@
     // /**@type {HTMLElement}*/ (ev.target).focus();
   }
 
+  let debugKeys = false;
+
   /**
    * @param {KeyboardEvent} ev
    */
   function handleKeyDown(ev) {
-    if (false) {
+    if (debugKeys) {
       const sev = {
         key: ev.key,
         shiftKey: ev.shiftKey,
@@ -142,8 +144,10 @@
       if (ev.key != ks.key) {
         continue;
       }
+      if (debugKeys) {
+        console.log("handleKeyDown:", ks);
+      }
       // handler is responsible for stopping propagation of the event
-      // console.log("handleKeyDown: ks", ks);
       dispatch("menucmd", { ev: ev, cmd: ks.cmdId });
     }
   }

@@ -188,6 +188,8 @@
     CMD_CTRLDEL,
     noMenuCommands,
     IDM_DUMP_SELECTIONS,
+    CMD_JUMP2SELSTART,
+    CMD_JUMP2SELEND,
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
@@ -319,6 +321,7 @@
     insertAfterSelection,
     encloseSelections,
     dumpSelections,
+    goToSelectionStartEnd,
   } from "../cmcommands";
   import {
     uuidv4,
@@ -445,7 +448,6 @@
   }
 
   function focusEditor() {
-    console.log("focusEditor");
     focusEditorView(editorView);
   }
 
@@ -660,7 +662,6 @@
   // and therefore should focus editor
   $: retakeFocusIf(!isShowingDialog);
   function retakeFocusIf(shouldRetake) {
-    console.log("retakeFocus:", shouldRetake);
     if (shouldRetake) {
       focusEditor();
     }
@@ -1457,6 +1458,12 @@
         break;
       case CMD_ONLINE_SEARCH_WIKI:
         launchSelectionWithWikipedia();
+        break;
+      case CMD_JUMP2SELSTART:
+        goToSelectionStartEnd(editorView, false);
+        break;
+      case CMD_JUMP2SELEND:
+        goToSelectionStartEnd(editorView, true);
         break;
 
       // those are handled by CodeMirror

@@ -122,9 +122,6 @@ export function serializeShortuct(s) {
  * @returns {Object}
  */
 export function parseShortcut(s) {
-  // if (s.includes("F11")) {
-  //   debugger;
-  // }
   let parts = s.split("\t");
   if (len(parts) > 1) {
     s = parts[0];
@@ -148,6 +145,15 @@ export function parseShortcut(s) {
     .replace("+-", "+minus")
     .replace("-+", "+plus")
     .replace("--", "+minus");
+
+  // TODO: special casing for notepad2
+  // TODO: this also changes what is show in menu
+  s2 = s2
+    .replace("(<,)", "")
+    .replace("(>.)", "")
+    .replace("(>,)", "")
+    .replace("(>.)", "");
+
   // allow "Ctrl + A" and "Ctrl - A"
   s2 = s2.replaceAll("-", "+").replaceAll(" ", "");
   parts = s2.split("+");
@@ -186,7 +192,6 @@ export function parseShortcut(s) {
     return res;
   }
   switch (keyL) {
-    // TODO: is Delete different on Win than Backspace?
     case "del":
     case "delete":
       res.key = "Delete";
@@ -207,6 +212,15 @@ export function parseShortcut(s) {
       break;
     case "minus":
       res.key = "-";
+      break;
+    // the keys are ",." but in KeyboardEvent.key they show up as "<>"
+    case "comma":
+      // res.key = ",";
+      res.key = "<";
+      break;
+    case "period":
+      // res.key = ".";
+      res.key = ">";
       break;
   }
   if (res.key !== "") {

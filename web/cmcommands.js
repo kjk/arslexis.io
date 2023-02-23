@@ -731,12 +731,11 @@ export function iterSelections(
   if (state.readOnly) return false;
   let changes = [];
   let ranges = [];
-  let sel = state.selection;
-  for (let { from, to } of sel.ranges) {
-    if (skipEmpty && from === to) {
+  for (let sel of state.selection.ranges) {
+    if (skipEmpty && sel.from === sel.to) {
       continue;
     }
-    fn(state, { from, to }, changes);
+    fn(state, sel, changes);
   }
   if (len(changes) + len(ranges) === 0) {
     return false;
@@ -760,8 +759,10 @@ export function iterSelections(
  */
 export function dumpSelections({ state, dispatch }) {
   console.log("dumpSelections:");
-  function iterFn(state, { from, to }, changes, ranges) {
-    console.log(`  range: ${from} => ${to}`);
+  function iterFn(state, sel, changes, ranges) {
+    console.log(
+      `  range: ${sel.from} => ${sel.to}, anchor: ${sel.anchor}, head: ${sel.head}`
+    );
   }
   return iterSelections(
     { state, dispatch },
@@ -878,6 +879,31 @@ export function insertText({ state, dispatch }, fnOrStr) {
       changes,
       selection: EditorSelection.create(ranges),
       userEvent: "input.insert",
+    })
+  );
+  return true;
+}
+
+/**
+ * @param {{state: EditorState, dispatch: Function}} arg0
+ * @param {boolean} end
+ * @returns {boolean}
+ */
+export function goToSelectionStartEnd({ state, dispatch }, end) {
+  // anchor is where selection starts, head is where the cursor is
+  // going to start: head to from, anchor to to
+  let { from, to, anchor, head } = state.selection.ranges[0];
+  let newAnchor = to;
+  let newHead = from;
+  if (end) {
+    newAnchor = from;
+    newHead = to;
+  }
+  let ranges = [EditorSelection.range(newAnchor, newHead)];
+  dispatch(
+    state.update({
+      selection: EditorSelection.create(ranges),
+      userEvent: "input.selecttodocstart",
     })
   );
   return true;
