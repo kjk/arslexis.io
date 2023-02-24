@@ -676,3 +676,25 @@ export function isIFrame() {
   }
   return isIFrame;
 }
+
+/**
+ * @param {Blob} f
+ * @returns {Promise<number>}
+ */
+export async function lineCount(f) {
+  let ab = await f.arrayBuffer();
+  let a = new Uint8Array(ab);
+  let nLines = 0;
+  for (let b of a) {
+    // line endings are:
+    // CR (13) LF (10) : windows
+    // LF (10) : unix
+    // CR (13) : mac
+    // mac is very rare so we just count 10 as they count
+    // windows and unix lines
+    if (b === 10) {
+      nLines++;
+    }
+  }
+  return nLines;
+}
