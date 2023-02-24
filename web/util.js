@@ -321,7 +321,7 @@ export function trapFocus2(parent, e) {
  * @param {number} n
  * @returns {string}
  */
-export function humanizeSize(n) {
+export function fmtSize(n) {
   const a = [
     [1024 * 1024 * 1024 * 1024, "TB"],
     [1024 * 1024 * 1024, "GB"],
@@ -337,6 +337,17 @@ export function humanizeSize(n) {
     }
   }
   return `${n} B`;
+}
+
+/**
+ * 1023 => 1.023
+ * @param {number} n
+ * @param {string} sep
+ * @returns {string}
+ */
+export function fmtNum(n, sep = ",") {
+  // TODO: maybe n.toLocaleString("en-US").replaceAll(",", ".");
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, sep);
 }
 
 /**
