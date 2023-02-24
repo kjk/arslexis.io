@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+
+    /* font size as in stack overflow */
+    font-size: 12pt;
+
+    color: #333;
+
+  /* TODO: do I need this ? 
+    https://stackoverflow.com/questions/21209223/remove-bounce-on-scroll-in-browser-issue-with-positionfixed-div
+  */
+  overscroll-behavior-y: none;
+}
+
+svg {
+  fill: currentColor;
+  display: block;
+  flex-shrink: 0;
+  backface-visibility: hidden;
+}
