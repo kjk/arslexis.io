@@ -665,3 +665,14 @@ export function stripExt(name) {
   }
   return name;
 }
+
+export function isIFrame() {
+  let isIFrame = false;
+  try {
+    // in iframe, those are different
+    isIFrame = window.self !== window.top;
+  } catch {
+    // do nothing
+  }
+  return isIFrame;
+}
