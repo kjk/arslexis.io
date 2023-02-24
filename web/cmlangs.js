@@ -30,7 +30,8 @@ import { sCSS, less } from "@codemirror/legacy-modes/mode/css";
 import { octave } from "@codemirror/legacy-modes/mode/octave";
 import { shell } from "@codemirror/legacy-modes/mode/shell";
 
-import { getFileExt, len } from "./util.js";
+import { getFileExt } from "./fileutil";
+import { len } from "./util";
 
 /** @typedef { import("@codemirror/language").LanguageSupport} LanguageSupport */
 

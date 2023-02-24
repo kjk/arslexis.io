@@ -8,7 +8,6 @@ import {
   deleteLeadingWhitespace,
   deleteTrailingWhitespace,
   padWithSpaces,
-  strCompressWS,
   deleteFirstChar,
   deleteLastChar,
   duplicateSelection,
