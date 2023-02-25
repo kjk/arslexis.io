@@ -159,3 +159,75 @@ export function isIFrame() {
 export function supportsFileSystem() {
   return "showDirectoryPicker" in window && !isIFrame();
 }
+
+// a directory tree. each element is either a file:
+// [file,      dirHandle, name, path, size, null]
+// or directory:
+// [[entries], dirHandle, name, path, size, null]
+// extra null values are for the caller to stick additional data
+// without the need to re-allocate the array
+
+/** @typedef {[any, FileSystemDirectoryHandle, string, string, number, object]} FsEntry*/
+
+export const fseFileIdx = 0;
+export const fseDirEntriesIdx = 0;
+export const fseDirHandleIdx = 1;
+export const fseNameIdx = 2;
+export const fsePathIdx = 3;
+export const fseSizeIdx = 4;
+export const fseInfoIdx = 5;
+
+/**
+ * @param {FsEntry} e
+ */
+export function fseIsDirectory(e) {
+  return Array.isArray(e[0]);
+}
+
+/**
+ * @param {FsEntry} e
+ * @param {string} key
+ * @param {any} val
+ */
+export function fseSetInfo(e, key, val) {
+  let info = e[fseInfoIdx] || {};
+  info[key] = val;
+  e[fseInfoIdx] = info;
+}
+
+function dontSkip(entry, dir) {
+  return false;
+}
+
+/**
+ * @param {FileSystemDirectoryHandle} dirHandle
+ * @param {Function} skipEntryFn
+ * @param {string} dir
+ */
+export async function readDirRecur(
+  dirHandle,
+  skipEntryFn = dontSkip,
+  dir = dirHandle.name
+) {
+  /** @type {FsEntry[]} */
+  let res = [];
+  // @ts-ignore
+  for await (const entry of dirHandle.values()) {
+    const path = dir == "" ? entry.name : `${dir}/${entry.name}`;
+    if (skipEntryFn(entry, dir)) {
+      continue;
+    }
+    if (entry.kind === "file") {
+      let file = await entry.getFile();
+      /** @type {FsEntry} */
+      let e = [file, dirHandle, file.name, path, file.size, null];
+      res.push(e);
+    } else if (entry.kind === "directory") {
+      let d = await readDirRecur(entry, path);
+      /** @type {FsEntry} */
+      let e = [d, dirHandle, entry.name, path, 0, null];
+      res.push(e);
+    }
+  }
+  return res;
+}
