@@ -47,6 +47,14 @@
         class="underline focus-within:outline"
         target="_blank"
         rel="noreferrer"
+        href="https://github.com/zufuliu/notepad2">Notepad2</a
+      > the original.
+    </div>
+    <div class="ml-2">
+      <a
+        class="underline focus-within:outline"
+        target="_blank"
+        rel="noreferrer"
         href="https://codemirror.net/">Svelte</a
       > framework
     </div>

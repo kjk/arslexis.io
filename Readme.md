@@ -1,6 +1,6 @@
 ## About
 
-notepad2web is a web adaptation of notepad2 windows text editor.
+[notepad2web](https://onlinetool.io/notepad2/) is a web adaptation of [notepad2](https://github.com/zufuliu/notepad2) windows text editor.
 
 ## To run
 
