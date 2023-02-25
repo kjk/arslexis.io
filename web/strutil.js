@@ -1,6 +1,14 @@
 import { Base64 } from "js-base64";
 import { len, throwIf } from "./util";
 
+/**
+ * @param {string} s1
+ * @param {string} s2
+ */
+export function strCompareNoCase(s1, s2) {
+  return s1.localeCompare(s2, undefined, { sensitivity: "accent" });
+}
+
 const wsRx = /\s{2,}/g;
 /**
  * @param {string} s

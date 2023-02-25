@@ -9,6 +9,7 @@ const binaryExts = [
   ".avif",
   ".jfif",
   ".tiff",
+  ".xd",
   ".a",
   ".xz",
   ".gz",
@@ -25,6 +26,7 @@ const binaryExts = [
   ".lib",
   ".ttf",
   ".otf",
+  ".afm",
 ];
 
 export function isBinary(path) {
