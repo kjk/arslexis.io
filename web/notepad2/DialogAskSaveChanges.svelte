@@ -8,8 +8,9 @@
   /** @type {Function} */
   export let shouldsave = fnNoOp;
 
-  function close() {
+  function close(shouldSave) {
     open = false;
+    shouldsave(shouldSave);
   }
 </script>
 
@@ -23,21 +24,21 @@
     <button
       class="btn-dlg ml-24 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
       on:click={() => {
-        close();
-        shouldsave(true);
+        close(true);
       }}>Yes</button
     >
     <button
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
       on:click={() => {
-        close();
-        shouldsave(false);
+        close(false);
       }}>No</button
     >
     <button
       use:focus
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
-      on:click={close}>Cancel</button
+      on:click={() => {
+        close(false);
+      }}>Cancel</button
     >
   </div>
 </WinDialogBase>

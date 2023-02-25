@@ -632,3 +632,10 @@ export function isIFrame() {
   }
   return isIFrame;
 }
+
+/**
+ * @returns {boolean}
+ */
+export function supportsFileSystem() {
+  return "showDirectoryPicker" in window && !isIFrame();
+}

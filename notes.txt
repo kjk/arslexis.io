@@ -1,3 +1,7 @@
+https://www.npmjs.com/package/idb
+
+--- notepad2
+
 "editor.getCursor": (): number => {
   return editor.editorView!.state.selection.main.from;
 },
