@@ -16,6 +16,19 @@
   </div>
   <div class="grow" />
   <a
+    class="mr-1 hover:bg-gray-100"
+    href="https://blog.kowalczyk.info"
+    target="_blank"
+    rel="noreferrer"
+  >
+    <img
+      src="https://avatars.githubusercontent.com/u/7935?v=4"
+      width="20"
+      height="20"
+      alt="kjk"
+    />
+  </a>
+  <a
     class="px-1 py-1 mr-1 hover:bg-gray-100"
     href={gitHubURL}
     target="_blank"
