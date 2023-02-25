@@ -138,3 +138,24 @@ export async function verifyHandlePermission(fileHandle, readWrite) {
   // The user didn't grant permission, so return false.
   return false;
 }
+
+/**
+ * @returns {boolean}
+ */
+export function isIFrame() {
+  let isIFrame = false;
+  try {
+    // in iframe, those are different
+    isIFrame = window.self !== window.top;
+  } catch {
+    // do nothing
+  }
+  return isIFrame;
+}
+
+/**
+ * @returns {boolean}
+ */
+export function supportsFileSystem() {
+  return "showDirectoryPicker" in window && !isIFrame();
+}

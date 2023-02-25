@@ -1,5 +1,5 @@
 <script>
-  import { supportsFileSystem } from "./util";
+  import { supportsFileSystem } from "./fileutil";
 
   let hasFileSystemSupport = supportsFileSystem();
 </script>
