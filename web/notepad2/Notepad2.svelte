@@ -197,6 +197,8 @@
   } from "./menu-notepad2";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
+  import Twitter from "../icons/Twitter.svelte";
+  import GitHub from "../icons/GitHub.svelte";
 
   import * as commands from "@codemirror/commands";
   import {
@@ -1829,6 +1831,22 @@
         {shownFileName}
       </div>
       <div class="grow" />
+      <a
+        class="px-1 py-1 mr-1 hover:bg-gray-100"
+        href="https://github.com/kjk/notepad2web"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <GitHub />
+      </a>
+      <a
+        class="px-1 py-1 mr-2 hover:bg-gray-100"
+        href="https://twitter.com/kjk"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Twitter />
+      </a>
     {:else}
       <MenuBar
         hidden={true}

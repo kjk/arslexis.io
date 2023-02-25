@@ -20,9 +20,9 @@ body {
   overscroll-behavior-y: none;
 }
 
-svg {
+/* svg {
   fill: currentColor;
   display: block;
   flex-shrink: 0;
   backface-visibility: hidden;
-}
+} */
