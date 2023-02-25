@@ -20,7 +20,7 @@
 
 <WinDialogBase bind:open {title}>
   <div slot="main" class="bg-white px-2 py-8 flex justify-center">
-    <div>{message}</div>
+    <div>{@html message}</div>
   </div>
 
   <!-- bottom -->
