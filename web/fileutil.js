@@ -1,3 +1,5 @@
+import { throwIf } from "./util";
+
 // not
 const binaryExts = [
   ".bmp",
@@ -164,20 +166,19 @@ export function supportsFileSystem() {
 // [file,      dirHandle, name, path, size, null, null]
 // or directory:
 // [[entries], dirHandle, name, path, size, null, null]
-// extra 2 null values are for the caller to stick additional data
+// extra null value is for the caller to stick additional data
 // without the need to re-allocate the array
-// if you need more than 2, use an object for one of the slots
+// if you need more than 1, use an object
 
-/** @typedef {[any, FileSystemDirectoryHandle, string, string, number, any, any]} FsEntry*/
+/** @typedef {[any, FileSystemDirectoryHandle, string, string, number, any]} FsEntry*/
 
-export const fseFileIdx = 0;
-export const fseDirEntriesIdx = 0;
-export const fseDirHandleIdx = 1;
-export const fseNameIdx = 2;
-export const fsePathIdx = 3;
-export const fseSizeIdx = 4;
-export const fseMeta1Idx = 5;
-export const fseMeta2Idx = 6;
+const fseFileIdx = 0;
+const fseDirEntriesIdx = 0;
+const fseDirHandleIdx = 1;
+const fseNameIdx = 2;
+const fsePathIdx = 3;
+const fseSizeIdx = 4;
+const fseMetaIdx = 5;
 
 /**
  * @param {FsEntry} e
@@ -188,13 +189,81 @@ export function fseIsDirectory(e) {
 
 /**
  * @param {FsEntry} e
+ * @returns {string}
+ */
+export function fseName(e) {
+  return e[fseNameIdx];
+}
+
+export function fseDirHandle(e) {
+  return e[fseDirHandleIdx];
+}
+
+export function fseDirEntries(e) {
+  throwIf(!fseIsDirectory(e));
+  return e[fseDirEntriesIdx];
+}
+
+export function fseFile(e) {
+  throwIf(fseIsDirectory(e));
+  return e[fseFileIdx];
+}
+
+/**
+ * @param {FsEntry} e
+ * @returns {string}
+ */
+export function fsePath(e) {
+  return e[fsePathIdx];
+}
+
+/**
+ * @param {FsEntry} e
+ * @returns {number}
+ */
+export function fseSize(e) {
+  return e[fseSizeIdx];
+}
+
+/**
+ * @param {FsEntry} e
+ * @param {number} n
+ */
+export function fseSetSize(e, n) {
+  e[fseSizeIdx] = n;
+}
+
+/**
+ * @param {FsEntry} e
+ * @return any
+ */
+export function fseMeta(e) {
+  return e[fseMetaIdx];
+}
+
+export function fseSetMetaObj(e, o) {
+  e[fseMetaIdx] = o;
+}
+
+/**
+ * @param {FsEntry} e
  * @param {string} key
  * @param {any} val
  */
-export function fseSetInfo(e, key, val) {
-  let info = e[fseMeta2Idx] || {};
-  info[key] = val;
-  e[fseMeta2Idx] = info;
+export function fseSetMeta(e, key, val) {
+  let meta = e[fseMetaIdx] || {};
+  meta[key] = val;
+  e[fseMetaIdx] = meta;
+}
+
+/**
+ * @param {FsEntry} e
+ * @param {string} key
+ * @returns {any}
+ */
+export function fseGetMeta(e, key) {
+  let meta = e[fseMetaIdx];
+  return meta ? meta[key] : undefined;
 }
 
 function dontSkip(entry, dir) {
@@ -205,12 +274,15 @@ function dontSkip(entry, dir) {
  * @param {FileSystemDirectoryHandle} dirHandle
  * @param {Function} skipEntryFn
  * @param {string} dir
+ * @returns {Promise<FsEntry>}
  */
 export async function readDirRecur(
   dirHandle,
   skipEntryFn = dontSkip,
   dir = dirHandle.name
 ) {
+  console.log("dirHandle:", dirHandle);
+
   /** @type {FsEntry[]} */
   let res = [];
   // @ts-ignore
@@ -225,11 +297,11 @@ export async function readDirRecur(
       let e = [file, dirHandle, file.name, path, file.size, null];
       res.push(e);
     } else if (entry.kind === "directory") {
-      let d = await readDirRecur(entry, path);
+      let e = await readDirRecur(entry, skipEntryFn, path);
       /** @type {FsEntry} */
-      let e = [d, dirHandle, entry.name, path, 0, null];
+      e[fsePathIdx] = path;
       res.push(e);
     }
   }
-  return res;
+  return [res, dirHandle, dirHandle.name, "", 0, null];
 }
