@@ -678,7 +678,8 @@ const menuView = [
   //MENUITEM "S&how CallTips",						IDM_VIEW_SHOWCALLTIPS
   [MENU_SEPARATOR],
   ["&Visual Brace Matching\tCtrl+Shift+V", IDM_VIEW_MATCHBRACES],
-  ["Highlight Current &Block", IDM_VIEW_HIGHLIGHTCURRENT_BLOCK],
+  // TODO: can CodeMirror do it?
+  // ["Highlight Current &Block", IDM_VIEW_HIGHLIGHTCURRENT_BLOCK],
   ["Highlight C&urrent Line", menuHighlightCurrentLine],
   ["Mar&k Occurrences", menuMarkOccurences],
   [MENU_SEPARATOR],

@@ -480,9 +480,8 @@
     });
   }
 
-  let showTrailingWhitespace = true;
   let showTrailingWhitespaceCompartment = new Compartment();
-  $: setShowTrailingWhitespace(showTrailingWhitespace);
+  $: setShowTrailingWhitespace(settings.showTrailingWhitespace);
   function setShowTrailingWhitespace(flag) {
     if (!editorView) return;
     const v = flag ? highlightTrailingWhitespace() : [];
@@ -491,9 +490,8 @@
     });
   }
 
-  let enableMultipleSelection = true;
   let enableMultipleSelectionCompartment = new Compartment();
-  $: setEnableMultipleSelection(enableMultipleSelection);
+  $: setEnableMultipleSelection(settings.enableMultipleSelection);
   function setEnableMultipleSelection(flag) {
     if (!editorView) return;
     const v = EditorState.allowMultipleSelections.of(flag);
@@ -519,10 +517,9 @@
     }
   }
 
-  let lineSeparator = null;
   let lineSeparatorStatus = "any";
   let lineSeparatorCompartment = new Compartment();
-  $: setLineSeparator(lineSeparator);
+  $: setLineSeparator(settings.lineSeparator);
   function setLineSeparator(sep) {
     if (!editorView) return;
     const v = EditorState.lineSeparator.of(sep);
@@ -531,9 +528,8 @@
     });
   }
 
-  let visualBraceMatching = true;
   let visualBraceMatchingCompartment = new Compartment();
-  $: setVisualBraceMatching(visualBraceMatching);
+  $: setVisualBraceMatching(settings.visualBraceMatching);
   function setVisualBraceMatching(flag) {
     if (!editorView) return;
     const v = flag ? bracketMatching() : [];
@@ -542,9 +538,8 @@
     });
   }
 
-  let tabSize = 4;
   let tabSizeCompartment = new Compartment();
-  $: setTabSize(tabSize);
+  $: setTabSize(settings.tabSize);
   function setTabSize(ts) {
     if (!editorView) return;
     const v = EditorState.tabSize.of(ts);
@@ -553,10 +548,8 @@
     });
   }
 
-  let tabsAsSpaces = true;
-  let tabSpaces = 4;
   let tabsCompartment = new Compartment();
-  $: setTabsState(tabsAsSpaces, tabSpaces);
+  $: setTabsState(settings.tabsAsSpaces, settings.tabSpaces);
   function setTabsState(tabsAsSpaces, tabSpaces) {
     if (!editorView) return;
     const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
@@ -566,9 +559,8 @@
     });
   }
 
-  let readOnly = false;
   let readOnlyCompartment = new Compartment();
-  $: setReadOnlyState(readOnly);
+  $: setReadOnlyState(settings.readOnly);
   /**
    * @param {boolean} flag
    */
@@ -592,9 +584,8 @@
   activeLineCSSElement.innerHTML = activeLineAltCSS;
   // sheet.innerHTML = ".cm-activeLine {background-color: #ffffa5 !important}";
   document.body.appendChild(activeLineCSSElement);
-  let lineHighlightType = IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK;
   let lineHighlightTypeCompartment = new Compartment();
-  $: setLineHighlightType(lineHighlightType);
+  $: setLineHighlightType(settings.lineHighlightType);
 
   function setLineHighlightType(lht) {
     if (!editorView) return;
@@ -617,9 +608,8 @@
     return s;
   }
 
-  let wordWrap = true;
   let wordWrapCompartment = new Compartment();
-  $: setWordWrapState(wordWrap);
+  $: setWordWrapState(settings.wordWrap);
   function setWordWrapState(flag) {
     if (!editorView) return;
     const v = flag ? EditorView.lineWrapping : [];
@@ -813,23 +803,27 @@
 
     // TODO: why is this [] and not null or something?
     // @ts-ignore
-    let wordWrapV = wordWrap ? EditorView.lineWrapping : [];
+    let wordWrapV = settings.wordWrap ? EditorView.lineWrapping : [];
     let multipleSelectionV = EditorState.allowMultipleSelections.of(
-      enableMultipleSelection
+      settings.enableMultipleSelection
     );
-    let lineSeparatorV = EditorState.lineSeparator.of(lineSeparator);
-    let readOnlyV = EditorState.readOnly.of(readOnly);
-    let tabSizeV = EditorState.tabSize.of(tabSize);
+    let lineSeparatorV = EditorState.lineSeparator.of(settings.lineSeparator);
+    let readOnlyV = EditorState.readOnly.of(settings.readOnly);
+    let tabSizeV = EditorState.tabSize.of(settings.tabSize);
     let lineNumV = settings.showLineNumbers ? lineNumbers() : [];
     let showWhitespaceV = settings.showWhitespace ? highlightWhitespace() : [];
-    let showTrailingWhitespaceV = showTrailingWhitespace
+    let showTrailingWhitespaceV = settings.showTrailingWhitespace
       ? highlightTrailingWhitespace()
       : [];
-    const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
+    const indentChar = settings.tabsAsSpaces
+      ? " ".repeat(settings.tabSpaces)
+      : "\t";
     const tabStateV = indentUnit.of(indentChar);
-    const visualBraceMatchingV = visualBraceMatching ? bracketMatching() : [];
+    const visualBraceMatchingV = settings.visualBraceMatching
+      ? bracketMatching()
+      : [];
     const lineHighlihtTypeV =
-      lineHighlightType === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE
+      settings.lineHighlightType === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE
         ? []
         : highlightActiveLine();
     let lexerV = getLangFromFileName(fileName);
@@ -941,7 +935,7 @@
       extensions: exts,
     });
     activeLineCSSElement.disabled =
-      lineHighlightType != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
+      settings.lineHighlightType != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
     return res;
   }
 
@@ -1113,9 +1107,9 @@
       case IDM_VIEW_MENU:
         return settings.showMenu;
       case IDM_VIEW_WORDWRAP:
-        return wordWrap;
+        return settings.wordWrap;
       case IDM_FILE_READONLY_MODE:
-        return readOnly;
+        return settings.readOnly;
       case IDM_VIEW_LINENUMBERS:
         return settings.showLineNumbers;
       case IDM_VIEW_STATUSBAR:
@@ -1123,26 +1117,26 @@
       case IDM_VIEW_TOOLBAR:
         return showToolbar;
       case IDM_LINEENDINGS_CRLF:
-        return lineSeparator === "\r\n";
+        return settings.lineSeparator === "\r\n";
       case IDM_LINEENDINGS_LF:
-        return lineSeparator === "\n";
+        return settings.lineSeparator === "\n";
       case IDM_LINEENDINGS_CR:
-        return lineSeparator === "\r";
+        return settings.lineSeparator === "\r";
       case IDM_VIEW_SHOWWHITESPACE:
         return settings.showWhitespace;
       case IDM_SET_MULTIPLE_SELECTION:
-        return enableMultipleSelection;
+        return settings.enableMultipleSelection;
       case IDM_VIEW_TABSASSPACES:
-        return tabsAsSpaces;
+        return settings.tabsAsSpaces;
       case IDM_VIEW_SHOWFILENAMEONLY:
       case IDM_VIEW_SHOWEXCERPT:
         return fileNameDisplay === cmdId;
       case IDM_VIEW_MATCHBRACES:
-        return visualBraceMatching;
+        return settings.visualBraceMatching;
       case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
       case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
       case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
-        return lineHighlightType === cmdId;
+        return settings.lineHighlightType === cmdId;
     }
     return false;
   }
@@ -1209,7 +1203,7 @@
       case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
       case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
       case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
-        lineHighlightType = cmdId;
+        settings.lineHighlightType = cmdId;
         break;
 
       case IDM_EDIT_CHAR2HEX:
@@ -1246,10 +1240,10 @@
         settings.showMenu = !settings.showMenu;
         break;
       case IDM_VIEW_WORDWRAP:
-        wordWrap = !wordWrap;
+        settings.wordWrap = !settings.wordWrap;
         break;
       case IDM_FILE_READONLY_MODE:
-        readOnly = !readOnly;
+        settings.readOnly = !settings.readOnly;
         break;
       case IDM_VIEW_SHOWWHITESPACE:
         settings.showWhitespace = !settings.showWhitespace;
@@ -1269,13 +1263,13 @@
         showToolbar = !showToolbar;
         break;
       case IDM_SET_MULTIPLE_SELECTION:
-        enableMultipleSelection = !enableMultipleSelection;
+        settings.enableMultipleSelection = !settings.enableMultipleSelection;
         break;
       case IDM_VIEW_TABSASSPACES:
-        tabsAsSpaces = !tabsAsSpaces;
+        settings.tabsAsSpaces = !settings.tabsAsSpaces;
         break;
       case IDM_VIEW_MATCHBRACES:
-        visualBraceMatching = !visualBraceMatching;
+        settings.visualBraceMatching = !settings.visualBraceMatching;
         break;
       // case IDM_VIEW_SHOW_FOLDING:
       //   showFolding = !showFolding;
@@ -1285,15 +1279,15 @@
       // in lines. Does it re-split the doc when
       // EditorState.lineSeparator changes?
       case IDM_LINEENDINGS_CRLF:
-        lineSeparator = "\r\n";
+        settings.lineSeparator = "\r\n";
         lineSeparatorStatus = "CR+LF";
         break;
       case IDM_LINEENDINGS_CR:
-        lineSeparator = "\r";
+        settings.lineSeparator = "\r";
         lineSeparatorStatus = "CR";
         break;
       case IDM_LINEENDINGS_LF:
-        lineSeparator = "\n";
+        settings.lineSeparator = "\n";
         lineSeparatorStatus = "LF";
         break;
       case IDM_EDIT_DELETELINERIGHT:

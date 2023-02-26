@@ -34,3 +34,4 @@ Specific things:
 
 IDM_VIEW_HIGHLIGHTCURRENTLINE_SUBLINE - when line is wrapped, Scintilla has an option (turned by default) to only highlight the first line of wrapped line. CodeMirror doesn't have that
 
+IDM_VIEW_HIGHLIGHTCURRENT_BLOCK - CodeMirror doesn't do that
