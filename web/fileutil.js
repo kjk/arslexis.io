@@ -161,13 +161,14 @@ export function supportsFileSystem() {
 }
 
 // a directory tree. each element is either a file:
-// [file,      dirHandle, name, path, size, null]
+// [file,      dirHandle, name, path, size, null, null]
 // or directory:
-// [[entries], dirHandle, name, path, size, null]
-// extra null values are for the caller to stick additional data
+// [[entries], dirHandle, name, path, size, null, null]
+// extra 2 null values are for the caller to stick additional data
 // without the need to re-allocate the array
+// if you need more than 2, use an object for one of the slots
 
-/** @typedef {[any, FileSystemDirectoryHandle, string, string, number, object]} FsEntry*/
+/** @typedef {[any, FileSystemDirectoryHandle, string, string, number, any, any]} FsEntry*/
 
 export const fseFileIdx = 0;
 export const fseDirEntriesIdx = 0;
@@ -175,7 +176,8 @@ export const fseDirHandleIdx = 1;
 export const fseNameIdx = 2;
 export const fsePathIdx = 3;
 export const fseSizeIdx = 4;
-export const fseInfoIdx = 5;
+export const fseMeta1Idx = 5;
+export const fseMeta2Idx = 6;
 
 /**
  * @param {FsEntry} e
@@ -190,9 +192,9 @@ export function fseIsDirectory(e) {
  * @param {any} val
  */
 export function fseSetInfo(e, key, val) {
-  let info = e[fseInfoIdx] || {};
+  let info = e[fseMeta2Idx] || {};
   info[key] = val;
-  e[fseInfoIdx] = info;
+  e[fseMeta2Idx] = info;
 }
 
 function dontSkip(entry, dir) {
