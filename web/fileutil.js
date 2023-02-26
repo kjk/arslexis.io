@@ -204,68 +204,60 @@ export class FsEntry extends Array {
     throwIf(!this.isDir);
     this[fseSizeIdx] = n;
   }
-}
 
-/**
- * @param {FsEntry} e
- */
-export function fseIsDirectory(e) {
-  return Array.isArray(e[0]);
-}
+  /**
+   * @returns {string}
+   */
+  get path() {
+    return this[fsePathIdx];
+  }
 
-export function fseDirHandle(e) {
-  return e[fseDirHandleIdx];
-}
+  /**
+   * @return any
+   */
+  get meta() {
+    return this[fseMetaIdx];
+  }
 
-export function fseDirEntries(e) {
-  throwIf(!fseIsDirectory(e));
-  return e[fseDirEntriesIdx];
-}
+  set meta(o) {
+    this[fseMetaIdx] = o;
+  }
 
-export function fseFile(e) {
-  throwIf(fseIsDirectory(e));
-  return e[fseFileIdx];
-}
+  /**
+   * @returns {File}
+   */
+  get file() {
+    throwIf(this.isDir);
+    return this[fseFileIdx];
+  }
 
-/**
- * @param {FsEntry} e
- * @returns {string}
- */
-export function fsePath(e) {
-  return e[fsePathIdx];
-}
+  /**
+   * @param {string} key
+   * @retruns {any}
+   */
+  getMeta(key) {
+    let m = this[fseMetaIdx];
+    return m ? m[key] : undefined;
+  }
 
-/**
- * @param {FsEntry} e
- * @return any
- */
-export function fseMeta(e) {
-  return e[fseMetaIdx];
-}
+  /**
+   * @param {string} key
+   * @param {any} val
+   */
+  setMeta(key, val) {
+    let m = this[fseMetaIdx] || {};
+    m[key] = val;
+    this[fseMetaIdx] = m;
+  }
 
-export function fseSetMetaObj(e, o) {
-  e[fseMetaIdx] = o;
-}
+  get dirHandle() {
+    return this[fseDirHandleIdx];
+  }
 
-/**
- * @param {FsEntry} e
- * @param {string} key
- * @param {any} val
- */
-export function fseSetMeta(e, key, val) {
-  let meta = e[fseMetaIdx] || {};
-  meta[key] = val;
-  e[fseMetaIdx] = meta;
-}
-
-/**
- * @param {FsEntry} e
- * @param {string} key
- * @returns {any}
- */
-export function fseGetMeta(e, key) {
-  let meta = e[fseMetaIdx];
-  return meta ? meta[key] : undefined;
+  get dirEntries() {
+    throwIf(!this.isDir);
+    return this[fseDirEntriesIdx];
+  }
 }
 
 function dontSkip(entry, dir) {
