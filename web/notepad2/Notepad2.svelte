@@ -361,16 +361,16 @@
   import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
   import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
   import { tick } from "svelte";
+  import { Settings } from "./Settings";
+
+  let settings = new Settings();
 
   /** @type {HTMLElement} */
   let editorElement = null;
   /** @type {EditorView} */
   let editorView = null;
 
-  let showMenu = true;
-
   // status line
-  let showStatusBar = true;
   let statusLn1 = 1;
   let statusLn2 = 1;
   let statusCol1 = 1;
@@ -470,9 +470,8 @@
 
   // console.log("commands:", commands);
 
-  let showWhitespace = false;
   let showWhitespaceCompartment = new Compartment();
-  $: setShowWhitespace(showWhitespace);
+  $: setShowWhitespace(settings.showWhitespace);
   function setShowWhitespace(flag) {
     if (!editorView) return;
     const v = flag ? highlightWhitespace() : [];
@@ -630,9 +629,8 @@
   }
 
   //   lineNumbers(),
-  let showLineNumbers = true;
   let showLineNumbersCompartment = new Compartment();
-  $: setLineNumbersState(showLineNumbers);
+  $: setLineNumbersState(settings.showLineNumbers);
   function setLineNumbersState(flag) {
     if (!editorView) return;
     const v = flag ? lineNumbers() : [];
@@ -822,8 +820,8 @@
     let lineSeparatorV = EditorState.lineSeparator.of(lineSeparator);
     let readOnlyV = EditorState.readOnly.of(readOnly);
     let tabSizeV = EditorState.tabSize.of(tabSize);
-    let lineNumV = showLineNumbers ? lineNumbers() : [];
-    let showWhitespaceV = showWhitespace ? highlightWhitespace() : [];
+    let lineNumV = settings.showLineNumbers ? lineNumbers() : [];
+    let showWhitespaceV = settings.showWhitespace ? highlightWhitespace() : [];
     let showTrailingWhitespaceV = showTrailingWhitespace
       ? highlightTrailingWhitespace()
       : [];
@@ -1113,15 +1111,15 @@
   function isMenuChecked(cmdId) {
     switch (cmdId) {
       case IDM_VIEW_MENU:
-        return showMenu;
+        return settings.showMenu;
       case IDM_VIEW_WORDWRAP:
         return wordWrap;
       case IDM_FILE_READONLY_MODE:
         return readOnly;
       case IDM_VIEW_LINENUMBERS:
-        return showLineNumbers;
+        return settings.showLineNumbers;
       case IDM_VIEW_STATUSBAR:
-        return showStatusBar;
+        return settings.showStatusBar;
       case IDM_VIEW_TOOLBAR:
         return showToolbar;
       case IDM_LINEENDINGS_CRLF:
@@ -1131,7 +1129,7 @@
       case IDM_LINEENDINGS_CR:
         return lineSeparator === "\r";
       case IDM_VIEW_SHOWWHITESPACE:
-        return showWhitespace;
+        return settings.showWhitespace;
       case IDM_SET_MULTIPLE_SELECTION:
         return enableMultipleSelection;
       case IDM_VIEW_TABSASSPACES:
@@ -1245,7 +1243,7 @@
         selectToDocEnd(editorView);
         break;
       case IDM_VIEW_MENU:
-        showMenu = !showMenu;
+        settings.showMenu = !settings.showMenu;
         break;
       case IDM_VIEW_WORDWRAP:
         wordWrap = !wordWrap;
@@ -1254,7 +1252,7 @@
         readOnly = !readOnly;
         break;
       case IDM_VIEW_SHOWWHITESPACE:
-        showWhitespace = !showWhitespace;
+        settings.showWhitespace = !settings.showWhitespace;
         break;
       case IDM_FILE_NEWWINDOW2:
         // open empty window
@@ -1262,10 +1260,10 @@
         window.open(uri);
         break;
       case IDM_VIEW_LINENUMBERS:
-        showLineNumbers = !showLineNumbers;
+        settings.showLineNumbers = !settings.showLineNumbers;
         break;
       case IDM_VIEW_STATUSBAR:
-        showStatusBar = !showStatusBar;
+        settings.showStatusBar = !settings.showStatusBar;
         break;
       case IDM_VIEW_TOOLBAR:
         showToolbar = !showToolbar;
@@ -1810,7 +1808,7 @@
 
 <main class="fixed inset-0 grid">
   <div class="flex flex-nowrap items-center shadow text-xs z-10">
-    {#if showMenu}
+    {#if settings.showMenu}
       <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
         ><svg
           xmlns="http://www.w3.org/2000/svg"
@@ -1861,7 +1859,7 @@
         </div>
         <button
           class="ml-2 px-2 py-0.5 hover:bg-gray-100 text-gray-600"
-          on:click={() => (showMenu = true)}>show menu</button
+          on:click={() => (settings.showMenu = true)}>show menu</button
         >
       </div>
     {/if}
@@ -1903,7 +1901,7 @@
     />
   </div>
 
-  {#if showStatusBar}
+  {#if settings.showStatusBar}
     <div class="flex justify-between px-2 bg-gray-50 text-sm gap-4">
       <div>Ln {statusLn1} / {statusLn2}</div>
       <div>Col {statusCol1} / {statusCol2}</div>
