@@ -337,3 +337,33 @@ export async function readDirRecur(
   res.dirEntries = entries;
   return res;
 }
+
+/**
+ * @param {FileSystemDirectoryHandle} dirHandle
+ * @param {string} dir
+ * @returns {Promise<File[]>}
+ */
+export async function readDirRecurFiles(dirHandle, dir = dirHandle.name) {
+  const dirs = [];
+  const files = [];
+  // @ts-ignore
+  for await (const entry of dirHandle.values()) {
+    const path = dir == "" ? entry.name : `${dir}/${entry.name}`;
+    if (entry.kind === "file") {
+      files.push(
+        entry.getFile().then((file) => {
+          file.directoryHandle = dirHandle;
+          file.handle = entry;
+          return Object.defineProperty(file, "webkitRelativePath", {
+            configurable: true,
+            enumerable: true,
+            get: () => path,
+          });
+        })
+      );
+    } else if (entry.kind === "directory") {
+      dirs.push(readDirRecurFiles(entry, path));
+    }
+  }
+  return [...(await Promise.all(dirs)).flat(), ...(await Promise.all(files))];
+}
