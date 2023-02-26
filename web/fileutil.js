@@ -40,14 +40,14 @@ export function isBinary(path) {
 }
 
 /**
- * @param {Blob} f
+ * @param {Blob} blog
  * @returns {Promise<number>}
  */
-export async function lineCount(f) {
-  if (f.size === 0) {
+export async function lineCount(blog) {
+  if (blog.size === 0) {
     return 0;
   }
-  let ab = await f.arrayBuffer();
+  let ab = await blog.arrayBuffer();
   let a = new Uint8Array(ab);
   let nLines = 0;
   // if last character is not newline, we must add +1 to line count
@@ -170,31 +170,34 @@ export function supportsFileSystem() {
 // without the need to re-allocate the array
 // if you need more than 1, use an object
 
-const fseFileIdx = 0;
-const fseDirEntriesIdx = 0;
-const fseDirHandleIdx = 1;
-const fseNameIdx = 2;
-const fsePathIdx = 3;
-const fseSizeIdx = 4;
-const fseMetaIdx = 5;
+// handle (file or dir), parentHandle (dir), size, path, dirEntries, meta
+const handleIdx = 0;
+const parentHandleIdx = 1;
+const sizeIdx = 2;
+const pathIdx = 3;
+const dirEntriesIdx = 4;
+const metaIdx = 5;
 
 export class FsEntry extends Array {
   /**
    * @returns {string}
    */
   get name() {
-    return this[fseNameIdx];
+    return this[handleIdx].name;
   }
 
+  /**
+   * @returns {boolean}
+   */
   get isDir() {
-    return Array.isArray(this[0]);
+    return this[handleIdx].kind === "directory";
   }
 
   /**
    * @returns {number}
    */
   get size() {
-    return this[fseSizeIdx];
+    return this[sizeIdx];
   }
 
   /**
@@ -202,33 +205,41 @@ export class FsEntry extends Array {
    */
   set size(n) {
     throwIf(!this.isDir);
-    this[fseSizeIdx] = n;
+    this[sizeIdx] = n;
   }
 
   /**
    * @returns {string}
    */
   get path() {
-    return this[fsePathIdx];
+    return this[pathIdx];
+  }
+
+  /**
+   * @param {string} v
+   */
+  set path(v) {
+    this[pathIdx] = v;
   }
 
   /**
    * @return any
    */
   get meta() {
-    return this[fseMetaIdx];
+    return this[metaIdx];
   }
 
   set meta(o) {
-    this[fseMetaIdx] = o;
+    this[metaIdx] = o;
   }
 
   /**
-   * @returns {File}
+   * @returns {Promise<File>}
    */
-  get file() {
+  async getFile() {
     throwIf(this.isDir);
-    return this[fseFileIdx];
+    let h = this[handleIdx];
+    return await h.getFile();
   }
 
   /**
@@ -236,7 +247,7 @@ export class FsEntry extends Array {
    * @retruns {any}
    */
   getMeta(key) {
-    let m = this[fseMetaIdx];
+    let m = this[metaIdx];
     return m ? m[key] : undefined;
   }
 
@@ -245,18 +256,48 @@ export class FsEntry extends Array {
    * @param {any} val
    */
   setMeta(key, val) {
-    let m = this[fseMetaIdx] || {};
+    let m = this[metaIdx] || {};
     m[key] = val;
-    this[fseMetaIdx] = m;
+    this[metaIdx] = m;
   }
 
-  get dirHandle() {
-    return this[fseDirHandleIdx];
+  get handle() {
+    return this[handleIdx];
   }
 
+  get parentDirHandle() {
+    return this[parentHandleIdx];
+  }
+
+  /**
+   * @returns {FsEntry[]}
+   */
   get dirEntries() {
     throwIf(!this.isDir);
-    return this[fseDirEntriesIdx];
+    return this[dirEntriesIdx];
+  }
+
+  /**
+   * @param {FsEntry[]} v
+   */
+  set dirEntries(v) {
+    throwIf(!this.isDir);
+    this[dirEntriesIdx] = v;
+  }
+
+  /**
+   * @param {any} handle
+   * @param {any} parentHandle
+   * @param {string} path
+   * @returns {Promise<FsEntry>}
+   */
+  static async fromHandle(handle, parentHandle, path) {
+    let size = 0;
+    if (handle.kind === "file") {
+      let file = await handle.getFile();
+      size = file.size;
+    }
+    return new FsEntry(handle, parentHandle, size, path, [], null);
   }
 }
 
@@ -276,24 +317,23 @@ export async function readDirRecur(
   dir = dirHandle.name
 ) {
   /** @type {FsEntry[]} */
-  let res = [];
+  let entries = [];
   // @ts-ignore
-  for await (const entry of dirHandle.values()) {
-    const path = dir == "" ? entry.name : `${dir}/${entry.name}`;
-    if (skipEntryFn(entry, dir)) {
+  for await (const handle of dirHandle.values()) {
+    if (skipEntryFn(handle, dir)) {
       continue;
     }
-    if (entry.kind === "file") {
-      let file = await entry.getFile();
-      /** @type {FsEntry} */
-      let e = new FsEntry(file, dirHandle, file.name, path, file.size, null);
-      res.push(e);
-    } else if (entry.kind === "directory") {
-      let e = await readDirRecur(entry, skipEntryFn, path);
-      /** @type {FsEntry} */
-      e[fsePathIdx] = path;
-      res.push(e);
+    const path = dir == "" ? handle.name : `${dir}/${handle.name}`;
+    if (handle.kind === "file") {
+      let e = await FsEntry.fromHandle(handle, dirHandle, path);
+      entries.push(e);
+    } else if (handle.kind === "directory") {
+      let e = await readDirRecur(handle, skipEntryFn, path);
+      e.path = path;
+      entries.push(e);
     }
   }
-  return new FsEntry(res, dirHandle, dirHandle.name, "", 0, null);
+  let res = new FsEntry(dirHandle, null, dir);
+  res.dirEntries = entries;
+  return res;
 }
