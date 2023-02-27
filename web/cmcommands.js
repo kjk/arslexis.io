@@ -7,13 +7,12 @@ import {
   b64EncodeHtmlImage,
   b64EncodeStandard,
   b64EncodeURLSafe,
-  parseNumFlexible,
   strCompressWS,
   urlDecode,
   urlEncode,
 } from "./strutil";
 import { EditorSelection } from "@codemirror/state";
-import { getClipboard, len, setClipboard, throwIf } from "./util";
+import { getClipboard, len, setClipboard } from "./util";
 
 /**
  * @param {EditorSelection} sel
@@ -34,14 +33,14 @@ function isEmptySelection(sel) {
  */
 function runOnSelIter({ state, dispatch }, fn, userEvent) {
   if (state.readOnly) return false;
-  let changes = [];
-  let doc = state.doc;
-  let sel = state.selection;
+  const changes = [];
+  const doc = state.doc;
+  const sel = state.selection;
   if (isEmptySelection(sel)) {
     return false;
   }
-  for (let range of sel.ranges) {
-    let { from, to } = range;
+  for (const range of sel.ranges) {
+    const { from, to } = range;
     fn(doc.iterRange(from, to), changes, from);
   }
   if (!changes.length) return false;

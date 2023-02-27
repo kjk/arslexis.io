@@ -222,7 +222,7 @@
     foldGutter,
     foldKeymap,
   } from "@codemirror/language";
-  import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+  import { history, historyKeymap } from "@codemirror/commands";
   import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
   import {
     autocompletion,
@@ -362,6 +362,7 @@
   import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
   import { tick } from "svelte";
   import { Settings } from "./Settings";
+  import { CodeMirrorConfig } from "../CodeMirrorConfig";
 
   let settings = new Settings();
 
@@ -469,6 +470,7 @@
   }
 
   // console.log("commands:", commands);
+  let cmConfig;
 
   let showWhitespaceCompartment = new Compartment();
   $: setShowWhitespace(settings.showWhitespace);
@@ -559,18 +561,7 @@
     });
   }
 
-  let readOnlyCompartment = new Compartment();
-  $: setReadOnlyState(settings.readOnly);
-  /**
-   * @param {boolean} flag
-   */
-  function setReadOnlyState(flag) {
-    if (!editorView) return;
-    const v = EditorState.readOnly.of(flag);
-    editorView.dispatch({
-      effects: readOnlyCompartment.reconfigure(v),
-    });
-  }
+  $: cmConfig && cmConfig.updateReadOnly(settings.readOnly);
 
   let activeLineAltCSS = `.cm-activeLine {
       outline: 1px dotted gray;
@@ -795,6 +786,8 @@
    * @returns {EditorState}
    */
   function createEditorState(s, fileName = "") {
+    cmConfig = new CodeMirrorConfig(editorView);
+
     let theme = undefined;
     let styles = undefined;
     let placeholder =
@@ -808,7 +801,6 @@
       settings.enableMultipleSelection
     );
     let lineSeparatorV = EditorState.lineSeparator.of(settings.lineSeparator);
-    let readOnlyV = EditorState.readOnly.of(settings.readOnly);
     let tabSizeV = EditorState.tabSize.of(settings.tabSize);
     let lineNumV = settings.showLineNumbers ? lineNumbers() : [];
     let showWhitespaceV = settings.showWhitespace ? highlightWhitespace() : [];
@@ -918,7 +910,7 @@
       placeholderExt(placeholder),
       tabsCompartment.of(tabStateV),
       tabSizeCompartment.of(tabSizeV),
-      readOnlyCompartment.of(readOnlyV),
+      cmConfig.makeReadOnly(settings.readOnly),
       lineSeparatorCompartment.of(lineSeparatorV),
       showWhitespaceCompartment.of(showWhitespaceV),
       showTrailingWhitespaceCompartment.of(showTrailingWhitespaceV),
@@ -1141,6 +1133,25 @@
     return false;
   }
 
+  function getCurrentContent() {
+    return editorView.state.doc.toString();
+  }
+
+  function shouldSaveChanged(shouldSave) {
+    if (!shouldSave) {
+      return;
+    }
+    let content = getCurrentContent();
+    writeFile(file, content);
+  }
+
+  function cmdFileNew() {
+    if (isDirty) {
+      // TODO: ask if should save changes
+    }
+    newEmptyFile();
+  }
+
   // this can be invoked via keyboard shortcut of via menu
   // if via keyboard, arg.detail.ev is set
   // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
@@ -1156,10 +1167,7 @@
       // those potentially show dialogs
       case IDM_FILE_NEW:
       case IDT_FILE_NEW:
-        if (isDirty) {
-          // TODO: ask if should save changes
-        }
-        newEmptyFile();
+        cmdFileNew();
         break;
       case IDM_EDIT_CLEARDOCUMENT:
         // TODO: ask to save if dirty?
@@ -1764,7 +1772,9 @@
   onMount(() => {
     buildIconImages();
     preventDragOnElement(document);
+    cmConfig = new CodeMirrorConfig();
     editorView = createEditorView();
+    cmConfig.editorView = editorView;
     openInitialFile();
 
     // document.addEventListener("keydown", onKeyDown);
