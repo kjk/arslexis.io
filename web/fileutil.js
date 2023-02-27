@@ -32,9 +32,9 @@ const binaryExts = [
 ];
 
 export function isBinary(path) {
-  if (path.includes(".git/")) {
-    return true;
-  }
+  // if (path.includes(".git/")) {
+  //   return true;
+  // }
   let ext = getFileExt(path);
   return binaryExts.includes(ext);
 }
@@ -366,4 +366,20 @@ export async function readDirRecurFiles(dirHandle, dir = dirHandle.name) {
     }
   }
   return [...(await Promise.all(dirs)).flat(), ...(await Promise.all(files))];
+}
+
+/**
+ *
+ * @param {FsEntry} dir
+ * @param {Function} fn
+ */
+export function forEachFsEntry(dir, fn) {
+  let entries = dir.dirEntries;
+  for (let e of entries) {
+    let skip = fn(e);
+    if (!skip && e.isDir) {
+      forEachFsEntry(e, fn);
+    }
+  }
+  fn(dir);
 }
