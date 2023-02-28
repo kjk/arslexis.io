@@ -1,6 +1,7 @@
 import { genRandomID, splitMax, throwIf } from "../util";
 
 export const fsTypeLocalStorage = "localstorage";
+export const fsTypeComputer = "computer'";
 
 export class FsFile {
   type = "";
@@ -8,6 +9,8 @@ export class FsFile {
   id = "";
   // name doesn't have to be unique
   name = "";
+  /** @type {FileSystemFileHandle} */
+  fileHandle;
   /**
    * @param {string} id
    * @param {string} [name]
@@ -96,12 +99,9 @@ export function deserialize(s) {
 }
 
 /**
- * must have id and name set
  * @param {FsFile} f
- * @returns {string}
  */
-export function readFile(f) {
-  throwIf(f.type !== fsTypeLocalStorage);
+function readFileLocalStorage(f) {
   const key = mkLSKey(f);
   const content = localStorage.getItem(key);
   return content;
@@ -109,13 +109,61 @@ export function readFile(f) {
 
 /**
  * @param {FsFile} f
- * @param {string} content
+ * @returns {Promise<string>}
  */
-export function writeFile(f, content) {
+async function readFileComputer(f) {
+  const fh = f.fileHandle;
+  const d = await fh.getFile();
+  const ab = await d.arrayBuffer();
+  const res = new TextDecoder().decode(ab);
+  return res;
+}
+
+/**
+ * must have id and name set
+ * @param {FsFile} f
+ * @returns {Promise<string>}
+ */
+export async function readFile(f) {
   switch (f.type) {
     case fsTypeLocalStorage:
-      const key = mkLSKey(f);
-      localStorage.setItem(key, content);
+      return readFileLocalStorage(f);
+    case fsTypeComputer:
+      return await readFileComputer(f);
+    default:
+      throwIf(true, `f.type '${f.type}' not recognized`);
+  }
+  return "";
+}
+
+async function writeFileComputer(f, contents) {
+  const fileHandle = f.fileHandle;
+  // Create a FileSystemWritableFileStream to write to.
+  const writable = await fileHandle.createWritable();
+
+  // Write the contents of the file to the stream.
+  await writable.write(contents);
+
+  // Close the file and write the contents to disk.
+  await writable.close();
+}
+
+function writeFileLocalStorage(f, content) {
+  const key = mkLSKey(f);
+  localStorage.setItem(key, content);
+}
+
+/**
+ * @param {FsFile} f
+ * @param {string} content
+ */
+export async function writeFile(f, content) {
+  switch (f.type) {
+    case fsTypeLocalStorage:
+      writeFileLocalStorage(f, content);
+      break;
+    case fsTypeComputer:
+      await writeFileComputer(f, content);
       break;
     default:
       throwIf(true, `invalid FsFile.type ${f.type}`);
@@ -134,4 +182,51 @@ export function getFileList(type) {
     default:
       throwIf(true, `invalid FsFile.type ${type}`);
   }
+}
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker
+ * @returns {Promise<FsFile>}
+ */
+export async function openFilePicker() {
+  const opts = {
+    mutltiple: false,
+  };
+  let fileHandle;
+  try {
+    // @ts-ignore
+    const files = await window.showOpenFilePicker(opts);
+    fileHandle = files[0];
+  } catch (e) {
+    console.log("openFilePicker: showOpenFilePicker: e:", e);
+    return null;
+  }
+  let name = fileHandle.name;
+  let res = new FsFile(fsTypeComputer, name, name);
+  res.fileHandle = fileHandle;
+  return res;
+}
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker
+ * @returns {Promise<FsFile>}
+ */
+export async function saveFilePicker(suggestedName = "") {
+  const opts = {
+    suggestedName: suggestedName,
+    mutltiple: false,
+  };
+  let fileHandle;
+  try {
+    // @ts-ignore
+    const files = await window.showSaveFilePicker(opts);
+    fileHandle = files[0];
+  } catch (e) {
+    console.log("saveFilePicker: showSaveFilePicker: e:", e);
+    return null;
+  }
+  let name = fileHandle.name;
+  let res = new FsFile(fsTypeComputer, name, name);
+  res.fileHandle = fileHandle;
+  return res;
 }

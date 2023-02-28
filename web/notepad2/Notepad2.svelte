@@ -280,6 +280,7 @@
     FsFile,
     newLocalStorageFile,
     readFile,
+    saveFilePicker,
     serialize,
     writeFile,
   } from "./FsFile";
@@ -379,6 +380,7 @@
     updateVisualBraceMatching,
     updateWordWrap,
   } from "../CodeMirrorConfig";
+  import { supportsFileSystem } from "../fileutil";
 
   let settings = new Settings();
 
@@ -560,6 +562,8 @@
   let showingInsertXmlTag = false;
 
   let showingAbout = false;
+  let askSaveChangesName;
+  let shouldSaveCb;
 
   let isShowingDialog = false;
   $: isShowingDialog =
@@ -583,9 +587,9 @@
   /**
    * @param {FsFile} fileIn
    */
-  function handleFileOpen(fileIn) {
+  async function handleFileOpen(fileIn) {
     console.log("handleFileOpen:", fileIn);
-    let content = readFile(fileIn);
+    let content = await readFile(fileIn);
     let state = createEditorState(content, fileIn.name);
     initialState = state;
     editorView.setState(initialState);
@@ -686,8 +690,6 @@
    * @returns {EditorState}
    */
   function createEditorState(s, fileName = "") {
-    setConfigEditorView(editorView);
-
     let theme = undefined;
     let styles = undefined;
     let placeholder =
@@ -803,6 +805,7 @@
       doc: s ?? undefined,
       extensions: exts,
     });
+    setConfigEditorView(editorView);
     return res;
   }
 
@@ -1012,19 +1015,95 @@
     return editorView.state.doc.toString();
   }
 
-  function shouldSaveChanged(shouldSave) {
-    if (!shouldSave) {
-      return;
-    }
+  // async function saveFilePickerLocalStorage() {
+  //   return new Promise((resolve, reject) => {
+  //     onSaveAsDone = (
+  //     showingSaveAs = true;
+  //   });
+  // }
+
+  /**
+   * @returns Promise<boolean> true if cancelled saving
+   */
+  async function saveCurrentFile() {
     let content = getCurrentContent();
-    writeFile(file, content);
+    if (file) {
+      writeFile(file, content);
+      return false;
+    }
+    if (supportsFileSystem()) {
+      let file = await saveFilePicker();
+      if (file === null) {
+        return true;
+      }
+      writeFile(file, content);
+      return false;
+    }
+    throwIf(true, "TODO: must do save as");
+    // TODO: show DialogSaveAs() as a promise
+    showingSaveAs = true;
   }
 
-  function cmdFileNew() {
-    if (isDirty) {
-      // TODO: ask if should save changes
+  /**
+   * @returns {Promise<string>}
+   */
+  async function askToSaveFile() {
+    return new Promise((resolve, reject) => {
+      askSaveChangesName = name;
+      shouldSaveCb = (why) => {
+        resolve(why);
+      };
+      showingSaveChanges = true;
+    });
+  }
+
+  async function cmdFileNew() {
+    if (!isDirty) {
+      newEmptyFile();
+      return;
     }
-    newEmptyFile();
+    let what = await askToSaveFile();
+    if (what === "cancel") {
+      return;
+    }
+    if (what === "no") {
+      newEmptyFile();
+      return;
+    }
+    throwIf(what !== "yes");
+    throwIf(true);
+    // what = await saveCurrentFile();
+  }
+
+  function cmdFileSave() {
+    if (file === null) {
+      // TODO: need to provide callback to call when saving a file
+      showingSaveAs = true;
+    } else {
+      handleSaveAs(file);
+    }
+  }
+
+  function cmdFileOpen3() {
+    if (supportsFileSystem()) {
+    }
+    showingOpenFile = true;
+    // TODO: more
+  }
+
+  function cmdFileOpen2(shouldSave) {
+    if (shouldSave) {
+    }
+  }
+
+  function cmdFileOpen() {
+    if (isDirty) {
+      askSaveChangesName = name;
+      showingSaveChanges = true;
+      shouldSaveCb = cmdFileOpen2;
+      return;
+    }
+    cmdFileOpen3();
   }
 
   // this can be invoked via keyboard shortcut of via menu
@@ -1050,17 +1129,11 @@
         break;
       case IDM_FILE_OPEN:
       case IDT_FILE_OPEN:
-        showingOpenFile = true;
-        // TODO: more
+        cmdFileOpen();
         break;
       case IDM_FILE_SAVE:
       case IDT_FILE_SAVE:
-        if (file === null) {
-          // TODO: need to provide callback to call when saving a file
-          showingSaveAs = true;
-        } else {
-          handleSaveAs(file);
-        }
+        cmdFileSave();
         break;
       case IDM_FILE_SAVEAS:
       case IDT_FILE_SAVEAS:
@@ -1805,9 +1878,11 @@
     />
   {/if}
 
-  {#if showingSaveChanges}
-    <DialogAskSaveChanges bind:open={showingSaveChanges} filePath="foo.md" />
-  {/if}
+  <DialogAskSaveChanges
+    bind:open={showingSaveChanges}
+    name={askSaveChangesName}
+    onDone={shouldSaveCb}
+  />
 
   <DialogAbout bind:open={showingAbout} />
 
