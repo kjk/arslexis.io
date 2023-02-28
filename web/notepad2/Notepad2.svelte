@@ -218,7 +218,6 @@
     defaultHighlightStyle,
     syntaxHighlighting,
     indentOnInput,
-    bracketMatching,
     foldGutter,
     foldKeymap,
   } from "@codemirror/language";
@@ -254,11 +253,9 @@
     standardKeymap,
   } from "@codemirror/commands";
 
-  import { indentUnit } from "@codemirror/language";
-
   import { getTheme } from "../cmexts";
   import {
-    getLangFromFileName,
+    getLangExtFromFileName,
     getLangFromLexer,
     getLangName,
   } from "../cmlangs";
@@ -472,35 +469,11 @@
   // console.log("commands:", commands);
   let cmConfig;
 
-  let showWhitespaceCompartment = new Compartment();
-  $: setShowWhitespace(settings.showWhitespace);
-  function setShowWhitespace(flag) {
-    if (!editorView) return;
-    const v = flag ? highlightWhitespace() : [];
-    editorView.dispatch({
-      effects: showWhitespaceCompartment.reconfigure(v),
-    });
-  }
-
-  let showTrailingWhitespaceCompartment = new Compartment();
-  $: setShowTrailingWhitespace(settings.showTrailingWhitespace);
-  function setShowTrailingWhitespace(flag) {
-    if (!editorView) return;
-    const v = flag ? highlightTrailingWhitespace() : [];
-    editorView.dispatch({
-      effects: showTrailingWhitespaceCompartment.reconfigure(v),
-    });
-  }
-
-  let enableMultipleSelectionCompartment = new Compartment();
-  $: setEnableMultipleSelection(settings.enableMultipleSelection);
-  function setEnableMultipleSelection(flag) {
-    if (!editorView) return;
-    const v = EditorState.allowMultipleSelections.of(flag);
-    editorView.dispatch({
-      effects: enableMultipleSelectionCompartment.reconfigure(v),
-    });
-  }
+  $: cmConfig && cmConfig.updateShowWhitespace(settings.showWhitespace);
+  $: cmConfig &&
+    cmConfig.updateShowTrailingWhitespace(settings.showTrailingWhitespace);
+  $: cmConfig &&
+    cmConfig.updateEnableMultipleSelection(settings.enableMultipleSelection);
 
   // we use Scintila terminology, it's language in CodeMirror
   let lexer = null;
@@ -520,75 +493,15 @@
   }
 
   let lineSeparatorStatus = "any";
-  let lineSeparatorCompartment = new Compartment();
-  $: setLineSeparator(settings.lineSeparator);
-  function setLineSeparator(sep) {
-    if (!editorView) return;
-    const v = EditorState.lineSeparator.of(sep);
-    editorView.dispatch({
-      effects: lineSeparatorCompartment.reconfigure(v),
-    });
-  }
-
-  let visualBraceMatchingCompartment = new Compartment();
-  $: setVisualBraceMatching(settings.visualBraceMatching);
-  function setVisualBraceMatching(flag) {
-    if (!editorView) return;
-    const v = flag ? bracketMatching() : [];
-    editorView.dispatch({
-      effects: visualBraceMatchingCompartment.reconfigure(v),
-    });
-  }
-
-  let tabSizeCompartment = new Compartment();
-  $: setTabSize(settings.tabSize);
-  function setTabSize(ts) {
-    if (!editorView) return;
-    const v = EditorState.tabSize.of(ts);
-    editorView.dispatch({
-      effects: tabSizeCompartment.reconfigure(v),
-    });
-  }
-
-  let tabsCompartment = new Compartment();
-  $: setTabsState(settings.tabsAsSpaces, settings.tabSpaces);
-  function setTabsState(tabsAsSpaces, tabSpaces) {
-    if (!editorView) return;
-    const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
-    const v = indentUnit.of(indentChar);
-    editorView.dispatch({
-      effects: tabsCompartment.reconfigure(v),
-    });
-  }
-
+  $: cmConfig && cmConfig.updateLineSeparator(settings.lineSeparator);
+  $: cmConfig &&
+    cmConfig.updateVisualBraceMatching(settings.visualBraceMatching);
+  $: cmConfig && cmConfig.updateTabSize(settings.tabSize);
+  $: cmConfig &&
+    cmConfig.updateTabsState(settings.tabsAsSpaces, settings.tabSpaces);
   $: cmConfig && cmConfig.updateReadOnly(settings.readOnly);
 
-  let activeLineAltCSS = `.cm-activeLine {
-      outline: 1px dotted gray;
-      outline-offset: -3px;
-      background-color: transparent !important;
-}`;
-  /** @type {HTMLStyleElement} */
-  let activeLineCSSElement = null;
-  // TODO: only on mount
-  activeLineCSSElement = document.createElement("style");
-  activeLineCSSElement.innerHTML = activeLineAltCSS;
-  // sheet.innerHTML = ".cm-activeLine {background-color: #ffffa5 !important}";
-  document.body.appendChild(activeLineCSSElement);
-  let lineHighlightTypeCompartment = new Compartment();
-  $: setLineHighlightType(settings.lineHighlightType);
-
-  function setLineHighlightType(lht) {
-    if (!editorView) return;
-    activeLineCSSElement.disabled = lht != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
-    const v =
-      lht === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE ? [] : highlightActiveLine();
-    // TODO: for IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK should be
-    // yellow background but for that we should rather change the theme
-    editorView.dispatch({
-      effects: lineHighlightTypeCompartment.reconfigure(v),
-    });
-  }
+  $: cmConfig && cmConfig.updateLineHighlightType(settings.lineHighlightType);
 
   function getCurrentSelectionAsText() {
     let v = editorView;
@@ -599,26 +512,8 @@
     return s;
   }
 
-  let wordWrapCompartment = new Compartment();
-  $: setWordWrapState(settings.wordWrap);
-  function setWordWrapState(flag) {
-    if (!editorView) return;
-    const v = flag ? EditorView.lineWrapping : [];
-    editorView.dispatch({
-      effects: wordWrapCompartment.reconfigure(v),
-    });
-  }
-
-  //   lineNumbers(),
-  let showLineNumbersCompartment = new Compartment();
-  $: setLineNumbersState(settings.showLineNumbers);
-  function setLineNumbersState(flag) {
-    if (!editorView) return;
-    const v = flag ? lineNumbers() : [];
-    editorView.dispatch({
-      effects: showLineNumbersCompartment.reconfigure(v),
-    });
-  }
+  $: cmConfig && cmConfig.updateWordWrap(settings.wordWrap);
+  $: cmConfig && cmConfig.updateLineNumbersState(settings.showLineNumbers);
 
   /** @type {FsFile} */
   let file = null;
@@ -795,30 +690,7 @@
     /** @type {Extension[]}*/
 
     // TODO: why is this [] and not null or something?
-    // @ts-ignore
-    let wordWrapV = settings.wordWrap ? EditorView.lineWrapping : [];
-    let multipleSelectionV = EditorState.allowMultipleSelections.of(
-      settings.enableMultipleSelection
-    );
-    let lineSeparatorV = EditorState.lineSeparator.of(settings.lineSeparator);
-    let tabSizeV = EditorState.tabSize.of(settings.tabSize);
-    let lineNumV = settings.showLineNumbers ? lineNumbers() : [];
-    let showWhitespaceV = settings.showWhitespace ? highlightWhitespace() : [];
-    let showTrailingWhitespaceV = settings.showTrailingWhitespace
-      ? highlightTrailingWhitespace()
-      : [];
-    const indentChar = settings.tabsAsSpaces
-      ? " ".repeat(settings.tabSpaces)
-      : "\t";
-    const tabStateV = indentUnit.of(indentChar);
-    const visualBraceMatchingV = settings.visualBraceMatching
-      ? bracketMatching()
-      : [];
-    const lineHighlihtTypeV =
-      settings.lineHighlightType === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE
-        ? []
-        : highlightActiveLine();
-    let lexerV = getLangFromFileName(fileName);
+    let lexerV = getLangExtFromFileName(fileName);
     statusLang = "Text";
     if (lexerV) {
       console.log("lang:", lexerV);
@@ -890,12 +762,12 @@
       dropCursor(),
       indentOnInput(),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      visualBraceMatchingCompartment.of(visualBraceMatchingV),
+      cmConfig.makeVisualBraceMatching(settings.visualBraceMatching),
       closeBrackets(),
       autocompletion(),
       rectangularSelection(),
       crosshairCursor(),
-      lineHighlightTypeCompartment.of(lineHighlihtTypeV),
+      cmConfig.makeLineHighlight(settings.lineHighlightType),
       highlightSelectionMatches(),
       keymap.of([
         ...closeBracketsKeymap,
@@ -908,15 +780,15 @@
       ]),
       keymap.of([indentWithTab2]),
       placeholderExt(placeholder),
-      tabsCompartment.of(tabStateV),
-      tabSizeCompartment.of(tabSizeV),
+      cmConfig.makeTabState(settings.tabsAsSpaces, settings.tabSpaces),
+      cmConfig.makeTabSize(settings.tabSize),
       cmConfig.makeReadOnly(settings.readOnly),
-      lineSeparatorCompartment.of(lineSeparatorV),
-      showWhitespaceCompartment.of(showWhitespaceV),
-      showTrailingWhitespaceCompartment.of(showTrailingWhitespaceV),
-      wordWrapCompartment.of(wordWrapV),
-      enableMultipleSelectionCompartment.of(multipleSelectionV),
-      showLineNumbersCompartment.of(lineNumV),
+      cmConfig.makeLineSeparator(settings.lineSeparator),
+      cmConfig.makeShowWhiteSpace(settings.showWhitespace),
+      cmConfig.makeShowTrailingWhitespace(settings.showTrailingWhitespace),
+      cmConfig.makeWordWrap(settings.wordWrap),
+      cmConfig.makeMultipleSelection(settings.enableMultipleSelection),
+      cmConfig.makeLineNumbers(settings.showLineNumbers),
       foldGutterExt,
       // scrollPastEnd(),
       lexerCompartment.of(lexerV),
@@ -926,8 +798,6 @@
       doc: s ?? undefined,
       extensions: exts,
     });
-    activeLineCSSElement.disabled =
-      settings.lineHighlightType != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
     return res;
   }
 

@@ -151,7 +151,7 @@ const langs = [
  * @param {string} fileName
  * @returns {any}
  */
-export function getLangFromFileName(fileName) {
+export function getLangExtFromFileName(fileName) {
   function findByExtOrName(s) {
     for (let lang of langs) {
       for (let i = 2; i < len(lang); i++) {
