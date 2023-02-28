@@ -161,7 +161,6 @@
     IDM_INSERT_UNICODE_WJ,
     CMD_INSERTFILENAME_NOEXT,
     IDM_EDIT_INSERT_FILENAME,
-    IDM_EDIT_INSERT_PATHNAME,
     IDM_EDIT_INSERT_UTC_DATETIME,
     IDM_EDIT_INSERT_TIMESTAMP,
     IDM_EDIT_INSERT_TIMESTAMP_MS,
@@ -169,9 +168,7 @@
     IDM_EDIT_INSERT_SHORTDATE,
     IDM_EDIT_INSERT_LONGDATE,
     IDM_VIEW_SHOWFILENAMEONLY,
-    IDM_VIEW_SHOWFULLPATH,
     IDM_VIEW_SHOWEXCERPT,
-    IDM_VIEW_SHOWFILENAMEFIRST,
     IDM_EDIT_SELTODOCSTART,
     IDM_EDIT_SELTODOCEND,
     IDM_EDIT_CHAR2HEX,
@@ -181,7 +178,6 @@
     IDM_EDIT_UNESCAPECCHARS,
     IDM_EDIT_XHTML_ESCAPE_CHAR,
     IDM_EDIT_XHTML_UNESCAPE_CHAR,
-    IDM_VIEW_SHOW_FOLDING,
     IDM_EDIT_ENCLOSESELECTION,
     IDM_EDIT_INSERT_XMLTAG,
     CMD_CTRLBACK,
@@ -195,8 +191,8 @@
     IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK,
     IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME,
   } from "./menu-notepad2";
-  import { EditorView, lineNumbers } from "@codemirror/view";
-  import { EditorSelection, EditorState, Compartment } from "@codemirror/state";
+  import { EditorView } from "@codemirror/view";
+  import { EditorSelection, EditorState } from "@codemirror/state";
   import Twitter from "../icons/Twitter.svelte";
   import GitHub from "../icons/GitHub.svelte";
 
@@ -204,9 +200,6 @@
   import {
     keymap,
     highlightSpecialChars,
-    highlightWhitespace,
-    highlightTrailingWhitespace,
-    highlightActiveLine,
     highlightActiveLineGutter,
     drawSelection,
     dropCursor,
@@ -359,7 +352,33 @@
   import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
   import { tick } from "svelte";
   import { Settings } from "./Settings";
-  import { CodeMirrorConfig } from "../CodeMirrorConfig";
+  import {
+    makeLang,
+    makeLineHighlight,
+    makeLineNumbers,
+    makeLineSeparator,
+    makeMultipleSelection,
+    makeReadOnly,
+    makeShowTrailingWhitespace,
+    makeShowWhiteSpace,
+    makeTabSize,
+    makeTabState,
+    makeVisualBraceMatching,
+    makeWordWrap,
+    setConfigEditorView,
+    updateEnableMultipleSelection,
+    updateLang,
+    updateLineHighlightType,
+    updateLineNumbersState,
+    updateLineSeparator,
+    updateReadOnly,
+    updateShowTrailingWhitespace,
+    updateShowWhitespace,
+    updateTabSize,
+    updateTabsState,
+    updateVisualBraceMatching,
+    updateWordWrap,
+  } from "../CodeMirrorConfig";
 
   let settings = new Settings();
 
@@ -467,41 +486,30 @@
   }
 
   // console.log("commands:", commands);
-  let cmConfig;
 
-  $: cmConfig && cmConfig.updateShowWhitespace(settings.showWhitespace);
-  $: cmConfig &&
-    cmConfig.updateShowTrailingWhitespace(settings.showTrailingWhitespace);
-  $: cmConfig &&
-    cmConfig.updateEnableMultipleSelection(settings.enableMultipleSelection);
-
+  $: updateShowWhitespace(settings.showWhitespace);
+  $: updateShowTrailingWhitespace(settings.showTrailingWhitespace);
+  $: updateEnableMultipleSelection(settings.enableMultipleSelection);
+  let lineSeparatorStatus = "any";
+  $: updateLineSeparator(settings.lineSeparator);
+  $: updateVisualBraceMatching(settings.visualBraceMatching);
+  $: updateTabSize(settings.tabSize);
+  $: updateTabsState(settings.tabsAsSpaces, settings.tabSpaces);
+  $: updateReadOnly(settings.readOnly);
+  $: updateLineHighlightType(settings.lineHighlightType);
+  $: updateWordWrap(settings.wordWrap);
+  $: updateLineNumbersState(settings.showLineNumbers);
   // we use Scintila terminology, it's language in CodeMirror
   let lexer = null;
-  let lexerCompartment = new Compartment();
-  $: setLexer(lexer);
-  function setLexer(lexer) {
-    if (!editorView) return;
-    const v = getLangFromLexer(lexer);
-    if (v) {
-      console.log("lang:", v);
-      statusLang = getLangName(v);
-      editorView.dispatch({
-        // @ts-ignore
-        effects: lexerCompartment.reconfigure(v),
-      });
+  $: updateLexer(lexer);
+  function updateLexer(lexer) {
+    const lang = getLangFromLexer(lexer);
+    if (lang) {
+      console.log("lang:", lang);
+      statusLang = getLangName(lang);
+      updateLang(lang);
     }
   }
-
-  let lineSeparatorStatus = "any";
-  $: cmConfig && cmConfig.updateLineSeparator(settings.lineSeparator);
-  $: cmConfig &&
-    cmConfig.updateVisualBraceMatching(settings.visualBraceMatching);
-  $: cmConfig && cmConfig.updateTabSize(settings.tabSize);
-  $: cmConfig &&
-    cmConfig.updateTabsState(settings.tabsAsSpaces, settings.tabSpaces);
-  $: cmConfig && cmConfig.updateReadOnly(settings.readOnly);
-
-  $: cmConfig && cmConfig.updateLineHighlightType(settings.lineHighlightType);
 
   function getCurrentSelectionAsText() {
     let v = editorView;
@@ -511,9 +519,6 @@
     );
     return s;
   }
-
-  $: cmConfig && cmConfig.updateWordWrap(settings.wordWrap);
-  $: cmConfig && cmConfig.updateLineNumbersState(settings.showLineNumbers);
 
   /** @type {FsFile} */
   let file = null;
@@ -681,7 +686,7 @@
    * @returns {EditorState}
    */
   function createEditorState(s, fileName = "") {
-    cmConfig = new CodeMirrorConfig(editorView);
+    setConfigEditorView(editorView);
 
     let theme = undefined;
     let styles = undefined;
@@ -690,13 +695,13 @@
     /** @type {Extension[]}*/
 
     // TODO: why is this [] and not null or something?
-    let lexerV = getLangExtFromFileName(fileName);
+    let lang = getLangExtFromFileName(fileName);
     statusLang = "Text";
-    if (lexerV) {
-      console.log("lang:", lexerV);
-      statusLang = getLangName(lexerV);
+    if (lang) {
+      console.log("lang:", lang);
+      statusLang = getLangName(lang);
     } else {
-      lexerV = [];
+      lang = [];
     }
 
     // possibilities:
@@ -762,12 +767,12 @@
       dropCursor(),
       indentOnInput(),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      cmConfig.makeVisualBraceMatching(settings.visualBraceMatching),
+      makeVisualBraceMatching(settings.visualBraceMatching),
       closeBrackets(),
       autocompletion(),
       rectangularSelection(),
       crosshairCursor(),
-      cmConfig.makeLineHighlight(settings.lineHighlightType),
+      makeLineHighlight(settings.lineHighlightType),
       highlightSelectionMatches(),
       keymap.of([
         ...closeBracketsKeymap,
@@ -780,18 +785,18 @@
       ]),
       keymap.of([indentWithTab2]),
       placeholderExt(placeholder),
-      cmConfig.makeTabState(settings.tabsAsSpaces, settings.tabSpaces),
-      cmConfig.makeTabSize(settings.tabSize),
-      cmConfig.makeReadOnly(settings.readOnly),
-      cmConfig.makeLineSeparator(settings.lineSeparator),
-      cmConfig.makeShowWhiteSpace(settings.showWhitespace),
-      cmConfig.makeShowTrailingWhitespace(settings.showTrailingWhitespace),
-      cmConfig.makeWordWrap(settings.wordWrap),
-      cmConfig.makeMultipleSelection(settings.enableMultipleSelection),
-      cmConfig.makeLineNumbers(settings.showLineNumbers),
+      makeTabState(settings.tabsAsSpaces, settings.tabSpaces),
+      makeTabSize(settings.tabSize),
+      makeReadOnly(settings.readOnly),
+      makeLineSeparator(settings.lineSeparator),
+      makeShowWhiteSpace(settings.showWhitespace),
+      makeShowTrailingWhitespace(settings.showTrailingWhitespace),
+      makeWordWrap(settings.wordWrap),
+      makeMultipleSelection(settings.enableMultipleSelection),
+      makeLineNumbers(settings.showLineNumbers),
       foldGutterExt,
       // scrollPastEnd(),
-      lexerCompartment.of(lexerV),
+      makeLang(lang),
       ...getTheme(theme, styles),
     ];
     let res = EditorState.create({
@@ -1642,9 +1647,7 @@
   onMount(() => {
     buildIconImages();
     preventDragOnElement(document);
-    cmConfig = new CodeMirrorConfig();
     editorView = createEditorView();
-    cmConfig.editorView = editorView;
     openInitialFile();
 
     // document.addEventListener("keydown", onKeyDown);
