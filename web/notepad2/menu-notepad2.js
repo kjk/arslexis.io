@@ -119,7 +119,7 @@ const menuFile = [
   ["&Save\tMod+S", IDM_FILE_SAVE],
   ["Save &As...\tF6", IDM_FILE_SAVEAS],
   // ["Save Back&up", IDM_FILE_SAVEBACKUP],
-  // ["Save Cop&y...\tMod+F6", IDM_FILE_SAVECOPY],
+  ["Save Cop&y...\tMod+F6", IDM_FILE_SAVECOPY],
   MENU_SEPARATOR,
   ["File &Mode", menuFileMode],
   // ["Re&vert\tF5", IDM_FILE_REVERT],

@@ -886,10 +886,11 @@
   }
 
   /**
-   * @param {string} [content]
+   * @param {string} content
+   * @param {boolean} saveCopy
    * @returns {Promise<boolean>}
    */
-  async function contentSaveAs(content) {
+  async function contentSaveAs(content, saveCopy) {
     if (!content) {
       content = getCurrentContent();
     }
@@ -899,14 +900,18 @@
         return true;
       }
       await writeFile(f, content);
-      name = f.name;
+      if (!saveCopy) {
+        setContentAsCurrent(content);
+      }
       return false;
     }
     // fallback to local storage
     let f = await saveFilePickerLocalStorage();
     if (f) {
       await writeFile(f, content);
-      name = f.name;
+      if (!saveCopy) {
+        setContentAsCurrent(content);
+      }
       return false;
     }
     return true;
@@ -924,7 +929,7 @@
       writeFile(file, content);
       return false;
     }
-    return await contentSaveAs(content);
+    return await contentSaveAs(content, false);
   }
 
   /**
@@ -940,20 +945,24 @@
     name = file.name;
   }
 
+  function setContentAsCurrent(content, name) {
+    let state = createEditorState(content, name);
+    initialState = state;
+    editorView.setState(initialState);
+    isDirty = false;
+    updateStatusLine();
+    setToolbarEnabledState();
+  }
+
   /**
    * @param {FsFile} fileIn
    */
   async function setFileAsCurrent(fileIn) {
     console.log("setCurrentFile:", fileIn);
     let content = await readFile(fileIn);
-    let state = createEditorState(content, fileIn.name);
-    initialState = state;
-    editorView.setState(initialState);
-    isDirty = false;
     file = fileIn;
     name = file.name;
-    updateStatusLine();
-    setToolbarEnabledState();
+    setContentAsCurrent(content, name);
   }
 
   async function loadFile() {
@@ -1009,7 +1018,12 @@
 
   function cmdFileSaveAs() {
     let content = getCurrentContent();
-    contentSaveAs(content);
+    contentSaveAs(content, false);
+  }
+
+  function cmdFileSaveCopy() {
+    let content = getCurrentContent();
+    contentSaveAs(content, true);
   }
 
   function cmdFileSave() {
@@ -1076,6 +1090,11 @@
       case IDT_FILE_SAVEAS:
         cmdFileSaveAs();
         break;
+      case IDM_FILE_SAVECOPY:
+      case IDT_FILE_SAVECOPY:
+        cmdFileSaveCopy();
+        break;
+
       case IDM_EDIT_ENCLOSESELECTION:
         showingEncloseSelection = true;
         break;
@@ -1085,9 +1104,6 @@
       case IDM_HELP_ABOUT:
         showingAbout = true;
         break;
-      // case IDM_FILE_SAVECOPY:
-      // case IDT_FILE_SAVECOPY:
-      //   break;
 
       case IDM_DUMP_SELECTIONS:
         dumpSelections(editorView);
