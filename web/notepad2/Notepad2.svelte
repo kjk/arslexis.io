@@ -488,7 +488,7 @@
   }
 
   // console.log("commands:", commands);
-
+  setConfigEditorView(null);
   $: updateShowWhitespace(settings.showWhitespace);
   $: updateShowTrailingWhitespace(settings.showTrailingWhitespace);
   $: updateEnableMultipleSelection(settings.enableMultipleSelection);
@@ -1015,12 +1015,18 @@
     return editorView.state.doc.toString();
   }
 
-  // async function saveFilePickerLocalStorage() {
-  //   return new Promise((resolve, reject) => {
-  //     onSaveAsDone = (
-  //     showingSaveAs = true;
-  //   });
-  // }
+  let onSaveAsDone;
+  /**
+   * @reuturns {Promise<FsFile>}
+   */
+  async function saveFilePickerLocalStorage() {
+    return new Promise((resolve, reject) => {
+      onSaveAsDone = (file) => {
+        resolve(file);
+      };
+      showingSaveAs = true;
+    });
+  }
 
   /**
    * @returns Promise<boolean> true if cancelled saving
@@ -1039,9 +1045,13 @@
       writeFile(file, content);
       return false;
     }
-    throwIf(true, "TODO: must do save as");
-    // TODO: show DialogSaveAs() as a promise
-    showingSaveAs = true;
+    // fallback to local storage
+    let f = await saveFilePickerLocalStorage();
+    if (f) {
+      writeFile(f, content);
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -1062,17 +1072,20 @@
       newEmptyFile();
       return;
     }
-    let what = await askToSaveFile();
-    if (what === "cancel") {
+    let action = await askToSaveFile();
+    if (action === "cancel") {
       return;
     }
-    if (what === "no") {
+    if (action === "no") {
       newEmptyFile();
       return;
     }
-    throwIf(what !== "yes");
-    throwIf(true);
-    // what = await saveCurrentFile();
+    throwIf(action !== "yes");
+    let didCancel = await saveCurrentFile();
+    if (!didCancel) {
+      // TODO: or do this always?
+      newEmptyFile();
+    }
   }
 
   function cmdFileSave() {
@@ -1874,7 +1887,7 @@
     <DialogSaveAs
       bind:open={showingSaveAs}
       name={saveName}
-      handleSave={handleSaveAs}
+      onDone={onSaveAsDone}
     />
   {/if}
 

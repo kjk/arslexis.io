@@ -15,7 +15,7 @@
 
 <WinDialogBase bind:open title="Save Changes?">
   <div slot="main" class="bg-white px-2 py-8 flex justify-center">
-    <div>Save changes to '{name}' ?</div>
+    <div>Save changes to <b>'{name}'</b> ?</div>
   </div>
 
   <!-- bottom -->

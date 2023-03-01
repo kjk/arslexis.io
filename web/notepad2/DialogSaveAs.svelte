@@ -13,7 +13,7 @@
 
   export let name = "";
   /** @type {Function} */
-  export let handleSave;
+  export let onDone;
 
   let selectedFile = null;
 
@@ -39,7 +39,7 @@
   function save() {
     if (selectedFile && selectedFile.name == name) {
       // if changed name since selecting,
-      handleSave(selectedFile);
+      onDone(selectedFile);
       open = false;
       return;
     }
@@ -47,8 +47,13 @@
       return;
     }
     let f = newLocalStorageFile(name);
-    handleSave(f);
+    onDone(f);
     open = false;
+  }
+
+  function close() {
+    open = false;
+    onDone(null);
   }
 
   /**
@@ -103,9 +108,7 @@
     >
     <button
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
-      on:click={() => {
-        open = false;
-      }}>Cancel</button
+      on:click={close}>Cancel</button
     >
   </div>
 </WinDialogBase>
