@@ -553,25 +553,28 @@
   let msgNotImplemented = "";
   let showingMsgNotImplemented = false;
 
-  let showingSaveChanges = false;
-  let saveName = "";
-
+  let onOpenFileDone;
   let showingOpenFile = false;
+
+  let askSaveChangesName;
+  let onAskSaveChangesDone;
+  let showingAskSaveChanges = false;
+
+  let saveAsName = "";
+  let onSaveAsDone;
   let showingSaveAs = false;
 
   let showingEncloseSelection = false;
   let showingInsertXmlTag = false;
 
   let showingAbout = false;
-  let askSaveChangesName;
-  let shouldSaveCb;
 
   let isShowingDialog = false;
   $: isShowingDialog =
     showingMsgNotImplemented ||
     showingOpenFile ||
+    showingAskSaveChanges ||
     showingSaveAs ||
-    showingSaveChanges ||
     showingEncloseSelection ||
     showingInsertXmlTag ||
     showingAbout;
@@ -584,19 +587,6 @@
     if (shouldRetake) {
       focusEditor();
     }
-  }
-
-  /**
-   * @param {FsFile} fileIn
-   */
-  function handleSaveAs(fileIn) {
-    console.log("handleSaveAs:", fileIn);
-    initialState = editorView.state;
-    let content = initialState.doc.toString();
-    writeFile(fileIn, content);
-    isDirty = false;
-    file = fileIn;
-    name = file.name;
   }
 
   function updateStatusLine() {
@@ -871,7 +861,6 @@
     return editorView.state.doc.toString();
   }
 
-  let onSaveAsDone;
   /**
    * @reuturns {Promise<FsFile>}
    */
@@ -884,48 +873,77 @@
     });
   }
 
-  let onFileOpenDone;
   /**
    * @reuturns {Promise<FsFile>}
    */
   async function openFilePickerLocalStorate() {
     return new Promise((resolve, reject) => {
-      onFileOpenDone = (file) => {
+      onOpenFileDone = (file) => {
         resolve(file);
       };
-      showingSaveAs = true;
+      showingOpenFile = true;
     });
   }
+
   /**
-   * @returns Promise<boolean> true if cancelled saving
+   * @param {string} [content]
+   * @returns {Promise<boolean>}
    */
-  async function saveCurrentFile() {
-    let content = getCurrentContent();
-    if (file) {
-      writeFile(file, content);
-      return false;
+  async function contentSaveAs(content) {
+    if (!content) {
+      content = getCurrentContent();
     }
     if (supportsFileSystem()) {
-      let f = await saveFilePicker();
+      let f = await saveFilePicker(name);
       if (f === null) {
         return true;
       }
-      writeFile(f, content);
+      await writeFile(f, content);
+      name = f.name;
       return false;
     }
     // fallback to local storage
     let f = await saveFilePickerLocalStorage();
     if (f) {
-      writeFile(f, content);
+      await writeFile(f, content);
+      name = f.name;
       return false;
     }
     return true;
   }
 
   /**
+   * @param {string} [content]
+   * @returns Promise<boolean> true if cancelled saving
+   */
+  async function contentSave(content) {
+    if (!content) {
+      content = getCurrentContent();
+    }
+    if (file) {
+      writeFile(file, content);
+      return false;
+    }
+    return await contentSaveAs(content);
+  }
+
+  /**
    * @param {FsFile} fileIn
    */
-  async function setCurrentFile(fileIn) {
+  function saveFile(fileIn) {
+    console.log("saveFile:", fileIn);
+    initialState = editorView.state;
+    let content = initialState.doc.toString();
+    writeFile(fileIn, content);
+    isDirty = false;
+    file = fileIn;
+    name = file.name;
+  }
+
+  /**
+   * @param {FsFile} fileIn
+   */
+  async function setFileAsCurrent(fileIn) {
     console.log("setCurrentFile:", fileIn);
     let content = await readFile(fileIn);
     let state = createEditorState(content, fileIn.name);
@@ -944,14 +962,14 @@
       if (!f) {
         return;
       }
-      await setCurrentFile(f);
+      await setFileAsCurrent(f);
       return;
     }
     let f = await openFilePickerLocalStorate();
     if (!f) {
       return;
     }
-    setCurrentFile(f);
+    await setFileAsCurrent(f);
   }
 
   /**
@@ -960,10 +978,10 @@
   async function askToSaveFile() {
     return new Promise((resolve, reject) => {
       askSaveChangesName = name;
-      shouldSaveCb = (why) => {
+      onAskSaveChangesDone = (why) => {
         resolve(why);
       };
-      showingSaveChanges = true;
+      showingAskSaveChanges = true;
     });
   }
 
@@ -981,7 +999,7 @@
       return;
     }
     throwIf(action !== "yes");
-    let didCancel = await saveCurrentFile();
+    let didCancel = await contentSave();
     if (didCancel) {
       return;
     }
@@ -989,13 +1007,18 @@
     newEmptyFile();
   }
 
+  function cmdFileSaveAs() {
+    let content = getCurrentContent();
+    contentSaveAs(content);
+  }
+
   function cmdFileSave() {
-    if (file === null) {
-      // TODO: need to provide callback to call when saving a file
-      showingSaveAs = true;
-    } else {
-      handleSaveAs(file);
+    if (file) {
+      saveFile(file);
+      return;
     }
+    let content = getCurrentContent();
+    contentSave(content);
   }
 
   async function cmdFileOpen() {
@@ -1012,7 +1035,7 @@
       return;
     }
     throwIf(action !== "yes");
-    let didCancel = await saveCurrentFile();
+    let didCancel = await contentSave();
     if (didCancel) {
       return;
     }
@@ -1051,7 +1074,7 @@
         break;
       case IDM_FILE_SAVEAS:
       case IDT_FILE_SAVEAS:
-        showingSaveAs = true;
+        cmdFileSaveAs();
         break;
       case IDM_EDIT_ENCLOSESELECTION:
         showingEncloseSelection = true;
@@ -1659,7 +1682,7 @@
     if (fileId) {
       let file = deserialize(fileId);
       if (file) {
-        setCurrentFile(file);
+        setFileAsCurrent(file);
         locationRemoveSearchParamsNoReload();
         return;
       }
@@ -1672,7 +1695,7 @@
   // Notepad2.c. DefaultToolbarButtons
   let toolbarButtonsOrder = [
     22, 3, 0, 1, 2, 0, 4, 18, 19, 0, 5, 6, 0, 7, 8, 9, 20, 0, 10, 11, 0, 12, 0,
-    24, 0, 15, 16, 0,
+    24, 0, 15,
   ];
   // order of icons in toolbar bitmap
   // el[0] is id of the command sent by the icon
@@ -1916,20 +1939,18 @@
     <div />
   {/if}
 
-  <DialogFileOpen bind:open={showingOpenFile} onDone={onFileOpenDone} />
+  <DialogFileOpen bind:open={showingOpenFile} onDone={onOpenFileDone} />
 
-  {#if showingSaveAs}
-    <DialogSaveAs
-      bind:open={showingSaveAs}
-      name={saveName}
-      onDone={onSaveAsDone}
-    />
-  {/if}
+  <DialogSaveAs
+    bind:open={showingSaveAs}
+    name={saveAsName}
+    onDone={onSaveAsDone}
+  />
 
   <DialogAskSaveChanges
-    bind:open={showingSaveChanges}
+    bind:open={showingAskSaveChanges}
     name={askSaveChangesName}
-    onDone={shouldSaveCb}
+    onDone={onAskSaveChangesDone}
   />
 
   <DialogAbout bind:open={showingAbout} />

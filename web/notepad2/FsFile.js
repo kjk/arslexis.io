@@ -214,8 +214,7 @@ export async function saveFilePicker(suggestedName = "") {
   let fileHandle;
   try {
     // @ts-ignore
-    const files = await window.showSaveFilePicker(opts);
-    fileHandle = files[0];
+    fileHandle = await window.showSaveFilePicker(opts);
   } catch (e) {
     console.log("saveFilePicker: showSaveFilePicker: e:", e);
     return null;
