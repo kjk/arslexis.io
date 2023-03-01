@@ -449,10 +449,6 @@
     setToolbarEnabledState();
   }
 
-  function handleEncloseSelectionOk(before, after) {
-    encloseSelections(editorView, before, after);
-  }
-
   /*
    * @param {number} max
    * @returns {string}
@@ -564,7 +560,10 @@
   let onSaveAsDone;
   let showingSaveAs = false;
 
+  let onEncloseSelectionDone;
   let showingEncloseSelection = false;
+
+  let onInserXmlTagDone;
   let showingInsertXmlTag = false;
 
   let showingAbout = false;
@@ -1057,6 +1056,30 @@
     loadFile();
   }
 
+  async function cmdEncloseSelection() {
+    let res = new Promise((resolve, reject) => {
+      onEncloseSelectionDone = (before, after) => {
+        if (before && after) {
+          encloseSelections(editorView, before, after);
+        }
+      };
+      showingEncloseSelection = true;
+    });
+    return res;
+  }
+
+  async function cmdInsertXmlTag() {
+    let res = new Promise((resolve, reject) => {
+      onInserXmlTagDone = (before, after) => {
+        if (before && after) {
+          encloseSelections(editorView, before, after);
+        }
+      };
+      showingInsertXmlTag = true;
+    });
+    return res;
+  }
+
   // this can be invoked via keyboard shortcut of via menu
   // if via keyboard, arg.detail.ev is set
   // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
@@ -1096,10 +1119,10 @@
         break;
 
       case IDM_EDIT_ENCLOSESELECTION:
-        showingEncloseSelection = true;
+        cmdEncloseSelection();
         break;
       case IDM_EDIT_INSERT_XMLTAG:
-        showingInsertXmlTag = true;
+        cmdInsertXmlTag();
         break;
       case IDM_HELP_ABOUT:
         showingAbout = true;
@@ -1973,12 +1996,12 @@
 
   <DialogEncloseSelection
     bind:open={showingEncloseSelection}
-    handleOk={handleEncloseSelectionOk}
+    onDone={onEncloseSelectionDone}
   />
 
   <DialogInsertXmlTag
     bind:open={showingInsertXmlTag}
-    handleOk={handleEncloseSelectionOk}
+    onDone={onInserXmlTagDone}
   />
 
   <DialogNotImplemented

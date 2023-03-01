@@ -10,6 +10,8 @@
 
   export let title = "";
   export let open = false;
+  // TODO: make it mandatory, children have to propagate
+  export let onDone = null;
   // TODO: always true?
   export let closeOnEsc = true;
 
@@ -19,6 +21,7 @@
 
   function close() {
     open = false;
+    onDone();
   }
 
   /**

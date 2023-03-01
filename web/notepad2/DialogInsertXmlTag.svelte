@@ -11,7 +11,7 @@
   export let before = "<>";
   export let after = "";
   /** @type {Function} */
-  export let handleOk;
+  export let onDone;
 
   let canDispatch = false;
   $: canDispatch = len(before) + len(after) > 0;
@@ -37,8 +37,8 @@
 
   function dispatchOk() {
     if (canDispatch) {
-      handleOk(before, after);
       open = false;
+      onDone(before, after);
     }
   }
 
@@ -60,9 +60,14 @@
     node.focus();
     node.setSelectionRange(1, 1);
   }
+
+  function close() {
+    open = false;
+    onDone(null, null);
+  }
 </script>
 
-<WinDialogBase bind:open title="Enclose Selection">
+<WinDialogBase onDone={close} bind:open title="Enclose Selection">
   <div
     slot="main"
     class="bg-white pt-2 pb-2 pl-4 pr-4 flex flex-col min-h-[4rem]"
@@ -97,9 +102,7 @@
     >
     <button
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
-      on:click={() => {
-        open = false;
-      }}>Cancel</button
+      on:click={close}>Cancel</button
     >
   </div>
 </WinDialogBase>
