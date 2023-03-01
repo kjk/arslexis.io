@@ -279,6 +279,7 @@
     deserialize,
     FsFile,
     newLocalStorageFile,
+    openFilePicker,
     readFile,
     saveFilePicker,
     serialize,
@@ -583,21 +584,6 @@
     if (shouldRetake) {
       focusEditor();
     }
-  }
-  /**
-   * @param {FsFile} fileIn
-   */
-  async function handleFileOpen(fileIn) {
-    console.log("handleFileOpen:", fileIn);
-    let content = await readFile(fileIn);
-    let state = createEditorState(content, fileIn.name);
-    initialState = state;
-    editorView.setState(initialState);
-    isDirty = false;
-    file = fileIn;
-    name = file.name;
-    updateStatusLine();
-    setToolbarEnabledState();
   }
 
   /**
@@ -965,6 +951,10 @@
       case IDM_EDIT_SWAP:
         return hasSelection && hasClipboard;
 
+      case IDM_FILE_SAVE:
+      case IDT_FILE_SAVE:
+        return isDirty;
+
       case IDM_EDIT_LINETRANSPOSE:
         // TODO: if not at first line
         break;
@@ -1028,6 +1018,18 @@
     });
   }
 
+  let onFileOpenDone;
+  /**
+   * @reuturns {Promise<FsFile>}
+   */
+  async function openFilePickerLocalStorate() {
+    return new Promise((resolve, reject) => {
+      onFileOpenDone = (file) => {
+        resolve(file);
+      };
+      showingSaveAs = true;
+    });
+  }
   /**
    * @returns Promise<boolean> true if cancelled saving
    */
@@ -1038,11 +1040,11 @@
       return false;
     }
     if (supportsFileSystem()) {
-      let file = await saveFilePicker();
-      if (file === null) {
+      let f = await saveFilePicker();
+      if (f === null) {
         return true;
       }
-      writeFile(file, content);
+      writeFile(f, content);
       return false;
     }
     // fallback to local storage
@@ -1052,6 +1054,38 @@
       return false;
     }
     return true;
+  }
+
+  /**
+   * @param {FsFile} fileIn
+   */
+  async function setCurrentFile(fileIn) {
+    console.log("setCurrentFile:", fileIn);
+    let content = await readFile(fileIn);
+    let state = createEditorState(content, fileIn.name);
+    initialState = state;
+    editorView.setState(initialState);
+    isDirty = false;
+    file = fileIn;
+    name = file.name;
+    updateStatusLine();
+    setToolbarEnabledState();
+  }
+
+  async function loadFile() {
+    if (supportsFileSystem()) {
+      let f = await openFilePicker();
+      if (!f) {
+        return;
+      }
+      await setCurrentFile(f);
+      return;
+    }
+    let f = await openFilePickerLocalStorate();
+    if (!f) {
+      return;
+    }
+    setCurrentFile(f);
   }
 
   /**
@@ -1082,10 +1116,11 @@
     }
     throwIf(action !== "yes");
     let didCancel = await saveCurrentFile();
-    if (!didCancel) {
-      // TODO: or do this always?
-      newEmptyFile();
+    if (didCancel) {
+      return;
     }
+    // TODO: or do this always?
+    newEmptyFile();
   }
 
   function cmdFileSave() {
@@ -1097,26 +1132,26 @@
     }
   }
 
-  function cmdFileOpen3() {
-    if (supportsFileSystem()) {
-    }
-    showingOpenFile = true;
-    // TODO: more
-  }
-
-  function cmdFileOpen2(shouldSave) {
-    if (shouldSave) {
-    }
-  }
-
-  function cmdFileOpen() {
-    if (isDirty) {
-      askSaveChangesName = name;
-      showingSaveChanges = true;
-      shouldSaveCb = cmdFileOpen2;
+  async function cmdFileOpen() {
+    if (!isDirty) {
+      loadFile();
       return;
     }
-    cmdFileOpen3();
+    let action = await askToSaveFile();
+    if (action === "cancel") {
+      return;
+    }
+    if (action === "no") {
+      loadFile();
+      return;
+    }
+    throwIf(action !== "yes");
+    let didCancel = await saveCurrentFile();
+    if (didCancel) {
+      return;
+    }
+    // TODO: or do this always?
+    loadFile();
   }
 
   // this can be invoked via keyboard shortcut of via menu
@@ -1624,7 +1659,7 @@
     if (fileId) {
       let file = deserialize(fileId);
       if (file) {
-        handleFileOpen(file);
+        setCurrentFile(file);
         locationRemoveSearchParamsNoReload();
         return;
       }
@@ -1879,9 +1914,7 @@
     <div />
   {/if}
 
-  {#if showingOpenFile}
-    <DialogFileOpen bind:open={showingOpenFile} handleOpen={handleFileOpen} />
-  {/if}
+  <DialogFileOpen bind:open={showingOpenFile} onDone={onFileOpenDone} />
 
   {#if showingSaveAs}
     <DialogSaveAs
