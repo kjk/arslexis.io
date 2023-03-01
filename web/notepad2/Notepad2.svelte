@@ -1781,6 +1781,9 @@
     // console.log("file drop:", ev);
     console.log("dt:", ev.dataTransfer);
     let files = await filterDataTransferEntries(ev.dataTransfer);
+    if (len(files) === 0) {
+      return;
+    }
     let first = files[0];
     let content = await first.file.text();
     // TODO: open in new window
