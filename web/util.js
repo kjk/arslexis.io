@@ -424,6 +424,9 @@ export async function getAllFileEntries(dataTransferItemList) {
   for (let i = 0; i < n; i++) {
     let item = dataTransferItemList[i];
     let entry = item.webkitGetAsEntry();
+    if (!entry) {
+      continue;
+    }
     queue.push(entry);
   }
   while (len(queue) > 0) {

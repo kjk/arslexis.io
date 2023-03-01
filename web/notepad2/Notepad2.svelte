@@ -1110,6 +1110,7 @@
         settings.showMenu = !settings.showMenu;
         break;
       case IDM_VIEW_WORDWRAP:
+      case IDT_VIEW_WORDWRAP:
         settings.wordWrap = !settings.wordWrap;
         break;
       case IDM_FILE_READONLY_MODE:
@@ -1861,7 +1862,7 @@
     {/if}
   </div>
 
-  {#if settings.howToolbar && isToolbarReady}
+  {#if settings.showToolbar && isToolbarReady}
     <div class="flex pl-1">
       {#each toolbarButtonsOrder as idx}
         {#if idx === 0}
