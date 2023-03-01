@@ -867,140 +867,6 @@
     window.open(uri);
   }
 
-  /**
-   * return false if a given cmd should be disabled
-   * based on the state of the app
-   * @param {string} cmdId
-   */
-  function isMenuEnabled(cmdId) {
-    if (!editorView) {
-      return false;
-    }
-    let state = editorView.state;
-    let n;
-    switch (cmdId) {
-      // TODO: much more that depend on selection state
-      case IDM_EDIT_CUT:
-      case IDT_EDIT_CUT:
-      case IDM_EDIT_COPY:
-      case IDT_EDIT_COPY:
-      case IDM_EDIT_COPYADD:
-      case IDM_EDIT_CLEARCLIPBOARD:
-      case IDM_EDIT_CONVERTUPPERCASE:
-      case IDM_EDIT_CONVERTLOWERCASE:
-      case IDM_EDIT_INVERTCASE:
-      case IDM_EDIT_TITLECASE:
-      case IDM_EDIT_SENTENCECASE:
-      case IDM_EDIT_CONVERTSPACES:
-      case IDM_EDIT_CONVERTTABS:
-      case IDM_EDIT_CONVERTSPACES2:
-      case IDM_EDIT_CONVERTTABS2:
-      case IDM_EDIT_NUM2HEX:
-      case IDM_EDIT_NUM2DEC:
-      case IDM_EDIT_NUM2BIN:
-      case IDM_EDIT_NUM2OCT:
-      case CMD_ONLINE_SEARCH_GOOGLE:
-      case CMD_ONLINE_SEARCH_BING:
-      case CMD_ONLINE_SEARCH_WIKI:
-      case IDM_EDIT_BASE64_ENCODE:
-      case IDM_EDIT_BASE64_SAFE_ENCODE:
-      case IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
-      case IDM_EDIT_BASE64_DECODE:
-      case IDM_EDIT_BASE64_DECODE_AS_HEX:
-      case CMD_CUSTOM_ACTION1:
-      case CMD_CUSTOM_ACTION2:
-      case IDM_EDIT_URLENCODE:
-      case IDM_EDIT_URLDECODE:
-      case IDM_EDIT_SELECTIONDUPLICATE:
-      case IDM_EDIT_SORTLINES:
-      case IDM_EDIT_JOINLINES:
-      case IDM_EDIT_COLUMNWRAP:
-      case IDM_EDIT_SPLITLINES:
-      case IDM_EDIT_JOINLINESEX:
-      case IDM_VIEW_SHOWEXCERPT:
-      case CMD_ONLINE_SEARCH_GOOGLE:
-      case CMD_ONLINE_SEARCH_BING:
-      case CMD_ONLINE_SEARCH_WIKI:
-      case IDM_EDIT_CHAR2HEX:
-      case IDM_EDIT_HEX2CHAR:
-      case IDM_EDIT_SHOW_HEX:
-      case IDM_EDIT_ESCAPECCHARS:
-      case IDM_EDIT_UNESCAPECCHARS:
-      case IDM_EDIT_XHTML_ESCAPE_CHAR:
-      case IDM_EDIT_XHTML_UNESCAPE_CHAR:
-        // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
-        return hasSelection;
-
-      case IDM_EDIT_COPYALL:
-        return editorView.state.doc.length > 0;
-
-      case IDM_EDIT_PASTE:
-      case IDT_EDIT_PASTE:
-        return hasClipboard;
-
-      case IDM_EDIT_UNDO:
-      case IDT_EDIT_UNDO:
-        n = commands.undoDepth(state);
-        return n > 0;
-
-      case IDM_EDIT_REDO:
-      case IDT_EDIT_REDO:
-        n = commands.redoDepth(state);
-        return n > 0;
-
-      case IDM_EDIT_SWAP:
-        return hasSelection && hasClipboard;
-
-      case IDM_FILE_SAVE:
-      case IDT_FILE_SAVE:
-        return isDirty;
-
-      case IDM_EDIT_LINETRANSPOSE:
-        // TODO: if not at first line
-        break;
-    }
-    return true;
-  }
-
-  function isMenuChecked(cmdId) {
-    switch (cmdId) {
-      case IDM_VIEW_MENU:
-        return settings.showMenu;
-      case IDM_VIEW_WORDWRAP:
-        return settings.wordWrap;
-      case IDM_FILE_READONLY_MODE:
-        return settings.readOnly;
-      case IDM_VIEW_LINENUMBERS:
-        return settings.showLineNumbers;
-      case IDM_VIEW_STATUSBAR:
-        return settings.showStatusBar;
-      case IDM_VIEW_TOOLBAR:
-        return showToolbar;
-      case IDM_LINEENDINGS_CRLF:
-        return settings.lineSeparator === "\r\n";
-      case IDM_LINEENDINGS_LF:
-        return settings.lineSeparator === "\n";
-      case IDM_LINEENDINGS_CR:
-        return settings.lineSeparator === "\r";
-      case IDM_VIEW_SHOWWHITESPACE:
-        return settings.showWhitespace;
-      case IDM_SET_MULTIPLE_SELECTION:
-        return settings.enableMultipleSelection;
-      case IDM_VIEW_TABSASSPACES:
-        return settings.tabsAsSpaces;
-      case IDM_VIEW_SHOWFILENAMEONLY:
-      case IDM_VIEW_SHOWEXCERPT:
-        return fileNameDisplay === cmdId;
-      case IDM_VIEW_MATCHBRACES:
-        return settings.visualBraceMatching;
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
-        return settings.lineHighlightType === cmdId;
-    }
-    return false;
-  }
-
   function getCurrentContent() {
     return editorView.state.doc.toString();
   }
@@ -1264,7 +1130,7 @@
         settings.showStatusBar = !settings.showStatusBar;
         break;
       case IDM_VIEW_TOOLBAR:
-        showToolbar = !showToolbar;
+        settings.showToolbar = !settings.showToolbar;
         break;
       case IDM_SET_MULTIPLE_SELECTION:
         settings.enableMultipleSelection = !settings.enableMultipleSelection;
@@ -1650,6 +1516,139 @@
       logNpEvent(cmdId);
     }
   }
+  /**
+   * return false if a given cmd should be disabled
+   * based on the state of the app
+   * @param {string} cmdId
+   */
+  function isMenuEnabled(cmdId) {
+    if (!editorView) {
+      return false;
+    }
+    let state = editorView.state;
+    let n;
+    switch (cmdId) {
+      // TODO: much more that depend on selection state
+      case IDM_EDIT_CUT:
+      case IDT_EDIT_CUT:
+      case IDM_EDIT_COPY:
+      case IDT_EDIT_COPY:
+      case IDM_EDIT_COPYADD:
+      case IDM_EDIT_CLEARCLIPBOARD:
+      case IDM_EDIT_CONVERTUPPERCASE:
+      case IDM_EDIT_CONVERTLOWERCASE:
+      case IDM_EDIT_INVERTCASE:
+      case IDM_EDIT_TITLECASE:
+      case IDM_EDIT_SENTENCECASE:
+      case IDM_EDIT_CONVERTSPACES:
+      case IDM_EDIT_CONVERTTABS:
+      case IDM_EDIT_CONVERTSPACES2:
+      case IDM_EDIT_CONVERTTABS2:
+      case IDM_EDIT_NUM2HEX:
+      case IDM_EDIT_NUM2DEC:
+      case IDM_EDIT_NUM2BIN:
+      case IDM_EDIT_NUM2OCT:
+      case CMD_ONLINE_SEARCH_GOOGLE:
+      case CMD_ONLINE_SEARCH_BING:
+      case CMD_ONLINE_SEARCH_WIKI:
+      case IDM_EDIT_BASE64_ENCODE:
+      case IDM_EDIT_BASE64_SAFE_ENCODE:
+      case IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
+      case IDM_EDIT_BASE64_DECODE:
+      case IDM_EDIT_BASE64_DECODE_AS_HEX:
+      case CMD_CUSTOM_ACTION1:
+      case CMD_CUSTOM_ACTION2:
+      case IDM_EDIT_URLENCODE:
+      case IDM_EDIT_URLDECODE:
+      case IDM_EDIT_SELECTIONDUPLICATE:
+      case IDM_EDIT_SORTLINES:
+      case IDM_EDIT_JOINLINES:
+      case IDM_EDIT_COLUMNWRAP:
+      case IDM_EDIT_SPLITLINES:
+      case IDM_EDIT_JOINLINESEX:
+      case IDM_VIEW_SHOWEXCERPT:
+      case CMD_ONLINE_SEARCH_GOOGLE:
+      case CMD_ONLINE_SEARCH_BING:
+      case CMD_ONLINE_SEARCH_WIKI:
+      case IDM_EDIT_CHAR2HEX:
+      case IDM_EDIT_HEX2CHAR:
+      case IDM_EDIT_SHOW_HEX:
+      case IDM_EDIT_ESCAPECCHARS:
+      case IDM_EDIT_UNESCAPECCHARS:
+      case IDM_EDIT_XHTML_ESCAPE_CHAR:
+      case IDM_EDIT_XHTML_UNESCAPE_CHAR:
+        // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
+        return hasSelection;
+
+      case IDM_EDIT_COPYALL:
+        return editorView.state.doc.length > 0;
+
+      case IDM_EDIT_PASTE:
+      case IDT_EDIT_PASTE:
+        return hasClipboard;
+
+      case IDM_EDIT_UNDO:
+      case IDT_EDIT_UNDO:
+        n = commands.undoDepth(state);
+        return n > 0;
+
+      case IDM_EDIT_REDO:
+      case IDT_EDIT_REDO:
+        n = commands.redoDepth(state);
+        return n > 0;
+
+      case IDM_EDIT_SWAP:
+        return hasSelection && hasClipboard;
+
+      case IDM_FILE_SAVE:
+      case IDT_FILE_SAVE:
+        return isDirty;
+
+      case IDM_EDIT_LINETRANSPOSE:
+        // TODO: if not at first line
+        break;
+    }
+    return true;
+  }
+
+  function isMenuChecked(cmdId) {
+    switch (cmdId) {
+      case IDM_VIEW_MENU:
+        return settings.showMenu;
+      case IDM_VIEW_WORDWRAP:
+        return settings.wordWrap;
+      case IDM_FILE_READONLY_MODE:
+        return settings.readOnly;
+      case IDM_VIEW_LINENUMBERS:
+        return settings.showLineNumbers;
+      case IDM_VIEW_STATUSBAR:
+        return settings.showStatusBar;
+      case IDM_VIEW_TOOLBAR:
+        return settings.showToolbar;
+      case IDM_LINEENDINGS_CRLF:
+        return settings.lineSeparator === "\r\n";
+      case IDM_LINEENDINGS_LF:
+        return settings.lineSeparator === "\n";
+      case IDM_LINEENDINGS_CR:
+        return settings.lineSeparator === "\r";
+      case IDM_VIEW_SHOWWHITESPACE:
+        return settings.showWhitespace;
+      case IDM_SET_MULTIPLE_SELECTION:
+        return settings.enableMultipleSelection;
+      case IDM_VIEW_TABSASSPACES:
+        return settings.tabsAsSpaces;
+      case IDM_VIEW_SHOWFILENAMEONLY:
+      case IDM_VIEW_SHOWEXCERPT:
+        return fileNameDisplay === cmdId;
+      case IDM_VIEW_MATCHBRACES:
+        return settings.visualBraceMatching;
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
+      case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
+        return settings.lineHighlightType === cmdId;
+    }
+    return false;
+  }
 
   function openInitialFile() {
     // if has ?file=${fileID}, opens that
@@ -1667,7 +1666,6 @@
     newEmptyFile();
   }
 
-  let showToolbar = true;
   let isToolbarReady = false;
 
   // Notepad2.c. DefaultToolbarButtons
@@ -1863,7 +1861,7 @@
     {/if}
   </div>
 
-  {#if showToolbar && isToolbarReady}
+  {#if settings.howToolbar && isToolbarReady}
     <div class="flex pl-1">
       {#each toolbarButtonsOrder as idx}
         {#if idx === 0}
