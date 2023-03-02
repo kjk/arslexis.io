@@ -1,7 +1,7 @@
 <script>
   import Spinners from "./Spinners.svelte";
   import MenuBar from "./MenuBar.svelte";
-  import { mainMenuBar } from "./menu-notepadpp.js";
+  import { mainMenuBar } from "./notepad2/menu-notepad2.js";
 
   function handleMenuCmd(cmd) {
     // console.log("handleMenuCmd:", cmd.detail);

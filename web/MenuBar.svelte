@@ -5,6 +5,8 @@
   import { len, splitMax } from "./util";
   import { parseShortcut } from "./keys";
 
+  let debugKeys = false;
+
   const dispatch = createEventDispatcher();
 
   export let menuBar; // definition of the menubar
@@ -104,8 +106,6 @@
   function handleMouseOver(ev) {
     // /**@type {HTMLElement}*/ (ev.target).focus();
   }
-
-  let debugKeys = false;
 
   /**
    * @param {KeyboardEvent} ev

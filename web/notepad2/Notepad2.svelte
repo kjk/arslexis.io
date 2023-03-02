@@ -8,6 +8,7 @@
 
 <script>
   import MenuBar from "../MenuBar.svelte";
+  import Toolbar from "./Toolbar.svelte";
   import {
     IDT_FILE_NEW,
     IDT_FILE_OPEN,
@@ -21,11 +22,8 @@
     IDT_EDIT_FIND,
     IDT_EDIT_REPLACE,
     IDT_VIEW_WORDWRAP,
-    IDT_VIEW_ZOOMIN,
-    IDT_VIEW_ZOOMOUT,
     IDT_VIEW_SCHEME,
     IDT_VIEW_SCHEMECONFIG,
-    IDT_FILE_EXIT,
     IDT_FILE_SAVEAS,
     IDT_FILE_SAVECOPY,
     IDT_EDIT_DELETE,
@@ -33,8 +31,6 @@
     IDT_FILE_OPENFAV,
     IDT_FILE_ADDTOFAV,
     IDT_VIEW_TOGGLEFOLDS,
-    IDT_FILE_LAUNCH,
-    IDT_VIEW_ALWAYSONTOP,
     CMD_CUSTOM_ACTION1,
     CMD_CUSTOM_ACTION2,
     CMD_ONLINE_SEARCH_BING,
@@ -190,6 +186,7 @@
     IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE,
     IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK,
     IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME,
+    IDM_EDIT_GOTOLINE,
   } from "./menu-notepad2";
   import { EditorView } from "@codemirror/view";
   import { EditorSelection, EditorState } from "@codemirror/state";
@@ -275,6 +272,7 @@
   import DialogSaveAs from "./DialogSaveAs.svelte";
   import DialogFileOpen from "./DialogFileOpen.svelte";
   import DialogAbout from "./DialogAbout.svelte";
+  import DialogGoTo from "./DialogGoTo.svelte";
   import {
     deserialize,
     FsFile,
@@ -320,6 +318,7 @@
     encloseSelections,
     dumpSelections,
     goToSelectionStartEnd,
+    goToPos,
   } from "../cmcommands";
   import {
     uuidv4,
@@ -385,6 +384,8 @@
 
   let settings = new Settings();
 
+  let toolbarFuncs;
+
   /** @type {HTMLElement} */
   let editorElement = null;
   /** @type {EditorView} */
@@ -406,30 +407,8 @@
   let hasSelection = false;
   $: updateSelectionState(currSelection);
 
-  let hasClipboard = false;
-  async function setToolbarEnabledState() {
-    if (!isToolbarReady) {
-      return;
-    }
-    // TODO: document must be focused to call this
-    // maybe get this from codemirror
-    // hasClipboard = (await getClipboard()) !== "";
-    let needsRedraw = false;
-    for (let i = 0; i < nIcons; i++) {
-      let info = tbIconsInfo[i];
-      let cmdId = info[0];
-      let isEnabled = info[3];
-      let isEnabledNew = isMenuEnabled(cmdId);
-      if (isEnabled !== isEnabledNew) {
-        needsRedraw = true;
-        info[3] = isEnabledNew;
-      }
-    }
-    // console.log("setToolbarEnabledState: needsRedraw:", needsRedraw);
-    if (needsRedraw) {
-      toolbarButtonsOrder = toolbarButtonsOrder;
-    }
-  }
+  // TODO: track this or remove use of it
+  let hasClipboard = true;
   /**
    * @param {EditorSelection} sel
    */
@@ -447,6 +426,12 @@
     }
     hasSelection = nonEmptySelection();
     setToolbarEnabledState();
+  }
+
+  async function setToolbarEnabledState() {
+    if (toolbarFuncs) {
+      toolbarFuncs.setToolbarEnabledState();
+    }
   }
 
   /*
@@ -566,6 +551,10 @@
   let onInserXmlTagDone;
   let showingInsertXmlTag = false;
 
+  let onGoToDone;
+  let goToMaxLine;
+  let showingGoTo = false;
+
   let showingAbout = false;
 
   let isShowingDialog = false;
@@ -576,6 +565,7 @@
     showingSaveAs ||
     showingEncloseSelection ||
     showingInsertXmlTag ||
+    showingGoTo ||
     showingAbout;
 
   // if we're transitioning from showing some dialog to not showing it,
@@ -1056,6 +1046,39 @@
     loadFile();
   }
 
+  function limit(n, min, max) {
+    if (n < min) {
+      return min;
+    }
+    if (n > max) {
+      return max;
+    }
+    return n;
+  }
+
+  async function cmdEditGoToLine() {
+    console.log("cmdEditGoToLine:");
+    let res = new Promise((resolve, reject) => {
+      onGoToDone = (lineNo, colNo) => {
+        console.log("cmdEditGoToLine: lineNo:", lineNo, "colNo:", colNo);
+        if (lineNo != null) {
+          const doc = editorView.state.doc;
+          lineNo = limit(lineNo, 1, doc.lines);
+          const line = doc.line(lineNo);
+          colNo = colNo || 1;
+          const maxCol = doc.line(lineNo).length;
+          colNo = limit(colNo, 1, maxCol);
+          const pos = line.from + colNo;
+          goToPos(editorView, pos);
+        }
+        resolve();
+      };
+      goToMaxLine = editorView.state.doc.lines;
+      showingGoTo = true;
+    });
+    return res;
+  }
+
   async function cmdEncloseSelection() {
     let res = new Promise((resolve, reject) => {
       onEncloseSelectionDone = (before, after) => {
@@ -1078,6 +1101,11 @@
       showingInsertXmlTag = true;
     });
     return res;
+  }
+
+  async function cmdEditPaste() {
+    const s = await navigator.clipboard.readText();
+    insertText(editorView, s);
   }
 
   // this can be invoked via keyboard shortcut of via menu
@@ -1116,6 +1144,10 @@
       case IDM_FILE_SAVECOPY:
       case IDT_FILE_SAVECOPY:
         cmdFileSaveCopy();
+        break;
+
+      case IDM_EDIT_GOTOLINE:
+        cmdEditGoToLine();
         break;
 
       case IDM_EDIT_ENCLOSESELECTION:
@@ -1453,6 +1485,7 @@
       case IDT_EDIT_COPY:
       case IDM_EDIT_CUT:
       case IDT_EDIT_CUT:
+      case IDT_EDIT_CUT:
       case IDM_EDIT_PASTE:
       case IDT_EDIT_PASTE:
       case IDM_EDIT_SELECTALL:
@@ -1476,15 +1509,18 @@
             case IDM_VIEW_TOGGLE_FULLSCREEN:
               toggleFullScreen();
               break;
-            // case IDM_EDIT_CUT:
-            // case IDT_EDIT_CUT:
-            //   break;
-            // case IDT_EDIT_COPY:
-            // case IDM_EDIT_COPY:
-            //   break;
-            // case IDM_EDIT_PASTE:
-            // case IDT_EDIT_PASTE:
-            //   break;
+            case IDM_EDIT_CUT:
+            case IDT_EDIT_CUT:
+              document.execCommand("cut");
+              break;
+            case IDT_EDIT_COPY:
+            case IDM_EDIT_COPY:
+              document.execCommand("copy");
+              break;
+            case IDM_EDIT_PASTE:
+            case IDT_EDIT_PASTE:
+              cmdEditPaste();
+              break;
             case IDM_EDIT_INDENT:
               commands.indentMore(editorView);
               break;
@@ -1570,6 +1606,7 @@
     } else {
       throwIf(!ev);
       if (stopPropagation) {
+        console.log("stopPropagataion:", cmdId);
         ev.stopPropagation();
         ev.preventDefault();
       }
@@ -1729,105 +1766,7 @@
     newEmptyFile();
   }
 
-  let isToolbarReady = false;
-
-  // Notepad2.c. DefaultToolbarButtons
-  let toolbarButtonsOrder = [
-    22, 3, 0, 1, 2, 0, 4, 18, 19, 0, 5, 6, 0, 7, 8, 9, 20, 0, 10, 11, 0, 12, 0,
-    24, 0, 15,
-  ];
-  // order of icons in toolbar bitmap
-  // el[0] is id of the command sent by the icon
-  // el[1] is tooltip for this icon
-  // el[2] is dataURL for Image() for this icon
-  // el[3] is enabled (if true)
-  /** @type {[string, string, string, boolean][]}*/
-  let tbIconsInfo = [
-    [IDT_FILE_NEW, "New", "", true],
-    [IDT_FILE_OPEN, "Open", "", true],
-    [IDT_FILE_BROWSE, "Browse", "", true],
-    [IDT_FILE_SAVE, "Save", "", true],
-    [IDT_EDIT_UNDO, "Undo", "", true],
-    [IDT_EDIT_REDO, "Redo", "", true],
-    [IDT_EDIT_CUT, "Cut", "", true],
-    [IDT_EDIT_COPY, "Copy", "", true],
-    [IDT_EDIT_PASTE, "Paste", "", true],
-    [IDT_EDIT_FIND, "Find", "", true],
-    [IDT_EDIT_REPLACE, "Replace", "", true],
-    [IDT_VIEW_WORDWRAP, "Word Wrap", "", true],
-    [IDT_VIEW_ZOOMIN, "Zoom In", "", true],
-    [IDT_VIEW_ZOOMOUT, "Zoom Out", "", true],
-    [IDT_VIEW_SCHEME, "Select Scheme", "", true],
-    [IDT_VIEW_SCHEMECONFIG, "Customize Schemes", "", true],
-    [IDT_FILE_EXIT, "Exit", "", true],
-    [IDT_FILE_SAVEAS, "Save As", "", true],
-    [IDT_FILE_SAVECOPY, "Save Copy", "", true],
-    [IDT_EDIT_DELETE, "Delete", "", true],
-    [IDT_FILE_PRINT, "Print", "", true],
-    [IDT_FILE_OPENFAV, "Favorites", "", true],
-    [IDT_FILE_ADDTOFAV, "Add to Favorites", "", true],
-    [IDT_VIEW_TOGGLEFOLDS, "Toggle Folds", "", true],
-    [IDT_FILE_LAUNCH, "Execute Document]", "", true],
-    [IDT_VIEW_ALWAYSONTOP, "Always On Top", "", true],
-  ];
-  const nIcons = len(tbIconsInfo);
-  let iconDy = 24;
-  let iconDx = iconDy;
-  function buildIconImages() {
-    let uriBmp = "";
-    switch (iconDy) {
-      case 16:
-        uriBmp = "Toolbar16.bmp";
-        break;
-      case 24:
-        uriBmp = "Toolbar24.bmp";
-        break;
-      default:
-        throwIf(true, `unsupported iconDy of ${iconDy}`);
-    }
-
-    let img = new Image();
-    img.onload = () => {
-      let canvasTmp = document.createElement("canvas");
-      // canvasTmp.setAttribute("willReadFrequently", "true");
-      canvasTmp.width = iconDx;
-      canvasTmp.height = iconDy;
-      let dw = iconDx;
-      let dh = iconDy;
-      let sw = iconDx;
-      let sh = iconDy;
-      let dx = 0;
-      let dy = 0;
-      let sy = 0;
-      for (let i = 0; i < nIcons; i++) {
-        let ctx = canvasTmp.getContext("2d", { willReadFrequently: true });
-        let sx = i * iconDx;
-        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-        let imgd = ctx.getImageData(0, 0, iconDy, iconDy);
-        let pix = imgd.data;
-        function makePixTransparent(n) {
-          let i = n * 4;
-          let v = pix[i] + pix[i + 1] + pix[i + 2];
-          if (v === 0) {
-            pix[i + 3] = 0;
-          }
-        }
-        let nPixels = iconDx * iconDy;
-        for (let i = 0; i < nPixels; i++) {
-          makePixTransparent(i);
-        }
-        ctx.putImageData(imgd, 0, 0);
-        let dataURL = canvasTmp.toDataURL("image/png");
-        tbIconsInfo[i][2] = dataURL;
-      }
-      isToolbarReady = true;
-      setToolbarEnabledState();
-    };
-    img.src = uriBmp;
-  }
-
   onMount(() => {
-    buildIconImages();
     preventDragOnElement(document);
     editorView = createEditorView();
     openInitialFile();
@@ -1927,35 +1866,12 @@
     {/if}
   </div>
 
-  {#if settings.showToolbar && isToolbarReady}
-    <div class="flex pl-1">
-      {#each toolbarButtonsOrder as idx}
-        {#if idx === 0}
-          <div class="w-[4px]" />
-        {:else}
-          {@const info = tbIconsInfo[idx - 1]}
-          {@const cmdId = info[0]}
-          {@const txt = info[1]}
-          {@const dataURL = info[2]}
-          {@const disabled = !info[3]}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <img
-            src={dataURL}
-            alt={txt}
-            use:tooltip={txt}
-            width={iconDx}
-            height={iconDy}
-            class:disabled
-            class="mt-1 px-1 py-1 hover:bg-blue-100"
-            on:click={() => handleMenuCmd({ detail: { cmd: cmdId } })}
-          />
-        {/if}
-      {/each}
-    </div>
-  {:else}
-    <div class="w-0 h-0" />
-  {/if}
-
+  <Toolbar
+    bind:funcs={toolbarFuncs}
+    bind:show={settings.showToolbar}
+    {isMenuEnabled}
+    {handleMenuCmd}
+  />
   <div class="min-h-0 overflow-hidden">
     <div
       class="codemirror-wrapper overflow-auto flex-grow bg-transparent"
@@ -1990,6 +1906,12 @@
     bind:open={showingAskSaveChanges}
     name={askSaveChangesName}
     onDone={onAskSaveChangesDone}
+  />
+
+  <DialogGoTo
+    bind:open={showingGoTo}
+    onDone={onGoToDone}
+    maxLine={goToMaxLine}
   />
 
   <DialogAbout bind:open={showingAbout} />

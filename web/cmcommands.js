@@ -56,14 +56,14 @@ function runOnSelIter({ state, dispatch }, fn, userEvent) {
  */
 function runOnIter({ state, dispatch }, fn, userEvent) {
   if (state.readOnly) return false;
-  let changes = [];
-  let doc = state.doc;
-  let sel = state.selection;
+  const changes = [];
+  const doc = state.doc;
+  const sel = state.selection;
   if (isEmptySelection(sel)) {
     fn(doc.iter(), changes);
   } else {
-    for (let range of sel.ranges) {
-      let { from, to } = range;
+    for (const range of sel.ranges) {
+      const { from, to } = range;
       fn(doc.iterRange(from, to), changes, from);
     }
   }
@@ -83,7 +83,7 @@ function runOnIter({ state, dispatch }, fn, userEvent) {
  */
 export function* iterLines(iter) {
   let pos = 0;
-  let res = [0, "", ""];
+  const res = [0, "", ""];
   res[0] = 0;
   res[1] = "";
   while (true) {
@@ -120,13 +120,13 @@ export function deleteLeadingWhitespace({ state, dispatch }) {
    * @param {number} start
    */
   function iter(iter, changes, start = 0) {
-    for (let li of iterLines(iter)) {
-      let s = li[1];
-      let m = s.match(rxLeadingWS);
+    for (const li of iterLines(iter)) {
+      const s = li[1];
+      const m = s.match(rxLeadingWS);
       if (m != null) {
-        let n = m[0].length;
-        let from = li[0] + start;
-        let to = from + n;
+        const n = m[0].length;
+        const from = li[0] + start;
+        const to = from + n;
         changes.push({ from, to });
       }
     }
@@ -146,13 +146,13 @@ export function deleteTrailingWhitespace({ state, dispatch }) {
    * @param {number} start
    */
   function iter(iter, changes, start = 0) {
-    for (let li of iterLines(iter)) {
-      let s = li[1];
-      let m = s.match(rxTrailingWS);
+    for (const li of iterLines(iter)) {
+      const s = li[1];
+      const m = s.match(rxTrailingWS);
       if (m != null) {
-        let n = m[0].length;
-        let from = start + li[0] + len(s) - n;
-        let to = from + n;
+        const n = m[0].length;
+        const from = start + li[0] + len(s) - n;
+        const to = from + n;
         changes.push({ from, to });
       }
     }
@@ -171,11 +171,11 @@ export function deleteFirstChar({ state, dispatch }) {
    * @param {number} start
    */
   function iter(iter, changes, start = 0) {
-    for (let li of iterLines(iter)) {
-      let s = li[1];
+    for (const li of iterLines(iter)) {
+      const s = li[1];
       if (len(s) > 0) {
-        let from = start + li[0];
-        let to = from + 1;
+        const from = start + li[0];
+        const to = from + 1;
         changes.push({ from, to });
       }
     }
@@ -194,11 +194,11 @@ export function deleteLastChar({ state, dispatch }) {
    * @param {number} start
    */
   function iter(iter, changes, start = 0) {
-    for (let li of iterLines(iter)) {
-      let s = li[1];
+    for (const li of iterLines(iter)) {
+      const s = li[1];
       if (len(s) > 0) {
-        let from = start + li[0] + len(s) - 1;
-        let to = from + 1;
+        const from = start + li[0] + len(s) - 1;
+        const to = from + 1;
         changes.push({ from, to });
       }
     }
@@ -270,11 +270,11 @@ export function removeBlankLines({ state, dispatch }) {
    * @param {number} start
    */
   function iter(iter, changes, start = 0) {
-    for (let li of iterLines(iter)) {
-      let s = li[1];
+    for (const li of iterLines(iter)) {
+      const s = li[1];
       if (len(s) === 0) {
-        let from = start + li[0];
-        let to = from + len(li[2]);
+        const from = start + li[0];
+        const to = from + len(li[2]);
         changes.push({ from, to });
       }
     }
@@ -290,8 +290,8 @@ export function removeBlankLines({ state, dispatch }) {
  */
 export function encloseSelection({ state, dispatch }, before, after) {
   if (state.readOnly) return false;
-  let changes = [];
-  let sel = state.selection;
+  const changes = [];
+  const sel = state.selection;
 
   // TOOD: if empty selection, set selection to after befor
   for (let { from, to } of sel.ranges) {
@@ -441,16 +441,16 @@ export function padWithSpaces({ state, dispatch }) {
  */
 export function replaceSelections({ state, dispatch }, convertFn) {
   if (state.readOnly) return false;
-  let changes = [];
-  let sel = state.selection;
+  const changes = [];
+  const sel = state.selection;
 
   // TOOD: if empty selection, set selection to after befor
-  for (let { from, to } of sel.ranges) {
+  for (const { from, to } of sel.ranges) {
     if (from === to) {
       continue;
     }
-    let s = state.sliceDoc(from, to);
-    let insert = convertFn(s);
+    const s = state.sliceDoc(from, to);
+    const insert = convertFn(s);
     changes.push({ from, to });
     // TODO: make this as a selection
     changes.push({ from, insert });
@@ -898,11 +898,23 @@ export function goToSelectionStartEnd({ state, dispatch }, end) {
     newAnchor = from;
     newHead = to;
   }
-  let ranges = [EditorSelection.range(newAnchor, newHead)];
+  const ranges = [EditorSelection.range(newAnchor, newHead)];
   dispatch(
     state.update({
       selection: EditorSelection.create(ranges),
       userEvent: "input.selecttodocstart",
+    })
+  );
+  return true;
+}
+
+export function goToPos({ state, dispatch }, pos) {
+  console.log("goToPos: pos:", pos);
+  const ranges = [EditorSelection.range(pos, pos)];
+  dispatch(
+    state.update({
+      selection: EditorSelection.create(ranges),
+      userEvent: "input.goToPos",
     })
   );
   return true;
