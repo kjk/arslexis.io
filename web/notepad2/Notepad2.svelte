@@ -187,6 +187,10 @@
     IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK,
     IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME,
     IDM_EDIT_GOTOLINE,
+    IDM_EDIT_FIND,
+    IDM_EDIT_FINDNEXT,
+    IDM_EDIT_FINDPREV,
+    IDM_EDIT_REPLACE,
   } from "./menu-notepad2";
   import { EditorView } from "@codemirror/view";
   import { EditorSelection, EditorState } from "@codemirror/state";
@@ -381,6 +385,7 @@
     updateWordWrap,
   } from "../CodeMirrorConfig";
   import { supportsFileSystem } from "../fileutil";
+  import DialogFind from "./DialogFind.svelte";
 
   let settings = new Settings();
 
@@ -554,6 +559,8 @@
   let onGoToDone;
   let goToMaxLine;
   let showingGoTo = false;
+
+  let showingFind = false;
 
   let showingAbout = false;
 
@@ -1057,10 +1064,8 @@
   }
 
   async function cmdEditGoToLine() {
-    console.log("cmdEditGoToLine:");
     let res = new Promise((resolve, reject) => {
       onGoToDone = (lineNo, colNo) => {
-        console.log("cmdEditGoToLine: lineNo:", lineNo, "colNo:", colNo);
         if (lineNo != null) {
           const doc = editorView.state.doc;
           lineNo = limit(lineNo, 1, doc.lines);
@@ -1089,6 +1094,10 @@
       showingEncloseSelection = true;
     });
     return res;
+  }
+
+  function cmdEditFind() {
+    showingFind = true;
   }
 
   async function cmdInsertXmlTag() {
@@ -1501,6 +1510,10 @@
       case IDM_EDIT_LINECOMMENT:
       case CMD_CTRLBACK:
       case CMD_CTRLDEL:
+      case IDM_EDIT_FIND: // TODO: custom dialog
+      case IDM_EDIT_FINDNEXT:
+      case IDM_EDIT_FINDPREV:
+      case IDM_EDIT_REPLACE:
         if (ev) {
           // if invoked via keyboard, CodeMirror has already handled it
           stopPropagation = false;
@@ -1908,6 +1921,8 @@
     onDone={onAskSaveChangesDone}
   />
 
+  <DialogFind bind:open={showingFind} />
+
   <DialogGoTo
     bind:open={showingGoTo}
     onDone={onGoToDone}
@@ -1933,13 +1948,6 @@
 </main>
 
 <style>
-  .disabled {
-    opacity: 0.5;
-  }
-  .disabled:hover {
-    background-color: white;
-  }
-
   main {
     grid-template-rows: auto auto 1fr auto;
   }

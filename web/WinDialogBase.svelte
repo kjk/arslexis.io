@@ -14,6 +14,7 @@
   export let onDone = null;
   // TODO: always true?
   export let closeOnEsc = true;
+  export let noButtons = false;
 
   let overlay = null;
   let modal = null;
@@ -21,7 +22,9 @@
 
   function close() {
     open = false;
-    onDone();
+    if (onDone) {
+      onDone();
+    }
   }
 
   /**
@@ -101,9 +104,13 @@
       <slot name="main" />
 
       <!-- buttons -->
-      <div class="bg-gray-100 px-2 py-2">
-        <slot name="bottom" />
-      </div>
+      {#if noButtons}
+        <div />
+      {:else}
+        <div class="bg-gray-100 px-2 py-2">
+          <slot name="bottom" />
+        </div>
+      {/if}
     </div>
   </div>
 {/if}

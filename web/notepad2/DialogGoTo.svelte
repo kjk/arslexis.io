@@ -1,5 +1,4 @@
 <script>
-  import { len } from "../util";
   import WinDialogBase from "../WinDialogBase.svelte";
 
   // TODO:
@@ -32,7 +31,6 @@
    * @param {KeyboardEvent} ev
    */
   function handleInputKeyDown(ev) {
-    console.log("DialogGoTo: handleInputKeyDown:", ev);
     // we want the user to be able to input enter
     if (ev.key === "Enter") {
       dispatchOk();
@@ -43,7 +41,6 @@
    * @param {HTMLInputElement} node
    */
   function focusAndSetCursor(node) {
-    console.log("focusAndSetCursor");
     node.focus();
   }
 

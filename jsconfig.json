@@ -20,7 +20,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     // "baseUrl": "./web",
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "*": ["./web/*"],
     },
