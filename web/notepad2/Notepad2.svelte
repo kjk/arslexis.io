@@ -198,55 +198,6 @@
   import GitHub from "../icons/GitHub.svelte";
 
   import * as commands from "@codemirror/commands";
-  import {
-    keymap,
-    highlightSpecialChars,
-    highlightActiveLineGutter,
-    drawSelection,
-    dropCursor,
-    rectangularSelection,
-    crosshairCursor,
-    placeholder as placeholderExt,
-  } from "@codemirror/view";
-  import {
-    defaultHighlightStyle,
-    syntaxHighlighting,
-    indentOnInput,
-    foldGutter,
-    foldKeymap,
-  } from "@codemirror/language";
-  import { history, historyKeymap } from "@codemirror/commands";
-  import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
-  import {
-    autocompletion,
-    completionKeymap,
-    closeBrackets,
-    closeBracketsKeymap,
-  } from "@codemirror/autocomplete";
-  import { lintKeymap } from "@codemirror/lint";
-
-  import { indentLess, indentMore, insertTab } from "@codemirror/commands";
-  import {
-    cursorSyntaxLeft,
-    selectSyntaxLeft,
-    cursorSyntaxRight,
-    selectSyntaxRight,
-    moveLineUp,
-    copyLineUp,
-    moveLineDown,
-    copyLineDown,
-    simplifySelection,
-    insertBlankLine,
-    selectLine,
-    selectParentSyntax,
-    indentSelection,
-    deleteLine,
-    cursorMatchingBracket,
-    toggleComment,
-    toggleBlockComment,
-    standardKeymap,
-  } from "@codemirror/commands";
-
   import { getTheme } from "../cmexts";
   import {
     getLangExtFromFileName,
@@ -358,18 +309,6 @@
   import { tick } from "svelte";
   import { Settings } from "./Settings";
   import {
-    makeLang,
-    makeLineHighlight,
-    makeLineNumbers,
-    makeLineSeparator,
-    makeMultipleSelection,
-    makeReadOnly,
-    makeShowTrailingWhitespace,
-    makeShowWhiteSpace,
-    makeTabSize,
-    makeTabState,
-    makeVisualBraceMatching,
-    makeWordWrap,
     setConfigEditorView,
     updateEnableMultipleSelection,
     updateLang,
@@ -386,6 +325,7 @@
   } from "../CodeMirrorConfig";
   import { supportsFileSystem } from "../fileutil";
   import DialogFind from "./DialogFind.svelte";
+  import { makeConfig } from "./editorConfig";
 
   let settings = new Settings();
 
@@ -664,9 +604,6 @@
   function createEditorState(s, fileName = "") {
     let theme = undefined;
     let styles = undefined;
-    let placeholder =
-      "Welcome to notepad2web - a web re-implementation of notepad2 Windows text editor.\nYou can save files in the browser (localStorage) or open files from the file system (if supported by your browser).\nStart typing...";
-    /** @type {Extension[]}*/
 
     // TODO: why is this [] and not null or something?
     let lang = getLangExtFromFileName(fileName);
@@ -678,101 +615,7 @@
       lang = [];
     }
 
-    // possibilities:
-    // "▶", "▼"
-    // "+", "−"
-    // "⊞", "⊟"
-    let foldGutterExt = foldGutter({
-      closedText: "⊞",
-      openText: "⊟",
-    });
-
-    /** @type {KeyBinding} */
-    const indentWithTab2 = {
-      key: "Tab",
-      run: indentMore,
-      shift: indentLess,
-    };
-    const defaultKeymap2 = [
-      {
-        key: "Alt-ArrowLeft",
-        mac: "Ctrl-ArrowLeft",
-        run: cursorSyntaxLeft,
-        shift: selectSyntaxLeft,
-      },
-      {
-        key: "Alt-ArrowRight",
-        mac: "Ctrl-ArrowRight",
-        run: cursorSyntaxRight,
-        shift: selectSyntaxRight,
-      },
-
-      { key: "Alt-ArrowUp", run: moveLineUp },
-      { key: "Shift-Alt-ArrowUp", run: copyLineUp },
-
-      { key: "Alt-ArrowDown", run: moveLineDown },
-      { key: "Shift-Alt-ArrowDown", run: copyLineDown },
-
-      { key: "Escape", run: simplifySelection },
-      { key: "Mod-Enter", run: insertBlankLine },
-
-      // { key: "Alt-l", mac: "Ctrl-l", run: selectLine },
-      { key: "Mod-i", run: selectParentSyntax, preventDefault: true },
-
-      { key: "Mod-[", run: indentLess },
-      { key: "Mod-]", run: indentMore },
-      { key: "Mod-Alt-\\", run: indentSelection },
-
-      { key: "Shift-Mod-k", run: deleteLine },
-
-      { key: "Shift-Mod-\\", run: cursorMatchingBracket },
-
-      { key: "Mod-/", run: toggleComment },
-      { key: "Alt-A", run: toggleBlockComment },
-      // @ts-ignore
-    ].concat(standardKeymap);
-
-    const exts = [
-      EditorView.editable.of(true), // ???
-      highlightActiveLineGutter(),
-      highlightSpecialChars(),
-      history(),
-      drawSelection(),
-      dropCursor(),
-      indentOnInput(),
-      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      makeVisualBraceMatching(settings.visualBraceMatching),
-      closeBrackets(),
-      autocompletion(),
-      rectangularSelection(),
-      crosshairCursor(),
-      makeLineHighlight(settings.lineHighlightType),
-      highlightSelectionMatches(),
-      keymap.of([
-        ...closeBracketsKeymap,
-        ...defaultKeymap2,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-        ...completionKeymap,
-        ...lintKeymap,
-      ]),
-      keymap.of([indentWithTab2]),
-      placeholderExt(placeholder),
-      makeTabState(settings.tabsAsSpaces, settings.tabSpaces),
-      makeTabSize(settings.tabSize),
-      makeReadOnly(settings.readOnly),
-      makeLineSeparator(settings.lineSeparator),
-      makeShowWhiteSpace(settings.showWhitespace),
-      makeShowTrailingWhitespace(settings.showTrailingWhitespace),
-      makeWordWrap(settings.wordWrap),
-      makeMultipleSelection(settings.enableMultipleSelection),
-      makeLineNumbers(settings.showLineNumbers),
-      foldGutterExt,
-      // scrollPastEnd(),
-      makeLang(lang),
-      ...getTheme(theme, styles),
-    ];
+    const exts = [...makeConfig(settings, lang), ...getTheme(theme, styles)];
     let res = EditorState.create({
       doc: s ?? undefined,
       extensions: exts,
