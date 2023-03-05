@@ -191,6 +191,7 @@
     IDM_EDIT_FINDNEXT,
     IDM_EDIT_FINDPREV,
     IDM_EDIT_REPLACE,
+    IDM_FILE_ADDTOFAV,
   } from "./menu-notepad2";
   import { EditorView } from "@codemirror/view";
   import { EditorSelection, EditorState } from "@codemirror/state";
@@ -231,6 +232,7 @@
   import {
     deserialize,
     FsFile,
+    fsTypeLocalStorage,
     newLocalStorageFile,
     openFilePicker,
     readFile,
@@ -326,6 +328,8 @@
   import { supportsFileSystem } from "../fileutil";
   import DialogFind from "./DialogFind.svelte";
   import { makeConfig } from "./editorConfig";
+  import DialogAddFavorite from "./DialogAddFavorite.svelte";
+  import { getFavorites, setFavorites } from "./np2store";
 
   let settings = new Settings();
 
@@ -496,6 +500,11 @@
   let onInserXmlTagDone;
   let showingInsertXmlTag = false;
 
+  let onAddToFavoritesDone = () => {
+    console.log("onAddToFavoritesDone");
+  };
+  let showingAddToFavorites = true;
+
   let onGoToDone;
   let goToMaxLine;
   let showingGoTo = false;
@@ -513,6 +522,7 @@
     showingEncloseSelection ||
     showingInsertXmlTag ||
     showingGoTo ||
+    showingAddToFavorites ||
     showingAbout;
 
   // if we're transitioning from showing some dialog to not showing it,
@@ -906,6 +916,33 @@
     return n;
   }
 
+  async function cmdFileAddToFav() {
+    if (!file) {
+      return;
+    }
+    let res = new Promise((resolve, reject) => {
+      onAddToFavoritesDone = async (name) => {
+        if (name) {
+          let favs = await getFavorites();
+          /** @type {import("./np2store.js").FavEntry}*/
+          let e = {
+            fs: file.type,
+            name: file.name,
+            favName: name,
+            id: file.id,
+            fileHandle: file.fileHandle,
+          };
+          console.log("onAddToFavoritesDone:", e);
+          favs.push(e);
+          setFavorites(favs);
+        }
+        resolve();
+      };
+      showingAddToFavorites = true;
+    });
+    return res;
+  }
+
   async function cmdEditGoToLine() {
     let res = new Promise((resolve, reject) => {
       onGoToDone = (lineNo, colNo) => {
@@ -1070,6 +1107,10 @@
         let uri = window.location.toString();
         window.open(uri);
         break;
+      case IDM_FILE_ADDTOFAV:
+        cmdFileAddToFav();
+        break;
+
       case IDM_VIEW_LINENUMBERS:
         settings.showLineNumbers = !settings.showLineNumbers;
         break;
@@ -1560,6 +1601,9 @@
       case IDT_FILE_SAVE:
         return isDirty;
 
+      case IDM_FILE_ADDTOFAV:
+        return file != null;
+
       case IDM_EDIT_LINETRANSPOSE:
         // TODO: if not at first line
         break;
@@ -1770,6 +1814,12 @@
     bind:open={showingGoTo}
     onDone={onGoToDone}
     maxLine={goToMaxLine}
+  />
+
+  <DialogAddFavorite
+    bind:open={showingAddToFavorites}
+    {name}
+    onDone={onAddToFavoritesDone}
   />
 
   <DialogAbout bind:open={showingAbout} />
