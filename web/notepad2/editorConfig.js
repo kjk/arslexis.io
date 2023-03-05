@@ -2,6 +2,7 @@
 /** @typedef { import("@codemirror/state").Extension} Extension */
 /** @typedef { import("./Settings").Settings} Settings */
 
+import { EditorView } from "codemirror";
 import {
   crosshairCursor,
   drawSelection,
@@ -10,7 +11,6 @@ import {
   highlightSpecialChars,
   rectangularSelection,
 } from "@codemirror/view";
-import { EditorView } from "codemirror";
 import {
   history,
   historyKeymap,
@@ -38,7 +38,7 @@ import {
   defaultHighlightStyle,
   syntaxHighlighting,
   indentOnInput,
-  foldKeymap,
+  // foldKeymap,
 } from "@codemirror/language";
 import {
   autocompletion,
@@ -65,6 +65,7 @@ import {
   makeVisualBraceMatching,
   makeWordWrap,
 } from "../CodeMirrorConfig";
+import { toggleFoldAll } from "../cmcommands";
 
 const placeholder =
   "Welcome to notepad2web - a web re-implementation of notepad2 Windows text editor.\nYou can save files in the browser (localStorage) or open files from the file system (if supported by your browser).\nStart typing...";
@@ -75,7 +76,8 @@ const indentWithTab2 = {
   run: indentMore,
   shift: indentLess,
 };
-const defaultKeymap2 = [
+
+let defaultKeymap2 = [
   {
     key: "Alt-ArrowLeft",
     mac: "Ctrl-ArrowLeft",
@@ -109,10 +111,12 @@ const defaultKeymap2 = [
 
   { key: "Shift-Mod-\\", run: cursorMatchingBracket },
 
+  // must over-ride, it must be used by some other keymap
+  // { key: "Alt-B", run: toggleFoldAll },
+
   { key: "Mod-/", run: toggleComment },
   { key: "Alt-A", run: toggleBlockComment },
-  // @ts-ignore
-].concat(standardKeymap);
+];
 
 /**
  * @param {Settings} settings
@@ -138,11 +142,12 @@ export function makeConfig(settings, lang) {
     makeLineHighlight(settings.lineHighlightType),
     highlightSelectionMatches(),
     keymap.of([
-      ...closeBracketsKeymap,
       ...defaultKeymap2,
+      ...standardKeymap,
+      ...closeBracketsKeymap,
       ...searchKeymap,
       ...historyKeymap,
-      ...foldKeymap,
+      // ...foldKeymap,
       ...completionKeymap,
       ...lintKeymap,
     ]),

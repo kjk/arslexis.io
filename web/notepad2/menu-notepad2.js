@@ -637,10 +637,11 @@ export const IDM_VIEW_RESETZOOM = "IDM_VIEW_RESETZOOM";
 export const IDM_VIEW_TOGGLE_FULLSCREEN = "IDM_VIEW_TOGGLE_FULLSCREEN";
 
 const menuToggleFolds = [
-  ["&Default Levels\tShift+Alt+D", IDM_VIEW_FOLD_DEFAULT],
+  // ["&Default Levels\tShift+Alt+D", IDM_VIEW_FOLD_DEFAULT],
+  // ["&All Levels\tShift+Alt+A", IDM_VIEW_FOLD_ALL],
   ["&All Levels\tShift+Alt+A", IDM_VIEW_FOLD_ALL],
   ["&Current Block\tAlt+C", IDM_VIEW_FOLD_CURRENT_BLOCK],
-  ["Current &Level", IDM_VIEW_FOLD_CURRENT_LEVEL],
+  // ["Current &Level", IDM_VIEW_FOLD_CURRENT_LEVEL],
   // [SEPARATOR],
   // ["Level &1\tAlt+1", IDM_VIEW_FOLD_LEVEL1],
   // ["Level &2\tAlt+2", IDM_VIEW_FOLD_LEVEL2],

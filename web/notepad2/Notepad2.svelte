@@ -27,6 +27,7 @@
   import { tooltip } from "../actions/tooltip";
   import { EditorView } from "@codemirror/view";
   import { EditorSelection, EditorState } from "@codemirror/state";
+  import { toggleFold } from "@codemirror/language";
   import { openSearchPanel } from "@codemirror/search";
   import * as commands from "@codemirror/commands";
   import * as m from "./menu-notepad2";
@@ -99,6 +100,7 @@
     dumpSelections,
     goToSelectionStartEnd,
     goToPos,
+    toggleFoldAll,
   } from "../cmcommands";
   import {
     uuidv4,
@@ -156,10 +158,9 @@
     favEntryFromFsFile,
     fsFileFromFavEntry,
     getAndClearFileForNewWindow,
-    getFavorites,
     rememberFileForNewWindow,
-    setFavorites,
   } from "./np2store";
+  import { parseShortcut } from "../keys";
 
   let toolbarFuncs;
 
@@ -857,8 +858,14 @@
     return res;
   }
 
-  function cmdEditFind() {
-    showingFind = true;
+  function cmdViewToggleFolds() {
+    const k = parseShortcut("Shift+Alt+A");
+    console.log("k:", k);
+    toggleFoldAll(editorView);
+  }
+
+  function cmdViewFoldCurrentBlock() {
+    toggleFold(editorView);
   }
 
   async function cmdInsertXmlTag() {
@@ -1075,6 +1082,14 @@
       case m.IDM_VIEW_SHOWINDENTGUIDES:
         settings.showIndentGuides = !settings.showIndentGuides;
         break;
+      case m.IDT_VIEW_TOGGLEFOLDS:
+      case m.IDM_VIEW_FOLD_ALL:
+        cmdViewToggleFolds();
+        break;
+      case m.IDM_VIEW_FOLD_CURRENT_BLOCK:
+        cmdViewFoldCurrentBlock();
+        break;
+
       // TODO: notepad2 changes line endings
       // not sure if that transfer to CM as it stores text
       // in lines. Does it re-split the doc when

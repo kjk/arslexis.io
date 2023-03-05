@@ -173,9 +173,10 @@ export function parseShortcut(s) {
   }
   const key = parts[0];
   const keyL = key.toLowerCase();
+  const keyU = keyL.toUpperCase();
   if (len(key) === 1) {
     if (keyL >= "a" && keyL <= "z") {
-      res.key = keyL;
+      res.key = res.shiftKey ? keyU : keyL;
       return res;
     }
     if (key >= "0" && key <= "9") {

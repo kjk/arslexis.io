@@ -1,4 +1,5 @@
 /** @typedef { import("@codemirror/state").EditorState} EditorState */
+/** @typedef { import("@codemirror/view").EditorView} EditorView */
 /** @typedef {import("@codemirror/state").TextIterator} TextIterator */
 
 import {
@@ -11,8 +12,9 @@ import {
   urlDecode,
   urlEncode,
 } from "./strutil";
+import { foldAll, unfoldAll } from "@codemirror/language";
 import { EditorSelection } from "@codemirror/state";
-import { getClipboard, len, setClipboard } from "./util";
+import { getClipboard, len, setClipboard, throwIf } from "./util";
 
 /**
  * @param {EditorSelection} sel
@@ -953,5 +955,38 @@ export function selectToDocEnd({ state, dispatch }) {
       userEvent: "input.selecttodocend",
     })
   );
+  return true;
+}
+
+const kFoldingStateFolded = 0;
+const kFoldingStateUnfolded = 1;
+
+let foldingState = kFoldingStateUnfolded;
+
+/**
+ * @param {boolean} isFolded
+ */
+export function setIsFolded(isFolded) {
+  foldingState = isFolded ? kFoldingStateFolded : kFoldingStateUnfolded;
+}
+
+/**
+ * @param {EditorView} editorView
+ * @returns {boolean}
+ */
+export function toggleFoldAll(editorView) {
+  console.log("toggleFoldAll");
+  switch (foldingState) {
+    case kFoldingStateUnfolded:
+      foldAll(editorView);
+      foldingState = kFoldingStateFolded;
+      break;
+    case kFoldingStateFolded:
+      unfoldAll(editorView);
+      foldingState = kFoldingStateUnfolded;
+      break;
+    default:
+      throwIf(true, `invalid foldingState ${foldingState}`);
+  }
   return true;
 }
