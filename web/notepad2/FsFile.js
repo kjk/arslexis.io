@@ -1,3 +1,4 @@
+import { verifyHandlePermission } from "../fileutil";
 import { genRandomID, splitMax, throwIf } from "../util";
 
 export const fsTypeLocalStorage = "localstorage";
@@ -113,6 +114,10 @@ function readFileLocalStorage(f) {
  */
 async function readFileComputer(f) {
   const fh = f.fileHandle;
+  const ok = await verifyHandlePermission(fh, false);
+  if (!ok) {
+    return null;
+  }
   const d = await fh.getFile();
   const ab = await d.arrayBuffer();
   const res = new TextDecoder().decode(ab);

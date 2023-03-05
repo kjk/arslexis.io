@@ -6,6 +6,7 @@
   import WinDialogBase from "../WinDialogBase.svelte";
   import { focus } from "../actions/focus";
   import { len } from "../util";
+  import { getFavorites, removeFavorite } from "./np2store";
 
   export let open = false;
   /** @type {Function} */
@@ -17,6 +18,7 @@
   let selected = null;
 
   let btnOpenDisabled = false;
+  let btnDeleteDisabled = false;
 
   function favClicked(fav) {
     console.log("favClicked:", fav);
@@ -39,12 +41,16 @@
     onDone(fav);
   }
 
+  async function btnRemoveClicked() {
+    favorites = await removeFavorite(selected);
+  }
+
   function close() {
     open = false;
     onDone(null);
   }
 
-  $: btnOpenDisabled = selected == null;
+  $: btnDeleteDisabled = btnOpenDisabled = selected == null;
 
   /**
    * @param {KeyboardEvent} ev
@@ -99,7 +105,13 @@
   </div>
 
   <!-- bottom -->
-  <div slot="bottom" class="flex justify-end textselect-none">
+  <div slot="bottom" class="flex textselect-none">
+    <button
+      disabled={btnDeleteDisabled}
+      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+      on:click={btnRemoveClicked}>Remove</button
+    >
+    <div class="grow" />
     <button
       disabled={btnOpenDisabled}
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"

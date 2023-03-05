@@ -29,7 +29,6 @@
     IDT_FILE_SAVECOPY,
     IDT_EDIT_DELETE,
     IDT_FILE_PRINT,
-    IDT_FILE_OPENFAV,
     IDT_FILE_ADDTOFAV,
     IDT_VIEW_TOGGLEFOLDS,
     CMD_CUSTOM_ACTION1,
@@ -194,6 +193,7 @@
     IDM_EDIT_REPLACE,
     IDM_FILE_ADDTOFAV,
     IDM_FILE_OPENFAV,
+    IDM_FILE_MANAGEFAV,
   } from "./menu-notepad2";
   import { EditorView } from "@codemirror/view";
   import { EditorSelection, EditorState } from "@codemirror/state";
@@ -815,6 +815,11 @@
   async function setFileAsCurrent(fileIn) {
     console.log("setCurrentFile:", fileIn);
     let content = await readFile(fileIn);
+    if (content === null) {
+      // could be serialized FileSystemFileHandle with denied permissions
+      console.log("Denied permissions for:", fileIn);
+      return;
+    }
     file = fileIn;
     name = file.name;
     setContentAsCurrent(content, name);
@@ -1082,7 +1087,7 @@
         cmdFileAddToFav();
         break;
       case IDM_FILE_OPENFAV:
-      case IDT_FILE_OPENFAV:
+      case IDM_FILE_MANAGEFAV:
         cmdFileOpenFav();
         break;
 
