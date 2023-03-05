@@ -98,6 +98,19 @@ export function updateCodeFolding(codeFolding) {
   });
 }
 
+const indentGuidesCompartment = new Compartment();
+export function makeIndentGuides(indentGuides) {
+  const v = indentGuides ? indentationMarkers() : [];
+  return indentGuidesCompartment.of(v);
+}
+export function updateIndentGuides(indentGuides) {
+  if (!editorView) return;
+  const v = indentGuides ? indentationMarkers() : [];
+  editorView.dispatch({
+    effects: indentGuidesCompartment.reconfigure(v),
+  });
+}
+
 const enableMultipleSelectionCompartment = new Compartment();
 export function makeMultipleSelection(multipleSel) {
   const v = EditorState.allowMultipleSelections.of(multipleSel);

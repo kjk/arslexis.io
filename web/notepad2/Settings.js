@@ -19,9 +19,8 @@ export class Settings {
   showTrailingWhitespace = true;
   // show / hide cold folding gutter
   showCodeFolding = true;
-
+  showIndentGuides = true;
   lineHighlightType = IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK;
-
   rememberRecentFiles = true;
 }
 

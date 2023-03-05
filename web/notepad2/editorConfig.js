@@ -50,6 +50,7 @@ import { lintKeymap } from "@codemirror/lint";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import {
   makeCodeFolding,
+  makeIndentGuides,
   makeLang,
   makeLineHighlight,
   makeLineNumbers,
@@ -130,7 +131,7 @@ export function makeConfig(settings, lang) {
     crosshairCursor(),
     makeLineHighlight(settings.lineHighlightType),
     highlightSelectionMatches(),
-    // indentationMarkers(),
+    makeIndentGuides(settings.indentationMarkers),
     keymap.of([
       ...closeBracketsKeymap,
       ...defaultKeymap2,

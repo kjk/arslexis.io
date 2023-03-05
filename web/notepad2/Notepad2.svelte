@@ -135,6 +135,7 @@
     setConfigEditorView,
     updateCodeFolding,
     updateEnableMultipleSelection,
+    updateIndentGuides,
     updateLang,
     updateLineHighlightType,
     updateLineNumbersState,
@@ -254,6 +255,7 @@
   $: updateLineSeparator(settings.lineSeparator);
   $: updateVisualBraceMatching(settings.visualBraceMatching);
   $: updateCodeFolding(settings.showCodeFolding);
+  $: updateIndentGuides(settings.showIndentGuides);
   $: updateTabSize(settings.tabSize);
   $: updateTabsState(settings.tabsAsSpaces, settings.tabSpaces);
   $: updateReadOnly(settings.readOnly);
@@ -1070,6 +1072,9 @@
       case m.IDM_VIEW_SHOW_FOLDING:
         settings.showCodeFolding = !settings.showCodeFolding;
         break;
+      case m.IDM_VIEW_SHOWINDENTGUIDES:
+        settings.showIndentGuides = !settings.showIndentGuides;
+        break;
       // TODO: notepad2 changes line endings
       // not sure if that transfer to CM as it stores text
       // in lines. Does it re-split the doc when
@@ -1545,6 +1550,8 @@
         return settings.lineHighlightType === cmdId;
       case m.IDM_VIEW_SHOW_FOLDING:
         return settings.showCodeFolding;
+      case m.IDM_VIEW_SHOWINDENTGUIDES:
+        return settings.showIndentGuides;
     }
     return false;
   }
