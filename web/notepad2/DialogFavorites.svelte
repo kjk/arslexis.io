@@ -1,39 +1,42 @@
+<script context="module">
+  /** @typedef {import("./np2store").FavEntry} FavEntry */
+</script>
+
 <script>
-  import { len } from "../util";
-  import { focus } from "../actions/focus";
   import WinDialogBase from "../WinDialogBase.svelte";
-  import { FsFile, fsTypeLocalStorage, getFileList } from "./FsFile";
+  import { focus } from "../actions/focus";
+  import { len } from "../util";
 
   export let open = false;
   /** @type {Function} */
   export let onDone;
+  /** @type {FavEntry[]} */
+  export let favorites;
 
-  /** @type {FsFile}*/
-  let selectedFile = null;
+  /** @type {FavEntry} */
+  let selected = null;
 
   let btnOpenDisabled = false;
 
-  let fileList = getFileList(fsTypeLocalStorage);
-
-  function fileClicked(file) {
-    console.log("fileClicked:", file);
-    selectedFile = file;
+  function favClicked(fav) {
+    console.log("favClicked:", fav);
+    selected = fav;
   }
 
-  function fileDblClicked(file) {
-    console.log("fileDblClicked:", file);
+  function favDblClicked(fav) {
+    console.log("favDblClicked:", fav);
     open = false;
-    onDone(file);
+    onDone(fav);
   }
 
   function btnOpenClicked() {
-    let file = selectedFile;
-    console.log("btnOpenClicked:", file);
-    if (!file) {
+    let fav = selected;
+    console.log("btnOpenClicked:", fav);
+    if (!fav) {
       return;
     }
     open = false;
-    onDone(file);
+    onDone(fav);
   }
 
   function close() {
@@ -41,59 +44,58 @@
     onDone(null);
   }
 
-  $: btnOpenDisabled = selectedFile == null;
+  $: btnOpenDisabled = selected == null;
 
   /**
    * @param {KeyboardEvent} ev
    */
   function handleKeyDown(ev) {
     if (ev.key === "Enter") {
-      if (selectedFile !== null) {
+      if (selected !== null) {
         open = false;
-        onDone(selectedFile);
+        onDone(selected);
         return;
       }
     }
   }
 </script>
 
-<WinDialogBase bind:open title="Open File">
+<WinDialogBase bind:open title="Favorites">
   <div
     slot="main"
     class="bg-white pt-2 pb-4 flex flex-col min-h-[4rem]"
     on:keydown={handleKeyDown}
   >
-    {#if len(fileList) > 0}
-      <div class="mx-6 ">Select a file:</div>
-      <div
-        class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 max-h-[60vh] cursor-pointer"
-        tabindex="0"
-        role="listbox"
-      >
-        {#each fileList as f (f.id)}
+    <div
+      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 max-h-[60vh] cursor-pointer h-[8rem]"
+      tabindex="0"
+      role="listbox"
+    >
+      {#if len(favorites) === 0}
+        <div class="mx-auto my-auto">no favorites!</div>
+      {:else}
+        {#each favorites as f (f.id)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          {#if f === selectedFile}
+          {#if f === selected}
             <div
               class="bg-gray-100 hover:bg-gray-200"
-              on:dblclick={() => fileDblClicked(f)}
-              on:click={() => fileClicked(f)}
+              on:dblclick={() => favDblClicked(f)}
+              on:click={() => favClicked(f)}
             >
               {f.name}
             </div>
           {:else}
             <div
               class="hover:bg-gray-200"
-              on:dblclick={() => fileDblClicked(f)}
-              on:click={() => fileClicked(f)}
+              on:dblclick={() => favDblClicked(f)}
+              on:click={() => favClicked(f)}
             >
               {f.name}
             </div>
           {/if}
         {/each}
-      </div>
-    {:else}
-      <div>There are no files to open!</div>
-    {/if}
+      {/if}
+    </div>
   </div>
 
   <!-- bottom -->

@@ -40,7 +40,7 @@ const favKeyName = "favorites";
  * @returns {Promise<FavEntry[]>}
  */
 export async function getFavorites() {
-  return await get(favKeyName);
+  return (await get(favKeyName)) || [];
 }
 
 /**

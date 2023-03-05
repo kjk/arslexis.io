@@ -4,6 +4,7 @@
   /** @typedef { import("@codemirror/state").Transaction} Transaction */
   /** @typedef { import("@codemirror/language").LanguageSupport} LanguageSupport */
   /** @typedef {import("@codemirror/state").SelectionRange} SelectionRange */
+  /** @typedef {import("./np2store").FavEntry} FavEntry */
 </script>
 
 <script>
@@ -192,6 +193,7 @@
     IDM_EDIT_FINDPREV,
     IDM_EDIT_REPLACE,
     IDM_FILE_ADDTOFAV,
+    IDM_FILE_OPENFAV,
   } from "./menu-notepad2";
   import { EditorView } from "@codemirror/view";
   import { EditorSelection, EditorState } from "@codemirror/state";
@@ -229,10 +231,14 @@
   import DialogFileOpen from "./DialogFileOpen.svelte";
   import DialogAbout from "./DialogAbout.svelte";
   import DialogGoTo from "./DialogGoTo.svelte";
+  import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
+  import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
+  import DialogFind from "./DialogFind.svelte";
+  import DialogAddFavorite from "./DialogAddFavorite.svelte";
+  import DialogFavorites from "./DialogFavorites.svelte";
   import {
     deserialize,
     FsFile,
-    fsTypeLocalStorage,
     newLocalStorageFile,
     openFilePicker,
     readFile,
@@ -306,8 +312,6 @@
     getUnixTimestampUs,
     getUTCDate,
   } from "../dateutil";
-  import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
-  import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
   import { tick } from "svelte";
   import { Settings } from "./Settings";
   import {
@@ -326,9 +330,7 @@
     updateWordWrap,
   } from "../CodeMirrorConfig";
   import { supportsFileSystem } from "../fileutil";
-  import DialogFind from "./DialogFind.svelte";
   import { makeConfig } from "./editorConfig";
-  import DialogAddFavorite from "./DialogAddFavorite.svelte";
   import { getFavorites, setFavorites } from "./np2store";
 
   let settings = new Settings();
@@ -500,10 +502,13 @@
   let onInserXmlTagDone;
   let showingInsertXmlTag = false;
 
-  let onAddToFavoritesDone = () => {
-    console.log("onAddToFavoritesDone");
-  };
-  let showingAddToFavorites = true;
+  let onAddToFavoritesDone;
+  let showingAddToFavorites = false;
+
+  let onFavoritesDone;
+  /** @type {FavEntry[]} */
+  let favorites;
+  let showingFavorites = false;
 
   let onGoToDone;
   let goToMaxLine;
@@ -523,6 +528,7 @@
     showingInsertXmlTag ||
     showingGoTo ||
     showingAddToFavorites ||
+    showingFavorites ||
     showingAbout;
 
   // if we're transitioning from showing some dialog to not showing it,
@@ -924,7 +930,7 @@
       onAddToFavoritesDone = async (name) => {
         if (name) {
           let favs = await getFavorites();
-          /** @type {import("./np2store.js").FavEntry}*/
+          /** @type {FavEntry} */
           let e = {
             fs: file.type,
             name: file.name,
@@ -941,6 +947,36 @@
       showingAddToFavorites = true;
     });
     return res;
+  }
+
+  /**
+   * @returns {Promise<FavEntry>}
+   */
+  async function openFavDialog() {
+    favorites = await getFavorites();
+    /**
+     * @param {FavEntry} fav
+     */
+    let res = new Promise((resolve, reject) => {
+      onFavoritesDone = async (fav) => {
+        resolve(fav);
+      };
+      showingFavorites = true;
+    });
+    return res;
+  }
+
+  async function cmdFileOpenFav() {
+    const fav = await openFavDialog();
+    if (!fav) {
+      return;
+    }
+    const name = fav.name; // or fav.favName?
+    const f = new FsFile(fav.fs, name, name);
+    f.fileHandle = fav.fileHandle;
+    f.id = fav.id;
+    console.log("onFavoritesDone:", f);
+    await setFileAsCurrent(f);
   }
 
   async function cmdEditGoToLine() {
@@ -1034,6 +1070,21 @@
       case IDT_FILE_SAVECOPY:
         cmdFileSaveCopy();
         break;
+      case IDM_FILE_READONLY_MODE:
+        settings.readOnly = !settings.readOnly;
+        break;
+      case IDM_FILE_NEWWINDOW2:
+        // open empty window
+        let uri = window.location.toString();
+        window.open(uri);
+        break;
+      case IDM_FILE_ADDTOFAV:
+        cmdFileAddToFav();
+        break;
+      case IDM_FILE_OPENFAV:
+      case IDT_FILE_OPENFAV:
+        cmdFileOpenFav();
+        break;
 
       case IDM_EDIT_GOTOLINE:
         cmdEditGoToLine();
@@ -1096,19 +1147,8 @@
       case IDT_VIEW_WORDWRAP:
         settings.wordWrap = !settings.wordWrap;
         break;
-      case IDM_FILE_READONLY_MODE:
-        settings.readOnly = !settings.readOnly;
-        break;
       case IDM_VIEW_SHOWWHITESPACE:
         settings.showWhitespace = !settings.showWhitespace;
-        break;
-      case IDM_FILE_NEWWINDOW2:
-        // open empty window
-        let uri = window.location.toString();
-        window.open(uri);
-        break;
-      case IDM_FILE_ADDTOFAV:
-        cmdFileAddToFav();
         break;
 
       case IDM_VIEW_LINENUMBERS:
@@ -1822,6 +1862,11 @@
     onDone={onAddToFavoritesDone}
   />
 
+  <DialogFavorites
+    bind:open={showingFavorites}
+    {favorites}
+    onDone={onFavoritesDone}
+  />
   <DialogAbout bind:open={showingAbout} />
 
   <DialogEncloseSelection
