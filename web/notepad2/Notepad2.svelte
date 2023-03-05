@@ -8,8 +8,27 @@
 </script>
 
 <script>
+  import { onDestroy, onMount } from "svelte";
   import MenuBar from "../MenuBar.svelte";
   import Toolbar from "./Toolbar.svelte";
+  import Twitter from "../icons/Twitter.svelte";
+  import GitHub from "../icons/GitHub.svelte";
+  import DialogAskSaveChanges from "./DialogAskSaveChanges.svelte";
+  import DialogNotImplemented from "./DialogNotImplemented.svelte";
+  import DialogSaveAs from "./DialogSaveAs.svelte";
+  import DialogFileOpen from "./DialogFileOpen.svelte";
+  import DialogAbout from "./DialogAbout.svelte";
+  import DialogGoTo from "./DialogGoTo.svelte";
+  import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
+  import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
+  import DialogFind from "./DialogFind.svelte";
+  import DialogAddFavorite from "./DialogAddFavorite.svelte";
+  import DialogFavorites from "./DialogFavorites.svelte";
+  import { tooltip } from "../actions/tooltip";
+  import { EditorView } from "@codemirror/view";
+  import { EditorSelection, EditorState } from "@codemirror/state";
+  import { openSearchPanel } from "@codemirror/search";
+  import * as commands from "@codemirror/commands";
   import {
     IDT_FILE_NEW,
     IDT_FILE_OPEN,
@@ -195,12 +214,6 @@
     IDM_FILE_OPENFAV,
     IDM_FILE_MANAGEFAV,
   } from "./menu-notepad2";
-  import { EditorView } from "@codemirror/view";
-  import { EditorSelection, EditorState } from "@codemirror/state";
-  import Twitter from "../icons/Twitter.svelte";
-  import GitHub from "../icons/GitHub.svelte";
-
-  import * as commands from "@codemirror/commands";
   import { getTheme } from "../cmexts";
   import {
     getLangExtFromFileName,
@@ -223,19 +236,6 @@
     toggleFullScreen,
     stripExt,
   } from "../util.js";
-  import { onDestroy, onMount } from "svelte";
-  import { tooltip } from "../actions/tooltip";
-  import DialogAskSaveChanges from "./DialogAskSaveChanges.svelte";
-  import DialogNotImplemented from "./DialogNotImplemented.svelte";
-  import DialogSaveAs from "./DialogSaveAs.svelte";
-  import DialogFileOpen from "./DialogFileOpen.svelte";
-  import DialogAbout from "./DialogAbout.svelte";
-  import DialogGoTo from "./DialogGoTo.svelte";
-  import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
-  import DialogInsertXmlTag from "./DialogInsertXmlTag.svelte";
-  import DialogFind from "./DialogFind.svelte";
-  import DialogAddFavorite from "./DialogAddFavorite.svelte";
-  import DialogFavorites from "./DialogFavorites.svelte";
   import {
     deserialize,
     FsFile,
@@ -1046,7 +1046,8 @@
     const ev = arg.detail.ev;
     let s = "";
     let stopPropagation = true;
-    let fromMenu = !ev;
+    const fromMenu = !ev;
+    let noEditorFocus = false;
     // if invoked from menu we need to give editor focus back
     // unless we're showing a dialog
     switch (cmdId) {
@@ -1496,6 +1497,11 @@
           }
         }
         break;
+      case IDT_EDIT_FIND:
+      case IDT_EDIT_REPLACE:
+        openSearchPanel(editorView);
+        noEditorFocus = true;
+        break;
       case IDM_EDIT_DELETE:
       case IDT_EDIT_DELETE:
         // TODO: possibly deleteCharBackward()
@@ -1541,7 +1547,7 @@
       closeMenu();
       // need to delay until isShowingDialog is re-calculated
       tick().then(() => {
-        if (!isShowingDialog) {
+        if (!isShowingDialog && !noEditorFocus) {
           focusEditor();
         }
       });
