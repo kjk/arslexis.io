@@ -29,191 +29,7 @@
   import { EditorSelection, EditorState } from "@codemirror/state";
   import { openSearchPanel } from "@codemirror/search";
   import * as commands from "@codemirror/commands";
-  import {
-    IDT_FILE_NEW,
-    IDT_FILE_OPEN,
-    IDT_FILE_BROWSE,
-    IDT_FILE_SAVE,
-    IDT_EDIT_UNDO,
-    IDT_EDIT_REDO,
-    IDT_EDIT_CUT,
-    IDT_EDIT_COPY,
-    IDT_EDIT_PASTE,
-    IDT_EDIT_FIND,
-    IDT_EDIT_REPLACE,
-    IDT_VIEW_WORDWRAP,
-    IDT_VIEW_SCHEME,
-    IDT_VIEW_SCHEMECONFIG,
-    IDT_FILE_SAVEAS,
-    IDT_FILE_SAVECOPY,
-    IDT_EDIT_DELETE,
-    IDT_FILE_PRINT,
-    IDT_FILE_ADDTOFAV,
-    IDT_VIEW_TOGGLEFOLDS,
-    CMD_CUSTOM_ACTION1,
-    CMD_CUSTOM_ACTION2,
-    CMD_ONLINE_SEARCH_BING,
-    CMD_ONLINE_SEARCH_GOOGLE,
-    CMD_ONLINE_SEARCH_WIKI,
-    IDM_EDIT_CLEARCLIPBOARD,
-    IDM_EDIT_CLEARDOCUMENT,
-    IDM_EDIT_CONVERTLOWERCASE,
-    IDM_EDIT_CONVERTSPACES,
-    IDM_EDIT_CONVERTSPACES2,
-    IDM_EDIT_CONVERTTABS,
-    IDM_EDIT_CONVERTTABS2,
-    IDM_EDIT_CONVERTUPPERCASE,
-    IDM_EDIT_COPY,
-    IDM_EDIT_COPYADD,
-    IDM_EDIT_COPYALL,
-    IDM_EDIT_CUT,
-    IDM_EDIT_INVERTCASE,
-    IDM_EDIT_NUM2BIN,
-    IDM_EDIT_NUM2DEC,
-    IDM_EDIT_NUM2HEX,
-    IDM_EDIT_NUM2OCT,
-    IDM_EDIT_PASTE,
-    IDM_EDIT_REDO,
-    IDM_EDIT_SELECTALL,
-    IDM_EDIT_SENTENCECASE,
-    IDM_EDIT_SWAP,
-    IDM_EDIT_TITLECASE,
-    IDM_EDIT_UNDO,
-    IDM_FILE_NEW,
-    IDM_FILE_NEWWINDOW2,
-    IDM_FILE_OPEN,
-    IDM_FILE_READONLY_MODE,
-    IDM_FILE_SAVE,
-    IDM_FILE_SAVEAS,
-    IDM_HELP_ABOUT,
-    IDM_HELP_FEATURE_REQUEST,
-    IDM_HELP_PROJECT_HOME,
-    IDM_HELP_REPORT_ISSUE,
-    IDM_VIEW_LINENUMBERS,
-    IDM_VIEW_WORDWRAP,
-    IDM_VIEW_STATUSBAR,
-    IDM_VIEW_TOOLBAR,
-    mainMenuBar,
-    IDM_FILE_SAVECOPY,
-    IDM_VIEW_MENU,
-    IDM_VIEW_TOGGLE_FULLSCREEN,
-    IDM_EDIT_URLENCODE,
-    IDM_EDIT_URLDECODE,
-    IDM_EDIT_BASE64_ENCODE,
-    IDM_EDIT_BASE64_SAFE_ENCODE,
-    IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE,
-    IDM_EDIT_BASE64_DECODE,
-    IDM_EDIT_BASE64_DECODE_AS_HEX,
-    IDM_EDIT_DELETE,
-    IDM_EDIT_INDENT,
-    IDM_EDIT_UNINDENT,
-    IDM_LINEENDINGS_CRLF,
-    IDM_LINEENDINGS_LF,
-    IDM_LINEENDINGS_CR,
-    IDM_VIEW_SHOWWHITESPACE,
-    IDM_SET_MULTIPLE_SELECTION,
-    IDM_VIEW_TABSASSPACES,
-    IDM_EDIT_MOVELINEDOWN,
-    IDM_EDIT_MOVELINEUP,
-    IDM_EDIT_DELETELINELEFT,
-    IDM_EDIT_DELETELINERIGHT,
-    IDM_EDIT_TRIMLINES,
-    IDM_EDIT_TRIMLEAD,
-    IDM_EDIT_STRIP1STCHAR,
-    IDM_EDIT_STRIPLASTCHAR,
-    IDM_EDIT_SELECTIONDUPLICATE,
-    IDM_EDIT_REMOVEBLANKLINES,
-    IDM_EDIT_MERGEBLANKLINES,
-    CMD_COPYFILENAME_NOEXT,
-    CMD_COPYFILENAME,
-    CMD_ENCLOSE_TRIPLE_SQ,
-    CMD_ENCLOSE_TRIPLE_DQ,
-    CMD_ENCLOSE_TRIPLE_BT,
-    IDM_EDIT_LINECOMMENT,
-    IDM_EDIT_STREAMCOMMENT,
-    IDM_EDIT_MERGEDUPLICATELINE,
-    IDM_EDIT_REMOVEDUPLICATELINE,
-    IDM_EDIT_COMPRESSWS,
-    IDM_EDIT_PADWITHSPACES,
-    IDM_EDIT_LINETRANSPOSE,
-    IDM_EDIT_DUPLICATELINE,
-    IDM_EDIT_SORTLINES,
-    IDM_EDIT_JOINLINES,
-    IDM_EDIT_COLUMNWRAP,
-    IDM_EDIT_SPLITLINES,
-    IDM_EDIT_JOINLINESEX,
-    IDM_EDIT_CUTLINE,
-    IDM_EDIT_COPYLINE,
-    IDM_EDIT_DELETELINE,
-    IDM_EDIT_INSERT_LOC_DATE,
-    IDM_EDIT_INSERT_LOC_DATETIME,
-    IDM_EDIT_INSERT_GUID,
-    IDM_INSERT_UNICODE_ALM,
-    IDM_INSERT_UNICODE_ZWSP,
-    IDM_INSERT_UNICODE_LS,
-    IDM_INSERT_UNICODE_PS,
-    IDM_INSERT_UNICODE_US,
-    IDM_INSERT_UNICODE_RS,
-    IDM_INSERT_UNICODE_IAFS,
-    IDM_INSERT_UNICODE_AAFS,
-    IDM_INSERT_UNICODE_ISS,
-    IDM_INSERT_UNICODE_ASS,
-    IDM_INSERT_UNICODE_NODS,
-    IDM_INSERT_UNICODE_NADS,
-    IDM_INSERT_UNICODE_PDF,
-    IDM_INSERT_UNICODE_PDI,
-    IDM_INSERT_UNICODE_FSI,
-    IDM_INSERT_UNICODE_RLI,
-    IDM_INSERT_UNICODE_LRI,
-    IDM_INSERT_UNICODE_RLO,
-    IDM_INSERT_UNICODE_LRO,
-    IDM_INSERT_UNICODE_RLE,
-    IDM_INSERT_UNICODE_LRE,
-    IDM_INSERT_UNICODE_RLM,
-    IDM_INSERT_UNICODE_LRM,
-    IDM_INSERT_UNICODE_ZWNJ,
-    IDM_INSERT_UNICODE_ZWJ,
-    IDM_INSERT_UNICODE_WJ,
-    CMD_INSERTFILENAME_NOEXT,
-    IDM_EDIT_INSERT_FILENAME,
-    IDM_EDIT_INSERT_UTC_DATETIME,
-    IDM_EDIT_INSERT_TIMESTAMP,
-    IDM_EDIT_INSERT_TIMESTAMP_MS,
-    IDM_EDIT_INSERT_TIMESTAMP_US,
-    IDM_EDIT_INSERT_SHORTDATE,
-    IDM_EDIT_INSERT_LONGDATE,
-    IDM_VIEW_SHOWFILENAMEONLY,
-    IDM_VIEW_SHOWEXCERPT,
-    IDM_EDIT_SELTODOCSTART,
-    IDM_EDIT_SELTODOCEND,
-    IDM_EDIT_CHAR2HEX,
-    IDM_EDIT_HEX2CHAR,
-    IDM_EDIT_SHOW_HEX,
-    IDM_EDIT_ESCAPECCHARS,
-    IDM_EDIT_UNESCAPECCHARS,
-    IDM_EDIT_XHTML_ESCAPE_CHAR,
-    IDM_EDIT_XHTML_UNESCAPE_CHAR,
-    IDM_EDIT_ENCLOSESELECTION,
-    IDM_EDIT_INSERT_XMLTAG,
-    CMD_CTRLBACK,
-    CMD_CTRLDEL,
-    noMenuCommands,
-    IDM_DUMP_SELECTIONS,
-    CMD_JUMP2SELSTART,
-    CMD_JUMP2SELEND,
-    IDM_VIEW_MATCHBRACES,
-    IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE,
-    IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK,
-    IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME,
-    IDM_EDIT_GOTOLINE,
-    IDM_EDIT_FIND,
-    IDM_EDIT_FINDNEXT,
-    IDM_EDIT_FINDPREV,
-    IDM_EDIT_REPLACE,
-    IDM_FILE_ADDTOFAV,
-    IDM_FILE_OPENFAV,
-    IDM_FILE_MANAGEFAV,
-  } from "./menu-notepad2";
+  import * as m from "./menu-notepad2";
   import { getTheme } from "../cmexts";
   import {
     getLangExtFromFileName,
@@ -462,17 +278,17 @@
   let initialState = null;
   let isDirty = false;
 
-  let fileNameDisplay = IDM_VIEW_SHOWFILENAMEONLY;
+  let fileNameDisplay = m.IDM_VIEW_SHOWFILENAMEONLY;
   let fileNameExcerpt = "";
   let shownFileName = ""; // what we show to the user
 
   $: updateFileNameDisplay(isDirty, fileNameDisplay, name);
   function updateFileNameDisplay(isDirty, fileNameDisplay, name) {
     switch (fileNameDisplay) {
-      case IDM_VIEW_SHOWFILENAMEONLY:
+      case m.IDM_VIEW_SHOWFILENAMEONLY:
         shownFileName = name;
         break;
-      case IDM_VIEW_SHOWEXCERPT:
+      case m.IDM_VIEW_SHOWEXCERPT:
         shownFileName = fileNameExcerpt;
         break;
     }
@@ -1052,442 +868,442 @@
     // unless we're showing a dialog
     switch (cmdId) {
       // those potentially show dialogs
-      case IDM_FILE_NEW:
-      case IDT_FILE_NEW:
+      case m.IDM_FILE_NEW:
+      case m.IDT_FILE_NEW:
         cmdFileNew();
         break;
-      case IDM_EDIT_CLEARDOCUMENT:
+      case m.IDM_EDIT_CLEARDOCUMENT:
         // TODO: ask to save if dirty?
         newEmptyFile();
         break;
-      case IDM_FILE_OPEN:
-      case IDT_FILE_OPEN:
+      case m.IDM_FILE_OPEN:
+      case m.IDT_FILE_OPEN:
         cmdFileOpen();
         break;
-      case IDM_FILE_SAVE:
-      case IDT_FILE_SAVE:
+      case m.IDM_FILE_SAVE:
+      case m.IDT_FILE_SAVE:
         cmdFileSave();
         break;
-      case IDM_FILE_SAVEAS:
-      case IDT_FILE_SAVEAS:
+      case m.IDM_FILE_SAVEAS:
+      case m.IDT_FILE_SAVEAS:
         cmdFileSaveAs();
         break;
-      case IDM_FILE_SAVECOPY:
-      case IDT_FILE_SAVECOPY:
+      case m.IDM_FILE_SAVECOPY:
+      case m.IDT_FILE_SAVECOPY:
         cmdFileSaveCopy();
         break;
-      case IDM_FILE_READONLY_MODE:
+      case m.IDM_FILE_READONLY_MODE:
         settings.readOnly = !settings.readOnly;
         break;
-      case IDM_FILE_NEWWINDOW2:
+      case m.IDM_FILE_NEWWINDOW2:
         // open empty window
         let uri = window.location.toString();
         window.open(uri);
         break;
-      case IDM_FILE_ADDTOFAV:
+      case m.IDM_FILE_ADDTOFAV:
         cmdFileAddToFav();
         break;
-      case IDM_FILE_OPENFAV:
-      case IDM_FILE_MANAGEFAV:
+      case m.IDM_FILE_OPENFAV:
+      case m.IDM_FILE_MANAGEFAV:
         cmdFileOpenFav();
         break;
 
-      case IDM_EDIT_GOTOLINE:
+      case m.IDM_EDIT_GOTOLINE:
         cmdEditGoToLine();
         break;
 
-      case IDM_EDIT_ENCLOSESELECTION:
+      case m.IDM_EDIT_ENCLOSESELECTION:
         cmdEncloseSelection();
         break;
-      case IDM_EDIT_INSERT_XMLTAG:
+      case m.IDM_EDIT_INSERT_XMLTAG:
         cmdInsertXmlTag();
         break;
-      case IDM_HELP_ABOUT:
+      case m.IDM_HELP_ABOUT:
         showingAbout = true;
         break;
 
-      case IDM_DUMP_SELECTIONS:
+      case m.IDM_DUMP_SELECTIONS:
         dumpSelections(editorView);
         break;
 
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
         settings.lineHighlightType = cmdId;
         break;
 
-      case IDM_EDIT_CHAR2HEX:
+      case m.IDM_EDIT_CHAR2HEX:
         replaceSelectionsWith(editorView, charToHex);
         break;
-      // case IDM_EDIT_HEX2CHAR:
+      // case m.IDM_EDIT_HEX2CHAR:
       //   replaceSelectionsWith(editorView, hexToChar);
       //   break;
-      case IDM_EDIT_SHOW_HEX:
+      case m.IDM_EDIT_SHOW_HEX:
         insertAfterSelection(editorView, showHex);
         break;
-      case IDM_EDIT_ESCAPECCHARS:
+      case m.IDM_EDIT_ESCAPECCHARS:
         replaceSelectionsWith(editorView, escapeCChars);
         break;
-      case IDM_EDIT_UNESCAPECCHARS:
+      case m.IDM_EDIT_UNESCAPECCHARS:
         replaceSelectionsWith(editorView, unescapeCChars);
         break;
-      case IDM_EDIT_XHTML_ESCAPE_CHAR:
+      case m.IDM_EDIT_XHTML_ESCAPE_CHAR:
         // TODO: if XML, needs use xhtmlEscapeCharsForXML
         replaceSelectionsWith(editorView, xhtmlEscapeChars);
         break;
-      case IDM_EDIT_XHTML_UNESCAPE_CHAR:
+      case m.IDM_EDIT_XHTML_UNESCAPE_CHAR:
         // TODO: if XML, needs use xhtmlUnEscapeCharsForXML
         replaceSelectionsWith(editorView, xhtmlUnEscapeChars);
         break;
 
-      case IDM_EDIT_SELTODOCSTART:
+      case m.IDM_EDIT_SELTODOCSTART:
         selectToDocStart(editorView);
         break;
-      case IDM_EDIT_SELTODOCEND:
+      case m.IDM_EDIT_SELTODOCEND:
         selectToDocEnd(editorView);
         break;
-      case IDM_VIEW_MENU:
+      case m.IDM_VIEW_MENU:
         settings.showMenu = !settings.showMenu;
         break;
-      case IDM_VIEW_WORDWRAP:
-      case IDT_VIEW_WORDWRAP:
+      case m.IDM_VIEW_WORDWRAP:
+      case m.IDT_VIEW_WORDWRAP:
         settings.wordWrap = !settings.wordWrap;
         break;
-      case IDM_VIEW_SHOWWHITESPACE:
+      case m.IDM_VIEW_SHOWWHITESPACE:
         settings.showWhitespace = !settings.showWhitespace;
         break;
 
-      case IDM_VIEW_LINENUMBERS:
+      case m.IDM_VIEW_LINENUMBERS:
         settings.showLineNumbers = !settings.showLineNumbers;
         break;
-      case IDM_VIEW_STATUSBAR:
+      case m.IDM_VIEW_STATUSBAR:
         settings.showStatusBar = !settings.showStatusBar;
         break;
-      case IDM_VIEW_TOOLBAR:
+      case m.IDM_VIEW_TOOLBAR:
         settings.showToolbar = !settings.showToolbar;
         break;
-      case IDM_SET_MULTIPLE_SELECTION:
+      case m.IDM_SET_MULTIPLE_SELECTION:
         settings.enableMultipleSelection = !settings.enableMultipleSelection;
         break;
-      case IDM_VIEW_TABSASSPACES:
+      case m.IDM_VIEW_TABSASSPACES:
         settings.tabsAsSpaces = !settings.tabsAsSpaces;
         break;
-      case IDM_VIEW_MATCHBRACES:
+      case m.IDM_VIEW_MATCHBRACES:
         settings.visualBraceMatching = !settings.visualBraceMatching;
         break;
-      // case IDM_VIEW_SHOW_FOLDING:
+      // case m.IDM_VIEW_SHOW_FOLDING:
       //   showFolding = !showFolding;
       //   break;
       // TODO: notepad2 changes line endings
       // not sure if that transfer to CM as it stores text
       // in lines. Does it re-split the doc when
       // EditorState.lineSeparator changes?
-      case IDM_LINEENDINGS_CRLF:
+      case m.IDM_LINEENDINGS_CRLF:
         settings.lineSeparator = "\r\n";
         lineSeparatorStatus = "CR+LF";
         break;
-      case IDM_LINEENDINGS_CR:
+      case m.IDM_LINEENDINGS_CR:
         settings.lineSeparator = "\r";
         lineSeparatorStatus = "CR";
         break;
-      case IDM_LINEENDINGS_LF:
+      case m.IDM_LINEENDINGS_LF:
         settings.lineSeparator = "\n";
         lineSeparatorStatus = "LF";
         break;
-      case IDM_EDIT_DELETELINERIGHT:
+      case m.IDM_EDIT_DELETELINERIGHT:
         commands.deleteToLineEnd(editorView);
         break;
-      case IDM_EDIT_DELETELINELEFT:
+      case m.IDM_EDIT_DELETELINELEFT:
         commands.deleteToLineStart(editorView);
         break;
-      case IDM_EDIT_SWAP:
+      case m.IDM_EDIT_SWAP:
         swapSelectionsWithClipboard(editorView);
         break;
-      case IDM_EDIT_TRIMLINES:
+      case m.IDM_EDIT_TRIMLINES:
         deleteTrailingWhitespace(editorView);
         break;
-      case IDM_EDIT_TRIMLEAD:
+      case m.IDM_EDIT_TRIMLEAD:
         deleteLeadingWhitespace(editorView);
         break;
-      case IDM_EDIT_STRIP1STCHAR:
+      case m.IDM_EDIT_STRIP1STCHAR:
         deleteFirstChar(editorView);
         break;
-      case IDM_EDIT_STRIPLASTCHAR:
+      case m.IDM_EDIT_STRIPLASTCHAR:
         deleteLastChar(editorView);
         break;
-      case IDM_EDIT_SELECTIONDUPLICATE:
+      case m.IDM_EDIT_SELECTIONDUPLICATE:
         duplicateSelection(editorView);
         break;
-      case IDM_EDIT_REMOVEBLANKLINES:
+      case m.IDM_EDIT_REMOVEBLANKLINES:
         removeBlankLines(editorView);
         break;
-      case IDM_EDIT_MERGEBLANKLINES:
+      case m.IDM_EDIT_MERGEBLANKLINES:
         mergeBlankLines(editorView);
         break;
-      case IDM_EDIT_LINETRANSPOSE:
+      case m.IDM_EDIT_LINETRANSPOSE:
         transposeLines(editorView);
         break;
-      case IDM_EDIT_DUPLICATELINE:
+      case m.IDM_EDIT_DUPLICATELINE:
         duplicateLine(editorView);
         break;
-      case IDM_EDIT_CUTLINE:
+      case m.IDM_EDIT_CUTLINE:
         cutLine(editorView);
         break;
-      case IDM_EDIT_COPYLINE:
+      case m.IDM_EDIT_COPYLINE:
         copyLine(editorView);
         break;
-      case IDM_EDIT_DELETELINE:
+      case m.IDM_EDIT_DELETELINE:
         commands.deleteLine(editorView);
         break;
-      case IDM_EDIT_JOINLINES:
+      case m.IDM_EDIT_JOINLINES:
         joinLines(editorView);
         break;
-      case CMD_COPYFILENAME_NOEXT:
+      case m.CMD_COPYFILENAME_NOEXT:
         copyFileNameToClipboard(1);
         break;
-      case CMD_COPYFILENAME:
+      case m.CMD_COPYFILENAME:
         copyFileNameToClipboard(0);
         break;
-      case CMD_ENCLOSE_TRIPLE_SQ:
+      case m.CMD_ENCLOSE_TRIPLE_SQ:
         encloseSelection(editorView, `'''`, `'''`);
         break;
-      case CMD_ENCLOSE_TRIPLE_DQ:
+      case m.CMD_ENCLOSE_TRIPLE_DQ:
         encloseSelection(editorView, `"""`, `"""`);
         break;
-      case CMD_ENCLOSE_TRIPLE_BT:
+      case m.CMD_ENCLOSE_TRIPLE_BT:
         encloseSelection(editorView, "```", "```");
         break;
-      case IDM_EDIT_STREAMCOMMENT:
+      case m.IDM_EDIT_STREAMCOMMENT:
         commands.blockComment(editorView);
         break;
-      case IDM_EDIT_MERGEDUPLICATELINE:
+      case m.IDM_EDIT_MERGEDUPLICATELINE:
         mergeDuplicateLines(editorView);
         break;
-      case IDM_EDIT_REMOVEDUPLICATELINE:
+      case m.IDM_EDIT_REMOVEDUPLICATELINE:
         deleteDuplicateLines(editorView);
         break;
-      case IDM_EDIT_PADWITHSPACES:
+      case m.IDM_EDIT_PADWITHSPACES:
         padWithSpaces(editorView);
         break;
-      case IDM_EDIT_COMPRESSWS:
+      case m.IDM_EDIT_COMPRESSWS:
         compressWhitespace(editorView);
         break;
-      case IDM_EDIT_BASE64_ENCODE:
+      case m.IDM_EDIT_BASE64_ENCODE:
         cmdBase64EncodeStandard(editorView);
         break;
-      case IDM_EDIT_BASE64_SAFE_ENCODE:
+      case m.IDM_EDIT_BASE64_SAFE_ENCODE:
         cmdBase64EncodeURLSafe(editorView);
         break;
-      case IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
+      case m.IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
         cmdBase64EncodeHtmlImage(editorView);
         break;
-      case IDM_EDIT_BASE64_DECODE:
+      case m.IDM_EDIT_BASE64_DECODE:
         cmdBase64Decode(editorView);
         break;
-      case IDM_EDIT_BASE64_DECODE_AS_HEX:
+      case m.IDM_EDIT_BASE64_DECODE_AS_HEX:
         cmdBase64DecodeAsHex(editorView);
         break;
-      case IDM_EDIT_URLENCODE:
+      case m.IDM_EDIT_URLENCODE:
         cmdUrlEncode(editorView);
         break;
-      case IDM_EDIT_URLDECODE:
+      case m.IDM_EDIT_URLDECODE:
         cmdUrlDecode(editorView);
         break;
-      case IDM_EDIT_CONVERTUPPERCASE:
+      case m.IDM_EDIT_CONVERTUPPERCASE:
         replaceSelectionsWith(editorView, convertUpperCase);
         break;
-      case IDM_EDIT_CONVERTLOWERCASE:
+      case m.IDM_EDIT_CONVERTLOWERCASE:
         replaceSelectionsWith(editorView, convertLowerCase);
         break;
-      case IDM_EDIT_INVERTCASE:
+      case m.IDM_EDIT_INVERTCASE:
         replaceSelectionsWith(editorView, invertCase);
         break;
-      case IDM_EDIT_TITLECASE:
+      case m.IDM_EDIT_TITLECASE:
         replaceSelectionsWith(editorView, titleCase);
         break;
-      // case IDM_EDIT_SENTENCECASE:
+      // case m.IDM_EDIT_SENTENCECASE:
       //   break;
-      // case IDM_EDIT_CONVERTSPACES:
+      // case m.IDM_EDIT_CONVERTSPACES:
       //   break;
-      // case IDM_EDIT_CONVERTTABS:
+      // case m.IDM_EDIT_CONVERTTABS:
       //   break;
-      // case IDM_EDIT_CONVERTSPACES2:
+      // case m.IDM_EDIT_CONVERTSPACES2:
       //   break;
-      // case IDM_EDIT_CONVERTTABS2:
+      // case m.IDM_EDIT_CONVERTTABS2:
       //   break;
-      case IDM_EDIT_NUM2HEX:
+      case m.IDM_EDIT_NUM2HEX:
         replaceSelectionsWith(editorView, toHex);
         break;
-      case IDM_EDIT_NUM2DEC:
+      case m.IDM_EDIT_NUM2DEC:
         replaceSelectionsWith(editorView, toDec);
         break;
-      case IDM_EDIT_NUM2BIN:
+      case m.IDM_EDIT_NUM2BIN:
         replaceSelectionsWith(editorView, toBin);
         break;
-      case IDM_EDIT_NUM2OCT:
+      case m.IDM_EDIT_NUM2OCT:
         replaceSelectionsWith(editorView, toOct);
         break;
-      case IDM_EDIT_INSERT_LOC_DATE:
+      case m.IDM_EDIT_INSERT_LOC_DATE:
         insertText(editorView, getCurrentDate);
         break;
-      case IDM_EDIT_INSERT_LOC_DATETIME:
+      case m.IDM_EDIT_INSERT_LOC_DATETIME:
         insertText(editorView, getCurrentDateTime);
         break;
-      case IDM_EDIT_INSERT_UTC_DATETIME:
+      case m.IDM_EDIT_INSERT_UTC_DATETIME:
         insertText(editorView, getUTCDate);
         break;
-      case IDM_EDIT_INSERT_TIMESTAMP:
+      case m.IDM_EDIT_INSERT_TIMESTAMP:
         insertText(editorView, getUnixTimestampSeconds);
         break;
-      case IDM_EDIT_INSERT_TIMESTAMP_MS:
+      case m.IDM_EDIT_INSERT_TIMESTAMP_MS:
         insertText(editorView, getUnixTimestampMs);
         break;
-      case IDM_EDIT_INSERT_TIMESTAMP_US:
+      case m.IDM_EDIT_INSERT_TIMESTAMP_US:
         insertText(editorView, getUnixTimestampUs);
         break;
-      case IDM_EDIT_INSERT_SHORTDATE:
+      case m.IDM_EDIT_INSERT_SHORTDATE:
         insertText(editorView, getShortDate);
         break;
-      case IDM_EDIT_INSERT_LONGDATE:
+      case m.IDM_EDIT_INSERT_LONGDATE:
         insertText(editorView, getLongDate);
         break;
-      case IDM_VIEW_SHOWFILENAMEONLY:
-      // case IDM_VIEW_SHOWFILENAMEFIRST:
-      // case IDM_VIEW_SHOWFULLPATH:
-      case IDM_VIEW_SHOWEXCERPT:
+      case m.IDM_VIEW_SHOWFILENAMEONLY:
+      // case m.IDM_VIEW_SHOWFILENAMEFIRST:
+      // case m.IDM_VIEW_SHOWFULLPATH:
+      case m.IDM_VIEW_SHOWEXCERPT:
         fileNameDisplay = cmdId;
-        if (cmdId === IDM_VIEW_SHOWEXCERPT) {
+        if (cmdId === m.IDM_VIEW_SHOWEXCERPT) {
           s = getCurrentSelection(128);
           fileNameExcerpt = `"` + sanitizeString(s) + `"`;
         }
         break;
 
-      case IDM_EDIT_INSERT_GUID:
+      case m.IDM_EDIT_INSERT_GUID:
         insertText(editorView, uuidv4);
         break;
-      case IDM_INSERT_UNICODE_WJ:
-      case IDM_INSERT_UNICODE_ZWJ:
-      case IDM_INSERT_UNICODE_ZWNJ:
-      case IDM_INSERT_UNICODE_LRM:
-      case IDM_INSERT_UNICODE_RLM:
-      case IDM_INSERT_UNICODE_LRE:
-      case IDM_INSERT_UNICODE_RLE:
-      case IDM_INSERT_UNICODE_LRO:
-      case IDM_INSERT_UNICODE_RLO:
-      case IDM_INSERT_UNICODE_LRI:
-      case IDM_INSERT_UNICODE_RLI:
-      case IDM_INSERT_UNICODE_FSI:
-      case IDM_INSERT_UNICODE_PDI:
-      case IDM_INSERT_UNICODE_PDF:
-      case IDM_INSERT_UNICODE_NADS:
-      case IDM_INSERT_UNICODE_NODS:
-      case IDM_INSERT_UNICODE_ASS:
-      case IDM_INSERT_UNICODE_ISS:
-      case IDM_INSERT_UNICODE_AAFS:
-      case IDM_INSERT_UNICODE_IAFS:
-      case IDM_INSERT_UNICODE_ALM:
-      case IDM_INSERT_UNICODE_RS:
-      case IDM_INSERT_UNICODE_US:
-      case IDM_INSERT_UNICODE_LS:
-      case IDM_INSERT_UNICODE_PS:
-      case IDM_INSERT_UNICODE_ZWSP:
+      case m.IDM_INSERT_UNICODE_WJ:
+      case m.IDM_INSERT_UNICODE_ZWJ:
+      case m.IDM_INSERT_UNICODE_ZWNJ:
+      case m.IDM_INSERT_UNICODE_LRM:
+      case m.IDM_INSERT_UNICODE_RLM:
+      case m.IDM_INSERT_UNICODE_LRE:
+      case m.IDM_INSERT_UNICODE_RLE:
+      case m.IDM_INSERT_UNICODE_LRO:
+      case m.IDM_INSERT_UNICODE_RLO:
+      case m.IDM_INSERT_UNICODE_LRI:
+      case m.IDM_INSERT_UNICODE_RLI:
+      case m.IDM_INSERT_UNICODE_FSI:
+      case m.IDM_INSERT_UNICODE_PDI:
+      case m.IDM_INSERT_UNICODE_PDF:
+      case m.IDM_INSERT_UNICODE_NADS:
+      case m.IDM_INSERT_UNICODE_NODS:
+      case m.IDM_INSERT_UNICODE_ASS:
+      case m.IDM_INSERT_UNICODE_ISS:
+      case m.IDM_INSERT_UNICODE_AAFS:
+      case m.IDM_INSERT_UNICODE_IAFS:
+      case m.IDM_INSERT_UNICODE_ALM:
+      case m.IDM_INSERT_UNICODE_RS:
+      case m.IDM_INSERT_UNICODE_US:
+      case m.IDM_INSERT_UNICODE_LS:
+      case m.IDM_INSERT_UNICODE_PS:
+      case m.IDM_INSERT_UNICODE_ZWSP:
         s = findUnicodeStrByMenuID(cmdId);
         insertText(editorView, s);
         break;
-      case IDM_EDIT_INSERT_FILENAME:
+      case m.IDM_EDIT_INSERT_FILENAME:
         insertText(editorView, getFileName(0));
         break;
-      case CMD_INSERTFILENAME_NOEXT:
+      case m.CMD_INSERTFILENAME_NOEXT:
         insertText(editorView, getFileName(1));
         break;
-      // case IDM_EDIT_INSERT_PATHNAME:
+      // case m.IDM_EDIT_INSERT_PATHNAME:
       //   insertText(editorView, getFileName(2));
       //   break;
-      case CMD_ONLINE_SEARCH_GOOGLE:
+      case m.CMD_ONLINE_SEARCH_GOOGLE:
         launchSelectionWithGoogle();
         break;
-      case CMD_ONLINE_SEARCH_BING:
+      case m.CMD_ONLINE_SEARCH_BING:
         launchSelectionWithBing();
         break;
-      case CMD_ONLINE_SEARCH_WIKI:
+      case m.CMD_ONLINE_SEARCH_WIKI:
         launchSelectionWithWikipedia();
         break;
-      case CMD_JUMP2SELSTART:
+      case m.CMD_JUMP2SELSTART:
         goToSelectionStartEnd(editorView, false);
         break;
-      case CMD_JUMP2SELEND:
+      case m.CMD_JUMP2SELEND:
         goToSelectionStartEnd(editorView, true);
         break;
 
       // those are handled by CodeMirror
-      case IDM_EDIT_COPY:
-      case IDT_EDIT_COPY:
-      case IDM_EDIT_CUT:
-      case IDT_EDIT_CUT:
-      case IDT_EDIT_CUT:
-      case IDM_EDIT_PASTE:
-      case IDT_EDIT_PASTE:
-      case IDM_EDIT_SELECTALL:
-      case IDM_EDIT_UNDO:
-      case IDT_EDIT_UNDO:
-      case IDM_EDIT_REDO:
-      case IDT_EDIT_REDO:
-      case IDM_VIEW_TOGGLE_FULLSCREEN:
-      case IDM_EDIT_INDENT:
-      case IDM_EDIT_UNINDENT:
-      case IDM_EDIT_MOVELINEDOWN:
-      case IDM_EDIT_MOVELINEUP:
-      case IDM_EDIT_LINECOMMENT:
-      case CMD_CTRLBACK:
-      case CMD_CTRLDEL:
-      case IDM_EDIT_FIND: // TODO: custom dialog
-      case IDM_EDIT_FINDNEXT:
-      case IDM_EDIT_FINDPREV:
-      case IDM_EDIT_REPLACE:
+      case m.IDM_EDIT_COPY:
+      case m.IDT_EDIT_COPY:
+      case m.IDM_EDIT_CUT:
+      case m.IDT_EDIT_CUT:
+      case m.IDT_EDIT_CUT:
+      case m.IDM_EDIT_PASTE:
+      case m.IDT_EDIT_PASTE:
+      case m.IDM_EDIT_SELECTALL:
+      case m.IDM_EDIT_UNDO:
+      case m.IDT_EDIT_UNDO:
+      case m.IDM_EDIT_REDO:
+      case m.IDT_EDIT_REDO:
+      case m.IDM_VIEW_TOGGLE_FULLSCREEN:
+      case m.IDM_EDIT_INDENT:
+      case m.IDM_EDIT_UNINDENT:
+      case m.IDM_EDIT_MOVELINEDOWN:
+      case m.IDM_EDIT_MOVELINEUP:
+      case m.IDM_EDIT_LINECOMMENT:
+      case m.CMD_CTRLBACK:
+      case m.CMD_CTRLDEL:
+      case m.IDM_EDIT_FIND: // TODO: custom dialog
+      case m.IDM_EDIT_FINDNEXT:
+      case m.IDM_EDIT_FINDPREV:
+      case m.IDM_EDIT_REPLACE:
         if (ev) {
           // if invoked via keyboard, CodeMirror has already handled it
           stopPropagation = false;
         } else {
           switch (cmdId) {
-            case IDM_VIEW_TOGGLE_FULLSCREEN:
+            case m.IDM_VIEW_TOGGLE_FULLSCREEN:
               toggleFullScreen();
               break;
-            case IDM_EDIT_CUT:
-            case IDT_EDIT_CUT:
+            case m.IDM_EDIT_CUT:
+            case m.IDT_EDIT_CUT:
               document.execCommand("cut");
               break;
-            case IDT_EDIT_COPY:
-            case IDM_EDIT_COPY:
+            case m.IDT_EDIT_COPY:
+            case m.IDM_EDIT_COPY:
               document.execCommand("copy");
               break;
-            case IDM_EDIT_PASTE:
-            case IDT_EDIT_PASTE:
+            case m.IDM_EDIT_PASTE:
+            case m.IDT_EDIT_PASTE:
               cmdEditPaste();
               break;
-            case IDM_EDIT_INDENT:
+            case m.IDM_EDIT_INDENT:
               commands.indentMore(editorView);
               break;
-            case IDM_EDIT_UNINDENT:
+            case m.IDM_EDIT_UNINDENT:
               commands.indentLess(editorView);
               break;
-            case IDM_EDIT_SELECTALL:
+            case m.IDM_EDIT_SELECTALL:
               commands.selectAll(editorView);
               break;
-            case IDM_EDIT_UNDO:
-            case IDT_EDIT_UNDO:
+            case m.IDM_EDIT_UNDO:
+            case m.IDT_EDIT_UNDO:
               commands.undo(editorView);
               break;
-            case IDM_EDIT_REDO:
-            case IDT_EDIT_REDO:
+            case m.IDM_EDIT_REDO:
+            case m.IDT_EDIT_REDO:
               commands.redo(editorView);
               break;
-            case IDM_EDIT_MOVELINEDOWN:
+            case m.IDM_EDIT_MOVELINEDOWN:
               commands.moveLineDown(editorView);
               break;
-            case IDM_EDIT_MOVELINEUP:
+            case m.IDM_EDIT_MOVELINEUP:
               commands.moveLineUp(editorView);
               break;
-            case IDM_EDIT_LINECOMMENT:
+            case m.IDM_EDIT_LINECOMMENT:
               commands.toggleComment(editorView);
               break;
             default:
@@ -1497,22 +1313,22 @@
           }
         }
         break;
-      case IDT_EDIT_FIND:
-      case IDT_EDIT_REPLACE:
+      case m.IDT_EDIT_FIND:
+      case m.IDT_EDIT_REPLACE:
         openSearchPanel(editorView);
         noEditorFocus = true;
         break;
-      case IDM_EDIT_DELETE:
-      case IDT_EDIT_DELETE:
+      case m.IDM_EDIT_DELETE:
+      case m.IDT_EDIT_DELETE:
         // TODO: possibly deleteCharBackward()
         commands.deleteCharForward(editorView);
         break;
-      case IDM_EDIT_COPYALL:
+      case m.IDM_EDIT_COPYALL:
         // copy the whole text to clipbard
         s = editorView.state.doc.toString();
         setClipboard(s);
         break;
-      case IDM_EDIT_COPYADD:
+      case m.IDM_EDIT_COPYADD:
         let sel = getCurrentSelectionAsText();
         if (sel !== "") {
           // Document must be focused for setting clipboard
@@ -1522,15 +1338,15 @@
           }, 500);
         }
         break;
-      case IDM_EDIT_CLEARCLIPBOARD:
+      case m.IDM_EDIT_CLEARCLIPBOARD:
         clearClipboard();
         break;
-      case IDM_HELP_PROJECT_HOME:
+      case m.IDM_HELP_PROJECT_HOME:
         // TODO: needs home
         window.open("https://onlinetool.io/", "_blank");
         break;
-      case IDM_HELP_REPORT_ISSUE:
-      case IDM_HELP_FEATURE_REQUEST:
+      case m.IDM_HELP_REPORT_ISSUE:
+      case m.IDM_HELP_FEATURE_REQUEST:
         window.open("https://github.com/kjk/notepad2web/issues", "_blank");
         break;
       default:
@@ -1577,85 +1393,85 @@
     let n;
     switch (cmdId) {
       // TODO: much more that depend on selection state
-      case IDM_EDIT_CUT:
-      case IDT_EDIT_CUT:
-      case IDM_EDIT_COPY:
-      case IDT_EDIT_COPY:
-      case IDM_EDIT_COPYADD:
-      case IDM_EDIT_CLEARCLIPBOARD:
-      case IDM_EDIT_CONVERTUPPERCASE:
-      case IDM_EDIT_CONVERTLOWERCASE:
-      case IDM_EDIT_INVERTCASE:
-      case IDM_EDIT_TITLECASE:
-      case IDM_EDIT_SENTENCECASE:
-      case IDM_EDIT_CONVERTSPACES:
-      case IDM_EDIT_CONVERTTABS:
-      case IDM_EDIT_CONVERTSPACES2:
-      case IDM_EDIT_CONVERTTABS2:
-      case IDM_EDIT_NUM2HEX:
-      case IDM_EDIT_NUM2DEC:
-      case IDM_EDIT_NUM2BIN:
-      case IDM_EDIT_NUM2OCT:
-      case CMD_ONLINE_SEARCH_GOOGLE:
-      case CMD_ONLINE_SEARCH_BING:
-      case CMD_ONLINE_SEARCH_WIKI:
-      case IDM_EDIT_BASE64_ENCODE:
-      case IDM_EDIT_BASE64_SAFE_ENCODE:
-      case IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
-      case IDM_EDIT_BASE64_DECODE:
-      case IDM_EDIT_BASE64_DECODE_AS_HEX:
-      case CMD_CUSTOM_ACTION1:
-      case CMD_CUSTOM_ACTION2:
-      case IDM_EDIT_URLENCODE:
-      case IDM_EDIT_URLDECODE:
-      case IDM_EDIT_SELECTIONDUPLICATE:
-      case IDM_EDIT_SORTLINES:
-      case IDM_EDIT_JOINLINES:
-      case IDM_EDIT_COLUMNWRAP:
-      case IDM_EDIT_SPLITLINES:
-      case IDM_EDIT_JOINLINESEX:
-      case IDM_VIEW_SHOWEXCERPT:
-      case CMD_ONLINE_SEARCH_GOOGLE:
-      case CMD_ONLINE_SEARCH_BING:
-      case CMD_ONLINE_SEARCH_WIKI:
-      case IDM_EDIT_CHAR2HEX:
-      case IDM_EDIT_HEX2CHAR:
-      case IDM_EDIT_SHOW_HEX:
-      case IDM_EDIT_ESCAPECCHARS:
-      case IDM_EDIT_UNESCAPECCHARS:
-      case IDM_EDIT_XHTML_ESCAPE_CHAR:
-      case IDM_EDIT_XHTML_UNESCAPE_CHAR:
+      case m.IDM_EDIT_CUT:
+      case m.IDT_EDIT_CUT:
+      case m.IDM_EDIT_COPY:
+      case m.IDT_EDIT_COPY:
+      case m.IDM_EDIT_COPYADD:
+      case m.IDM_EDIT_CLEARCLIPBOARD:
+      case m.IDM_EDIT_CONVERTUPPERCASE:
+      case m.IDM_EDIT_CONVERTLOWERCASE:
+      case m.IDM_EDIT_INVERTCASE:
+      case m.IDM_EDIT_TITLECASE:
+      case m.IDM_EDIT_SENTENCECASE:
+      case m.IDM_EDIT_CONVERTSPACES:
+      case m.IDM_EDIT_CONVERTTABS:
+      case m.IDM_EDIT_CONVERTSPACES2:
+      case m.IDM_EDIT_CONVERTTABS2:
+      case m.IDM_EDIT_NUM2HEX:
+      case m.IDM_EDIT_NUM2DEC:
+      case m.IDM_EDIT_NUM2BIN:
+      case m.IDM_EDIT_NUM2OCT:
+      case m.CMD_ONLINE_SEARCH_GOOGLE:
+      case m.CMD_ONLINE_SEARCH_BING:
+      case m.CMD_ONLINE_SEARCH_WIKI:
+      case m.IDM_EDIT_BASE64_ENCODE:
+      case m.IDM_EDIT_BASE64_SAFE_ENCODE:
+      case m.IDM_EDIT_BASE64_HTML_EMBEDDED_IMAGE:
+      case m.IDM_EDIT_BASE64_DECODE:
+      case m.IDM_EDIT_BASE64_DECODE_AS_HEX:
+      case m.CMD_CUSTOM_ACTION1:
+      case m.CMD_CUSTOM_ACTION2:
+      case m.IDM_EDIT_URLENCODE:
+      case m.IDM_EDIT_URLDECODE:
+      case m.IDM_EDIT_SELECTIONDUPLICATE:
+      case m.IDM_EDIT_SORTLINES:
+      case m.IDM_EDIT_JOINLINES:
+      case m.IDM_EDIT_COLUMNWRAP:
+      case m.IDM_EDIT_SPLITLINES:
+      case m.IDM_EDIT_JOINLINESEX:
+      case m.IDM_VIEW_SHOWEXCERPT:
+      case m.CMD_ONLINE_SEARCH_GOOGLE:
+      case m.CMD_ONLINE_SEARCH_BING:
+      case m.CMD_ONLINE_SEARCH_WIKI:
+      case m.IDM_EDIT_CHAR2HEX:
+      case m.IDM_EDIT_HEX2CHAR:
+      case m.IDM_EDIT_SHOW_HEX:
+      case m.IDM_EDIT_ESCAPECCHARS:
+      case m.IDM_EDIT_UNESCAPECCHARS:
+      case m.IDM_EDIT_XHTML_ESCAPE_CHAR:
+      case m.IDM_EDIT_XHTML_UNESCAPE_CHAR:
         // console.log("isMenuEnabled:", cmdId, "hasSelection:", hasSelection);
         return hasSelection;
 
-      case IDM_EDIT_COPYALL:
+      case m.IDM_EDIT_COPYALL:
         return editorView.state.doc.length > 0;
 
-      case IDM_EDIT_PASTE:
-      case IDT_EDIT_PASTE:
+      case m.IDM_EDIT_PASTE:
+      case m.IDT_EDIT_PASTE:
         return hasClipboard;
 
-      case IDM_EDIT_UNDO:
-      case IDT_EDIT_UNDO:
+      case m.IDM_EDIT_UNDO:
+      case m.IDT_EDIT_UNDO:
         n = commands.undoDepth(state);
         return n > 0;
 
-      case IDM_EDIT_REDO:
-      case IDT_EDIT_REDO:
+      case m.IDM_EDIT_REDO:
+      case m.IDT_EDIT_REDO:
         n = commands.redoDepth(state);
         return n > 0;
 
-      case IDM_EDIT_SWAP:
+      case m.IDM_EDIT_SWAP:
         return hasSelection && hasClipboard;
 
-      case IDM_FILE_SAVE:
-      case IDT_FILE_SAVE:
+      case m.IDM_FILE_SAVE:
+      case m.IDT_FILE_SAVE:
         return isDirty;
 
-      case IDM_FILE_ADDTOFAV:
+      case m.IDM_FILE_ADDTOFAV:
         return file != null;
 
-      case IDM_EDIT_LINETRANSPOSE:
+      case m.IDM_EDIT_LINETRANSPOSE:
         // TODO: if not at first line
         break;
     }
@@ -1664,38 +1480,38 @@
 
   function isMenuChecked(cmdId) {
     switch (cmdId) {
-      case IDM_VIEW_MENU:
+      case m.IDM_VIEW_MENU:
         return settings.showMenu;
-      case IDM_VIEW_WORDWRAP:
+      case m.IDM_VIEW_WORDWRAP:
         return settings.wordWrap;
-      case IDM_FILE_READONLY_MODE:
+      case m.IDM_FILE_READONLY_MODE:
         return settings.readOnly;
-      case IDM_VIEW_LINENUMBERS:
+      case m.IDM_VIEW_LINENUMBERS:
         return settings.showLineNumbers;
-      case IDM_VIEW_STATUSBAR:
+      case m.IDM_VIEW_STATUSBAR:
         return settings.showStatusBar;
-      case IDM_VIEW_TOOLBAR:
+      case m.IDM_VIEW_TOOLBAR:
         return settings.showToolbar;
-      case IDM_LINEENDINGS_CRLF:
+      case m.IDM_LINEENDINGS_CRLF:
         return settings.lineSeparator === "\r\n";
-      case IDM_LINEENDINGS_LF:
+      case m.IDM_LINEENDINGS_LF:
         return settings.lineSeparator === "\n";
-      case IDM_LINEENDINGS_CR:
+      case m.IDM_LINEENDINGS_CR:
         return settings.lineSeparator === "\r";
-      case IDM_VIEW_SHOWWHITESPACE:
+      case m.IDM_VIEW_SHOWWHITESPACE:
         return settings.showWhitespace;
-      case IDM_SET_MULTIPLE_SELECTION:
+      case m.IDM_SET_MULTIPLE_SELECTION:
         return settings.enableMultipleSelection;
-      case IDM_VIEW_TABSASSPACES:
+      case m.IDM_VIEW_TABSASSPACES:
         return settings.tabsAsSpaces;
-      case IDM_VIEW_SHOWFILENAMEONLY:
-      case IDM_VIEW_SHOWEXCERPT:
+      case m.IDM_VIEW_SHOWFILENAMEONLY:
+      case m.IDM_VIEW_SHOWEXCERPT:
         return fileNameDisplay === cmdId;
-      case IDM_VIEW_MATCHBRACES:
+      case m.IDM_VIEW_MATCHBRACES:
         return settings.visualBraceMatching;
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
-      case IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
         return settings.lineHighlightType === cmdId;
     }
     return false;
@@ -1773,8 +1589,8 @@
       >
       <MenuBar
         menuDidOpenFn={handleMenuDidOpen}
-        menuBar={mainMenuBar}
-        {noMenuCommands}
+        menuBar={m.mainMenuBar}
+        noMenuCommands={m.noMenuCommands}
         on:menucmd={handleMenuCmd}
       />
       <div class="truncate italic text-gray-500">
@@ -1801,8 +1617,8 @@
       <MenuBar
         hidden={true}
         menuDidOpenFn={handleMenuDidOpen}
-        menuBar={mainMenuBar}
-        {noMenuCommands}
+        menuBar={m.mainMenuBar}
+        noMenuCommands={m.noMenuCommands}
         on:menucmd={handleMenuCmd}
       />
       <div class="absolute flex top-[2px] right-[4px] text-sm">
