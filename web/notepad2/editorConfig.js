@@ -1,5 +1,6 @@
 /** @typedef { import("@codemirror/view").KeyBinding} KeyBinding */
 /** @typedef { import("@codemirror/state").Extension} Extension */
+/** @typedef { import("./Settings").Settings} Settings */
 
 import {
   crosshairCursor,
@@ -113,6 +114,11 @@ const defaultKeymap2 = [
   // @ts-ignore
 ].concat(standardKeymap);
 
+/**
+ * @param {Settings} settings
+ * @param {Extension} lang
+ * @returns
+ */
 export function makeConfig(settings, lang) {
   /** @type {Extension[]}*/
   let res = [
@@ -131,7 +137,6 @@ export function makeConfig(settings, lang) {
     crosshairCursor(),
     makeLineHighlight(settings.lineHighlightType),
     highlightSelectionMatches(),
-    makeIndentGuides(settings.indentationMarkers),
     keymap.of([
       ...closeBracketsKeymap,
       ...defaultKeymap2,
@@ -152,6 +157,7 @@ export function makeConfig(settings, lang) {
     makeWordWrap(settings.wordWrap),
     makeMultipleSelection(settings.enableMultipleSelection),
     makeLineNumbers(settings.showLineNumbers),
+    makeIndentGuides(settings.showIndentGuides),
     makeCodeFolding(settings.showCodeFolding),
     // scrollPastEnd(),
     makeLang(lang),
