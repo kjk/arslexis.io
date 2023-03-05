@@ -129,7 +129,7 @@
     getUTCDate,
   } from "../dateutil";
   import { tick } from "svelte";
-  import { Settings } from "./Settings";
+  import { settings } from "./Settings";
   import {
     setConfigEditorView,
     updateEnableMultipleSelection,
@@ -154,8 +154,6 @@
     getFavorites,
     setFavorites,
   } from "./np2store";
-
-  let settings = new Settings();
 
   let toolbarFuncs;
 
@@ -1657,6 +1655,7 @@
   <Toolbar
     bind:funcs={toolbarFuncs}
     bind:show={settings.showToolbar}
+    bind:wordWrap={settings.wordWrap}
     {isMenuEnabled}
     {handleMenuCmd}
   />

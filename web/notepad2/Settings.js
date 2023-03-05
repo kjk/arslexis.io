@@ -22,3 +22,5 @@ export class Settings {
 
   rememberRecentFiles = true;
 }
+
+export const settings = new Settings();

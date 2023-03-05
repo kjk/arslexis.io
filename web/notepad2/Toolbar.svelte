@@ -32,10 +32,13 @@
   import { len, throwIf } from "../util";
 
   export let show = false;
+  /** @typw {Function} */
   export let isMenuEnabled;
   export let handleMenuCmd;
+  export let wordWrap;
 
   let isToolbarReady = false;
+
   async function setToolbarEnabledState() {
     if (!isToolbarReady) {
       return;
@@ -56,15 +59,22 @@
     }
     // console.log("setToolbarEnabledState: needsRedraw:", needsRedraw);
     if (needsRedraw) {
-      toolbarButtonsOrder = toolbarButtonsOrder;
+      redrawToolbar();
     }
   }
+
+  $: redrawToolbar(wordWrap);
 
   // Notepad2.c. DefaultToolbarButtons
   let toolbarButtonsOrder = [
     22, 3, 0, 1, 2, 0, 4, 18, 19, 0, 5, 6, 0, 7, 8, 9, 20, 0, 10, 11, 0, 12, 0,
     24, 0, 15,
   ];
+
+  function redrawToolbar(ignore) {
+    toolbarButtonsOrder = toolbarButtonsOrder;
+  }
+
   // order of icons in toolbar bitmap
   // el[0] is id of the command sent by the icon
   // el[1] is tooltip for this icon
@@ -160,6 +170,15 @@
     setToolbarEnabledState: setToolbarEnabledState,
   };
 
+  function hilightClass(info) {
+    const cmdId = info[0];
+    switch (cmdId) {
+      case IDT_VIEW_WORDWRAP:
+        return wordWrap ? "bg-blue-50" : "bg-white";
+      default:
+        return "bg-white";
+    }
+  }
   onMount(() => {
     buildIconImages();
   });
@@ -184,7 +203,7 @@
           width={iconDx}
           height={iconDy}
           class:disabled
-          class="mt-1 px-1 py-1 hover:bg-blue-100"
+          class="{hilightClass(info)} mt-1 px-1 py-1 hover:bg-blue-100"
           on:click={() => handleMenuCmd({ detail: { cmd: cmdId } })}
         />
       {/if}
