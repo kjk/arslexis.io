@@ -39,6 +39,7 @@
     "@codemirror/legacy-modes": "^6.3.1",
     "@codemirror/theme-one-dark": "^6.1.0",
     "@neodrag/svelte": "^2.0.3",
+    "@replit/codemirror-indentation-markers": "^6.3.0",
     "@replit/codemirror-lang-svelte": "^6.0.0",
     "@zip.js/zip.js": "^2.6.65",
     "codemirror": "^6.0.1",

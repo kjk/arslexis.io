@@ -1,11 +1,12 @@
 import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, lineNumbers } from "@codemirror/view";
-import { bracketMatching, indentUnit } from "@codemirror/language";
+import { foldGutter, bracketMatching, indentUnit } from "@codemirror/language";
 import {
   highlightWhitespace,
   highlightTrailingWhitespace,
   highlightActiveLine,
 } from "@codemirror/view";
+import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import {
   IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME,
   IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE,
@@ -67,11 +68,33 @@ export function makeVisualBraceMatching(visualBraceMatching) {
   const v = visualBraceMatching ? bracketMatching() : [];
   return visualBraceMatchingCompartment.of(v);
 }
-export function updateVisualBraceMatching(flag) {
+export function updateVisualBraceMatching(visualBraceMatching) {
   if (!editorView) return;
-  const v = flag ? bracketMatching() : [];
+  const v = visualBraceMatching ? bracketMatching() : [];
   editorView.dispatch({
     effects: visualBraceMatchingCompartment.reconfigure(v),
+  });
+}
+
+// possibilities:
+// "▶", "▼"
+// "+", "−"
+// "⊞", "⊟"
+let foldGutterExt = foldGutter({
+  closedText: "⊞",
+  openText: "⊟",
+});
+
+const codeFoldingCompartment = new Compartment();
+export function makeCodeFolding(codeFolding) {
+  const v = codeFolding ? foldGutterExt : [];
+  return codeFoldingCompartment.of(v);
+}
+export function updateCodeFolding(codeFolding) {
+  if (!editorView) return;
+  const v = codeFolding ? foldGutterExt : [];
+  editorView.dispatch({
+    effects: codeFoldingCompartment.reconfigure(v),
   });
 }
 

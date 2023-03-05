@@ -37,7 +37,6 @@ import {
   defaultHighlightStyle,
   syntaxHighlighting,
   indentOnInput,
-  foldGutter,
   foldKeymap,
 } from "@codemirror/language";
 import {
@@ -50,6 +49,7 @@ import { keymap, placeholder as placeholderExt } from "@codemirror/view";
 import { lintKeymap } from "@codemirror/lint";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import {
+  makeCodeFolding,
   makeLang,
   makeLineHighlight,
   makeLineNumbers,
@@ -113,15 +113,6 @@ const defaultKeymap2 = [
 ].concat(standardKeymap);
 
 export function makeConfig(settings, lang) {
-  // possibilities:
-  // "▶", "▼"
-  // "+", "−"
-  // "⊞", "⊟"
-  let foldGutterExt = foldGutter({
-    closedText: "⊞",
-    openText: "⊟",
-  });
-
   /** @type {Extension[]}*/
   let res = [
     EditorView.editable.of(true), // ???
@@ -139,6 +130,7 @@ export function makeConfig(settings, lang) {
     crosshairCursor(),
     makeLineHighlight(settings.lineHighlightType),
     highlightSelectionMatches(),
+    // indentationMarkers(),
     keymap.of([
       ...closeBracketsKeymap,
       ...defaultKeymap2,
@@ -159,7 +151,7 @@ export function makeConfig(settings, lang) {
     makeWordWrap(settings.wordWrap),
     makeMultipleSelection(settings.enableMultipleSelection),
     makeLineNumbers(settings.showLineNumbers),
-    foldGutterExt,
+    makeCodeFolding(settings.showCodeFolding),
     // scrollPastEnd(),
     makeLang(lang),
   ];

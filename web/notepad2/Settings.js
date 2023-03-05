@@ -17,6 +17,8 @@ export class Settings {
   visualBraceMatching = true;
   lineSeparator = null;
   showTrailingWhitespace = true;
+  // show / hide cold folding gutter
+  showCodeFolding = true;
 
   lineHighlightType = IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK;
 

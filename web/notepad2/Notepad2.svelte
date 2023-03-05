@@ -133,6 +133,7 @@
   import { settings } from "./Settings";
   import {
     setConfigEditorView,
+    updateCodeFolding,
     updateEnableMultipleSelection,
     updateLang,
     updateLineHighlightType,
@@ -252,6 +253,7 @@
   let lineSeparatorStatus = "any";
   $: updateLineSeparator(settings.lineSeparator);
   $: updateVisualBraceMatching(settings.visualBraceMatching);
+  $: updateCodeFolding(settings.showCodeFolding);
   $: updateTabSize(settings.tabSize);
   $: updateTabsState(settings.tabsAsSpaces, settings.tabSpaces);
   $: updateReadOnly(settings.readOnly);
@@ -1065,9 +1067,9 @@
       case m.IDM_VIEW_MATCHBRACES:
         settings.visualBraceMatching = !settings.visualBraceMatching;
         break;
-      // case m.IDM_VIEW_SHOW_FOLDING:
-      //   showFolding = !showFolding;
-      //   break;
+      case m.IDM_VIEW_SHOW_FOLDING:
+        settings.showCodeFolding = !settings.showCodeFolding;
+        break;
       // TODO: notepad2 changes line endings
       // not sure if that transfer to CM as it stores text
       // in lines. Does it re-split the doc when
@@ -1541,6 +1543,8 @@
       case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
       case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
         return settings.lineHighlightType === cmdId;
+      case m.IDM_VIEW_SHOW_FOLDING:
+        return settings.showCodeFolding;
     }
     return false;
   }
