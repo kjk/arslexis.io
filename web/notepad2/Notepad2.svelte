@@ -51,6 +51,7 @@
     notepad2Size,
     toggleFullScreen,
     stripExt,
+    limit,
   } from "../util.js";
   import {
     deserialize,
@@ -151,7 +152,10 @@
     addToFavorites,
     addToRecent,
     favEntryFromFsFile,
+    fsFileFromFavEntry,
+    getAndClearFileForNewWindow,
     getFavorites,
+    rememberFileForNewWindow,
     setFavorites,
   } from "./np2store";
 
@@ -701,13 +705,30 @@
   }
 
   function cmdFileSaveAs() {
-    let content = getCurrentContent();
+    const content = getCurrentContent();
     contentSaveAs(content, false);
   }
 
   function cmdFileSaveCopy() {
-    let content = getCurrentContent();
+    const content = getCurrentContent();
     contentSaveAs(content, true);
+  }
+
+  function cmdFileNewEmptyWindow() {
+    const uri = window.location.toString();
+    window.open(uri);
+  }
+
+  // open new window with current file or empty window
+  // if working of new file
+  async function cmdFileNewWindow() {
+    if (!file) {
+      cmdFileNewEmptyWindow();
+      return;
+    }
+    await rememberFileForNewWindow(file);
+    const uri = location.toString() + "?file=" + encodeURI("__for_new_window");
+    window.open(uri);
   }
 
   function cmdFileSave() {
@@ -715,7 +736,7 @@
       saveFile(file);
       return;
     }
-    let content = getCurrentContent();
+    const content = getCurrentContent();
     contentSave(content);
   }
 
@@ -724,7 +745,7 @@
       loadFile();
       return;
     }
-    let action = await askToSaveFile();
+    const action = await askToSaveFile();
     if (action === "cancel") {
       return;
     }
@@ -733,22 +754,12 @@
       return;
     }
     throwIf(action !== "yes");
-    let didCancel = await contentSave();
+    const didCancel = await contentSave();
     if (didCancel) {
       return;
     }
     // TODO: or do this always?
     loadFile();
-  }
-
-  function limit(n, min, max) {
-    if (n < min) {
-      return min;
-    }
-    if (n > max) {
-      return max;
-    }
-    return n;
   }
 
   async function cmdFileAddToFav() {
@@ -804,10 +815,7 @@
     if (!fav) {
       return;
     }
-    const name = fav.name; // or fav.favName?
-    const f = new FsFile(fav.fs, name, name);
-    f.fileHandle = fav.fileHandle;
-    f.id = fav.id;
+    const f = fsFileFromFavEntry(fav);
     console.log("cmdFileOpenRecent:", f);
     await setFileAsCurrent(f);
   }
@@ -907,10 +915,11 @@
       case m.IDM_FILE_READONLY_MODE:
         settings.readOnly = !settings.readOnly;
         break;
+      case m.IDM_FILE_NEWWINDOW:
+        cmdFileNewWindow();
+        break;
       case m.IDM_FILE_NEWWINDOW2:
-        // open empty window
-        let uri = window.location.toString();
-        window.open(uri);
+        cmdFileNewEmptyWindow();
         break;
       case m.IDM_FILE_ADDTOFAV:
         cmdFileAddToFav();
@@ -1536,20 +1545,25 @@
     return false;
   }
 
-  function openInitialFile() {
+  async function openInitialFile() {
     // if has ?file=${fileID}, opens that
     // otherwise, opens empty file
     let params = new URLSearchParams(location.search);
     let fileId = params.get("file");
-    if (fileId) {
-      let file = deserialize(fileId);
-      if (file) {
-        setFileAsCurrent(file);
-        locationRemoveSearchParamsNoReload();
-        return;
-      }
+    if (!fileId) {
+      newEmptyFile();
+      return;
     }
-    newEmptyFile();
+    locationRemoveSearchParamsNoReload();
+    let file;
+    if (fileId === "__for_new_window") {
+      file = await getAndClearFileForNewWindow();
+    } else {
+      file = deserialize(fileId);
+    }
+    if (file) {
+      setFileAsCurrent(file);
+    }
   }
 
   onMount(() => {

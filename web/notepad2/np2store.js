@@ -1,9 +1,8 @@
 // https://www.npmjs.com/package/idb
 
-/** @typedef {import("./FsFile").FsFile} FsFile */
 import { KV } from "../dbutil";
 import { len, throwIf } from "../util";
-import { fsTypeComputer, fsTypeLocalStorage } from "./FsFile";
+import { FsFile, fsTypeComputer, fsTypeLocalStorage } from "./FsFile";
 
 const db = new KV("np2store", "keyval");
 
@@ -32,6 +31,19 @@ export function favEntryFromFsFile(file, favName) {
   };
   return e;
 }
+
+/**
+ * @param {FavEntry} fav
+ * @returns {FsFile}
+ */
+export function fsFileFromFavEntry(fav) {
+  const name = fav.name; // or fav.favName?
+  const f = new FsFile(fav.fs, name, name);
+  f.fileHandle = fav.fileHandle;
+  f.id = fav.id;
+  return f;
+}
+
 // TODO: expose as svelte store
 
 /**
@@ -172,4 +184,23 @@ export async function addToRecent(e) {
 
 export async function clearRecent() {
   await setRecent([]);
+}
+
+const keyFileForNewWindow = "file-for-new-window";
+
+/**
+ * @param {FsFile} f
+ */
+export async function rememberFileForNewWindow(f) {
+  const e = favEntryFromFsFile(f, f.name);
+  await db.set(keyFileForNewWindow, e);
+}
+
+/**
+ * @returns {Promise<FsFile>}
+ */
+export async function getAndClearFileForNewWindow() {
+  const fav = await db.get(keyFileForNewWindow);
+  const f = fsFileFromFavEntry(fav);
+  return f;
 }

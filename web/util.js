@@ -624,3 +624,20 @@ export function stripExt(name) {
   }
   return name;
 }
+
+/**
+ *
+ * @param {number} n
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+export function limit(n, min, max) {
+  if (n < min) {
+    return min;
+  }
+  if (n > max) {
+    return max;
+  }
+  return n;
+}
