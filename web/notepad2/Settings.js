@@ -19,4 +19,6 @@ export class Settings {
   showTrailingWhitespace = true;
 
   lineHighlightType = IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK;
+
+  rememberRecentFiles = true;
 }

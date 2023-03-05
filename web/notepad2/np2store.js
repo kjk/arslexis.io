@@ -1,5 +1,6 @@
 // https://www.npmjs.com/package/idb
 
+/** @typedef {import("./FsFile").FsFile} FsFile */
 import { KV } from "../dbutil";
 import { len, throwIf } from "../util";
 import { fsTypeComputer, fsTypeLocalStorage } from "./FsFile";
@@ -15,22 +16,23 @@ const db = new KV("np2store", "keyval");
  * @property {string} favName
  */
 
+/**
+ * @param {FsFile} file
+ * @param {string} favName
+ * @returns {FavEntry}
+ */
+export function favEntryFromFsFile(file, favName) {
+  /** @type {FavEntry} */
+  const e = {
+    fs: file.type,
+    name: file.name,
+    favName: favName,
+    id: file.id,
+    fileHandle: file.fileHandle,
+  };
+  return e;
+}
 // TODO: expose as svelte store
-
-const favKeyName = "favorites";
-/**
- * @returns {Promise<FavEntry[]>}
- */
-export async function getFavorites() {
-  return (await db.get(favKeyName)) || [];
-}
-
-/**
- * @param {FavEntry[]} v
- */
-export async function setFavorites(v) {
-  await db.set(favKeyName, v);
-}
 
 /**
  * @param {FavEntry} e1
@@ -53,26 +55,121 @@ async function favEq(e1, e2) {
 }
 
 /**
+ * @param {string} key
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function getFavs(key) {
+  return (await db.get(key)) || [];
+}
+
+/**
+ * @param {string} key
+ * @param {FavEntry[]} v
+ */
+export async function setFavs(key, v) {
+  await db.set(key, v);
+}
+
+/**
+ * @param {string} key
  * @param {FavEntry} e
  * @returns {Promise<FavEntry[]>}
  */
-export async function removeFavorite(e) {
-  let entries = await getFavorites();
+export async function removeFav(key, e) {
+  let entries = await getFavs(key);
   let newEntries = [];
   for (const ee of entries) {
     const eq = await favEq(ee, e);
-    console.log("eq:", eq);
     if (!eq) newEntries.push(ee);
   }
   if (len(entries) === len(newEntries) + 1) {
-    await setFavorites(newEntries);
+    await setFavs(key, newEntries);
   } else {
     console.log(
-      "removeFavorites: didn't remove! entries:",
+      "removeFav: didn't remove! entries:",
       entries,
       "newEntries:",
       newEntries
     );
   }
-  return await getFavorites();
+  return await getFavs(key);
+}
+
+/**
+ * @param {string} key
+ * @param {FavEntry} e
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function addToFavs(key, e) {
+  // remove if exist, we don't want duplicates
+  let entries = await removeFav(key, e);
+  entries.push(e);
+  await setFavs(key, entries);
+  return entries;
+}
+
+const favKeyName = "favorites";
+/**
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function getFavorites() {
+  return await getFavs(favKeyName);
+}
+
+/**
+ * @param {FavEntry[]} v
+ */
+export async function setFavorites(v) {
+  await setFavs(favKeyName, v);
+}
+
+/**
+ * @param {FavEntry} e
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function removeFavorite(e) {
+  return await removeFav(favKeyName, e);
+}
+
+/**
+ * @param {FavEntry} e
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function addToFavorites(e) {
+  return await addToFavs(favKeyName, e);
+}
+
+const recentKeyName = "recent";
+/**
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function getRecent() {
+  return await getFavs(recentKeyName);
+}
+
+/**
+ * @param {FavEntry[]} v
+ */
+export async function setRecent(v) {
+  await setFavs(recentKeyName, v);
+}
+
+/**
+ * @param {FavEntry} e
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function removeRecent(e) {
+  return await removeFav(recentKeyName, e);
+}
+
+/**
+ * @param {FavEntry} e
+ * @returns {Promise<FavEntry[]>}
+ */
+export async function addToRecent(e) {
+  return await addToFavs(recentKeyName, e);
+}
+
+export async function clearRecent() {
+  await setRecent([]);
 }

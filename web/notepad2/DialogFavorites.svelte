@@ -5,14 +5,29 @@
 <script>
   import WinDialogBase from "../WinDialogBase.svelte";
   import { focus } from "../actions/focus";
-  import { len } from "../util";
-  import { getFavorites, removeFavorite } from "./np2store";
+  import { len, throwIf } from "../util";
+  import {
+    getFavorites,
+    getRecent,
+    removeFavorite,
+    removeRecent,
+    clearRecent,
+  } from "./np2store";
+  import { onMount } from "svelte";
 
   export let open = false;
   /** @type {Function} */
   export let onDone;
+
+  /* "favorites", "recent" */
+  export let type;
+  export let rememberRecentFiles;
+
+  let title;
+  let emptyMsg;
+
   /** @type {FavEntry[]} */
-  export let favorites;
+  let entries;
 
   /** @type {FavEntry} */
   let selected = null;
@@ -42,7 +57,14 @@
   }
 
   async function btnRemoveClicked() {
-    favorites = await removeFavorite(selected);
+    switch (type) {
+      case "recent":
+        entries = await removeRecent(selected);
+        break;
+      case "favorites":
+        entries = await removeFavorite(selected);
+        break;
+    }
   }
 
   function close() {
@@ -64,23 +86,46 @@
       }
     }
   }
+
+  onMount(async () => {
+    switch (type) {
+      case "recent":
+        title = "Open Recent File";
+        emptyMsg = "no recent files!";
+        entries = await getRecent();
+        entries.reverse(); // TODO: maybe handle the right order
+        break;
+      case "favorites":
+        title = "Favorites";
+        emptyMsg = "no favorites!";
+        entries = await getFavorites();
+        break;
+      default:
+        throwIf(true, `unknown type '${type}'`);
+    }
+  });
+
+  async function clearHistory() {
+    clearRecent();
+    entries = await getRecent();
+  }
 </script>
 
-<WinDialogBase bind:open title="Favorites">
+<WinDialogBase bind:open {title}>
   <div
     slot="main"
     class="bg-white pt-2 pb-4 flex flex-col min-h-[4rem]"
     on:keydown={handleKeyDown}
   >
     <div
-      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 max-h-[60vh] cursor-pointer h-[8rem]"
+      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 cursor-pointer min-h-[12rem] max-h-[8rem]"
       tabindex="0"
       role="listbox"
     >
-      {#if len(favorites) === 0}
-        <div class="mx-auto my-auto">no favorites!</div>
+      {#if len(entries) === 0}
+        <div class="mx-auto my-auto">{emptyMsg}</div>
       {:else}
-        {#each favorites as f (f.id)}
+        {#each entries as f (f.id)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           {#if f === selected}
             <div
@@ -102,6 +147,17 @@
         {/each}
       {/if}
     </div>
+    {#if type === "recent"}
+      <div class="flex justify-between mx-5 mt-2 text-xs">
+        <label
+          ><input type="checkbox" bind:checked={rememberRecentFiles} />Remeber
+          recent files
+        </label>
+        <button class="underline text-blue-500" on:click={clearHistory}
+          >Clear History</button
+        >
+      </div>
+    {/if}
   </div>
 
   <!-- bottom -->
@@ -124,3 +180,15 @@
     >
   </div>
 </WinDialogBase>
+
+<style>
+  label {
+    display: inline-block;
+    white-space: nowrap;
+  }
+  input {
+    vertical-align: middle;
+    margin-top: -3px;
+    margin-right: 4px;
+  }
+</style>

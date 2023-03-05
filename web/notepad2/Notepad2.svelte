@@ -147,7 +147,13 @@
   } from "../CodeMirrorConfig";
   import { supportsFileSystem } from "../fileutil";
   import { makeConfig } from "./editorConfig";
-  import { getFavorites, setFavorites } from "./np2store";
+  import {
+    addToFavorites,
+    addToRecent,
+    favEntryFromFsFile,
+    getFavorites,
+    setFavorites,
+  } from "./np2store";
 
   let settings = new Settings();
 
@@ -322,8 +328,7 @@
   let showingAddToFavorites = false;
 
   let onFavoritesDone;
-  /** @type {FavEntry[]} */
-  let favorites;
+  let favoritesType = "";
   let showingFavorites = false;
 
   let onGoToDone;
@@ -629,7 +634,7 @@
    * @param {FsFile} fileIn
    */
   async function setFileAsCurrent(fileIn) {
-    console.log("setCurrentFile:", fileIn);
+    console.log("setFileAsCurrent:", fileIn);
     let content = await readFile(fileIn);
     if (content === null) {
       // could be serialized FileSystemFileHandle with denied permissions
@@ -639,6 +644,11 @@
     file = fileIn;
     name = file.name;
     setContentAsCurrent(content, name);
+    if (!settings.rememberRecentFiles) {
+      return;
+    }
+    const e = favEntryFromFsFile(file, name);
+    await addToRecent(e);
   }
 
   async function loadFile() {
@@ -750,18 +760,8 @@
     let res = new Promise((resolve, reject) => {
       onAddToFavoritesDone = async (name) => {
         if (name) {
-          let favs = await getFavorites();
-          /** @type {FavEntry} */
-          let e = {
-            fs: file.type,
-            name: file.name,
-            favName: name,
-            id: file.id,
-            fileHandle: file.fileHandle,
-          };
-          console.log("onAddToFavoritesDone:", e);
-          favs.push(e);
-          setFavorites(favs);
+          const e = favEntryFromFsFile(file, name);
+          await addToFavorites(e);
         }
         resolve();
       };
@@ -771,10 +771,11 @@
   }
 
   /**
+   * @param {"favorites"|"recent"} type
    * @returns {Promise<FavEntry>}
    */
-  async function openFavDialog() {
-    favorites = await getFavorites();
+  async function openFavDialog(type) {
+    favoritesType = type;
     /**
      * @param {FavEntry} fav
      */
@@ -788,7 +789,7 @@
   }
 
   async function cmdFileOpenFav() {
-    const fav = await openFavDialog();
+    const fav = await openFavDialog("favorites");
     if (!fav) {
       return;
     }
@@ -796,7 +797,20 @@
     const f = new FsFile(fav.fs, name, name);
     f.fileHandle = fav.fileHandle;
     f.id = fav.id;
-    console.log("onFavoritesDone:", f);
+    console.log("cmdFileOpenFav:", f);
+    await setFileAsCurrent(f);
+  }
+
+  async function cmdFileOpenRecent() {
+    const fav = await openFavDialog("recent");
+    if (!fav) {
+      return;
+    }
+    const name = fav.name; // or fav.favName?
+    const f = new FsFile(fav.fs, name, name);
+    f.fileHandle = fav.fileHandle;
+    f.id = fav.id;
+    console.log("cmdFileOpenRecent:", f);
     await setFileAsCurrent(f);
   }
 
@@ -907,7 +921,9 @@
       case m.IDM_FILE_MANAGEFAV:
         cmdFileOpenFav();
         break;
-
+      case m.IDM_FILE_RECENT:
+        cmdFileOpenRecent();
+        break;
       case m.IDM_EDIT_GOTOLINE:
         cmdEditGoToLine();
         break;
@@ -920,95 +936,6 @@
         break;
       case m.IDM_HELP_ABOUT:
         showingAbout = true;
-        break;
-
-      case m.IDM_DUMP_SELECTIONS:
-        dumpSelections(editorView);
-        break;
-
-      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
-      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
-      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
-        settings.lineHighlightType = cmdId;
-        break;
-
-      case m.IDM_EDIT_CHAR2HEX:
-        replaceSelectionsWith(editorView, charToHex);
-        break;
-      // case m.IDM_EDIT_HEX2CHAR:
-      //   replaceSelectionsWith(editorView, hexToChar);
-      //   break;
-      case m.IDM_EDIT_SHOW_HEX:
-        insertAfterSelection(editorView, showHex);
-        break;
-      case m.IDM_EDIT_ESCAPECCHARS:
-        replaceSelectionsWith(editorView, escapeCChars);
-        break;
-      case m.IDM_EDIT_UNESCAPECCHARS:
-        replaceSelectionsWith(editorView, unescapeCChars);
-        break;
-      case m.IDM_EDIT_XHTML_ESCAPE_CHAR:
-        // TODO: if XML, needs use xhtmlEscapeCharsForXML
-        replaceSelectionsWith(editorView, xhtmlEscapeChars);
-        break;
-      case m.IDM_EDIT_XHTML_UNESCAPE_CHAR:
-        // TODO: if XML, needs use xhtmlUnEscapeCharsForXML
-        replaceSelectionsWith(editorView, xhtmlUnEscapeChars);
-        break;
-
-      case m.IDM_EDIT_SELTODOCSTART:
-        selectToDocStart(editorView);
-        break;
-      case m.IDM_EDIT_SELTODOCEND:
-        selectToDocEnd(editorView);
-        break;
-      case m.IDM_VIEW_MENU:
-        settings.showMenu = !settings.showMenu;
-        break;
-      case m.IDM_VIEW_WORDWRAP:
-      case m.IDT_VIEW_WORDWRAP:
-        settings.wordWrap = !settings.wordWrap;
-        break;
-      case m.IDM_VIEW_SHOWWHITESPACE:
-        settings.showWhitespace = !settings.showWhitespace;
-        break;
-
-      case m.IDM_VIEW_LINENUMBERS:
-        settings.showLineNumbers = !settings.showLineNumbers;
-        break;
-      case m.IDM_VIEW_STATUSBAR:
-        settings.showStatusBar = !settings.showStatusBar;
-        break;
-      case m.IDM_VIEW_TOOLBAR:
-        settings.showToolbar = !settings.showToolbar;
-        break;
-      case m.IDM_SET_MULTIPLE_SELECTION:
-        settings.enableMultipleSelection = !settings.enableMultipleSelection;
-        break;
-      case m.IDM_VIEW_TABSASSPACES:
-        settings.tabsAsSpaces = !settings.tabsAsSpaces;
-        break;
-      case m.IDM_VIEW_MATCHBRACES:
-        settings.visualBraceMatching = !settings.visualBraceMatching;
-        break;
-      // case m.IDM_VIEW_SHOW_FOLDING:
-      //   showFolding = !showFolding;
-      //   break;
-      // TODO: notepad2 changes line endings
-      // not sure if that transfer to CM as it stores text
-      // in lines. Does it re-split the doc when
-      // EditorState.lineSeparator changes?
-      case m.IDM_LINEENDINGS_CRLF:
-        settings.lineSeparator = "\r\n";
-        lineSeparatorStatus = "CR+LF";
-        break;
-      case m.IDM_LINEENDINGS_CR:
-        settings.lineSeparator = "\r";
-        lineSeparatorStatus = "CR";
-        break;
-      case m.IDM_LINEENDINGS_LF:
-        settings.lineSeparator = "\n";
-        lineSeparatorStatus = "LF";
         break;
       case m.IDM_EDIT_DELETELINERIGHT:
         commands.deleteToLineEnd(editorView);
@@ -1057,6 +984,98 @@
         break;
       case m.IDM_EDIT_JOINLINES:
         joinLines(editorView);
+        break;
+
+      case m.IDM_DUMP_SELECTIONS:
+        dumpSelections(editorView);
+        break;
+
+      case m.IDM_EDIT_CHAR2HEX:
+        replaceSelectionsWith(editorView, charToHex);
+        break;
+      // case m.IDM_EDIT_HEX2CHAR:
+      //   replaceSelectionsWith(editorView, hexToChar);
+      //   break;
+      case m.IDM_EDIT_SHOW_HEX:
+        insertAfterSelection(editorView, showHex);
+        break;
+      case m.IDM_EDIT_ESCAPECCHARS:
+        replaceSelectionsWith(editorView, escapeCChars);
+        break;
+      case m.IDM_EDIT_UNESCAPECCHARS:
+        replaceSelectionsWith(editorView, unescapeCChars);
+        break;
+      case m.IDM_EDIT_XHTML_ESCAPE_CHAR:
+        // TODO: if XML, needs use xhtmlEscapeCharsForXML
+        replaceSelectionsWith(editorView, xhtmlEscapeChars);
+        break;
+      case m.IDM_EDIT_XHTML_UNESCAPE_CHAR:
+        // TODO: if XML, needs use xhtmlUnEscapeCharsForXML
+        replaceSelectionsWith(editorView, xhtmlUnEscapeChars);
+        break;
+
+      case m.IDM_EDIT_SELTODOCSTART:
+        selectToDocStart(editorView);
+        break;
+      case m.IDM_EDIT_SELTODOCEND:
+        selectToDocEnd(editorView);
+        break;
+
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
+      case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
+        settings.lineHighlightType = cmdId;
+        break;
+      case m.IDM_VIEW_NOSAVERECENT:
+        settings.rememberRecentFiles = !settings.rememberRecentFiles;
+        break;
+      case m.IDM_VIEW_MENU:
+        settings.showMenu = !settings.showMenu;
+        break;
+      case m.IDM_VIEW_WORDWRAP:
+      case m.IDT_VIEW_WORDWRAP:
+        settings.wordWrap = !settings.wordWrap;
+        break;
+      case m.IDM_VIEW_SHOWWHITESPACE:
+        settings.showWhitespace = !settings.showWhitespace;
+        break;
+
+      case m.IDM_VIEW_LINENUMBERS:
+        settings.showLineNumbers = !settings.showLineNumbers;
+        break;
+      case m.IDM_VIEW_STATUSBAR:
+        settings.showStatusBar = !settings.showStatusBar;
+        break;
+      case m.IDM_VIEW_TOOLBAR:
+        settings.showToolbar = !settings.showToolbar;
+        break;
+      case m.IDM_SET_MULTIPLE_SELECTION:
+        settings.enableMultipleSelection = !settings.enableMultipleSelection;
+        break;
+      case m.IDM_VIEW_TABSASSPACES:
+        settings.tabsAsSpaces = !settings.tabsAsSpaces;
+        break;
+      case m.IDM_VIEW_MATCHBRACES:
+        settings.visualBraceMatching = !settings.visualBraceMatching;
+        break;
+      // case m.IDM_VIEW_SHOW_FOLDING:
+      //   showFolding = !showFolding;
+      //   break;
+      // TODO: notepad2 changes line endings
+      // not sure if that transfer to CM as it stores text
+      // in lines. Does it re-split the doc when
+      // EditorState.lineSeparator changes?
+      case m.IDM_LINEENDINGS_CRLF:
+        settings.lineSeparator = "\r\n";
+        lineSeparatorStatus = "CR+LF";
+        break;
+      case m.IDM_LINEENDINGS_CR:
+        settings.lineSeparator = "\r";
+        lineSeparatorStatus = "CR";
+        break;
+      case m.IDM_LINEENDINGS_LF:
+        settings.lineSeparator = "\n";
+        lineSeparatorStatus = "LF";
         break;
       case m.CMD_COPYFILENAME_NOEXT:
         copyFileNameToClipboard(1);
@@ -1509,6 +1528,8 @@
         return fileNameDisplay === cmdId;
       case m.IDM_VIEW_MATCHBRACES:
         return settings.visualBraceMatching;
+      case m.IDM_VIEW_NOSAVERECENT:
+        return settings.rememberRecentFiles;
       case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE:
       case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
       case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
@@ -1689,11 +1710,16 @@
     onDone={onAddToFavoritesDone}
   />
 
-  <DialogFavorites
-    bind:open={showingFavorites}
-    {favorites}
-    onDone={onFavoritesDone}
-  />
+  <!-- need to mount / unmount -->
+  {#if showingFavorites}
+    <DialogFavorites
+      bind:open={showingFavorites}
+      bind:rememberRecentFiles={settings.rememberRecentFiles}
+      type={favoritesType}
+      onDone={onFavoritesDone}
+    />
+  {/if}
+
   <DialogAbout bind:open={showingAbout} />
 
   <DialogEncloseSelection
