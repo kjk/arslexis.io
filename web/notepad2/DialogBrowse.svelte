@@ -12,7 +12,6 @@
   import WinDialogBaseNoOverlay from "../WinDialogBaseNoOverlay.svelte";
   import { focus } from "../actions/focus";
   import { FsFile, fsTypeIndexedDB, getFileList } from "./FsFile";
-  import { len } from "../util";
 
   export let open = false;
   /** @type {Function} */
@@ -75,7 +74,6 @@
    * @param {Entry} e
    */
   async function browserOpenFile(e) {
-    open = false;
     onDone(e.file);
   }
 
@@ -109,7 +107,7 @@
 
 <WinDialogBaseNoOverlay bind:open title="Browse Files">
   <div
-    class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 my-2 min-h-[12rem] max-h-[60vh] cursor-pointer select-none"
+    class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 my-2 min-h-[12rem] max-h-[60vh] cursor-pointer select-none text-xs"
     tabindex="0"
     slot="main"
     role="listbox"
@@ -137,7 +135,7 @@
   </div>
 
   <!-- bottom -->
-  <div slot="bottom" class="flex justify-end textselect-none">
+  <div slot="bottom" class="flex justify-end textselect-none  text-xs">
     <button
       disabled={btnOpenDisabled}
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"

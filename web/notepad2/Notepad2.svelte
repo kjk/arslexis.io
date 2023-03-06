@@ -745,14 +745,17 @@
     window.open(uri);
   }
 
-  // open new window with current file or empty window
-  // if working of new file
-  async function cmdFileNewWindow() {
-    if (!file) {
+  /**
+   * open new window with current file or empty window
+   * if working of new file
+   * @param {FsFile} f
+   */
+  async function cmdFileNewWindow(f) {
+    if (!f) {
       cmdFileNewEmptyWindow();
       return;
     }
-    await rememberFileForNewWindow(file);
+    await rememberFileForNewWindow(f);
     const uri = location.toString() + "?file=" + encodeURI("__for_new_window");
     window.open(uri);
   }
@@ -851,7 +854,12 @@
     if (!f) {
       return;
     }
-    await setFileAsCurrent(f);
+    if (!file) {
+      await setFileAsCurrent(f);
+      return;
+    }
+
+    await cmdFileNewWindow(f);
   }
 
   async function cmdFileBrowse() {
@@ -960,7 +968,7 @@
         settings.readOnly = !settings.readOnly;
         break;
       case m.IDM_FILE_NEWWINDOW:
-        cmdFileNewWindow();
+        cmdFileNewWindow(file);
         break;
       case m.IDM_FILE_NEWWINDOW2:
         cmdFileNewEmptyWindow();
