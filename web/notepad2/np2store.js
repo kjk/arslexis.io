@@ -208,3 +208,34 @@ export async function getAndClearFileForNewWindow() {
   await db.del(keyFileForNewWindow);
   return f;
 }
+
+// an array of FileSystemDirectoryHandle for remembering
+// opened folders in DialogBrowse
+const keyBrowseFolders = "browse-folders";
+
+/**
+ * @param {FileSystemDirectoryHandle[]} v
+ */
+export async function setBrowseFolders(v) {
+  await db.set(keyBrowseFolders, v);
+}
+
+/**
+ * @returns {Promise<FileSystemDirectoryHandle[]>}
+ */
+export async function getBrowseFolders() {
+  const res = await db.get(keyBrowseFolders);
+  return res || [];
+}
+
+/**
+ *
+ * @param {FileSystemDirectoryHandle} f
+ * @returns {Promise<FileSystemDirectoryHandle[]>}
+ */
+export async function addBrowseFolder(f) {
+  const a = await getBrowseFolders();
+  a.push(f);
+  await setBrowseFolders(a);
+  return a;
+}

@@ -20,7 +20,13 @@
   import { FsFile, fsTypeIndexedDB, fsTypeFolder, getFileList } from "./FsFile";
   import { openDirPicker, readDir, supportsFileSystem } from "../fileutil";
   import { sortEntries } from "../wc/Folder.svelte";
-  import { fsFileFromFavEntry, getFavorites, getRecent } from "./np2store";
+  import {
+    addBrowseFolder,
+    fsFileFromFavEntry,
+    getBrowseFolders,
+    getFavorites,
+    getRecent,
+  } from "./np2store";
   import { len } from "../util";
 
   export let open = false;
@@ -29,9 +35,6 @@
 
   /** @type {Entry}*/
   let selected = null;
-
-  /** @type {FileSystemDirectoryHandle[]}*/
-  let dirHandles = [];
 
   let btnOpenDisabled = false;
   let btnOpenFolderDisabled = false;
@@ -71,7 +74,7 @@
       console.log("");
       return;
     }
-    dirHandles.push(dirHandle);
+    await addBrowseFolder(dirHandle);
     await setTopLevel(null);
   }
 
@@ -219,6 +222,7 @@
       a.push(e);
     }
 
+    const dirHandles = await getBrowseFolders();
     for (const dh of dirHandles) {
       e = {
         name: dh.name,
