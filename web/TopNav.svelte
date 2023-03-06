@@ -3,7 +3,7 @@
   import Twitter from "./icons/Twitter.svelte";
   import GitHub from "./icons/GitHub.svelte";
 
-  export let gitHubURL = "https://github.com/kjk";
+  export let gitHubURL = "https://github.com/kjk/onlinetool-docs";
 </script>
 
 <div class="flex items-center mx-4 mb-2 pt-1 pb-2 text-gray-500">
@@ -16,18 +16,14 @@
   </div>
   <div class="grow" />
   <a
-    class="mr-1 hover:bg-gray-100"
-    href="https://blog.kowalczyk.info"
+    class="px-1 py-1 mr-1 hover:underline text-xs"
+    href="https://github.com/kjk/onlinetool-docs/discussions"
     target="_blank"
     rel="noreferrer"
   >
-    <img
-      src="https://avatars.githubusercontent.com/u/7935?v=4"
-      width="20"
-      height="20"
-      alt="kjk"
-    />
+    feedback
   </a>
+
   <a
     class="px-1 py-1 mr-1 hover:bg-gray-100"
     href={gitHubURL}
@@ -43,5 +39,18 @@
     rel="noreferrer"
   >
     <Twitter />
+  </a>
+  <a
+    class="mr-1 hover:bg-gray-100"
+    href="https://blog.kowalczyk.info"
+    target="_blank"
+    rel="noreferrer"
+  >
+    <img
+      src="https://avatars.githubusercontent.com/u/7935?v=4"
+      width="20"
+      height="20"
+      alt="kjk"
+    />
   </a>
 </div>
