@@ -1434,12 +1434,23 @@
         clearClipboard();
         break;
       case m.IDM_HELP_PROJECT_HOME:
-        // TODO: needs home
-        window.open("https://onlinetool.io/", "_blank");
+        window.open("https://docs.onlinetool.io/notepad2.html", "_blank");
         break;
       case m.IDM_HELP_REPORT_ISSUE:
       case m.IDM_HELP_FEATURE_REQUEST:
-        window.open("https://github.com/kjk/notepad2web/issues", "_blank");
+        window.open(
+          "https://github.com/kjk/onlinetool-docs/labels/notepad2",
+          "_blank"
+        );
+        break;
+      case m.IDM_HELP_SOURCE_CODE:
+        window.open("https://github.com/kjk/notepad2web", "_blank");
+        break;
+      case m.IDM_HELP_DISCUSS:
+        window.open(
+          "https://github.com/kjk/onlinetool-docs/discussions/categories/notepad2",
+          "_blank"
+        );
         break;
       default:
         let lex = getLangFromLexer(cmdId);

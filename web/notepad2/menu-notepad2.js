@@ -1195,13 +1195,17 @@ export const IDM_HELP_FEATURE_REQUEST = "IDM_HELP_FEATURE_REQUEST";
 export const IDM_HELP_ONLINE_WIKI = "IDM_HELP_ONLINE_WIKI";
 export const IDM_CMDLINE_HELP = "IDM_CMDLINE_HELP";
 export const IDM_HELP_ABOUT = "IDM_HELP_ABOUT";
+export const IDM_HELP_SOURCE_CODE = "IDM_HELP_SOURCE_CODE";
+export const IDM_HELP_DISCUSS = "IDM_HELP_DISCUSS";
 
 const menuHelp = [
-  ["Project &Home", IDM_HELP_PROJECT_HOME],
+  ["Project &Home / Docs", IDM_HELP_PROJECT_HOME],
   // ["Latest &Release", IDM_HELP_LATEST_RELEASE],
   // ["Latest &Build", IDM_HELP_LATEST_BUILD],
+  ["Discuss in Forum", IDM_HELP_DISCUSS],
   ["Report &Issue", IDM_HELP_REPORT_ISSUE],
   ["&Feature Request", IDM_HELP_FEATURE_REQUEST],
+  ["Source Code", IDM_HELP_SOURCE_CODE],
   // [SEPARATOR],
   // ["Online &Wiki", IDM_HELP_ONLINE_WIKI],
   // ["&Command Line Help", IDM_CMDLINE_HELP],
