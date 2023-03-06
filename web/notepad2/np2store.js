@@ -2,7 +2,7 @@
 
 import { KV } from "../dbutil";
 import { len, throwIf } from "../util";
-import { FsFile, fsTypeComputer, fsTypeIndexedDB, setIDB } from "./FsFile";
+import { FsFile, fsTypeFolder, fsTypeIndexedDB, setIDB } from "./FsFile";
 
 const db = new KV("np2store", "keyval");
 
@@ -61,7 +61,7 @@ async function favEq(e1, e2) {
   switch (e1.fs) {
     case fsTypeIndexedDB:
       return e1.id === e2.id;
-    case fsTypeComputer:
+    case fsTypeFolder:
       const eq = await e1.fileHandle.isSameEntry(e2.fileHandle);
       return eq;
   }

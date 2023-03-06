@@ -160,7 +160,7 @@ export function isIFrame() {
  */
 export function supportsFileSystem() {
   const ok = "showDirectoryPicker" in window && !isIFrame();
-  return false && ok;
+  return ok;
 }
 
 // a directory tree. each element is either a file:
@@ -341,6 +341,33 @@ export async function readDirRecur(
 
 /**
  * @param {FileSystemDirectoryHandle} dirHandle
+ * @param {Function} skipEntryFn
+ * @param {string} dir
+ * @returns {Promise<FsEntry>}
+ */
+export async function readDir(
+  dirHandle,
+  skipEntryFn = dontSkip,
+  dir = dirHandle.name
+) {
+  /** @type {FsEntry[]} */
+  let entries = [];
+  // @ts-ignore
+  for await (const handle of dirHandle.values()) {
+    if (skipEntryFn(handle, dir)) {
+      continue;
+    }
+    const path = dir == "" ? handle.name : `${dir}/${handle.name}`;
+    let e = await FsEntry.fromHandle(handle, dirHandle, path);
+    entries.push(e);
+  }
+  let res = new FsEntry(dirHandle, null, dir);
+  res.dirEntries = entries;
+  return res;
+}
+
+/**
+ * @param {FileSystemDirectoryHandle} dirHandle
  * @param {string} dir
  * @returns {Promise<File[]>}
  */
@@ -383,4 +410,22 @@ export function forEachFsEntry(dir, fn) {
     }
   }
   fn(dir);
+}
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker
+ * @returns {Promise<FileSystemDirectoryHandle>}
+ */
+export async function openDirPicker() {
+  const opts = {
+    mutltiple: false,
+  };
+  try {
+    // @ts-ignore
+    const fh = await window.showDirectoryPicker(opts);
+    return fh;
+  } catch (e) {
+    console.log("openDirPicker: showDirectoryPicker: e:", e);
+  }
+  return null;
 }

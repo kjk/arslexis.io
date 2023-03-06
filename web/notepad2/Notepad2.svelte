@@ -25,6 +25,7 @@
   import DialogFind from "./DialogFind.svelte";
   import DialogAddFavorite from "./DialogAddFavorite.svelte";
   import DialogFavorites from "./DialogFavorites.svelte";
+  import Progress from "../Progress.svelte";
   import { tooltip } from "../actions/tooltip";
   import { EditorView } from "@codemirror/view";
   import { EditorSelection, EditorState } from "@codemirror/state";
@@ -161,7 +162,6 @@
     getAndClearFileForNewWindow,
     rememberFileForNewWindow,
   } from "./np2store";
-  import { parseShortcut } from "../keys";
 
   let toolbarFuncs;
 
@@ -322,7 +322,7 @@
   let onAskSaveChangesDone;
   let showingAskSaveChanges = false;
 
-  let showingFileBrowse = true;
+  let showingFileBrowse = false;
 
   let saveAsName = "";
   let onSaveAsDone;
@@ -900,8 +900,6 @@
   }
 
   function cmdViewToggleFolds() {
-    const k = parseShortcut("Shift+Alt+A");
-    console.log("k:", k);
     toggleFoldAll(editorView);
   }
 
@@ -1831,6 +1829,7 @@
     msg={msgNotImplemented}
   />
 </main>
+<Progress />
 
 <style>
   main {

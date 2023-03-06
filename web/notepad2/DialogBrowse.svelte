@@ -1,17 +1,23 @@
 <script context="module">
+  /** @typedef {import("../fileutil").FsEntry} FsEntry */
   /**
    * @typedef { Object } Entry
    * @property {string} name
-   * @property {FsFile} [file]
+   * @property {Entry} parent
    * @property {Function} open
+   * @property {FsFile} [file]
+   * @property {FsEntry} [entry]
+   * @property {FileSystemDirectoryHandle} [dirHandle]
    */
 </script>
 
 <script>
   import { onMount } from "svelte";
   import WinDialogBaseNoOverlay from "../WinDialogBaseNoOverlay.svelte";
+  import { progress } from "../Progress.svelte";
   import { focus } from "../actions/focus";
-  import { FsFile, fsTypeIndexedDB, getFileList } from "./FsFile";
+  import { FsFile, fsTypeIndexedDB, fsTypeFolder, getFileList } from "./FsFile";
+  import { openDirPicker, readDir, supportsFileSystem } from "../fileutil";
 
   export let open = false;
   /** @type {Function} */
@@ -20,7 +26,11 @@
   /** @type {Entry}*/
   let selected = null;
 
+  /** @type {FileSystemDirectoryHandle[]}*/
+  let dirHandles = [];
+
   let btnOpenDisabled = false;
+  let btnOpenFolderDisabled = false;
 
   /** @type {Entry[]} */
   let entries = [];
@@ -50,12 +60,76 @@
     await e.open(e);
   }
 
+  async function btnOpenFolderClicked() {
+    let dirHandle = await openDirPicker();
+    console.log("btnOpenFolderClicked: dirHandle:", dirHandle);
+    if (dirHandle == null) {
+      console.log("");
+      return;
+    }
+    dirHandles.push(dirHandle);
+    await setTopLevel(null);
+  }
+
   function close() {
     open = false;
     onDone(null);
   }
 
   $: btnOpenDisabled = selected == null || !selected.file;
+
+  /**
+   * @param {FileSystemDirectoryHandle} dh
+   * @param {Entry} parent
+   */
+  async function setDirHandle(dh, parent) {
+    console.log("setDirHandle:", dh, "parent:", parent);
+    // TODO: cache things
+    $progress = `reading ${dh.name}`;
+    const fsEntry = await readDir(dh);
+    $progress = "";
+    /** @type {Function} */
+    let open = setTopLevel;
+    if (parent != null) {
+      open = openDirHandle;
+    }
+    /** @type {Entry} */
+    let e = {
+      name: "..",
+      parent: parent,
+      open: open,
+    };
+    let a = [e];
+    for (const fse of fsEntry.dirEntries) {
+      if (fse.isDir) {
+        e = {
+          name: fse.name + "/",
+          parent: parent,
+          open: openDirHandle,
+          dirHandle: fse.handle,
+        };
+      } else {
+        const fsf = new FsFile(fsTypeFolder, fse.name, fse.name);
+        fsf.fileHandle = fse.handle;
+        e = {
+          name: fse.name,
+          parent: parent,
+          open: openFile,
+          file: fsf,
+        };
+      }
+      a.push(e);
+    }
+    entries = a;
+  }
+
+  /**
+   * @param {Entry} e
+   */
+  async function openDirHandle(e) {
+    console.log("openDirHandle:", e);
+    await setDirHandle(e.dirHandle, e.parent);
+  }
 
   /**
    * @param {Entry} e
@@ -65,37 +139,51 @@
     /** @type {Entry} */
     const e1 = {
       name: "browser",
-      open: browserOpen,
+      parent: null,
+      open: openBrowser,
     };
-    entries = [e1];
+    let a = [e1];
+    for (const dh of dirHandles) {
+      /** @type {Entry} */
+      const e = {
+        name: dh.name,
+        parent: null,
+        dirHandle: dh,
+        open: openDirHandle,
+      };
+      a.push(e);
+    }
+    entries = a;
   }
 
   /**
    * @param {Entry} e
    */
-  async function browserOpenFile(e) {
+  async function openFile(e) {
     onDone(e.file);
   }
 
   /**
    * @param {Entry} e
    */
-  async function browserOpen(e) {
+  async function openBrowser(e) {
     /** @type {Entry} */
     let e1 = {
       name: "..",
+      parent: e,
       open: setTopLevel,
     };
     let a = [e1];
     const files = await getFileList(fsTypeIndexedDB);
     for (const f of files) {
       /** @type {Entry} */
-      const e = {
+      const e2 = {
         name: f.name,
+        parent: e,
         file: f,
-        open: browserOpenFile,
+        open: openFile,
       };
-      a.push(e);
+      a.push(e2);
     }
     entries = a;
   }
@@ -135,10 +223,20 @@
   </div>
 
   <!-- bottom -->
-  <div slot="bottom" class="flex justify-end textselect-none  text-xs">
+  <div slot="bottom" class="flex mx-2 justify-between text-select-none text-xs">
+    {#if supportsFileSystem()}
+      <button
+        disabled={btnOpenFolderDisabled}
+        class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+        on:click={btnOpenFolderClicked}>Open Folder</button
+      >
+    {/if}
+
+    <div class="grow" />
+
     <button
       disabled={btnOpenDisabled}
-      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+      class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
       on:click={btnOpenClicked}>Open</button
     >
     <button

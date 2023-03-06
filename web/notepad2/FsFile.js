@@ -3,7 +3,7 @@ import { verifyHandlePermission } from "../fileutil";
 import { genRandomID, splitMax, throwIf } from "../util";
 
 export const fsTypeIndexedDB = "idb";
-export const fsTypeComputer = "computer'";
+export const fsTypeFolder = "computer'";
 
 export class FsFile {
   type = "";
@@ -143,7 +143,7 @@ export async function readFile(f) {
   switch (f.type) {
     case fsTypeIndexedDB:
       return await readFileIndexedDB(f);
-    case fsTypeComputer:
+    case fsTypeFolder:
       return await readFileComputer(f);
     default:
       throwIf(true, `f.type '${f.type}' not recognized`);
@@ -182,7 +182,7 @@ export async function writeFile(f, d) {
     case fsTypeIndexedDB:
       writeFileIndexedDB(f, d);
       break;
-    case fsTypeComputer:
+    case fsTypeFolder:
       await writeFileComputer(f, d);
       break;
     default:
@@ -222,7 +222,7 @@ export async function openFilePicker() {
     return null;
   }
   let name = fileHandle.name;
-  let res = new FsFile(fsTypeComputer, name, name);
+  let res = new FsFile(fsTypeFolder, name, name);
   res.fileHandle = fileHandle;
   return res;
 }
@@ -245,7 +245,7 @@ export async function saveFilePicker(suggestedName = "") {
     return null;
   }
   let name = fileHandle.name;
-  let res = new FsFile(fsTypeComputer, name, name);
+  let res = new FsFile(fsTypeFolder, name, name);
   res.fileHandle = fileHandle;
   return res;
 }
