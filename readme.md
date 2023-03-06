@@ -9,7 +9,7 @@ This repository only has source code.
 For feature requests, bug reports, discussions:
 * [bug reports](https://github.com/kjk/onlinetool-docs/labels/notepad2)
 * [feature requests](https://github.com/kjk/onlinetool-docs/labels/notepad2)
-* [discussion](https://github.com/kjk/onlinetool-docs/discussions/categories/notepad2")
+* [discussion](https://github.com/kjk/onlinetool-docs/discussions/categories/notepad2)
 
 ## To run
 
