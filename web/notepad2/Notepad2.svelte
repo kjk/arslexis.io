@@ -152,7 +152,7 @@
     updateVisualBraceMatching,
     updateWordWrap,
   } from "../CodeMirrorConfig";
-  import { supportsFileSystem } from "../fileutil";
+  import { supportsFileSystem, verifyHandlePermission } from "../fileutil";
   import { makeConfig } from "./editorConfig";
   import {
     addToFavorites,
@@ -755,6 +755,7 @@
       cmdFileNewEmptyWindow();
       return;
     }
+    await verifyHandlePermission(f.fileHandle, false);
     await rememberFileForNewWindow(f);
     const uri = location.toString() + "?file=" + encodeURI("__for_new_window");
     window.open(uri);
@@ -1627,11 +1628,12 @@
     let file;
     if (fileId === "__for_new_window") {
       file = await getAndClearFileForNewWindow();
+      console.log("openInitialFile: got __for_new_window file:", file);
     } else {
       file = deserialize(fileId);
     }
     if (file) {
-      setFileAsCurrent(file);
+      await setFileAsCurrent(file);
     }
   }
 
@@ -1695,7 +1697,7 @@
         noMenuCommands={m.noMenuCommands}
         on:menucmd={handleMenuCmd}
       />
-      <div class="truncate italic text-gray-500">
+      <div class="truncate italic font-semibold text-gray-800">
         {shownFileName}
       </div>
       <div class="grow" />
@@ -1724,7 +1726,7 @@
         on:menucmd={handleMenuCmd}
       />
       <div class="absolute flex top-[2px] right-[4px] text-sm">
-        <div class="py-0.5 truncate italic text-gray-500">
+        <div class="py-0.5 truncate italic font-semibold text-gray-900">
           {shownFileName}
         </div>
         <button

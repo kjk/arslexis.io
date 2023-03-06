@@ -1,5 +1,6 @@
 <script context="module">
   /** @typedef {import("../fileutil").FsEntry} FsEntry */
+  /** @typedef {import("./np2store").FavEntry} FavEntry*/
   /**
    * @typedef { Object } Entry
    * @property {string} name
@@ -19,6 +20,8 @@
   import { FsFile, fsTypeIndexedDB, fsTypeFolder, getFileList } from "./FsFile";
   import { openDirPicker, readDir, supportsFileSystem } from "../fileutil";
   import { sortEntries } from "../wc/Folder.svelte";
+  import { fsFileFromFavEntry, getFavorites, getRecent } from "./np2store";
+  import { len } from "../util";
 
   export let open = false;
   /** @type {Function} */
@@ -135,20 +138,89 @@
   }
 
   /**
-   * @param {Entry} e
+   * @param {Entry[]} a
+   * @param {FavEntry[]} favs
    */
-  async function setTopLevel(e) {
+  function addFavs(a, favs) {
+    for (const fav of favs) {
+      const fsf = fsFileFromFavEntry(fav);
+      const e = {
+        name: fav.favName,
+        parent: null,
+        file: fsf,
+        open: openFile,
+      };
+      a.push(e);
+    }
+  }
+
+  /**
+   * @param {Entry} ignore
+   */
+  async function openRecent(ignore) {
+    /** @type {Entry} */
+    let e = {
+      name: "..",
+      parent: null,
+      open: setTopLevel,
+    };
+    let a = [e];
+    const favs = await getRecent();
+    favs.reverse();
+    addFavs(a, favs);
+    entries = a;
+  }
+
+  /**
+   * @param {Entry} ignore
+   */
+  async function openFavorites(ignore) {
+    /** @type {Entry} */
+    let e = {
+      name: "..",
+      parent: null,
+      open: setTopLevel,
+    };
+    let a = [e];
+    const favs = await getFavorites();
+    favs.reverse();
+    addFavs(a, favs);
+    entries = a;
+  }
+
+  /**
+   * @param {Entry} ignore
+   */
+  async function setTopLevel(ignore) {
     console.log();
     /** @type {Entry} */
-    const e1 = {
+    let e = {
       name: "browser",
       parent: null,
       open: openBrowser,
     };
-    let a = [e1];
+    let a = [e];
+    const recent = await getRecent();
+    if (len(recent) > 0) {
+      e = {
+        name: "recent",
+        parent: null,
+        open: openRecent,
+      };
+      a.push(e);
+    }
+    const favs = await getFavorites();
+    if (len(favs) > 0) {
+      e = {
+        name: "favorites",
+        parent: null,
+        open: openFavorites,
+      };
+      a.push(e);
+    }
+
     for (const dh of dirHandles) {
-      /** @type {Entry} */
-      const e = {
+      e = {
         name: dh.name,
         parent: null,
         dirHandle: dh,
@@ -204,10 +276,12 @@
     role="listbox"
   >
     {#each entries as f}
+      {@const isBold = f.name.endsWith("/")}
+      {@const boldCls = isBold ? "font-bold" : ""}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       {#if f === selected}
         <div
-          class="bg-gray-100 hover:bg-gray-200"
+          class="{boldCls} bg-gray-100 hover:bg-gray-200"
           on:dblclick={() => entryDblClicked(f)}
           on:click={() => entryClicked(f)}
         >
@@ -215,7 +289,7 @@
         </div>
       {:else}
         <div
-          class="hover:bg-gray-200"
+          class="{boldCls} hover:bg-gray-200"
           on:dblclick={() => entryDblClicked(f)}
           on:click={() => entryClicked(f)}
         >
@@ -245,7 +319,7 @@
     <button
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
       use:focus
-      on:click={close}>Cancel</button
+      on:click={close}>Close</button
     >
   </div>
 </WinDialogBaseNoOverlay>
