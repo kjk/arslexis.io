@@ -6,6 +6,7 @@
    * @property {string} name
    * @property {Entry} parent
    * @property {Function} open
+   * @property {Function} [remove] or delete
    * @property {FsFile} [file]
    * @property {FsEntry} [entry]
    * @property {FileSystemDirectoryHandle} [dirHandle]
