@@ -18,6 +18,7 @@
   import { focus } from "../actions/focus";
   import { FsFile, fsTypeIndexedDB, fsTypeFolder, getFileList } from "./FsFile";
   import { openDirPicker, readDir, supportsFileSystem } from "../fileutil";
+  import { sortEntries } from "../wc/Folder.svelte";
 
   export let open = false;
   /** @type {Function} */
@@ -100,7 +101,9 @@
       open: open,
     };
     let a = [e];
-    for (const fse of fsEntry.dirEntries) {
+    let fsEntries = fsEntry.dirEntries;
+    sortEntries(fsEntries);
+    for (const fse of fsEntries) {
       if (fse.isDir) {
         e = {
           name: fse.name + "/",
