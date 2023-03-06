@@ -583,6 +583,24 @@
    * @param {boolean} saveCopy
    * @returns {Promise<boolean>} return false if saved (???)
    */
+  async function contentBrowserSaveAs(content, saveCopy) {
+    // fallback to indexeddb
+    let f = await saveFilePickerIndexedDB();
+    if (!f) {
+      return true;
+    }
+    await writeFile(f, content);
+    if (!saveCopy) {
+      setContentAsCurrent(content, f.name);
+    }
+    return false;
+  }
+
+  /**
+   * @param {Blob} content
+   * @param {boolean} saveCopy
+   * @returns {Promise<boolean>} return false if saved (???)
+   */
   async function contentSaveAs(content, saveCopy) {
     if (!content) {
       content = getCurrentContent();
@@ -598,16 +616,7 @@
       }
       return false;
     }
-    // fallback to indexeddb
-    let f = await saveFilePickerIndexedDB();
-    if (!f) {
-      return true;
-    }
-    await writeFile(f, content);
-    if (!saveCopy) {
-      setContentAsCurrent(content, f.name);
-    }
-    return false;
+    return await contentBrowserSaveAs(content, saveCopy);
   }
 
   /**
@@ -735,6 +744,11 @@
     contentSaveAs(content, false);
   }
 
+  function cmdFileBrowserSaveAs() {
+    const content = getCurrentContent();
+    contentBrowserSaveAs(content, false);
+  }
+
   function cmdFileSaveCopy() {
     const content = getCurrentContent();
     contentSaveAs(content, true);
@@ -755,7 +769,9 @@
       cmdFileNewEmptyWindow();
       return;
     }
-    await verifyHandlePermission(f.fileHandle, false);
+    if (f.fileHandle) {
+      await verifyHandlePermission(f.fileHandle, false);
+    }
     await rememberFileForNewWindow(f);
     const uri = location.toString() + "?file=" + encodeURI("__for_new_window");
     window.open(uri);
@@ -958,6 +974,9 @@
       case m.IDM_FILE_SAVEAS:
       case m.IDT_FILE_SAVEAS:
         cmdFileSaveAs();
+        break;
+      case m.IDM_FILE_BROWSER_SAVEAS:
+        cmdFileBrowserSaveAs();
         break;
       case m.IDM_FILE_SAVECOPY:
       case m.IDT_FILE_SAVECOPY:

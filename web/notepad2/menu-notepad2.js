@@ -99,6 +99,7 @@ export const IDM_FILE_NEW = "IDM_FILE_NEW";
 export const IDM_FILE_OPEN = "IDM_FILE_OPEN";
 export const IDM_FILE_SAVE = "IDM_FILE_SAVE";
 export const IDM_FILE_SAVEAS = "IDM_FILE_SAVEAS";
+export const IDM_FILE_BROWSER_SAVEAS = "IDM_FILE_BROWSER_SAVEAS";
 export const IDM_FILE_SAVEBACKUP = "IDM_FILE_SAVEBACKUP";
 export const IDM_FILE_SAVECOPY = "IDM_FILE_SAVECOPY";
 export const IDM_FILE_REVERT = "IDM_FILE_REVERT";
@@ -117,6 +118,7 @@ const menuFile = [
   ["&Open...\tMod+O", IDM_FILE_OPEN],
   ["&Save\tMod+S", IDM_FILE_SAVE],
   ["Save &As...\tF6", IDM_FILE_SAVEAS],
+  ["Save In Browser As...", IDM_FILE_BROWSER_SAVEAS],
   // ["Save Back&up", IDM_FILE_SAVEBACKUP],
   ["Save Cop&y...\tMod+F6", IDM_FILE_SAVECOPY],
   MENU_SEPARATOR,
