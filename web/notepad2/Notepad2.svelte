@@ -17,6 +17,7 @@
   import DialogNotImplemented from "./DialogNotImplemented.svelte";
   import DialogSaveAs from "./DialogSaveAs.svelte";
   import DialogFileOpen from "./DialogFileOpen.svelte";
+  import DialogBrowse from "./DialogBrowse.svelte";
   import DialogAbout from "./DialogAbout.svelte";
   import DialogGoTo from "./DialogGoTo.svelte";
   import DialogEncloseSelection from "./DialogEncloseSelection.svelte";
@@ -321,6 +322,8 @@
   let onAskSaveChangesDone;
   let showingAskSaveChanges = false;
 
+  let showingFileBrowse = true;
+
   let saveAsName = "";
   let onSaveAsDone;
   let showingSaveAs = false;
@@ -357,6 +360,7 @@
     showingGoTo ||
     showingAddToFavorites ||
     showingFavorites ||
+    showingFileBrowse ||
     showingAbout;
 
   // if we're transitioning from showing some dialog to not showing it,
@@ -842,6 +846,18 @@
     await setFileAsCurrent(f);
   }
 
+  async function onFileBrowseDone(f) {
+    console.log("onFileBrowseDone:", f);
+    if (!f) {
+      return;
+    }
+    await setFileAsCurrent(f);
+  }
+
+  async function cmdFileBrowse() {
+    showingFileBrowse = true;
+  }
+
   async function cmdEditGoToLine() {
     let res = new Promise((resolve, reject) => {
       onGoToDone = (lineNo, colNo) => {
@@ -959,10 +975,14 @@
       case m.IDM_FILE_RECENT:
         cmdFileOpenRecent();
         break;
+      case m.IDT_FILE_BROWSE:
+      case m.IDM_FILE_BROWSE:
+        cmdFileBrowse();
+        break;
+
       case m.IDM_EDIT_GOTOLINE:
         cmdEditGoToLine();
         break;
-
       case m.IDM_EDIT_ENCLOSESELECTION:
         cmdEncloseSelection();
         break;
@@ -1750,6 +1770,10 @@
       name={saveAsName}
       onDone={onSaveAsDone}
     />
+  {/if}
+
+  {#if showingFileBrowse}
+    <DialogBrowse bind:open={showingFileBrowse} onDone={onFileBrowseDone} />
   {/if}
 
   <DialogAskSaveChanges

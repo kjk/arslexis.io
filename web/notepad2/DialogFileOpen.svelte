@@ -1,9 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import WinDialogBase from "../WinDialogBase.svelte";
+  import { focus } from "../actions/focus";
   import { FsFile, fsTypeIndexedDB, getFileList } from "./FsFile";
   import { len } from "../util";
-  import { focus } from "../actions/focus";
 
   export let open = false;
   /** @type {Function} */
