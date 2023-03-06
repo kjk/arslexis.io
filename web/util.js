@@ -340,7 +340,7 @@ export function fmtSize(n) {
 }
 
 /**
- * 1023 => 1.023
+ * 1023 => 1,023
  * @param {number} n
  * @param {string} sep
  * @returns {string}
