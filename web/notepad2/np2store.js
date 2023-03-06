@@ -229,13 +229,32 @@ export async function getBrowseFolders() {
 }
 
 /**
- *
- * @param {FileSystemDirectoryHandle} f
+ * @param {FileSystemDirectoryHandle} h
  * @returns {Promise<FileSystemDirectoryHandle[]>}
  */
-export async function addBrowseFolder(f) {
+export async function addBrowseFolder(h) {
   const a = await getBrowseFolders();
-  a.push(f);
+  a.push(h);
   await setBrowseFolders(a);
   return a;
+}
+
+/**
+ * @param {FileSystemDirectoryHandle} h
+ * @returns {Promise<FileSystemDirectoryHandle[]>}
+ */
+export async function removeBrowserFolder(h) {
+  const a = await getBrowseFolders();
+  const res = [];
+  for (const el of a) {
+    const eq = await el.isSameEntry(h);
+    if (!eq) {
+      res.push(el);
+    }
+  }
+  if (len(a) === len(res)) {
+    return;
+  }
+  await setBrowseFolders(res);
+  return res;
 }

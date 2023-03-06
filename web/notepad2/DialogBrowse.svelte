@@ -7,6 +7,7 @@
    * @property {Entry} parent
    * @property {Function} open
    * @property {Function} [remove] or delete
+   * @property {string} [removeTitle]
    * @property {FsFile} [file]
    * @property {FsEntry} [entry]
    * @property {FileSystemDirectoryHandle} [dirHandle]
@@ -19,7 +20,12 @@
   import { progress } from "../Progress.svelte";
   import { focus } from "../actions/focus";
   import { FsFile, fsTypeIndexedDB, fsTypeFolder, getFileList } from "./FsFile";
-  import { openDirPicker, readDir, supportsFileSystem } from "../fileutil";
+  import {
+    openDirPicker,
+    readDir,
+    supportsFileSystem,
+    verifyHandlePermission,
+  } from "../fileutil";
   import { sortEntries } from "../wc/Folder.svelte";
   import {
     addBrowseFolder,
@@ -27,6 +33,7 @@
     getBrowseFolders,
     getFavorites,
     getRecent,
+    removeBrowserFolder,
   } from "./np2store";
   import { len } from "../util";
 
@@ -36,12 +43,27 @@
 
   /** @type {Entry}*/
   let selected = null;
+  let removeTitle = "Remove";
+  let btnRemoveDisabled = true;
 
   let btnOpenDisabled = false;
   let btnOpenFolderDisabled = false;
+  let path = "";
 
   /** @type {Entry[]} */
   let entries = [];
+
+  $: updateRemove(selected);
+
+  /**
+   * @param {Entry} e
+   */
+  function updateRemove(e) {
+    btnRemoveDisabled = !e || !e.remove;
+    if (e && e.removeTitle) {
+      removeTitle = e.removeTitle;
+    }
+  }
 
   /**
    * @param {Entry} e
@@ -79,6 +101,13 @@
     await setTopLevel(null);
   }
 
+  async function btnRemoveClicked() {
+    if (selected && selected.remove) {
+      selected.remove(selected);
+      selected = null;
+    }
+  }
+
   function close() {
     open = false;
     onDone(null);
@@ -87,58 +116,83 @@
   $: btnOpenDisabled = selected == null || !selected.file;
 
   /**
-   * @param {FileSystemDirectoryHandle} dh
-   * @param {Entry} parent
+   * @param {Entry} e
    */
-  async function setDirHandle(dh, parent) {
-    console.log("setDirHandle:", dh, "parent:", parent);
+  async function openDirHandle(e) {
+    await setDirHandle(e);
+  }
+
+  /**
+   * @param {Entry} e
+   */
+  async function openDirHandleParent(e) {
+    if (e.parent === null) {
+      await setTopLevel(null);
+      return;
+    }
+    await setDirHandle(e.parent);
+  }
+
+  /**
+   * @param {Entry} e
+   */
+  async function setDirHandle(e) {
+    let dh = e.dirHandle;
+    console.log("setDirHandle:", dh, "parent:", e.parent);
+    const ok = await verifyHandlePermission(dh, false);
+    if (!ok) {
+      return;
+    }
+
+    path = dh.name;
+    let p = e.parent;
+    // TODO: remove when tested not needed
+    while (p && p != p.parent) {
+      path = p.dirHandle.name + "/" + path;
+      p = p.parent;
+    }
+
     // TODO: cache things
     $progress = `reading ${dh.name}`;
     const fsEntry = await readDir(dh);
     $progress = "";
     /** @type {Function} */
     let open = setTopLevel;
-    if (parent != null) {
+    if (e.parent != null) {
       open = openDirHandle;
     }
     /** @type {Entry} */
-    let e = {
+    let e2 = {
       name: "..",
-      parent: parent,
-      open: open,
+      parent: e.parent,
+      dirHandle: dh,
+      open: openDirHandleParent,
     };
-    let a = [e];
+    let a = [e2];
     let fsEntries = fsEntry.dirEntries;
     sortEntries(fsEntries);
     for (const fse of fsEntries) {
       if (fse.isDir) {
-        e = {
+        e2 = {
           name: fse.name + "/",
-          parent: parent,
+          parent: e,
           open: openDirHandle,
           dirHandle: fse.handle,
         };
       } else {
         const fsf = new FsFile(fsTypeFolder, fse.name, fse.name);
         fsf.fileHandle = fse.handle;
-        e = {
+        e2 = {
           name: fse.name,
-          parent: parent,
+          parent: e,
           open: openFile,
           file: fsf,
+          dirHandle: null,
         };
       }
-      a.push(e);
+      a.push(e2);
     }
     entries = a;
-  }
-
-  /**
-   * @param {Entry} e
-   */
-  async function openDirHandle(e) {
-    console.log("openDirHandle:", e);
-    await setDirHandle(e.dirHandle, e.parent);
   }
 
   /**
@@ -162,6 +216,7 @@
    * @param {Entry} ignore
    */
   async function openRecent(ignore) {
+    path = "recent";
     /** @type {Entry} */
     let e = {
       name: "..",
@@ -179,6 +234,7 @@
    * @param {Entry} ignore
    */
   async function openFavorites(ignore) {
+    path = "favorites";
     /** @type {Entry} */
     let e = {
       name: "..",
@@ -196,7 +252,7 @@
    * @param {Entry} ignore
    */
   async function setTopLevel(ignore) {
-    console.log();
+    path = "";
     /** @type {Entry} */
     let e = {
       name: "browser",
@@ -230,10 +286,17 @@
         parent: null,
         dirHandle: dh,
         open: openDirHandle,
+        remove: removeHandle,
+        removeTitle: "Remove",
       };
       a.push(e);
     }
     entries = a;
+  }
+
+  async function removeHandle(e) {
+    await removeBrowserFolder(e.dirHandle);
+    setTopLevel(null);
   }
 
   /**
@@ -247,6 +310,7 @@
    * @param {Entry} e
    */
   async function openBrowser(e) {
+    path = "browser";
     /** @type {Entry} */
     let e1 = {
       name: "..",
@@ -274,36 +338,37 @@
 </script>
 
 <WinDialogBaseNoOverlay bind:open title="Browse Files">
-  <div
-    class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 my-2 min-h-[12rem] max-h-[60vh] cursor-pointer select-none text-xs"
-    tabindex="0"
-    slot="main"
-    role="listbox"
-  >
-    {#each entries as f}
-      {@const isBold = f.name.endsWith("/")}
-      {@const boldCls = isBold ? "font-bold" : ""}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      {#if f === selected}
-        <div
-          class="{boldCls} bg-gray-100 hover:bg-gray-200"
-          on:dblclick={() => entryDblClicked(f)}
-          on:click={() => entryClicked(f)}
-        >
-          {f.name}
-        </div>
-      {:else}
-        <div
-          class="{boldCls} hover:bg-gray-200"
-          on:dblclick={() => entryDblClicked(f)}
-          on:click={() => entryClicked(f)}
-        >
-          {f.name}
-        </div>
-      {/if}
-    {/each}
+  <div slot="main" class="flex flex-col">
+    <div class="mx-5 text-xs mt-2 min-h-[1rem]">{path}</div>
+    <div
+      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 my-2 min-h-[12rem] max-h-[60vh] cursor-pointer select-none text-xs"
+      tabindex="0"
+      role="listbox"
+    >
+      {#each entries as f}
+        {@const isBold = f.name.endsWith("/")}
+        {@const boldCls = isBold ? "font-bold" : ""}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        {#if f === selected}
+          <div
+            class="{boldCls} bg-gray-100 hover:bg-gray-200"
+            on:dblclick={() => entryDblClicked(f)}
+            on:click={() => entryClicked(f)}
+          >
+            {f.name}
+          </div>
+        {:else}
+          <div
+            class="{boldCls} hover:bg-gray-200"
+            on:dblclick={() => entryDblClicked(f)}
+            on:click={() => entryClicked(f)}
+          >
+            {f.name}
+          </div>
+        {/if}
+      {/each}
+    </div>
   </div>
-
   <!-- bottom -->
   <div slot="bottom" class="flex mx-2 justify-between text-select-none text-xs">
     {#if supportsFileSystem()}
@@ -313,12 +378,17 @@
         on:click={btnOpenFolderClicked}>Open Folder</button
       >
     {/if}
+    <button
+      disabled={btnRemoveDisabled}
+      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+      on:click={btnRemoveClicked}>{removeTitle}</button
+    >
 
     <div class="grow" />
 
     <button
       disabled={btnOpenDisabled}
-      class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
       on:click={btnOpenClicked}>Open</button
     >
     <button

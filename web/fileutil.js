@@ -124,6 +124,12 @@ export function genNextUniqueFileName(s) {
   return s + ext;
 }
 
+/**
+ *
+ * @param {any} fileHandle
+ * @param {boolean} readWrite
+ * @returns {Promise<boolean>}
+ */
 export async function verifyHandlePermission(fileHandle, readWrite) {
   const options = {};
   if (readWrite) {
