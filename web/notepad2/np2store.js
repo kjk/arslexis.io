@@ -2,9 +2,12 @@
 
 import { KV } from "../dbutil";
 import { len, throwIf } from "../util";
-import { FsFile, fsTypeComputer, fsTypeLocalStorage } from "./FsFile";
+import { FsFile, fsTypeComputer, fsTypeIndexedDB, setIDB } from "./FsFile";
 
 const db = new KV("np2store", "keyval");
+
+// TODO: not great, needed to avoid circular dependencies
+setIDB(db);
 
 /**
  * @typedef {Object} FavEntry
@@ -56,7 +59,7 @@ async function favEq(e1, e2) {
   if (e1.name !== e2.name) return false;
   if (e1.favName !== e2.favName) return false;
   switch (e1.fs) {
-    case fsTypeLocalStorage:
+    case fsTypeIndexedDB:
       return e1.id === e2.id;
     case fsTypeComputer:
       const eq = await e1.fileHandle.isSameEntry(e2.fileHandle);
@@ -202,5 +205,6 @@ export async function rememberFileForNewWindow(f) {
 export async function getAndClearFileForNewWindow() {
   const fav = await db.get(keyFileForNewWindow);
   const f = fsFileFromFavEntry(fav);
+  await db.del(keyFileForNewWindow);
   return f;
 }

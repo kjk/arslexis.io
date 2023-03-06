@@ -57,7 +57,7 @@
   import {
     deserialize,
     FsFile,
-    newLocalStorageFile,
+    newIndexedDBFile,
     openFilePicker,
     readFile,
     saveFilePicker,
@@ -540,14 +540,20 @@
     window.open(uri);
   }
 
+  /**
+   * @returns {Blob}
+   */
   function getCurrentContent() {
-    return editorView.state.doc.toString();
+    const s = editorView.state.doc.toString();
+    const d = new TextEncoder().encode(s);
+    const blob = new Blob([d.buffer]);
+    return blob;
   }
 
   /**
    * @reuturns {Promise<FsFile>}
    */
-  async function saveFilePickerLocalStorage() {
+  async function saveFilePickerIndexedDB() {
     return new Promise((resolve, reject) => {
       onSaveAsDone = (file) => {
         resolve(file);
@@ -569,9 +575,9 @@
   }
 
   /**
-   * @param {string} content
+   * @param {Blob} content
    * @param {boolean} saveCopy
-   * @returns {Promise<boolean>}
+   * @returns {Promise<boolean>} return false if saved (???)
    */
   async function contentSaveAs(content, saveCopy) {
     if (!content) {
@@ -584,35 +590,35 @@
       }
       await writeFile(f, content);
       if (!saveCopy) {
-        setContentAsCurrent(content);
+        setContentAsCurrent(content, f.name);
       }
       return false;
     }
-    // fallback to local storage
-    let f = await saveFilePickerLocalStorage();
-    if (f) {
-      await writeFile(f, content);
-      if (!saveCopy) {
-        setContentAsCurrent(content);
-      }
-      return false;
+    // fallback to indexeddb
+    let f = await saveFilePickerIndexedDB();
+    if (!f) {
+      return true;
     }
-    return true;
+    await writeFile(f, content);
+    if (!saveCopy) {
+      setContentAsCurrent(content, f.name);
+    }
+    return false;
   }
 
   /**
-   * @param {string} [content]
-   * @returns Promise<boolean> true if cancelled saving
+   * @param {Blob} [blob]
+   * @returns {Promise<boolean>} true if cancelled saving
    */
-  async function contentSave(content) {
-    if (!content) {
-      content = getCurrentContent();
+  async function contentSave(blob) {
+    if (!blob) {
+      blob = getCurrentContent();
     }
     if (file) {
-      writeFile(file, content);
+      writeFile(file, blob);
       return false;
     }
-    return await contentSaveAs(content, false);
+    return await contentSaveAs(blob, false);
   }
 
   /**
@@ -621,17 +627,28 @@
   function saveFile(fileIn) {
     console.log("saveFile:", fileIn);
     initialState = editorView.state;
-    let content = initialState.doc.toString();
-    writeFile(fileIn, content);
+    const content = initialState.doc.toString();
+    const d = new TextEncoder().encode(content);
+    const blob = new Blob([d.buffer]);
+    writeFile(fileIn, blob);
     isDirty = false;
     file = fileIn;
     name = file.name;
   }
 
-  function setContentAsCurrent(content, name) {
-    let state = createEditorState(content, name);
+  /**
+   * @param {Blob|string} content
+   * @param {string} fileName
+   */
+  async function setContentAsCurrent(content, fileName) {
+    if (content instanceof Blob) {
+      const ab = await content.arrayBuffer();
+      content = new TextDecoder().decode(ab);
+    }
+    let state = createEditorState(content, fileName);
     initialState = state;
     editorView.setState(initialState);
+    name = fileName;
     isDirty = false;
     updateStatusLine();
     setToolbarEnabledState();
@@ -642,15 +659,15 @@
    */
   async function setFileAsCurrent(fileIn) {
     console.log("setFileAsCurrent:", fileIn);
-    let content = await readFile(fileIn);
-    if (content === null) {
+    let blob = await readFile(fileIn);
+    if (blob === null) {
       // could be serialized FileSystemFileHandle with denied permissions
       console.log("Denied permissions for:", fileIn);
       return;
     }
     file = fileIn;
     name = file.name;
-    setContentAsCurrent(content, name);
+    await setContentAsCurrent(blob, name);
     if (!settings.rememberRecentFiles) {
       return;
     }
@@ -1612,11 +1629,11 @@
       return;
     }
     let first = files[0];
-    let content = await first.file.text();
+    let blob = await first.file;
     // TODO: open in new window
     let name = first.file.name;
-    let fs = newLocalStorageFile(name);
-    writeFile(fs, content);
+    let fs = newIndexedDBFile(name);
+    writeFile(fs, blob);
     let uriName = serialize(fs);
     let uri = window.location.toString();
     uri += "?file=" + encodeURIComponent(uriName);
@@ -1721,13 +1738,19 @@
     <div />
   {/if}
 
-  <DialogFileOpen bind:open={showingOpenFile} onDone={onOpenFileDone} />
+  <!-- needs to re-mount -->
+  {#if showingOpenFile}
+    <DialogFileOpen bind:open={showingOpenFile} onDone={onOpenFileDone} />
+  {/if}
 
-  <DialogSaveAs
-    bind:open={showingSaveAs}
-    name={saveAsName}
-    onDone={onSaveAsDone}
-  />
+  <!-- needs to re-mount -->
+  {#if showingSaveAs}
+    <DialogSaveAs
+      bind:open={showingSaveAs}
+      name={saveAsName}
+      onDone={onSaveAsDone}
+    />
+  {/if}
 
   <DialogAskSaveChanges
     bind:open={showingAskSaveChanges}

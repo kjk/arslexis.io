@@ -1,8 +1,9 @@
 <script>
+  import { onMount } from "svelte";
+  import WinDialogBase from "../WinDialogBase.svelte";
+  import { FsFile, fsTypeIndexedDB, getFileList } from "./FsFile";
   import { len } from "../util";
   import { focus } from "../actions/focus";
-  import WinDialogBase from "../WinDialogBase.svelte";
-  import { FsFile, fsTypeLocalStorage, getFileList } from "./FsFile";
 
   export let open = false;
   /** @type {Function} */
@@ -13,7 +14,7 @@
 
   let btnOpenDisabled = false;
 
-  let fileList = getFileList(fsTypeLocalStorage);
+  let fileList = [];
 
   function fileClicked(file) {
     console.log("fileClicked:", file);
@@ -55,6 +56,10 @@
       }
     }
   }
+
+  onMount(async () => {
+    fileList = await getFileList(fsTypeIndexedDB);
+  });
 </script>
 
 <WinDialogBase bind:open title="Open File">

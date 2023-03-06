@@ -1,13 +1,14 @@
 <script>
-  import { len } from "../util";
-  import { focus } from "../actions/focus";
+  import { onMount } from "svelte";
   import WinDialogBase from "../WinDialogBase.svelte";
   import {
     FsFile,
-    fsTypeLocalStorage,
+    fsTypeIndexedDB,
     getFileList,
-    newLocalStorageFile,
+    newIndexedDBFile,
   } from "./FsFile";
+  import { len } from "../util";
+  import { focus } from "../actions/focus";
 
   export let open = false;
 
@@ -17,7 +18,7 @@
 
   let selectedFile = null;
 
-  let fileList = getFileList(fsTypeLocalStorage);
+  let fileList = [];
 
   /**
    * @param {FsFile} clickedFile
@@ -46,7 +47,7 @@
     if (name === "") {
       return;
     }
-    let f = newLocalStorageFile(name);
+    let f = newIndexedDBFile(name);
     onDone(f);
     open = false;
   }
@@ -64,6 +65,10 @@
       save();
     }
   }
+
+  onMount(async () => {
+    fileList = await getFileList(fsTypeIndexedDB);
+  });
 </script>
 
 <WinDialogBase bind:open title="Save As">

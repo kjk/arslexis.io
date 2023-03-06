@@ -68,7 +68,7 @@ import {
 import { toggleFoldAll } from "../cmcommands";
 
 const placeholder =
-  "Welcome to notepad2web - a web re-implementation of notepad2 Windows text editor.\nYou can save files in the browser (localStorage) or open files from the file system (if supported by your browser).\nStart typing...";
+  "Welcome to notepad2web - a web re-implementation of notepad2 Windows text editor.\nYou can save files in the browser (indexeddb) or open files from the file system (if supported by your browser).\nStart typing...";
 
 /** @type {KeyBinding} */
 const indentWithTab2 = {

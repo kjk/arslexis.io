@@ -1,7 +1,8 @@
+/** @typedef {import("../dbutil").KV} KV */
 import { verifyHandlePermission } from "../fileutil";
 import { genRandomID, splitMax, throwIf } from "../util";
 
-export const fsTypeLocalStorage = "localstorage";
+export const fsTypeIndexedDB = "idb";
 export const fsTypeComputer = "computer'";
 
 export class FsFile {
@@ -23,44 +24,54 @@ export class FsFile {
   }
 }
 
+/** @type {KV} */
+let db;
+
+/**
+ * @param {KV} idb
+ */
+export function setIDB(idb) {
+  db = idb;
+}
+
 // format of the key is:
 // np2:file:${id}:${name}
-const lsKeyPrefix = "np2:file:";
+const idbKeyPrefix = "np2:file:";
 
 /**
  * must have id and name set
  * @param {FsFile} f
  * @result {string}
  */
-function mkLSKey(f) {
-  return lsKeyPrefix + f.id + ":" + f.name;
+function mkIDBKey(f) {
+  return idbKeyPrefix + f.id + ":" + f.name;
 }
 
-export function newLocalStorageFile(name) {
+export function newIndexedDBFile(name) {
   let id = genRandomID(6);
-  let f = new FsFile(fsTypeLocalStorage, id, name);
-  f.type = fsTypeLocalStorage;
+  let f = new FsFile(fsTypeIndexedDB, id, name);
+  f.type = fsTypeIndexedDB;
   return f;
 }
 
+// TODO: could store file list under a single key + content
 /**
- * @returns {FsFile[]}
+ * @returns {Promise<FsFile[]>}
  */
-function getFileListLocalStorage() {
-  const nKeys = localStorage.length;
+async function getFileListIndexedDB() {
+  let keys = await db.keys();
   const res = [];
-  for (let i = 0; i < nKeys; i++) {
-    const key = localStorage.key(i);
-    if (!key.startsWith(lsKeyPrefix)) {
+  for (const dbKey of keys) {
+    const key = dbKey.toString();
+    if (!key.startsWith(idbKeyPrefix)) {
       continue;
     }
     const parts = key.split(":", 4);
     console.log("getFileListLocalStorage: parts:", parts);
     let id = parts[2];
     let name = parts[3];
-    const f = new FsFile(fsTypeLocalStorage, id, name);
-    f.type = fsTypeLocalStorage;
-    console.log("getFileListLocalStorage:", f);
+    const f = new FsFile(fsTypeIndexedDB, id, name);
+    console.log("getFileListIndexedDB:", f);
     res.push(f);
   }
   return res;
@@ -73,7 +84,7 @@ function getFileListLocalStorage() {
  */
 export function serialize(f) {
   switch (f.type) {
-    case fsTypeLocalStorage:
+    case fsTypeIndexedDB:
       return "ls--" + f.id + "--" + f.name;
   }
   throwIf(true, `invalid FsFile.type ${f.type}`);
@@ -91,7 +102,7 @@ export function deserialize(s) {
       let id = parts[1];
       let name = parts[2];
       console.log("deserialize: id=", id, "name:", name);
-      return new FsFile(fsTypeLocalStorage, id, name);
+      return new FsFile(fsTypeIndexedDB, id, name);
     default:
       // comes from the user so only logging
       console.log(`FsFile:deserialize: invalid type '${type}' in '${s}'`);
@@ -101,16 +112,17 @@ export function deserialize(s) {
 
 /**
  * @param {FsFile} f
+ * @returns {Promise<Blob>}
  */
-function readFileLocalStorage(f) {
-  const key = mkLSKey(f);
-  const content = localStorage.getItem(key);
-  return content;
+async function readFileIndexedDB(f) {
+  const key = mkIDBKey(f);
+  const d = await db.get(key);
+  return d;
 }
 
 /**
  * @param {FsFile} f
- * @returns {Promise<string>}
+ * @returns {Promise<Blob>}
  */
 async function readFileComputer(f) {
   const fh = f.fileHandle;
@@ -119,51 +131,59 @@ async function readFileComputer(f) {
     return null;
   }
   const d = await fh.getFile();
-  const ab = await d.arrayBuffer();
-  const res = new TextDecoder().decode(ab);
-  return res;
+  return d;
 }
 
 /**
  * must have id and name set
  * @param {FsFile} f
- * @returns {Promise<string>}
+ * @returns {Promise<Blob>}
  */
 export async function readFile(f) {
   switch (f.type) {
-    case fsTypeLocalStorage:
-      return readFileLocalStorage(f);
+    case fsTypeIndexedDB:
+      return await readFileIndexedDB(f);
     case fsTypeComputer:
       return await readFileComputer(f);
     default:
       throwIf(true, `f.type '${f.type}' not recognized`);
   }
-  return "";
-}
-
-async function writeFileComputer(f, contents) {
-  const fileHandle = f.fileHandle;
-  const writable = await fileHandle.createWritable();
-  await writable.write(contents);
-  await writable.close();
-}
-
-function writeFileLocalStorage(f, content) {
-  const key = mkLSKey(f);
-  localStorage.setItem(key, content);
+  return null;
 }
 
 /**
  * @param {FsFile} f
- * @param {string} content
+ * @param {Blob} d
  */
-export async function writeFile(f, content) {
+async function writeFileComputer(f, d) {
+  const fileHandle = f.fileHandle;
+  // @ts-ignore
+  const writable = await fileHandle.createWritable();
+  await writable.write(d);
+  await writable.close();
+}
+
+/**
+ * @param {FsFile} f
+ * @param {Blob} d
+ */
+async function writeFileIndexedDB(f, d) {
+  const key = mkIDBKey(f);
+  await db.set(key, d);
+}
+
+/**
+ * @param {FsFile} f
+ * @param {Blob} d
+ */
+export async function writeFile(f, d) {
+  throwIf(!(d instanceof Blob));
   switch (f.type) {
-    case fsTypeLocalStorage:
-      writeFileLocalStorage(f, content);
+    case fsTypeIndexedDB:
+      writeFileIndexedDB(f, d);
       break;
     case fsTypeComputer:
-      await writeFileComputer(f, content);
+      await writeFileComputer(f, d);
       break;
     default:
       throwIf(true, `invalid FsFile.type ${f.type}`);
@@ -173,12 +193,12 @@ export async function writeFile(f, content) {
 /**
  * return array of FsFile objects without objects
  * @param {string} type
- * @returns {FsFile[]}
+ * @returns {Promise<FsFile[]>}
  */
-export function getFileList(type) {
+export async function getFileList(type) {
   switch (type) {
-    case fsTypeLocalStorage:
-      return getFileListLocalStorage();
+    case fsTypeIndexedDB:
+      return await getFileListIndexedDB();
     default:
       throwIf(true, `invalid FsFile.type ${type}`);
   }

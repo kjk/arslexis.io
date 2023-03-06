@@ -159,7 +159,8 @@ export function isIFrame() {
  * @returns {boolean}
  */
 export function supportsFileSystem() {
-  return "showDirectoryPicker" in window && !isIFrame();
+  const ok = "showDirectoryPicker" in window && !isIFrame();
+  return false && ok;
 }
 
 // a directory tree. each element is either a file:
