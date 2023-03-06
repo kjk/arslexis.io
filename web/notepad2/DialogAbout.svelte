@@ -25,6 +25,12 @@
       class="ml-2 underline focus-within:outline"
       rel="noreferrer"
       target="_blank"
+      href="https://docs.onlinetool.io/notepad2.html">read documentation</a
+    >
+    <a
+      class="ml-2 underline focus-within:outline"
+      rel="noreferrer"
+      target="_blank"
       href="https://github.com/kjk/notepad2web/issues"
       >report bugs, request features</a
     >
