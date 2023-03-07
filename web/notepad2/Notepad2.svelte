@@ -155,8 +155,8 @@
   import { supportsFileSystem, verifyHandlePermission } from "../fileutil";
   import { makeConfig } from "./editorConfig";
   import {
-    addToFavorites,
-    addToRecent,
+    favorites,
+    recent,
     favEntryFromFsFile,
     fsFileFromFavEntry,
     getAndClearFileForNewWindow,
@@ -685,7 +685,8 @@
       return;
     }
     const e = favEntryFromFsFile(file, name);
-    await addToRecent(e);
+    // push new value at the top
+    $recent = [e].concat($recent);
   }
 
   async function loadFile() {
@@ -816,7 +817,7 @@
       onAddToFavoritesDone = async (name) => {
         if (name) {
           const e = favEntryFromFsFile(file, name);
-          await addToFavorites(e);
+          $favorites = $favorites.concat(e);
         }
         resolve();
       };

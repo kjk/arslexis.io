@@ -47,14 +47,12 @@ export function fsFileFromFavEntry(fav) {
   return f;
 }
 
-// TODO: expose as svelte store
-
 /**
  * @param {FavEntry} e1
  * @param {FavEntry} e2
  * @returns {Promise<boolean>}
  */
-async function favEq(e1, e2) {
+export async function favEq(e1, e2) {
   if (e1.fs !== e2.fs) return false;
   if (e1.name !== e2.name) return false;
   if (e1.favName !== e2.favName) return false;
@@ -67,126 +65,6 @@ async function favEq(e1, e2) {
   }
   throwIf(true, `unknown e1.fs: '${e1.fs}`);
   return false;
-}
-
-/**
- * @param {string} key
- * @returns {Promise<FavEntry[]>}
- */
-export async function getFavs(key) {
-  return (await db.get(key)) || [];
-}
-
-/**
- * @param {string} key
- * @param {FavEntry[]} v
- */
-export async function setFavs(key, v) {
-  await db.set(key, v);
-}
-
-/**
- * @param {string} key
- * @param {FavEntry} e
- * @returns {Promise<FavEntry[]>}
- */
-export async function removeFav(key, e) {
-  let entries = await getFavs(key);
-  let newEntries = [];
-  for (const ee of entries) {
-    const eq = await favEq(ee, e);
-    if (!eq) newEntries.push(ee);
-  }
-  if (len(entries) === len(newEntries) + 1) {
-    await setFavs(key, newEntries);
-  } else {
-    console.log(
-      "removeFav: didn't remove! entries:",
-      entries,
-      "newEntries:",
-      newEntries
-    );
-  }
-  return await getFavs(key);
-}
-
-/**
- * @param {string} key
- * @param {FavEntry} e
- * @returns {Promise<FavEntry[]>}
- */
-export async function addToFavs(key, e) {
-  // remove if exist, we don't want duplicates
-  let entries = await removeFav(key, e);
-  entries.push(e);
-  await setFavs(key, entries);
-  return entries;
-}
-
-const favKeyName = "favorites";
-/**
- * @returns {Promise<FavEntry[]>}
- */
-export async function getFavorites() {
-  return await getFavs(favKeyName);
-}
-
-/**
- * @param {FavEntry[]} v
- */
-export async function setFavorites(v) {
-  await setFavs(favKeyName, v);
-}
-
-/**
- * @param {FavEntry} e
- * @returns {Promise<FavEntry[]>}
- */
-export async function removeFavorite(e) {
-  return await removeFav(favKeyName, e);
-}
-
-/**
- * @param {FavEntry} e
- * @returns {Promise<FavEntry[]>}
- */
-export async function addToFavorites(e) {
-  return await addToFavs(favKeyName, e);
-}
-
-const recentKeyName = "recent";
-/**
- * @returns {Promise<FavEntry[]>}
- */
-export async function getRecent() {
-  return await getFavs(recentKeyName);
-}
-
-/**
- * @param {FavEntry[]} v
- */
-export async function setRecent(v) {
-  await setFavs(recentKeyName, v);
-}
-
-/**
- * @param {FavEntry} e
- * @returns {Promise<FavEntry[]>}
- */
-export async function removeRecent(e) {
-  return await removeFav(recentKeyName, e);
-}
-
-/**
- * @param {FavEntry} e
- * @returns {Promise<FavEntry[]>}
- */
-export async function addToRecent(e) {
-  return await addToFavs(recentKeyName, e);
-}
-
-export async function clearRecent() {
-  await setRecent([]);
 }
 
 const keyFileForNewWindow = "file-for-new-window";
@@ -276,3 +154,7 @@ function makeIndexedDBStore(dbKey, initialValue, crossTab) {
  * opened folders in DialogBrowse
  */
 export let browseFolders = makeIndexedDBStore("browse-folders", [], true);
+
+export let recent = makeIndexedDBStore("recent", [], true);
+
+export let favorites = makeIndexedDBStore("favorites", [], true);

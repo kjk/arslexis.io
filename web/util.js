@@ -641,3 +641,50 @@ export function limit(n, min, max) {
   }
   return n;
 }
+
+/**
+ * @param {any[]} a
+ * @param {any} el
+ * @returns {any[]}
+ */
+export function arrayRemove(a, el) {
+  const idx = a.indexOf(el);
+  if (idx >= 0) {
+    a.splice(idx, 1);
+  }
+  return a;
+}
+
+/**
+ * @param {any[]} a
+ * @param {any} el
+ * @param {Function} [cmpFn]
+ * @returns {any[]}
+ */
+export function arrayRemoveFn(a, el, cmpFn) {
+  let res = [];
+  for (const el2 of a) {
+    const eq = cmpFn(el, el2);
+    if (!eq) {
+      res.push(el2);
+    }
+  }
+  return res;
+}
+
+/**
+ * @param {any[]} a
+ * @param {any} el
+ * @param {Function} [cmpFn]
+ * @returns {Promise<any[]>}
+ */
+export async function arrayRemoveFnAsync(a, el, cmpFn) {
+  let res = [];
+  for (const el2 of a) {
+    const eq = await cmpFn(el, el2);
+    if (!eq) {
+      res.push(el2);
+    }
+  }
+  return res;
+}

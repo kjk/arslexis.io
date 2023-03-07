@@ -5,14 +5,8 @@
 <script>
   import WinDialogBase from "../WinDialogBase.svelte";
   import { focus } from "../actions/focus";
-  import { len, throwIf } from "../util";
-  import {
-    getFavorites,
-    getRecent,
-    removeFavorite,
-    removeRecent,
-    clearRecent,
-  } from "./np2store";
+  import { arrayRemove, len, throwIf } from "../util";
+  import { recent, favorites } from "./np2store";
   import { onMount } from "svelte";
 
   export let open = false;
@@ -59,10 +53,12 @@
   async function btnRemoveClicked() {
     switch (type) {
       case "recent":
-        entries = await removeRecent(selected);
+        $recent = arrayRemove($recent, selected);
+        entries = $recent;
         break;
       case "favorites":
-        entries = await removeFavorite(selected);
+        $favorites = arrayRemove($favorites, selected);
+        entries = $favorites;
         break;
     }
   }
@@ -92,13 +88,12 @@
       case "recent":
         title = "Open Recent File";
         emptyMsg = "no recent files!";
-        entries = await getRecent();
-        entries.reverse(); // TODO: maybe handle the right order
+        entries = $recent;
         break;
       case "favorites":
         title = "Favorites";
         emptyMsg = "no favorites!";
-        entries = await getFavorites();
+        entries = $favorites;
         break;
       default:
         throwIf(true, `unknown type '${type}'`);
@@ -106,8 +101,8 @@
   });
 
   async function clearHistory() {
-    clearRecent();
-    entries = await getRecent();
+    $recent = [];
+    entries = $recent;
   }
 </script>
 

@@ -29,8 +29,8 @@
   import { sortEntries } from "../wc/Folder.svelte";
   import {
     fsFileFromFavEntry,
-    getFavorites,
-    getRecent,
+    favorites,
+    recent,
     browseFolders,
   } from "./np2store";
   import { len, throwIf } from "../util";
@@ -196,6 +196,7 @@
   /**
    * @param {Entry[]} a
    * @param {FavEntry[]} favs
+   * @returns {Entry[]}
    */
   function addFavs(a, favs) {
     for (const fav of favs) {
@@ -208,6 +209,7 @@
       };
       a.push(e);
     }
+    return a;
   }
 
   /**
@@ -221,11 +223,7 @@
       parent: null,
       open: setTopLevel,
     };
-    let a = [e];
-    const favs = await getRecent();
-    favs.reverse();
-    addFavs(a, favs);
-    entries = a;
+    entries = addFavs([e], $recent);
   }
 
   /**
@@ -239,11 +237,7 @@
       parent: null,
       open: setTopLevel,
     };
-    let a = [e];
-    const favs = await getFavorites();
-    favs.reverse();
-    addFavs(a, favs);
-    entries = a;
+    entries = addFavs([e], $favorites);
   }
 
   function showingTopLevel() {
@@ -268,8 +262,7 @@
       open: openBrowser,
     };
     let a = [e];
-    const recent = await getRecent();
-    if (len(recent) > 0) {
+    if (len($recent) > 0) {
       e = {
         name: "recent",
         parent: null,
@@ -277,8 +270,7 @@
       };
       a.push(e);
     }
-    const favs = await getFavorites();
-    if (len(favs) > 0) {
+    if (len($favorites) > 0) {
       e = {
         name: "favorites",
         parent: null,
