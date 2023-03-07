@@ -210,67 +210,69 @@ export async function getAndClearFileForNewWindow() {
 }
 
 /**
+ * Create a generic Svelte store persisted in IndexedDB
+ * @param {string} dbKey unique IndexedDB key for storing this value
+ * @param {any} initialValue
+ * @param {boolean} crossTab if true, changes are visible in other browser tabs (windows)
+ * @returns {any}
+ */
+function makeIndexedDBStore(dbKey, initialValue, crossTab) {
+  function makeStoreMaker(dbKey, initialValue, crossTab) {
+    const lsKey = "store-notify:" + dbKey;
+    let curr = initialValue;
+    const subscribers = new Set();
+
+    function getCurrentValue() {
+      db.get(dbKey).then((v) => {
+        curr = v || [];
+        subscribers.forEach((cb) => cb(curr));
+      });
+    }
+
+    getCurrentValue();
+
+    /**
+     * @param {StorageEvent} event
+     */
+    function storageChanged(event) {
+      if (event.storageArea === localStorage && event.key === lsKey) {
+        getCurrentValue();
+      }
+    }
+    if (crossTab) {
+      window.addEventListener("storage", storageChanged, false);
+    }
+
+    function set(v) {
+      curr = v;
+      subscribers.forEach((cb) => cb(curr));
+      db.set(dbKey, v).then((v) => {
+        if (crossTab) {
+          const n = +localStorage.getItem(lsKey) || 0;
+          localStorage.setItem(lsKey, `${n + 1}`);
+        }
+      });
+    }
+
+    /**
+     * @param {Function} subscriber
+     */
+    function subscribe(subscriber) {
+      subscriber(curr);
+      subscribers.add(subscriber);
+      function unsubscribe() {
+        subscribers.delete(subscriber);
+      }
+      return unsubscribe;
+    }
+
+    return { set, subscribe };
+  }
+  return makeStoreMaker(dbKey, initialValue, crossTab);
+}
+
+/**
  * an array of FileSystemDirectoryHandle for remembering
  * opened folders in DialogBrowse
  */
-function browseFoldersStore() {
-  const dbKey = "browse-folders";
-  const lsKey = "store-notify:" + dbKey;
-  let curr = [];
-  const subscribers = new Set();
-
-  function getCurrentValue() {
-    db.get(dbKey).then((v) => {
-      curr = v || [];
-      broadcastValue();
-    });
-  }
-
-  getCurrentValue();
-
-  function broadcastValue() {
-    subscribers.forEach((cb) => cb(curr));
-  }
-
-  function crossWindowNotify() {
-    let v = +localStorage.getItem(lsKey) || 0;
-    localStorage.setItem(lsKey, `${v + 1}`);
-  }
-
-  /**
-   * @param {StorageEvent} event
-   */
-  function storageChanged(event) {
-    if (event.storageArea === localStorage && event.key === lsKey) {
-      getCurrentValue();
-    }
-  }
-  window.addEventListener("storage", storageChanged, false);
-
-  /**
-   * @param {FileSystemDirectoryHandle[]} v
-   */
-  function set(v) {
-    curr = v;
-    broadcastValue();
-    db.set(dbKey, v).then((v) => {
-      crossWindowNotify();
-    });
-  }
-
-  /**
-   * @param {Function} subscriber
-   */
-  function subscribe(subscriber) {
-    subscriber(curr);
-    subscribers.add(subscriber);
-    function unsubscribe() {
-      subscribers.delete(subscriber);
-    }
-    return unsubscribe;
-  }
-
-  return { set, subscribe };
-}
-
-export let browseFolders = browseFoldersStore();
+export let browseFolders = makeIndexedDBStore("browse-folders", [], true);
