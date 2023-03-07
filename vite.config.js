@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import copy from "rollup-plugin-copy";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,6 +11,13 @@ export default defineConfig({
     outDir: resolve("dist"),
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
+      plugins: [
+        copy({
+          targets: [
+            { src: "./web/notepad2/*.bmp", dest: resolve("dist", "notepad2") },
+          ],
+        }),
+      ],
       input: {
         main: resolve("web", "index.html"),
 
