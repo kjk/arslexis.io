@@ -246,6 +246,16 @@
     entries = a;
   }
 
+  function showingTopLevel() {
+    // TODO: a hack
+    return len(entries) > 0 && entries[0].name === "browser";
+  }
+  browseFolders.subscribe((ignore) => {
+    if (showingTopLevel()) {
+      setTopLevel(null);
+    }
+  });
+
   /**
    * @param {Entry} ignore
    */

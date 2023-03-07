@@ -214,43 +214,58 @@ export async function getAndClearFileForNewWindow() {
  * opened folders in DialogBrowse
  */
 function browseFoldersStore() {
-  console.log("browseFolderStore");
   const dbKey = "browse-folders";
+  const lsKey = "store-notify:" + dbKey;
   let curr = [];
-  let subscribers = [];
+  const subscribers = new Set();
 
-  db.get(dbKey).then((v) => {
-    curr = v || [];
-    broadcastValue();
-  });
+  function getCurrentValue() {
+    db.get(dbKey).then((v) => {
+      curr = v || [];
+      broadcastValue();
+    });
+  }
+
+  getCurrentValue();
 
   function broadcastValue() {
-    console.log("broadcastValue:", curr);
-    for (const sub of subscribers) {
-      sub(curr);
+    subscribers.forEach((cb) => cb(curr));
+  }
+
+  function crossWindowNotify() {
+    let v = +localStorage.getItem(lsKey) || 0;
+    localStorage.setItem(lsKey, `${v + 1}`);
+  }
+
+  /**
+   * @param {StorageEvent} event
+   */
+  function storageChanged(event) {
+    if (event.storageArea === localStorage && event.key === lsKey) {
+      getCurrentValue();
     }
   }
+  window.addEventListener("storage", storageChanged, false);
 
   /**
    * @param {FileSystemDirectoryHandle[]} v
    */
   function set(v) {
-    console.log("set:", v);
     curr = v;
     broadcastValue();
-    db.set(dbKey, v);
+    db.set(dbKey, v).then((v) => {
+      crossWindowNotify();
+    });
   }
 
   /**
-   * @param {Function} subscription
+   * @param {Function} subscriber
    */
-  function subscribe(subscription) {
-    console.log("subscribe:, curr:", curr);
-    subscription(curr);
-    const idx = len(subscribers);
-    subscribers.push(subscription);
+  function subscribe(subscriber) {
+    subscriber(curr);
+    subscribers.add(subscriber);
     function unsubscribe() {
-      subscribers.splice(idx, 1);
+      subscribers.delete(subscriber);
     }
     return unsubscribe;
   }
