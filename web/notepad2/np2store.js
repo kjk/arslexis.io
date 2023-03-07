@@ -209,52 +209,53 @@ export async function getAndClearFileForNewWindow() {
   return f;
 }
 
-// an array of FileSystemDirectoryHandle for remembering
-// opened folders in DialogBrowse
-const keyBrowseFolders = "browse-folders";
-
 /**
- * @param {FileSystemDirectoryHandle[]} v
+ * an array of FileSystemDirectoryHandle for remembering
+ * opened folders in DialogBrowse
  */
-export async function setBrowseFolders(v) {
-  await db.set(keyBrowseFolders, v);
-}
+function browseFoldersStore() {
+  console.log("browseFolderStore");
+  const dbKey = "browse-folders";
+  let curr = [];
+  let subscribers = [];
 
-/**
- * @returns {Promise<FileSystemDirectoryHandle[]>}
- */
-export async function getBrowseFolders() {
-  const res = await db.get(keyBrowseFolders);
-  return res || [];
-}
+  db.get(dbKey).then((v) => {
+    curr = v || [];
+    broadcastValue();
+  });
 
-/**
- * @param {FileSystemDirectoryHandle} h
- * @returns {Promise<FileSystemDirectoryHandle[]>}
- */
-export async function addBrowseFolder(h) {
-  const a = await getBrowseFolders();
-  a.push(h);
-  await setBrowseFolders(a);
-  return a;
-}
-
-/**
- * @param {FileSystemDirectoryHandle} h
- * @returns {Promise<FileSystemDirectoryHandle[]>}
- */
-export async function removeBrowserFolder(h) {
-  const a = await getBrowseFolders();
-  const res = [];
-  for (const el of a) {
-    const eq = await el.isSameEntry(h);
-    if (!eq) {
-      res.push(el);
+  function broadcastValue() {
+    console.log("broadcastValue:", curr);
+    for (const sub of subscribers) {
+      sub(curr);
     }
   }
-  if (len(a) === len(res)) {
-    return;
+
+  /**
+   * @param {FileSystemDirectoryHandle[]} v
+   */
+  function set(v) {
+    console.log("set:", v);
+    curr = v;
+    broadcastValue();
+    db.set(dbKey, v);
   }
-  await setBrowseFolders(res);
-  return res;
+
+  /**
+   * @param {Function} subscription
+   */
+  function subscribe(subscription) {
+    console.log("subscribe:, curr:", curr);
+    subscription(curr);
+    const idx = len(subscribers);
+    subscribers.push(subscription);
+    function unsubscribe() {
+      subscribers.splice(idx, 1);
+    }
+    return unsubscribe;
+  }
+
+  return { set, subscribe };
 }
+
+export let browseFolders = browseFoldersStore();

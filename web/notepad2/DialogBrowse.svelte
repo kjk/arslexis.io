@@ -28,14 +28,12 @@
   } from "../fileutil";
   import { sortEntries } from "../wc/Folder.svelte";
   import {
-    addBrowseFolder,
     fsFileFromFavEntry,
-    getBrowseFolders,
     getFavorites,
     getRecent,
-    removeBrowserFolder,
+    browseFolders,
   } from "./np2store";
-  import { len } from "../util";
+  import { len, throwIf } from "../util";
 
   export let open = false;
   /** @type {Function} */
@@ -94,10 +92,10 @@
     let dirHandle = await openDirPicker();
     console.log("btnOpenFolderClicked: dirHandle:", dirHandle);
     if (dirHandle == null) {
-      console.log("");
+      console.log("btnOpenFolderClicked: no dirHandle");
       return;
     }
-    await addBrowseFolder(dirHandle);
+    $browseFolders = $browseFolders.concat(dirHandle);
     await setTopLevel(null);
   }
 
@@ -279,8 +277,7 @@
       a.push(e);
     }
 
-    const dirHandles = await getBrowseFolders();
-    for (const dh of dirHandles) {
+    for (const dh of $browseFolders) {
       e = {
         name: dh.name,
         parent: null,
@@ -295,7 +292,10 @@
   }
 
   async function removeHandle(e) {
-    await removeBrowserFolder(e.dirHandle);
+    let idx = $browseFolders.indexOf(e.dirHandle);
+    throwIf(idx < 0);
+    $browseFolders.splice(idx, 1);
+    browseFolders.set($browseFolders);
     setTopLevel(null);
   }
 
