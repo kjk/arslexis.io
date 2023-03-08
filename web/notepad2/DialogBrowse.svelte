@@ -372,12 +372,15 @@
     </div>
   </div>
   <!-- bottom -->
-  <div slot="bottom" class="flex mx-2 justify-between text-select-none text-xs">
+  <div
+    slot="bottom"
+    class="flex mx-2 justify-between text-select-none text-xs items-baseline"
+  >
     {#if supportsFileSystem()}
       <button
         disabled={btnOpenFolderDisabled}
         class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
-        on:click={btnOpenFolderClicked}>Open Folder</button
+        on:click={btnOpenFolderClicked}>Add Folder</button
       >
     {/if}
     <button
@@ -388,15 +391,23 @@
 
     <div class="grow" />
 
-    <button
+    <!-- <button
       disabled={btnOpenDisabled}
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
       on:click={btnOpenClicked}>Open</button
-    >
-    <button
+    > -->
+    <!-- <button
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
       use:focus
       on:click={close}>Close</button
+    > -->
+    <a
+      target="_blank"
+      rel="noreferrer"
+      class="text-blue-700 underline mr-2"
+      href="https://docs.onlinetool.io/notepad2-browse-files"
+    >
+      help</a
     >
   </div>
 </WinDialogBaseNoOverlay>

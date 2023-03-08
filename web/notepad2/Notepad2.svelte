@@ -1728,7 +1728,9 @@
         noMenuCommands={m.noMenuCommands}
         on:menucmd={handleMenuCmd}
       />
-      <div class="truncate italic font-semibold text-gray-800">
+      <div
+        class="truncate border-l border-gray-500 font-semibold text-gray-900 pl-2"
+      >
         {shownFileName}
       </div>
       <div class="grow" />
@@ -1757,7 +1759,7 @@
         on:menucmd={handleMenuCmd}
       />
       <div class="absolute flex top-[2px] right-[4px] text-sm">
-        <div class="py-0.5 truncate italic font-semibold text-gray-900">
+        <div class="py-0.5 truncate font-semibold text-gray-900 border-l">
           {shownFileName}
         </div>
         <button
@@ -1875,5 +1877,6 @@
   :global(.cm-editor) {
     overflow: hidden;
     height: 100%;
+    font-size: 10pt;
   }
 </style>
