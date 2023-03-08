@@ -1735,6 +1735,14 @@
       </div>
       <div class="grow" />
       <a
+        class="px-1 py-1 mr-1 hover:underline text-xs"
+        href="https://github.com/kjk/onlinetool-docs/discussions"
+        target="_blank"
+        rel="noreferrer"
+      >
+        feedback
+      </a>
+      <a
         class="px-1 py-1 mr-1 hover:bg-gray-100"
         href="https://github.com/kjk/notepad2web"
         target="_blank"
