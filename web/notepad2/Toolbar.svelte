@@ -121,28 +121,30 @@
         break;
       case 24:
         uriBmp = "Toolbar24.bmp";
+        // uriBmp = "Toolbar24.png";
         break;
       default:
         throwIf(true, `unsupported iconDy of ${iconDy}`);
     }
 
+    // console.log("uriBmp:", uriBmp);
     let img = new Image();
     img.onload = () => {
       let canvasTmp = document.createElement("canvas");
       // canvasTmp.setAttribute("willReadFrequently", "true");
       canvasTmp.width = iconDx;
       canvasTmp.height = iconDy;
-      let dw = iconDx;
-      let dh = iconDy;
-      let sw = iconDx;
-      let sh = iconDy;
-      let dx = 0;
-      let dy = 0;
-      let sy = 0;
+      const dw = iconDx;
+      const dh = iconDy;
+      const sw = iconDx;
+      const sh = iconDy;
+      const sy = 0;
+      const nPixels = iconDx * iconDy;
       for (let i = 0; i < nIcons; i++) {
         let ctx = canvasTmp.getContext("2d", { willReadFrequently: true });
         let sx = i * iconDx;
-        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+        ctx.clearRect(0, 0, dw, dh);
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
         let imgd = ctx.getImageData(0, 0, iconDy, iconDy);
         let pix = imgd.data;
         function makePixTransparent(n) {
@@ -152,7 +154,6 @@
             pix[i + 3] = 0;
           }
         }
-        let nPixels = iconDx * iconDy;
         for (let i = 0; i < nPixels; i++) {
           makePixTransparent(i);
         }
