@@ -10,6 +10,7 @@
    * @property {string} [removeTitle]
    * @property {FsFile} [file]
    * @property {FsEntry} [entry]
+   * @property {FavEntry} [fav]
    * @property {FileSystemDirectoryHandle} [dirHandle]
    */
 </script>
@@ -39,7 +40,7 @@
     recent,
     browseFolders,
   } from "./np2store";
-  import { len, throwIf } from "../util";
+  import { arrayRemove, len, throwIf } from "../util";
 
   export let open = false;
   /** @type {Function} */
@@ -211,11 +212,21 @@
         name: fav.favName,
         parent: null,
         file: fsf,
+        fav: fav,
         open: openFile,
       };
       a.push(e);
     }
     return a;
+  }
+
+  /**
+   * @param {Entry} e
+   */
+  function removeRecent(e) {
+    console.log("removeRecent:", e);
+    $recent = arrayRemove($recent, e.fav);
+    openRecent(null);
   }
 
   /**
@@ -231,6 +242,19 @@
       open: setTopLevel,
     };
     entries = addFavs([e], $recent);
+    for (let e of entries) {
+      e.remove = removeRecent;
+      e.removeTitle = "Remove";
+    }
+  }
+
+  /**
+   * @param {Entry} e
+   */
+  function removeFavorite(e) {
+    console.log("removeFavorite:", e);
+    $favorites = arrayRemove($favorites, e.fav);
+    openFavorites(null);
   }
 
   /**
@@ -246,6 +270,10 @@
       open: setTopLevel,
     };
     entries = addFavs([e], $favorites);
+    for (let e of entries) {
+      e.remove = removeFavorite;
+      e.removeTitle = "Remove";
+    }
   }
 
   function showingTopLevel() {

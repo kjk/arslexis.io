@@ -93,6 +93,8 @@ export async function getAndClearFileForNewWindow() {
  */
 export let browseFolders = makeIndexedDBStore(db, "browse-folders", [], true);
 
+/** @type {import("svelte/store").Writable<FavEntry[]>} */
 export let recent = makeIndexedDBStore(db, "recent", [], true);
 
+/** @type {import("svelte/store").Writable<FavEntry[]>} */
 export let favorites = makeIndexedDBStore(db, "favorites", [], true);
