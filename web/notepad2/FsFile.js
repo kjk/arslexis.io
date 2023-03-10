@@ -176,8 +176,14 @@ async function readFileComputer(f) {
   if (!ok) {
     return null;
   }
-  const d = await fh.getFile();
-  return d;
+  // can throw an exception if file has been removed
+  try {
+    const d = await fh.getFile();
+    return d;
+  } catch (e) {
+    console.log("readFileComputer: e:", e);
+  }
+  return null;
 }
 
 /**

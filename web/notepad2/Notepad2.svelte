@@ -162,6 +162,7 @@
     getAndClearFileForNewWindow,
     rememberFileForNewWindow,
   } from "./np2store";
+  import Messages, { showError } from "../Messages.svelte";
 
   let toolbarFuncs;
 
@@ -675,7 +676,9 @@
     let blob = await readFile(fileIn);
     if (blob === null) {
       // could be serialized FileSystemFileHandle with denied permissions
-      console.log("Denied permissions for:", fileIn);
+      // or failed to read file because it was deleted
+      console.log("Couldn't open file:", fileIn);
+      showError(`Couldn't open file '${fileIn.name}'`, 3000);
       return;
     }
     file = fileIn;
@@ -1806,72 +1809,70 @@
   {:else}
     <div />
   {/if}
-
-  <!-- needs to re-mount -->
-  {#if showingOpenFile}
-    <DialogFileOpen bind:open={showingOpenFile} onDone={onOpenFileDone} />
-  {/if}
-
-  <!-- needs to re-mount -->
-  {#if showingSaveAs}
-    <DialogSaveAs
-      bind:open={showingSaveAs}
-      name={saveAsName}
-      onDone={onSaveAsDone}
-    />
-  {/if}
-
-  {#if showingFileBrowse}
-    <DialogBrowse bind:open={showingFileBrowse} onDone={onFileBrowseDone} />
-  {/if}
-
-  <DialogAskSaveChanges
-    bind:open={showingAskSaveChanges}
-    name={askSaveChangesName}
-    onDone={onAskSaveChangesDone}
-  />
-
-  <DialogFind bind:open={showingFind} />
-
-  <DialogGoTo
-    bind:open={showingGoTo}
-    onDone={onGoToDone}
-    maxLine={goToMaxLine}
-  />
-
-  <DialogAddFavorite
-    bind:open={showingAddToFavorites}
-    {name}
-    onDone={onAddToFavoritesDone}
-  />
-
-  <!-- need to mount / unmount -->
-  {#if showingFavorites}
-    <DialogFavorites
-      bind:open={showingFavorites}
-      bind:rememberRecentFiles={settings.rememberRecentFiles}
-      type={favoritesType}
-      onDone={onFavoritesDone}
-    />
-  {/if}
-
-  <DialogAbout bind:open={showingAbout} />
-
-  <DialogEncloseSelection
-    bind:open={showingEncloseSelection}
-    onDone={onEncloseSelectionDone}
-  />
-
-  <DialogInsertXmlTag
-    bind:open={showingInsertXmlTag}
-    onDone={onInserXmlTagDone}
-  />
-
-  <DialogNotImplemented
-    bind:open={showingMsgNotImplemented}
-    msg={msgNotImplemented}
-  />
 </main>
+
+<!-- needs to re-mount -->
+{#if showingOpenFile}
+  <DialogFileOpen bind:open={showingOpenFile} onDone={onOpenFileDone} />
+{/if}
+
+<!-- needs to re-mount -->
+{#if showingSaveAs}
+  <DialogSaveAs
+    bind:open={showingSaveAs}
+    name={saveAsName}
+    onDone={onSaveAsDone}
+  />
+{/if}
+
+{#if showingFileBrowse}
+  <DialogBrowse bind:open={showingFileBrowse} onDone={onFileBrowseDone} />
+{/if}
+
+<DialogAskSaveChanges
+  bind:open={showingAskSaveChanges}
+  name={askSaveChangesName}
+  onDone={onAskSaveChangesDone}
+/>
+
+<DialogFind bind:open={showingFind} />
+
+<DialogGoTo bind:open={showingGoTo} onDone={onGoToDone} maxLine={goToMaxLine} />
+
+<DialogAddFavorite
+  bind:open={showingAddToFavorites}
+  {name}
+  onDone={onAddToFavoritesDone}
+/>
+
+<!-- need to mount / unmount -->
+{#if showingFavorites}
+  <DialogFavorites
+    bind:open={showingFavorites}
+    bind:rememberRecentFiles={settings.rememberRecentFiles}
+    type={favoritesType}
+    onDone={onFavoritesDone}
+  />
+{/if}
+
+<DialogAbout bind:open={showingAbout} />
+
+<DialogEncloseSelection
+  bind:open={showingEncloseSelection}
+  onDone={onEncloseSelectionDone}
+/>
+
+<DialogInsertXmlTag
+  bind:open={showingInsertXmlTag}
+  onDone={onInserXmlTagDone}
+/>
+
+<DialogNotImplemented
+  bind:open={showingMsgNotImplemented}
+  msg={msgNotImplemented}
+/>
+
+<Messages />
 <Progress />
 
 <style>
