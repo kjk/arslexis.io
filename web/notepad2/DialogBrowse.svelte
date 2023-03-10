@@ -19,7 +19,13 @@
   import WinDialogBaseNoOverlay from "../WinDialogBaseNoOverlay.svelte";
   import { progress } from "../Progress.svelte";
   import { focus } from "../actions/focus";
-  import { FsFile, fsTypeIndexedDB, fsTypeFolder, getFileList } from "./FsFile";
+  import {
+    FsFile,
+    fsTypeIndexedDB,
+    fsTypeFolder,
+    getFileList,
+    deleteFile,
+  } from "./FsFile";
   import {
     openDirPicker,
     readDir,
@@ -44,8 +50,7 @@
   let removeTitle = "Remove";
   let btnRemoveDisabled = true;
 
-  let btnOpenDisabled = false;
-  let btnOpenFolderDisabled = false;
+  let btnAddFolderDisabled = false;
   let path = "";
 
   /** @type {Entry[]} */
@@ -57,6 +62,7 @@
    * @param {Entry} e
    */
   function updateRemove(e) {
+    console.log("updateRemove:", e);
     btnRemoveDisabled = !e || !e.remove;
     if (e && e.removeTitle) {
       removeTitle = e.removeTitle;
@@ -111,8 +117,6 @@
     onDone(null);
   }
 
-  $: btnOpenDisabled = selected == null || !selected.file;
-
   /**
    * @param {Entry} e
    */
@@ -141,6 +145,8 @@
     if (!ok) {
       return;
     }
+
+    btnAddFolderDisabled = true;
 
     path = dh.name;
     let p = e.parent;
@@ -216,6 +222,7 @@
    * @param {Entry} ignore
    */
   async function openRecent(ignore) {
+    btnAddFolderDisabled = true;
     path = "recent";
     /** @type {Entry} */
     let e = {
@@ -230,6 +237,7 @@
    * @param {Entry} ignore
    */
   async function openFavorites(ignore) {
+    btnAddFolderDisabled = true;
     path = "favorites";
     /** @type {Entry} */
     let e = {
@@ -244,6 +252,8 @@
     // TODO: a hack
     return len(entries) > 0 && entries[0].name === "browser";
   }
+
+  // show new list of folders if changed in another tab
   browseFolders.subscribe((ignore) => {
     if (showingTopLevel()) {
       setTopLevel(null);
@@ -254,6 +264,7 @@
    * @param {Entry} ignore
    */
   async function setTopLevel(ignore) {
+    btnAddFolderDisabled = false;
     path = "";
     /** @type {Entry} */
     let e = {
@@ -285,7 +296,7 @@
         parent: null,
         dirHandle: dh,
         open: openDirHandle,
-        remove: removeHandle,
+        remove: removeFolder,
         removeTitle: "Remove",
       };
       a.push(e);
@@ -293,7 +304,7 @@
     entries = a;
   }
 
-  async function removeHandle(e) {
+  async function removeFolder(e) {
     let idx = $browseFolders.indexOf(e.dirHandle);
     throwIf(idx < 0);
     $browseFolders.splice(idx, 1);
@@ -311,12 +322,23 @@
   /**
    * @param {Entry} e
    */
-  async function openBrowser(e) {
+  async function removeBrowserFile(e) {
+    console.log("removeBrowseFile", e);
+    // throwIf(e.parent !== null);
+    await deleteFile(e.file);
+    await openBrowser(null);
+  }
+
+  /**
+   * @param {Entry} parent
+   */
+  async function openBrowser(parent) {
+    btnAddFolderDisabled = true;
     path = "browser";
     /** @type {Entry} */
     let e1 = {
       name: "..",
-      parent: e,
+      parent: parent,
       open: setTopLevel,
     };
     let a = [e1];
@@ -325,9 +347,11 @@
       /** @type {Entry} */
       const e2 = {
         name: f.name,
-        parent: e,
+        parent: parent,
         file: f,
         open: openFile,
+        remove: removeBrowserFile,
+        removeTitle: "Delete",
       };
       a.push(e2);
     }
@@ -378,7 +402,7 @@
   >
     {#if supportsFileSystem()}
       <button
-        disabled={btnOpenFolderDisabled}
+        disabled={btnAddFolderDisabled}
         class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
         on:click={btnOpenFolderClicked}>Add Folder</button
       >

@@ -112,6 +112,52 @@ export function deserialize(s) {
 
 /**
  * @param {FsFile} f
+ * @returns {Promise<boolean>}
+ */
+async function deleteFileIndexedDB(f) {
+  const key = mkIDBKey(f);
+  try {
+    await db.del(key);
+  } catch (e) {
+    console.log("deleteIndexedDB:", e);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @param {FsFile} f
+ * @returns {Promise<boolean>}
+ */
+async function deleteFileComputer(f) {
+  const fh = f.fileHandle;
+  const ok = await verifyHandlePermission(fh, true);
+  if (!ok) {
+    return null;
+  }
+  // needs parent directory to implement?
+  throwIf(true, "NYI");
+  return true;
+}
+
+/**
+ * @param {FsFile} f
+ * @returns {Promise<boolean>}
+ */
+export async function deleteFile(f) {
+  switch (f.type) {
+    case fsTypeIndexedDB:
+      return await deleteFileIndexedDB(f);
+    case fsTypeFolder:
+      return await deleteFileComputer(f);
+    default:
+      throwIf(true, `f.type '${f.type}' not recognized`);
+  }
+  return null;
+}
+
+/**
+ * @param {FsFile} f
  * @returns {Promise<Blob>}
  */
 async function readFileIndexedDB(f) {
