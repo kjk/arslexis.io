@@ -1,6 +1,6 @@
 // https://www.npmjs.com/package/idb
 
-import { KV } from "../dbutil";
+import { KV, makeIndexedDBStore } from "../dbutil";
 import { len, throwIf } from "../util";
 import { FsFile, fsTypeFolder, fsTypeIndexedDB, setIDB } from "./FsFile";
 
@@ -88,73 +88,11 @@ export async function getAndClearFileForNewWindow() {
 }
 
 /**
- * Create a generic Svelte store persisted in IndexedDB
- * @param {string} dbKey unique IndexedDB key for storing this value
- * @param {any} initialValue
- * @param {boolean} crossTab if true, changes are visible in other browser tabs (windows)
- * @returns {any}
- */
-function makeIndexedDBStore(dbKey, initialValue, crossTab) {
-  function makeStoreMaker(dbKey, initialValue, crossTab) {
-    const lsKey = "store-notify:" + dbKey;
-    let curr = initialValue;
-    const subscribers = new Set();
-
-    function getCurrentValue() {
-      db.get(dbKey).then((v) => {
-        curr = v || [];
-        subscribers.forEach((cb) => cb(curr));
-      });
-    }
-
-    getCurrentValue();
-
-    /**
-     * @param {StorageEvent} event
-     */
-    function storageChanged(event) {
-      if (event.storageArea === localStorage && event.key === lsKey) {
-        getCurrentValue();
-      }
-    }
-    if (crossTab) {
-      window.addEventListener("storage", storageChanged, false);
-    }
-
-    function set(v) {
-      curr = v;
-      subscribers.forEach((cb) => cb(curr));
-      db.set(dbKey, v).then((v) => {
-        if (crossTab) {
-          const n = +localStorage.getItem(lsKey) || 0;
-          localStorage.setItem(lsKey, `${n + 1}`);
-        }
-      });
-    }
-
-    /**
-     * @param {Function} subscriber
-     */
-    function subscribe(subscriber) {
-      subscriber(curr);
-      subscribers.add(subscriber);
-      function unsubscribe() {
-        subscribers.delete(subscriber);
-      }
-      return unsubscribe;
-    }
-
-    return { set, subscribe };
-  }
-  return makeStoreMaker(dbKey, initialValue, crossTab);
-}
-
-/**
  * an array of FileSystemDirectoryHandle for remembering
  * opened folders in DialogBrowse
  */
-export let browseFolders = makeIndexedDBStore("browse-folders", [], true);
+export let browseFolders = makeIndexedDBStore(db, "browse-folders", [], true);
 
-export let recent = makeIndexedDBStore("recent", [], true);
+export let recent = makeIndexedDBStore(db, "recent", [], true);
 
-export let favorites = makeIndexedDBStore("favorites", [], true);
+export let favorites = makeIndexedDBStore(db, "favorites", [], true);
