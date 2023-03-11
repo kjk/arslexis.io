@@ -1,34 +1,72 @@
 // https://codemirror.net/5/mode/index.html
 // https://github.com/codemirror/legacy-modes/blob/main/mode/README.md
 // https://gist.github.com/rooks/6a13affb544ef8bc338b49af7d018318 csv mode
-// import { javascript } from "@codemirror/lang-javascript";
-// import { css } from "@codemirror/lang-css";
-// import { html } from "@codemirror/lang-html";
-// import { java } from "@codemirror/lang-java";
-// import { vue } from "@codemirror/lang-vue";
-// import { angular } from "@codemirror/lang-angular";
-// import { wast } from "@codemirror/lang-wast";
-// import { markdown } from "@codemirror/lang-markdown";
-
-import { rust } from "@codemirror/lang-rust";
-import { sql } from "@codemirror/lang-sql";
-import { python } from "@codemirror/lang-python";
-import { php } from "@codemirror/lang-php";
-import { cpp } from "@codemirror/lang-cpp";
-import { svelte } from "@replit/codemirror-lang-svelte";
-
-import { StreamLanguage } from "@codemirror/language";
 
 // TODO: more https://github.com/codemirror/legacy-modes
 
+/** @typedef { import("@codemirror/language").LanguageSupport} LanguageSupport */
+
+import { StreamLanguage } from "@codemirror/language";
+import * as m from "./notepad2/menu-notepad2";
 import { getFileExt } from "./fileutil";
 import { len, throwIf } from "./util";
 
-/** @typedef { import("@codemirror/language").LanguageSupport} LanguageSupport */
-
-import * as m from "./notepad2/menu-notepad2";
-
 // see Style_UpdateLexerLang in Styles.c
+
+let langSql;
+// TODO: different dialects: MySQL, PostgreSQL etc.
+async function getLangSql() {
+  if (!langSql) {
+    const m = await import("@codemirror/lang-sql");
+    langSql = m.sql();
+  }
+  return langSql;
+}
+
+let langCpp;
+async function getLangCpp() {
+  if (!langCpp) {
+    const m = await import("@codemirror/lang-cpp");
+    langCpp = m.cpp();
+  }
+  return langCpp;
+}
+
+let langPhp;
+async function getLangPhp() {
+  if (!langPhp) {
+    const m = await import("@codemirror/lang-php");
+    langPhp = m.php();
+  }
+  return langPhp;
+}
+
+let langPython;
+async function getLangPython() {
+  if (!langPython) {
+    const m = await import("@codemirror/lang-python");
+    langPython = m.python();
+  }
+  return langPython;
+}
+
+let langRust;
+async function getLangRust() {
+  if (!langRust) {
+    const m = await import("@codemirror/lang-rust");
+    langRust = m.rust();
+  }
+  return langRust;
+}
+
+let langSvelte;
+async function getLangSvelte() {
+  if (!langSvelte) {
+    const m = await import("@replit/codemirror-lang-svelte");
+    langSvelte = m.svelte();
+  }
+  return langSvelte;
+}
 
 let langJson;
 async function getLangJson() {
@@ -229,21 +267,22 @@ async function getLexerDynamic(id) {
       return await getLangJson();
     case m.IDM_LEXER_XML:
       return await getLangXml();
-    // return await getLangCSharp();
-    // return await getLangCSharp();
-    // return await getLangCSharp();
-    // return await getLangCSharp();
+    case m.IDM_LEXER_RUST:
+      return await getLangRust();
+    case m.IDM_LEXER_SQL:
+      return await getLangSql();
+    case m.IDM_LEXER_PYTHON:
+      return await getLangPython();
+    case m.IDM_LEXER_CPP:
+      return await getLangPython();
+    case m.IDM_LEXER_SVELTE:
+      return await getLangSvelte();
+    case m.IDM_LEXER_PHP:
+      return await getLangPhp();
   }
 
   return null;
 }
-
-// [rust(), m.IDM_LEXER_RUST, ".rs"],
-// [sql(), m.IDM_LEXER_SQL, ".sql"],
-// [python(), m.IDM_LEXER_PYTHON, ".py"],
-// [cpp(), m.IDM_LEXER_CPP, ".c", ".cpp", ".c++", ".cxx", ".h", ".hpp", ".hxx"],
-// [svelte(), m.IDM_LEXER_SVELTE, ".svelte"],
-// [php(), m.IDM_LEXER_PHP, ".php"],
 
 const langs = [
   [null, m.IDM_LEXER_JS, ".js", ".ts", ".jsx", ".tsx"],
@@ -314,12 +353,12 @@ const langs = [
     ".fbp",
     ".wxml",
   ],
-  [rust(), m.IDM_LEXER_RUST, ".rs"],
-  [sql(), m.IDM_LEXER_SQL, ".sql"],
-  [python(), m.IDM_LEXER_PYTHON, ".py"],
-  [cpp(), m.IDM_LEXER_CPP, ".c", ".cpp", ".c++", ".cxx", ".h", ".hpp", ".hxx"],
-  [svelte(), m.IDM_LEXER_SVELTE, ".svelte"],
-  [php(), m.IDM_LEXER_PHP, ".php"],
+  [null, m.IDM_LEXER_RUST, ".rs"],
+  [null, m.IDM_LEXER_SQL, ".sql"],
+  [null, m.IDM_LEXER_PYTHON, ".py"],
+  [null, m.IDM_LEXER_CPP, ".c", ".cpp", ".c++", ".cxx", ".h", ".hpp", ".hxx"],
+  [null, m.IDM_LEXER_SVELTE, ".svelte"],
+  [null, m.IDM_LEXER_PHP, ".php"],
   [null, m.IDM_LEXER_LUA, ".lua"],
   [null, m.IDM_LEXER_GO, ".go"],
   [null, m.IDM_LEXER_DIFF, ".diff"],
