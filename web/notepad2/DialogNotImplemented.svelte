@@ -1,11 +1,12 @@
 <script>
   import WinDialogBase from "../WinDialogBase.svelte";
   import { focus } from "../actions/focus";
+  import { noOp } from "../util";
   export let open = false;
   export let msg = "";
 </script>
 
-<WinDialogBase bind:open title="Notepad2 web">
+<WinDialogBase onClose={noOp} bind:open title="Notepad2 web">
   <div class="bg-white px-8 py-8 flex justify-center min-h-[4rem]" slot="main">
     <div>{msg}</div>
   </div>

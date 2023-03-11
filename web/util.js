@@ -688,3 +688,7 @@ export async function arrayRemoveFnAsync(a, el, cmpFn) {
   }
   return res;
 }
+
+export function noOp() {
+  // function that does nothing
+}

@@ -62,7 +62,7 @@
   });
 </script>
 
-<WinDialogBase bind:open title="Open File">
+<WinDialogBase onClose={close} bind:open title="Open File">
   <div
     slot="main"
     class="bg-white pt-2 pb-4 flex flex-col min-h-[4rem]"

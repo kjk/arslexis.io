@@ -10,8 +10,7 @@
 
   export let title = "";
   export let open = false;
-  // TODO: make it mandatory, children have to propagate
-  export let onClose = null;
+  export let onClose;
   // TODO: always true?
   export let closeOnEsc = true;
   export let noButtons = false;

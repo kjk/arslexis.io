@@ -10,8 +10,7 @@
 
   export let title = "";
   export let open = false;
-  // TODO: make it mandatory, children have to propagate
-  export let onDone = null;
+  export let onClose = null;
   export let noButtons = false;
   export let closeOnEsc = true;
 
@@ -20,8 +19,8 @@
 
   function close() {
     open = false;
-    if (onDone) {
-      onDone();
+    if (onClose) {
+      onClose();
     }
   }
 

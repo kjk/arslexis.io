@@ -71,7 +71,7 @@
   });
 </script>
 
-<WinDialogBase bind:open title="Save As">
+<WinDialogBase onClose={close} bind:open title="Save As">
   <div slot="main" class="bg-white pt-2 flex flex-col min-h-[4rem]">
     {#if len(fileList) > 0}
       <div class="mx-4">Existing files:</div>
