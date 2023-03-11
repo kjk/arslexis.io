@@ -165,6 +165,7 @@
     favEq,
   } from "./np2store";
   import Messages, { showError } from "../Messages.svelte";
+  import DialogSelectScheme from "./DialogSelectScheme.svelte";
 
   let toolbarFuncs;
 
@@ -268,13 +269,18 @@
   $: updateWordWrap(settings.wordWrap);
   $: updateLineNumbersState(settings.showLineNumbers);
   // we use Scintila terminology, it's language in CodeMirror
-  let lexer = null;
-  $: updateLexer(lexer);
-  function updateLexer(lexer) {
-    if (!lexer) {
+  let lexerId = null;
+  $: updateLexer(lexerId);
+  function updateLexer(lexerId) {
+    if (!lexerId) {
       return;
     }
-    getCMLangFromLexer(lexer).then((lang) => {
+    if (lexerId === m.IDM_LEXER_TEXTFILE) {
+      statusLang = "text";
+      updateLang(null);
+      return;
+    }
+    getCMLangFromLexer(lexerId).then((lang) => {
       if (!lang) {
         return;
       }
@@ -323,37 +329,49 @@
   let msgNotImplemented = "";
   let showingMsgNotImplemented = false;
 
+  /** @type {Function} */
   let onOpenFileDone;
   let showingOpenFile = false;
 
   let askSaveChangesName;
+  /** @type {Function} */
   let onAskSaveChangesDone;
   let showingAskSaveChanges = false;
 
   let showingFileBrowse = false;
 
   let saveAsName = "";
+  /** @type {Function} */
   let onSaveAsDone;
   let showingSaveAs = false;
 
+  /** @type {Function} */
   let onEncloseSelectionDone;
   let showingEncloseSelection = false;
 
+  /** @type {Function} */
   let onInserXmlTagDone;
   let showingInsertXmlTag = false;
 
+  /** @type {Function} */
   let onAddToFavoritesDone;
   let showingAddToFavorites = false;
 
+  /** @type {Function} */
   let onFavoritesDone;
   let favoritesType = "";
   let showingFavorites = false;
 
+  /** @type {Function} */
   let onGoToDone;
   let goToMaxLine;
   let showingGoTo = false;
 
   let showingFind = false;
+
+  /** @type {Function} */
+  let onSelectSchemeDone;
+  let showingSelectScheme = false;
 
   let showingAbout = false;
 
@@ -369,6 +387,7 @@
     showingAddToFavorites ||
     showingFavorites ||
     showingFileBrowse ||
+    showingSelectScheme ||
     showingAbout;
 
   // if we're transitioning from showing some dialog to not showing it,
@@ -965,6 +984,25 @@
     toggleFold(editorView);
   }
 
+  async function cmdViewScheme() {
+    const dialog = new Promise((resolve, reject) => {
+      onSelectSchemeDone = (cmdId) => {
+        resolve(cmdId);
+      };
+      showingSelectScheme = true;
+    });
+    const cmdId = await dialog;
+    console.log("cmdViewScheme:", cmdId);
+    if (cmdId) {
+      const arg = {
+        detail: {
+          cmd: cmdId,
+        },
+      };
+      handleMenuCmd(arg);
+    }
+  }
+
   async function cmdInsertXmlTag() {
     let res = new Promise((resolve, reject) => {
       onInserXmlTagDone = (before, after) => {
@@ -1192,6 +1230,10 @@
         break;
       case m.IDM_VIEW_FOLD_CURRENT_BLOCK:
         cmdViewFoldCurrentBlock();
+        break;
+      case m.IDT_VIEW_SCHEME:
+      case m.IDM_VIEW_SCHEME:
+        cmdViewScheme();
         break;
 
       // TODO: notepad2 changes line endings
@@ -1513,9 +1555,13 @@
         );
         break;
       default:
+        if (cmdId === m.IDM_LEXER_TEXTFILE) {
+          lexerId = cmdId;
+          break;
+        }
         let lex = await getCMLangFromLexer(cmdId);
         if (lex) {
-          lexer = cmdId;
+          lexerId = cmdId;
           break;
         }
         // TODO: not handled
@@ -1901,6 +1947,11 @@
 <DialogNotImplemented
   bind:open={showingMsgNotImplemented}
   msg={msgNotImplemented}
+/>
+
+<DialogSelectScheme
+  bind:open={showingSelectScheme}
+  onDone={onSelectSchemeDone}
 />
 
 <Messages />

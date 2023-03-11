@@ -274,7 +274,7 @@ async function getLexerDynamic(id) {
     case m.IDM_LEXER_PYTHON:
       return await getLangPython();
     case m.IDM_LEXER_CPP:
-      return await getLangPython();
+      return await getLangCpp();
     case m.IDM_LEXER_SVELTE:
       return await getLangSvelte();
     case m.IDM_LEXER_PHP:

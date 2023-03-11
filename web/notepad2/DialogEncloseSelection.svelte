@@ -40,7 +40,7 @@
   }
 </script>
 
-<WinDialogBase onDone={close} bind:open title="Enclose Selection">
+<WinDialogBase onClose={close} bind:open title="Enclose Selection">
   <div
     slot="main"
     class="bg-white pt-2 pb-2 pl-4 pr-4 flex flex-col min-h-[4rem]"

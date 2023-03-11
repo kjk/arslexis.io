@@ -42,7 +42,7 @@
   }
 </script>
 
-<WinDialogBase onDone={close} bind:open title="Add to Favorites">
+<WinDialogBase onClose={close} bind:open title="Add to Favorites">
   <div
     slot="main"
     class="bg-white pt-2 pb-2 pl-4 pr-4 flex flex-col min-h-[4rem]"

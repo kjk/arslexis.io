@@ -142,9 +142,9 @@ const menuFile = [
   ["File &Mode", menuFileMode],
   // ["Re&vert\tF5", IDM_FILE_REVERT],
   // ["Reloa&d", menuReload],
-  MENU_SEPARATOR,
+  // MENU_SEPARATOR,
   // ["&Encoding", menuEncoding],
-  ["Line Endin&gs", menuLineEndings],
+  // ["Line Endin&gs", menuLineEndings],
   // menuSep,
   // ["Page Se&tup...", IDM_FILE_PAGESETUP],
   // ["&Print...\tCtrl+P", IDM_FILE_PRINT],
@@ -855,8 +855,8 @@ const menuXmlOthers = [
 
 const menuScheme = [
   ["&Syntax Scheme...\tF12", IDM_VIEW_SCHEME],
-  ["&Customize Schemes...\tCtrl+F12", IDM_VIEW_SCHEME_CONFIG],
-  ["&Favorite Schemes...", IDM_VIEW_SCHEME_FAVORITE],
+  // ["&Customize Schemes...\tCtrl+F12", IDM_VIEW_SCHEME_CONFIG],
+  // ["&Favorite Schemes...", IDM_VIEW_SCHEME_FAVORITE],
   [MENU_SEPARATOR],
   ["Use &2nd Global Styles\tShift+F12", IDM_VIEW_USE2NDGLOBALSTYLE],
   ["&Use Default Code Style", IDM_VIEW_USEDEFAULT_CODESTYLE],

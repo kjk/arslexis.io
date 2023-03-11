@@ -29,20 +29,17 @@
   let btnOpenDisabled = false;
   let btnDeleteDisabled = false;
 
-  function favClicked(fav) {
-    console.log("favClicked:", fav);
+  function clicked(fav) {
     selected = fav;
   }
 
-  function favDblClicked(fav) {
-    console.log("favDblClicked:", fav);
+  function dblClicked(fav) {
     open = false;
     onDone(fav);
   }
 
-  function btnOpenClicked() {
+  function openClicked() {
     let fav = selected;
-    console.log("btnOpenClicked:", fav);
     if (!fav) {
       return;
     }
@@ -106,14 +103,14 @@
   }
 </script>
 
-<WinDialogBase bind:open {title}>
+<WinDialogBase onClose={close} bind:open {title}>
   <div
     slot="main"
     class="bg-white pt-2 pb-4 flex flex-col min-h-[4rem]"
     on:keydown={handleKeyDown}
   >
     <div
-      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 cursor-pointer min-h-[12rem] max-h-[8rem]"
+      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 cursor-pointer min-h-[12rem] max-h-[8rem] select-none	"
       tabindex="0"
       role="listbox"
     >
@@ -125,16 +122,16 @@
           {#if f === selected}
             <div
               class="bg-gray-100 hover:bg-gray-200"
-              on:dblclick={() => favDblClicked(f)}
-              on:click={() => favClicked(f)}
+              on:dblclick={() => dblClicked(f)}
+              on:click={() => clicked(f)}
             >
               {f.name}
             </div>
           {:else}
             <div
               class="hover:bg-gray-200"
-              on:dblclick={() => favDblClicked(f)}
-              on:click={() => favClicked(f)}
+              on:dblclick={() => dblClicked(f)}
+              on:click={() => clicked(f)}
             >
               {f.name}
             </div>
@@ -166,7 +163,7 @@
     <button
       disabled={btnOpenDisabled}
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
-      on:click={btnOpenClicked}>Open</button
+      on:click={openClicked}>Open</button
     >
     <button
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
