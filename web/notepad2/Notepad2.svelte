@@ -146,6 +146,7 @@
     updateLineNumbersState,
     updateLineSeparator,
     updateReadOnly,
+    updateScrollPastEnd,
     updateShowTrailingWhitespace,
     updateShowWhitespace,
     updateTabSize,
@@ -268,6 +269,8 @@
   $: updateLineHighlightType(settings.lineHighlightType);
   $: updateWordWrap(settings.wordWrap);
   $: updateLineNumbersState(settings.showLineNumbers);
+  $: updateScrollPastEnd(settings.scrollPastEnd);
+
   // we use Scintila terminology, it's language in CodeMirror
   let lexerId = null;
   $: updateLexer(lexerId);
@@ -1199,6 +1202,10 @@
       case m.IDM_VIEW_SHOWWHITESPACE:
         settings.showWhitespace = !settings.showWhitespace;
         break;
+      case m.IDM_VIEW_SCROLLPASTLASTLINE_NO:
+      case m.IDM_VIEW_SCROLLPASTLASTLINE_ONE:
+        settings.scrollPastEnd = cmdId;
+        break;
 
       case m.IDM_VIEW_LINENUMBERS:
         settings.showLineNumbers = !settings.showLineNumbers;
@@ -1724,6 +1731,9 @@
       case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK:
       case m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME:
         return settings.lineHighlightType === cmdId;
+      case m.IDM_VIEW_SCROLLPASTLASTLINE_NO:
+      case m.IDM_VIEW_SCROLLPASTLASTLINE_ONE:
+        return settings.scrollPastEnd === cmdId;
       case m.IDM_VIEW_SHOW_FOLDING:
         return settings.showCodeFolding;
       case m.IDM_VIEW_SHOWINDENTGUIDES:

@@ -973,9 +973,9 @@ const menuSelectAndEditOptions = [
 const menuScrollPastLastLine = [
   ["&No", IDM_VIEW_SCROLLPASTLASTLINE_NO],
   ["&One Page", IDM_VIEW_SCROLLPASTLASTLINE_ONE],
-  ["&Half Page", IDM_VIEW_SCROLLPASTLASTLINE_HALF],
-  ["1/&3 Page", IDM_VIEW_SCROLLPASTLASTLINE_THIRD],
-  ["1/&4 Page", IDM_VIEW_SCROLLPASTLASTLINE_QUARTER],
+  // ["&Half Page", IDM_VIEW_SCROLLPASTLASTLINE_HALF],
+  // ["1/&3 Page", IDM_VIEW_SCROLLPASTLASTLINE_THIRD],
+  // ["1/&4 Page", IDM_VIEW_SCROLLPASTLASTLINE_QUARTER],
 ];
 
 // const menuFullScreenMode = [
@@ -1152,9 +1152,9 @@ const menuActionOnSelection = [
   ["Search with &Google", CMD_ONLINE_SEARCH_GOOGLE],
   ["Search with &Bing", CMD_ONLINE_SEARCH_BING],
   ["Search on &Wikipedia", CMD_ONLINE_SEARCH_WIKI],
-  [MENU_SEPARATOR],
-  ["Custom Action &1\tCtrl+Shift+1", CMD_CUSTOM_ACTION1],
-  ["Custom Action &2\tCtrl+Shift+2", CMD_CUSTOM_ACTION2],
+  // [MENU_SEPARATOR],
+  // ["Custom Action &1\tCtrl+Shift+1", CMD_CUSTOM_ACTION1],
+  // ["Custom Action &2\tCtrl+Shift+2", CMD_CUSTOM_ACTION2],
 ];
 
 const menuBase64 = [

@@ -1,4 +1,4 @@
-import { IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK } from "./menu-notepad2";
+import * as m from "./menu-notepad2";
 
 // global Notepad2 settings
 export class Settings {
@@ -10,6 +10,7 @@ export class Settings {
   showWhitespace = false;
   wordWrap = true;
   readOnly = false;
+  scrollPastEnd = m.IDM_VIEW_SCROLLPASTLASTLINE_NO;
   enableMultipleSelection = true;
   tabsAsSpaces = true;
   tabSpaces = 4;
@@ -20,7 +21,7 @@ export class Settings {
   // show / hide cold folding gutter
   showCodeFolding = true;
   showIndentGuides = true;
-  lineHighlightType = IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK;
+  lineHighlightType = m.IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK;
   rememberRecentFiles = true;
 }
 

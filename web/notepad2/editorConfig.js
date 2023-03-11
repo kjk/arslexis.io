@@ -58,6 +58,7 @@ import {
   makeLineSeparator,
   makeMultipleSelection,
   makeReadOnly,
+  makeScrollPastEnd,
   makeShowTrailingWhitespace,
   makeShowWhiteSpace,
   makeTabSize,
@@ -164,7 +165,7 @@ export function makeConfig(settings, lang) {
     makeLineNumbers(settings.showLineNumbers),
     makeIndentGuides(settings.showIndentGuides),
     makeCodeFolding(settings.showCodeFolding),
-    // scrollPastEnd(),
+    makeScrollPastEnd(settings.scrollPastEnd),
     makeLang(lang),
   ];
   return res;

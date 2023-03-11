@@ -1,5 +1,5 @@
 import { EditorState, Compartment } from "@codemirror/state";
-import { EditorView, lineNumbers } from "@codemirror/view";
+import { EditorView, lineNumbers, scrollPastEnd } from "@codemirror/view";
 import { foldGutter, bracketMatching, indentUnit } from "@codemirror/language";
 import {
   highlightWhitespace,
@@ -7,10 +7,8 @@ import {
   highlightActiveLine,
 } from "@codemirror/view";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
-import {
-  IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME,
-  IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE,
-} from "./notepad2/menu-notepad2";
+import * as m from "./notepad2/menu-notepad2";
+import { throwIf } from "./util";
 
 let editorView;
 
@@ -210,18 +208,18 @@ export function makeLineHighlight(lineHighlightType) {
   }
   // TODO: use own value instead of IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE etc.
   const v =
-    lineHighlightType === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE
+    lineHighlightType === m.IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE
       ? []
       : highlightActiveLine();
   activeLineCSSElement.disabled =
-    lineHighlightType != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
+    lineHighlightType != m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
   return lineHighlightTypeCompartment.of(v);
 }
 export function updateLineHighlightType(lht) {
   if (!editorView) return;
-  activeLineCSSElement.disabled = lht != IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
+  activeLineCSSElement.disabled = lht != m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
   const v =
-    lht === IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE ? [] : highlightActiveLine();
+    lht === m.IDM_VIEW_HIGHLIGHTCURRENTLINE_NONE ? [] : highlightActiveLine();
   // TODO: for IDM_VIEW_HIGHLIGHTCURRENTLINE_BACK should be
   // yellow background but for that we should rather change the theme
   editorView.dispatch({
@@ -244,5 +242,28 @@ export function updateLang(lang) {
   editorView.dispatch({
     // @ts-ignore
     effects: langCompartment.reconfigure(lang),
+  });
+}
+
+const scrollPastEndCompartment = new Compartment();
+export function makeScrollPastEnd(id) {
+  let v;
+  switch (id) {
+    case m.IDM_VIEW_SCROLLPASTLASTLINE_ONE:
+      v = scrollPastEnd();
+      break;
+    case m.IDM_VIEW_SCROLLPASTLASTLINE_NO:
+      v = [];
+      break;
+    default:
+      throwIf(true, `unsupported id ${id}`);
+  }
+  return scrollPastEndCompartment.of(v);
+}
+export function updateScrollPastEnd(id) {
+  if (!editorView) return;
+  const v = id === m.IDM_VIEW_SCROLLPASTLASTLINE_ONE ? scrollPastEnd() : [];
+  editorView.dispatch({
+    effects: scrollPastEndCompartment.reconfigure(v),
   });
 }
