@@ -10,7 +10,7 @@
 
   export let title = "";
   export let open = false;
-  export let onClose = null;
+  export let onClose;
   export let noButtons = false;
   export let closeOnEsc = true;
 

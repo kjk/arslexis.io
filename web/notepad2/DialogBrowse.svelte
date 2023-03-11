@@ -26,6 +26,7 @@
     fsTypeFolder,
     getFileList,
     deleteFile,
+    newIndexedDBFile,
   } from "./FsFile";
   import {
     openDirPicker,
@@ -41,21 +42,26 @@
     browseFolders,
   } from "./np2store";
   import { arrayRemove, len, throwIf } from "../util";
+  import { tooltip } from "../actions/tooltip";
 
   export let open = false;
   /** @type {Function} */
   export let onDone;
+  export let title;
+  export let closeOnFileOpen = false;
 
   /** @type {Entry}*/
   let selected = null;
   let removeTitle = "Remove";
   let btnRemoveDisabled = true;
+  let newFileDisabled = true;
 
   let btnAddFolderDisabled = false;
   let path = "";
 
   /** @type {Entry[]} */
   let entries = [];
+  let newFileName = "";
 
   $: updateRemove(selected);
 
@@ -74,7 +80,6 @@
    * @param {Entry} e
    */
   async function entryClicked(e) {
-    console.log("entryClicked:", e);
     selected = e;
   }
 
@@ -82,16 +87,6 @@
    * @param {Entry} e
    */
   async function entryDblClicked(e) {
-    console.log("entryDblClicked:", e);
-    await e.open(e);
-  }
-
-  async function btnOpenClicked() {
-    let e = selected;
-    console.log("btnOpenClicked:", e);
-    if (!e) {
-      return;
-    }
     await e.open(e);
   }
 
@@ -148,6 +143,7 @@
     }
 
     btnAddFolderDisabled = true;
+    newFileDisabled = true;
 
     path = dh.name;
     let p = e.parent;
@@ -234,6 +230,7 @@
    */
   async function openRecent(ignore) {
     btnAddFolderDisabled = true;
+    newFileDisabled = true;
     path = "recent";
     /** @type {Entry} */
     let e = {
@@ -262,6 +259,7 @@
    */
   async function openFavorites(ignore) {
     btnAddFolderDisabled = true;
+    newFileDisabled = true;
     path = "favorites";
     /** @type {Entry} */
     let e = {
@@ -293,6 +291,7 @@
    */
   async function setTopLevel(ignore) {
     btnAddFolderDisabled = false;
+    newFileDisabled = true;
     path = "";
     /** @type {Entry} */
     let e = {
@@ -345,6 +344,9 @@
    */
   async function openFile(e) {
     onDone(e.file);
+    if (closeOnFileOpen) {
+      open = false;
+    }
   }
 
   /**
@@ -362,6 +364,7 @@
    */
   async function openBrowser(parent) {
     btnAddFolderDisabled = true;
+    newFileDisabled = false;
     path = "browser";
     /** @type {Entry} */
     let e1 = {
@@ -386,18 +389,26 @@
     entries = a;
   }
 
+  async function newFile() {
+    let f = newIndexedDBFile(newFileName);
+    newFileName = "";
+    onDone(f);
+    open = false;
+  }
+
   onMount(async () => {
     await setTopLevel(null);
   });
 </script>
 
-<WinDialogBaseNoOverlay bind:open title="Browse Files">
+<WinDialogBaseNoOverlay onClose={close} bind:open {title}>
   <div slot="main" class="flex flex-col">
     <div class="mx-5 text-xs mt-2 min-h-[1rem]">{path}</div>
     <div
-      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 my-2 min-h-[12rem] max-h-[60vh] cursor-pointer select-none text-xs"
+      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 min-h-[12rem] max-h-[60vh] cursor-pointer select-none text-xs"
       tabindex="0"
       role="listbox"
+      use:focus
     >
       {#each entries as f}
         {@const isBold = f.name.endsWith("/")}
@@ -422,7 +433,26 @@
         {/if}
       {/each}
     </div>
+
+    <div class="flex items-baseline mx-4 my-2">
+      <input
+        type="text"
+        disabled={newFileDisabled}
+        class="px-2 py-0.5 border-gray-300 border-b outline-none grow"
+        spellcheck="false"
+        placeholder="Enter file name..."
+        autocomplete="false"
+        bind:value={newFileName}
+      />
+      <button
+        class="border hover:bg-gray-300 disabled:hover:bg-white ml-2 px-2 py-0.5 disabled:text-gray-200"
+        use:tooltip={"Create new file and open it"}
+        disabled={newFileDisabled || newFileName === ""}
+        on:click={newFile}>New File</button
+      >
+    </div>
   </div>
+
   <!-- bottom -->
   <div
     slot="bottom"
@@ -432,6 +462,7 @@
       <button
         disabled={btnAddFolderDisabled}
         class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+        use:tooltip={"Add folder from computer"}
         on:click={btnOpenFolderClicked}>Add Folder</button
       >
     {/if}

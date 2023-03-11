@@ -344,6 +344,9 @@
   let onAskSaveChangesDone;
   let showingAskSaveChanges = false;
 
+  let fileBrowseCloseOnFileOpen = true;
+  let fileBrowseTitle = "Browse Files";
+  let onFileBrowseDone = onFileBrowseDoneDefault;
   let showingFileBrowse = false;
 
   let saveAsName = "";
@@ -713,7 +716,7 @@
         location.toString() + "?file=" + encodeURI("__for_new_window");
       window.open(uri);
     } else {
-      let uriName = serialize(f);
+      const uriName = serialize(f);
       let uri = window.location.toString();
       uri += "?file=" + encodeURIComponent(uriName);
       window.open(uri);
@@ -756,16 +759,43 @@
     $recent = [e].concat($recent);
   }
 
-  async function loadFile() {
-    if (supportsFileSystem()) {
-      let f = await openFilePicker();
-      if (!f) {
-        return;
-      }
-      await setFileAsCurrent(f);
+  async function openFileComputer() {
+    if (!supportsFileSystem()) {
+      return false;
+    }
+    const f = await openFilePicker();
+    if (!f) {
+      return true; // TODO: or false?
+    }
+    await setFileAsCurrent(f);
+    return true;
+  }
+
+  async function openFile() {
+    if (openFileComputer()) {
       return;
     }
-    let f = await openFilePickerLocalStorage();
+    const f = await openFilePickerLocalStorage();
+    if (!f) {
+      return;
+    }
+    await setFileAsCurrent(f);
+  }
+
+  async function openFileBrowse() {
+    showingFileBrowse = false;
+    fileBrowseTitle = "Open File";
+    await tick();
+    const p = new Promise((resolve, reject) => {
+      onFileBrowseDone = (f) => {
+        onFileBrowseDone = onFileBrowseDoneDefault;
+        fileBrowseTitle = "Browse Files";
+        resolve(f);
+      };
+      showingFileBrowse = true;
+    });
+    let f = await p;
+    console.log("openFileBrowse:", f);
     if (!f) {
       return;
     }
@@ -790,7 +820,7 @@
       await newEmptyFile();
       return;
     }
-    let action = await askToSaveFile();
+    const action = await askToSaveFile();
     if (action === "cancel") {
       return;
     }
@@ -799,7 +829,7 @@
       return;
     }
     throwIf(action !== "yes");
-    let didCancel = await contentSave();
+    const didCancel = await contentSave();
     if (didCancel) {
       return;
     }
@@ -849,9 +879,9 @@
     contentSave(content);
   }
 
-  async function cmdFileOpen() {
+  async function cmdFileOpenComputer() {
     if (!isDirty) {
-      loadFile();
+      openFile();
       return;
     }
     const action = await askToSaveFile();
@@ -859,7 +889,7 @@
       return;
     }
     if (action === "no") {
-      loadFile();
+      openFile();
       return;
     }
     throwIf(action !== "yes");
@@ -868,7 +898,32 @@
       return;
     }
     // TODO: or do this always?
-    loadFile();
+    openFile();
+  }
+
+  async function cmdFileOpen() {
+    if (!isDirty) {
+      openFileBrowse();
+      // openFile();
+      return;
+    }
+    const action = await askToSaveFile();
+    if (action === "cancel") {
+      return;
+    }
+    if (action === "no") {
+      openFileBrowse();
+      // openFile();
+      return;
+    }
+    throwIf(action !== "yes");
+    const didCancel = await contentSave();
+    if (didCancel) {
+      return;
+    }
+    // TODO: or do this always?
+    openFileBrowse();
+    // openFile();
   }
 
   async function cmdFileAddToFav() {
@@ -929,17 +984,11 @@
     await setFileAsCurrent(f);
   }
 
-  async function onFileBrowseDone(f) {
-    console.log("onFileBrowseDone:", f);
+  function onFileBrowseDoneDefault(f) {
     if (!f) {
       return;
     }
-    if (!file) {
-      await setFileAsCurrent(f);
-      return;
-    }
-
-    await cmdFileNewWindow(f);
+    setFileAsCurrent(f);
   }
 
   async function cmdFileBrowse() {
@@ -1048,6 +1097,9 @@
       case m.IDM_FILE_OPEN:
       case m.IDT_FILE_OPEN:
         cmdFileOpen();
+        break;
+      case m.IDM_FILE_OPEN_COMPUTER:
+        cmdFileOpenComputer();
         break;
       case m.IDM_FILE_SAVE:
       case m.IDT_FILE_SAVE:
@@ -1923,9 +1975,12 @@
   />
 {/if}
 
-{#if showingFileBrowse}
-  <DialogBrowse bind:open={showingFileBrowse} onDone={onFileBrowseDone} />
-{/if}
+<DialogBrowse
+  closeOnFileOpen={fileBrowseCloseOnFileOpen}
+  bind:open={showingFileBrowse}
+  bind:title={fileBrowseTitle}
+  onDone={onFileBrowseDone}
+/>
 
 <DialogAskSaveChanges
   bind:open={showingAskSaveChanges}
