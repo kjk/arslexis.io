@@ -3,11 +3,11 @@
 </script>
 
 <script>
+  import { onMount } from "svelte";
   import WinDialogBase from "../WinDialogBase.svelte";
   import { focus } from "../actions/focus";
-  import { arrayRemove, len, throwIf } from "../util";
   import { recent, favorites } from "./np2store";
-  import { onMount } from "svelte";
+  import { arrayRemove, len, throwIf } from "../util";
 
   export let open = false;
   /** @type {Function} */

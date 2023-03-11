@@ -35,8 +35,8 @@
   import * as m from "./menu-notepad2";
   import { getTheme } from "../cmexts";
   import {
-    getLangExtFromFileName,
-    getLangFromLexer,
+    getCMLangFromFileName,
+    getCMLangFromLexer,
     getLangName,
   } from "../cmlangs";
   import { focusEditorView } from "../cmutil";
@@ -55,6 +55,7 @@
     toggleFullScreen,
     stripExt,
     limit,
+    arrayRemoveFnAsync,
   } from "../util.js";
   import {
     deserialize,
@@ -161,6 +162,7 @@
     fsFileFromFavEntry,
     getAndClearFileForNewWindow,
     rememberFileForNewWindow,
+    favEq,
   } from "./np2store";
   import Messages, { showError } from "../Messages.svelte";
 
@@ -269,12 +271,17 @@
   let lexer = null;
   $: updateLexer(lexer);
   function updateLexer(lexer) {
-    const lang = getLangFromLexer(lexer);
-    if (lang) {
+    if (!lexer) {
+      return;
+    }
+    getCMLangFromLexer(lexer).then((lang) => {
+      if (!lang) {
+        return;
+      }
       console.log("lang:", lang);
       statusLang = getLangName(lang);
       updateLang(lang);
-    }
+    });
   }
 
   function getCurrentSelectionAsText() {
@@ -448,14 +455,14 @@
   /**
    * @param {string} s
    * @param {string} fileName
-   * @returns {EditorState}
+   * @returns {Promise<EditorState>}
    */
-  function createEditorState(s, fileName = "") {
+  async function createEditorState(s, fileName = "") {
     let theme = undefined;
     let styles = undefined;
 
     // TODO: why is this [] and not null or something?
-    let lang = getLangExtFromFileName(fileName);
+    let lang = await getCMLangFromFileName(fileName);
     statusLang = "Text";
     if (lang) {
       console.log("lang:", lang);
@@ -484,10 +491,10 @@
     }
   }
 
-  function newEmptyFile() {
+  async function newEmptyFile() {
     file = null;
     name = "Untitled";
-    initialState = createEditorState("");
+    initialState = await createEditorState("");
     editorView.setState(initialState);
     isDirty = false;
     updateStatusLine();
@@ -570,7 +577,7 @@
   /**
    * @reuturns {Promise<FsFile>}
    */
-  async function openFilePickerLocalStorate() {
+  async function openFilePickerLocalStorage() {
     return new Promise((resolve, reject) => {
       onOpenFileDone = (file) => {
         resolve(file);
@@ -659,7 +666,7 @@
       const ab = await content.arrayBuffer();
       content = new TextDecoder().decode(ab);
     }
-    let state = createEditorState(content, fileName);
+    let state = await createEditorState(content, fileName);
     initialState = state;
     editorView.setState(initialState);
     name = fileName;
@@ -669,10 +676,43 @@
   }
 
   /**
+   * open new window with
+   * @param {FsFile} f
+   */
+  async function openFileInNewWindow(f) {
+    if (f.fileHandle) {
+      const ok = await verifyHandlePermission(f.fileHandle, false);
+      if (!ok) {
+        return;
+      }
+      // TODO: should also read content because file could be deleted
+      await rememberFileForNewWindow(f);
+      const uri =
+        location.toString() + "?file=" + encodeURI("__for_new_window");
+      window.open(uri);
+    } else {
+      let uriName = serialize(f);
+      let uri = window.location.toString();
+      uri += "?file=" + encodeURIComponent(uriName);
+      window.open(uri);
+      // this opens a new window and will trigger openInitialFile()
+      // from onMount()
+    }
+  }
+
+  /**
    * @param {FsFile} fileIn
    */
   async function setFileAsCurrent(fileIn) {
     console.log("setFileAsCurrent:", fileIn);
+    // if file exists and has changed, open in a new window
+    if (file && isDirty) {
+      await openFileInNewWindow(fileIn);
+      return;
+    }
+
+    // TODO: maybe move before openFileInNewWindow() to verify file
+    // can be read in this window. But it's more expensive
     let blob = await readFile(fileIn);
     if (blob === null) {
       // could be serialized FileSystemFileHandle with denied permissions
@@ -681,6 +721,7 @@
       showError(`Couldn't open file '${fileIn.name}'`, 3000);
       return;
     }
+
     file = fileIn;
     name = file.name;
     await setContentAsCurrent(blob, name);
@@ -689,6 +730,7 @@
     }
     const e = favEntryFromFsFile(file, name);
     // push new value at the top
+    await arrayRemoveFnAsync($recent, e, favEq);
     $recent = [e].concat($recent);
   }
 
@@ -701,7 +743,7 @@
       await setFileAsCurrent(f);
       return;
     }
-    let f = await openFilePickerLocalStorate();
+    let f = await openFilePickerLocalStorage();
     if (!f) {
       return;
     }
@@ -723,7 +765,7 @@
 
   async function cmdFileNew() {
     if (!isDirty) {
-      newEmptyFile();
+      await newEmptyFile();
       return;
     }
     let action = await askToSaveFile();
@@ -731,7 +773,7 @@
       return;
     }
     if (action === "no") {
-      newEmptyFile();
+      await newEmptyFile();
       return;
     }
     throwIf(action !== "yes");
@@ -773,12 +815,7 @@
       cmdFileNewEmptyWindow();
       return;
     }
-    if (f.fileHandle) {
-      await verifyHandlePermission(f.fileHandle, false);
-    }
-    await rememberFileForNewWindow(f);
-    const uri = location.toString() + "?file=" + encodeURI("__for_new_window");
-    window.open(uri);
+    openFileInNewWindow(f);
   }
 
   function cmdFileSave() {
@@ -1476,7 +1513,7 @@
         );
         break;
       default:
-        let lex = getLangFromLexer(cmdId);
+        let lex = await getCMLangFromLexer(cmdId);
         if (lex) {
           lexer = cmdId;
           break;
@@ -1692,16 +1729,10 @@
     }
     let first = files[0];
     let blob = await first.file;
-    // TODO: open in new window
     let name = first.file.name;
     let fs = newIndexedDBFile(name);
     writeFile(fs, blob);
-    let uriName = serialize(fs);
-    let uri = window.location.toString();
-    uri += "?file=" + encodeURIComponent(uriName);
-    window.open(uri);
-    // this opens a new window and will trigger openInitialFile()
-    // from onMount()
+    setFileAsCurrent(fs);
   }
 
   onDestroy(() => {

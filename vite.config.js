@@ -27,15 +27,15 @@ export default defineConfig({
       output: {
         manualChunks: {
           cm: ["codemirror"],
+          langjavascript: ["@codemirror/lang-javascript"],
+          langhtml: ["@codemirror/lang-html"],
+          langcss: ["@codemirror/lang-css"],
+          langjava: ["@codemirror/lang-java"],
+          langvue: ["@codemirror/lang-vue"],
+          langmarkdown: ["@codemirror/lang-markdown"],
           cmlangs: [
-            "@codemirror/lang-css",
-            "@codemirror/lang-html",
-            "@codemirror/lang-java",
-            "@codemirror/lang-javascript",
-            "@codemirror/lang-vue",
             "@codemirror/lang-angular",
             "@codemirror/lang-wast",
-            "@codemirror/lang-markdown",
             "@codemirror/lang-xml",
             "@codemirror/lang-rust",
             "@codemirror/lang-sql",

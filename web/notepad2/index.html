@@ -16,10 +16,10 @@
     import Notepad2 from './Notepad2.svelte'
     import '../base.css'
 
-    const args = {
+    const app = new Notepad2({
       target: document.getElementById('app'),
-    };
-    const app = new Notepad2(args)
+      props: {}
+    });
   </script>
 </body>
 

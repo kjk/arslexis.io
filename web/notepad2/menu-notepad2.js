@@ -2,6 +2,23 @@
 
 const MENU_SEPARATOR = "---";
 
+export const IDM_LEXER_JS = "IDM_LEXER_JS";
+export const IDM_LEXER_JSON = "IDM_LEXER_JSON";
+export const IDM_LEXER_JAVA = "IDM_LEXER_JAVA";
+export const IDM_LEXER_VUE = "IDM_LEXER_VUE";
+export const IDM_LEXER_MARKDOWN = "IDM_LEXER_MARKDOWN";
+export const IDM_LEXER_RUST = "IDM_LEXER_RUST";
+export const IDM_LEXER_SQL = "IDM_LEXER_SQL";
+export const IDM_LEXER_PYTHON = "IDM_LEXER_PYTHON";
+export const IDM_LEXER_CPP = "IDM_LEXER_CPP";
+export const IDM_LEXER_SVELTE = "IDM_LEXER_SVELTE";
+export const IDM_LEXER_LUA = "IDM_LEXER_LUA";
+export const IDM_LEXER_GO = "IDM_LEXER_GO";
+export const IDM_LEXER_DIFF = "IDM_LEXER_DIFF";
+export const IDM_LEXER_CSHARP = "IDM_LEXER_CSHARP";
+export const IDM_LEXER_RUBY = "IDM_LEXER_RUBY";
+export const IDM_LEXER_ACTIONSCRIPT = "IDM_LEXER_ACTIONSCRIPT";
+
 export const IDT_FILE_NEW = "IDT_FILE_NEW";
 export const IDT_FILE_OPEN = "IDT_FILE_OPEN";
 export const IDT_FILE_BROWSE = "IDT_FILE_BROWSE";
@@ -711,7 +728,7 @@ export const IDM_LEXER_CSS = "IDM_LEXER_CSS";
 export const IDM_LEXER_SCSS = "IDM_LEXER_SCSS";
 export const IDM_LEXER_LESS = "IDM_LEXER_LESS";
 export const IDM_LEXER_HSS = "IDM_LEXER_HSS";
-export const IDM_LEXER_WEB = "IDM_LEXER_WEB";
+export const IDM_LEXER_HTML = "IDM_LEXER_HTML";
 export const IDM_LEXER_PHP = "IDM_LEXER_PHP";
 export const IDM_LEXER_JSP = "IDM_LEXER_JSP";
 export const IDM_LEXER_ASPX_CS = "IDM_LEXER_ASPX_CS";
@@ -768,7 +785,7 @@ const menuCssStyleSheet = [
 ];
 
 const menuWebSourceCode = [
-  ["&Web Source Code", IDM_LEXER_WEB],
+  ["&Web Source Code", IDM_LEXER_HTML],
   ["&PHP Page", IDM_LEXER_PHP],
   ["&JSP Page", IDM_LEXER_JSP],
   ["ASP.NET (&C#)", IDM_LEXER_ASPX_CS],
