@@ -10,27 +10,16 @@
 // import { wast } from "@codemirror/lang-wast";
 // import { markdown } from "@codemirror/lang-markdown";
 
-import { xml } from "@codemirror/lang-xml";
 import { rust } from "@codemirror/lang-rust";
 import { sql } from "@codemirror/lang-sql";
 import { python } from "@codemirror/lang-python";
 import { php } from "@codemirror/lang-php";
 import { cpp } from "@codemirror/lang-cpp";
-import { json } from "@codemirror/lang-json";
 import { svelte } from "@replit/codemirror-lang-svelte";
 
-// TODO: more https://github.com/codemirror/legacy-modes
-import { lua } from "@codemirror/legacy-modes/mode/lua";
-import { go } from "@codemirror/legacy-modes/mode/go";
-import { diff } from "@codemirror/legacy-modes/mode/diff";
-
-// legacy modes
 import { StreamLanguage } from "@codemirror/language";
-import { sCSS, less } from "@codemirror/legacy-modes/mode/css";
-import { octave } from "@codemirror/legacy-modes/mode/octave";
-import { shell } from "@codemirror/legacy-modes/mode/shell";
-import { csharp, dart } from "@codemirror/legacy-modes/mode/clike";
-import { ruby } from "@codemirror/legacy-modes/mode/ruby";
+
+// TODO: more https://github.com/codemirror/legacy-modes
 
 import { getFileExt } from "./fileutil";
 import { len, throwIf } from "./util";
@@ -41,64 +30,226 @@ import * as m from "./notepad2/menu-notepad2";
 
 // see Style_UpdateLexerLang in Styles.c
 
-let lexerJavascript;
-let lexerCSS;
-let lexerHTML;
-let lexerJava;
-let lexerVue;
-let lexerMarkdown;
+let langJson;
+async function getLangJson() {
+  if (!langJson) {
+    const m = await import("@codemirror/lang-json");
+    langJson = m.json();
+  }
+  return langJson;
+}
+
+let langXml;
+async function getLangXml() {
+  if (!langXml) {
+    const m = await import("@codemirror/lang-xml");
+    langXml = m.xml();
+  }
+  return langXml;
+}
+
+let langJavascript;
+async function getLangJavaScript() {
+  if (!langJavascript) {
+    const m = await import("@codemirror/lang-javascript");
+    langJavascript = m.javascript();
+  }
+  return langJavascript;
+}
+
+let langCSS;
+async function getLangCSS() {
+  if (!langCSS) {
+    const m = await import("@codemirror/lang-css");
+    langCSS = m.css();
+  }
+  return langCSS;
+}
+
+let langHTML;
+async function getLangHTML() {
+  if (!langHTML) {
+    const m = await import("@codemirror/lang-html");
+    langHTML = m.html();
+  }
+  return langHTML;
+}
+
+let langJava;
+async function getLangJava() {
+  if (!langJava) {
+    const m = await import("@codemirror/lang-java");
+    langJava = m.java();
+  }
+  return langJava;
+}
+
+let langVue;
+async function getLangVue() {
+  if (!langVue) {
+    const m = await import("@codemirror/lang-vue");
+    langVue = m.vue();
+  }
+  return langVue;
+}
+
+let langMarkdown;
+async function getLangMarkdown() {
+  if (!langMarkdown) {
+    const m = await import("@codemirror/lang-markdown");
+    langMarkdown = m.markdown();
+  }
+  return langMarkdown;
+}
+
+let langLua;
+async function getLangLua() {
+  if (!langLua) {
+    const m = await import("@codemirror/legacy-modes/mode/lua");
+    langLua = StreamLanguage.define(m.lua);
+  }
+  return langLua;
+}
+
+let langGo;
+async function getLangGo() {
+  if (!langGo) {
+    const m = await import("@codemirror/legacy-modes/mode/go");
+    langGo = StreamLanguage.define(m.go);
+  }
+  return langGo;
+}
+
+let langDiff;
+async function getLangDiff() {
+  if (!langDiff) {
+    const m = await import("@codemirror/legacy-modes/mode/diff");
+    langLua = StreamLanguage.define(m.diff);
+  }
+  return langDiff;
+}
+
+let langScss;
+async function getLangScss() {
+  if (!langScss) {
+    const m = await import("@codemirror/legacy-modes/mode/css");
+    langScss = StreamLanguage.define(m.sCSS);
+  }
+  return langScss;
+}
+
+let langLess;
+async function getLangLess() {
+  if (!langLess) {
+    const m = await import("@codemirror/legacy-modes/mode/css");
+    langLess = StreamLanguage.define(m.less);
+  }
+  return langLess;
+}
+
+let langOctave;
+async function getLangOctave() {
+  if (!langOctave) {
+    const m = await import("@codemirror/legacy-modes/mode/octave");
+    langOctave = StreamLanguage.define(m.octave);
+  }
+  return langOctave;
+}
+
+let langShell;
+async function getLangShell() {
+  if (!langShell) {
+    const m = await import("@codemirror/legacy-modes/mode/shell");
+    langShell = StreamLanguage.define(m.shell);
+  }
+  return langShell;
+}
+
+let langRuby;
+async function getLangRuby() {
+  if (!langRuby) {
+    const m = await import("@codemirror/legacy-modes/mode/ruby");
+    langRuby = StreamLanguage.define(m.ruby);
+  }
+  return langRuby;
+}
+
+let langCSharp;
+async function getLangCSharp() {
+  if (!langCSharp) {
+    const m = await import("@codemirror/legacy-modes/mode/clike");
+    langCSharp = StreamLanguage.define(m.csharp);
+  }
+  return langCSharp;
+}
 
 async function getLexerDynamic(id) {
   switch (id) {
+    case m.IDM_LEXER_RUBY:
+      return await getLangRuby();
     case m.IDM_LEXER_JS:
     case m.IDM_LEXER_ACTIONSCRIPT:
-      if (!lexerJavascript) {
-        const o = await import("@codemirror/lang-javascript");
-        lexerJavascript = o.javascript();
-      }
-      return lexerJavascript;
+      return await getLangJavaScript();
     case m.IDM_LEXER_HTML:
-      if (!lexerHTML) {
-        const o = await import("@codemirror/lang-html");
-        lexerHTML = o.html();
-      }
-      return lexerHTML;
+      return await getLangHTML();
     case m.IDM_LEXER_CSS:
-      if (!lexerCSS) {
-        const o = await import("@codemirror/lang-css");
-        lexerCSS = o.css();
-      }
-      return lexerCSS;
+      return await getLangCSS();
     case m.IDM_LEXER_JAVA:
-      if (!lexerJava) {
-        const o = await import("@codemirror/lang-java");
-        lexerJava = o.java();
-      }
-      return lexerJava;
+      return await getLangJava();
     case m.IDM_LEXER_VUE:
-      if (!lexerVue) {
-        const o = await import("@codemirror/lang-vue");
-        lexerVue = o.vue();
-      }
-      return lexerVue;
+      return await getLangVue();
     case m.IDM_LEXER_MARKDOWN:
     case m.IDM_LEXER_MARKDOWN_GITHUB:
     case m.IDM_LEXER_MARKDOWN_GITLAB:
     case m.IDM_LEXER_MARKDOWN_PANDOC:
-      if (!lexerMarkdown) {
-        const o = await import("@codemirror/lang-markdown");
-        lexerMarkdown = o.markdown();
-      }
-      return lexerMarkdown;
+      return await getLangMarkdown();
+    case m.IDM_LEXER_LUA:
+      return await getLangLua();
+    case m.IDM_LEXER_GO:
+      return await getLangGo();
+    case m.IDM_LEXER_DIFF:
+      return await getLangDiff();
+    case m.IDM_LEXER_SCSS:
+      return await getLangScss();
+    case m.IDM_LEXER_LESS:
+      return await getLangLess();
+    case m.IDM_LEXER_OCTAVE:
+    case m.IDM_LEXER_MATLAB:
+    case m.IDM_LEXER_SCILAB:
+      return await getLangOctave();
+    case m.IDM_LEXER_BASH:
+    case m.IDM_LEXER_CSHELL:
+    case m.IDM_LEXER_M4:
+      return await getLangShell();
+    case m.IDM_LEXER_RUBY:
+      return await getLangRuby();
+    case m.IDM_LEXER_CSHARP:
+      return await getLangCSharp();
+    case m.IDM_LEXER_JSON:
+      return await getLangJson();
+    case m.IDM_LEXER_XML:
+      return await getLangXml();
+    // return await getLangCSharp();
+    // return await getLangCSharp();
+    // return await getLangCSharp();
+    // return await getLangCSharp();
   }
+
   return null;
 }
+
+// [rust(), m.IDM_LEXER_RUST, ".rs"],
+// [sql(), m.IDM_LEXER_SQL, ".sql"],
+// [python(), m.IDM_LEXER_PYTHON, ".py"],
+// [cpp(), m.IDM_LEXER_CPP, ".c", ".cpp", ".c++", ".cxx", ".h", ".hpp", ".hxx"],
+// [svelte(), m.IDM_LEXER_SVELTE, ".svelte"],
+// [php(), m.IDM_LEXER_PHP, ".php"],
 
 const langs = [
   [null, m.IDM_LEXER_JS, ".js", ".ts", ".jsx", ".tsx"],
   [null, m.IDM_LEXER_ACTIONSCRIPT, ".as"],
   [
-    json(),
+    null,
     m.IDM_LEXER_JSON,
     ".json",
     ".har",
@@ -142,7 +293,7 @@ const langs = [
   [null, m.IDM_LEXER_MARKDOWN_GITLAB, ".md", ".markdown"],
   [null, m.IDM_LEXER_MARKDOWN_PANDOC, ".md", ".markdown"],
   [
-    xml(),
+    null,
     m.IDM_LEXER_XML,
     ".xml",
     ".xsl",
@@ -169,20 +320,20 @@ const langs = [
   [cpp(), m.IDM_LEXER_CPP, ".c", ".cpp", ".c++", ".cxx", ".h", ".hpp", ".hxx"],
   [svelte(), m.IDM_LEXER_SVELTE, ".svelte"],
   [php(), m.IDM_LEXER_PHP, ".php"],
-  [StreamLanguage.define(lua), m.IDM_LEXER_LUA, ".lua"],
-  [StreamLanguage.define(go), m.IDM_LEXER_GO, ".go"],
-  [StreamLanguage.define(diff), m.IDM_LEXER_DIFF, ".diff"],
+  [null, m.IDM_LEXER_LUA, ".lua"],
+  [null, m.IDM_LEXER_GO, ".go"],
+  [null, m.IDM_LEXER_DIFF, ".diff"],
 
-  [StreamLanguage.define(sCSS), m.IDM_LEXER_SCSS, ".scss"],
-  [StreamLanguage.define(less), m.IDM_LEXER_LESS, ".scss"],
-  [StreamLanguage.define(octave), m.IDM_LEXER_OCTAVE, ".octave"],
-  [StreamLanguage.define(octave), m.IDM_LEXER_MATLAB, ".m"],
-  [StreamLanguage.define(octave), m.IDM_LEXER_SCILAB, ".sce", ".sci"],
-  [StreamLanguage.define(shell), m.IDM_LEXER_BASH, ".bash", ".sh"],
-  [StreamLanguage.define(shell), m.IDM_LEXER_CSHELL, ".csh", ".tcsh"],
-  [StreamLanguage.define(shell), m.IDM_LEXER_M4, ".m4", ".ac"],
+  [null, m.IDM_LEXER_SCSS, ".scss"],
+  [null, m.IDM_LEXER_LESS, ".less"],
+  [null, m.IDM_LEXER_OCTAVE, ".octave"],
+  [null, m.IDM_LEXER_MATLAB, ".m"],
+  [null, m.IDM_LEXER_SCILAB, ".sce", ".sci"],
+  [null, m.IDM_LEXER_BASH, ".bash", ".sh"],
+  [null, m.IDM_LEXER_CSHELL, ".csh", ".tcsh"],
+  [null, m.IDM_LEXER_M4, ".m4", ".ac"],
   [
-    StreamLanguage.define(ruby),
+    null,
     m.IDM_LEXER_RUBY,
     ".rb",
     ".ruby",
@@ -193,14 +344,7 @@ const langs = [
     ".podspec",
     ".cr",
   ],
-  [
-    StreamLanguage.define(csharp),
-    m.IDM_LEXER_CSHARP,
-    ".cs",
-    ".csx",
-    ".vala",
-    ".vapi",
-  ],
+  [null, m.IDM_LEXER_CSHARP, ".cs", ".csx", ".vala", ".vapi"],
 
   /*
   // TODO: to figure out
