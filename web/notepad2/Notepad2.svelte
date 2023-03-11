@@ -738,7 +738,7 @@
 
     // TODO: maybe move before openFileInNewWindow() to verify file
     // can be read in this window. But it's more expensive
-    let blob = await readFile(fileIn);
+    const blob = await readFile(fileIn);
     if (blob === null) {
       // could be serialized FileSystemFileHandle with denied permissions
       // or failed to read file because it was deleted
@@ -754,9 +754,31 @@
       return;
     }
     const e = favEntryFromFsFile(file, name);
+    await addToRecent(e);
+  }
+
+  function filterMenuItem(mi) {
+    if (len(mi) < 2) {
+      return false;
+    }
+    const id = mi[1];
+    if (Array.isArray(id)) {
+      return false;
+    }
+    switch (id) {
+      case m.IDM_FILE_OPEN_COMPUTER:
+        return !supportsFileSystem();
+    }
+    return false;
+  }
+
+  /**
+   * @param {FavEntry} e
+   */
+  async function addToRecent(e) {
     // push new value at the top
-    await arrayRemoveFnAsync($recent, e, favEq);
-    $recent = [e].concat($recent);
+    const a = await arrayRemoveFnAsync($recent, e, favEq);
+    $recent = [e].concat(a);
   }
 
   async function openFileComputer() {
@@ -1876,6 +1898,7 @@
         </svg></a
       >
       <MenuBar
+        filterFn={filterMenuItem}
         menuDidOpenFn={handleMenuDidOpen}
         menuBar={m.mainMenuBar}
         noMenuCommands={m.noMenuCommands}

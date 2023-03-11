@@ -18,9 +18,8 @@
 </script>
 
 <script>
-  import { parseShortcut, serializeShortuct } from "./keys.js";
-
   import { createEventDispatcher } from "svelte";
+  import { parseShortcut, serializeShortuct } from "./keys.js";
   import { len, splitMax } from "./util.js";
 
   const dispatch = createEventDispatcher();
@@ -32,6 +31,8 @@
   // see menu-parent1, menu-parent2, menu-parent3,
   // menu-child1, menu-child2, menu-child3 global classes
   export let nest = 1;
+
+  export let filterFn;
 
   function sanitizeShortcut(txt) {
     const s = parseShortcut(txt);
@@ -141,68 +142,71 @@
     {@const shortcut = getShortcut(mi)}
     {@const submenu = mi[1]}
     {@const isSubmenu = Array.isArray(submenu)}
-    {#if isDiv}
-      <div class="border-y border-gray-200 mt-1 mb-1" />
-    {:else if isSubmenu}
-      <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-      <div
-        role="menuitem"
-        class="menu-parent{nest} relative my-1"
-        on:mouseleave={handleMouseLeave}
-        on:mouseover={handleMouseOver}
-        on:mouseenter={handleMouseEnter}
-      >
-        <button
-          class="flex w-full items-center justify-between pl-3 pr-2 py-0.5"
+    {@const shouldFilter = filterFn && filterFn(mi)}
+    {#if !shouldFilter}
+      {#if isDiv}
+        <div class="border-y border-gray-200 mt-1 mb-1" />
+      {:else if isSubmenu}
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <div
+          role="menuitem"
+          class="menu-parent{nest} relative my-1"
+          on:mouseleave={handleMouseLeave}
+          on:mouseover={handleMouseOver}
+          on:mouseenter={handleMouseEnter}
         >
-          <span class="flex">
-            <span class="w-4 h-4" />
+          <button
+            class="flex w-full items-center justify-between pl-3 pr-2 py-0.5"
+          >
+            <span class="flex">
+              <span class="w-4 h-4" />
+              <span class="ml-2">{text}</span>
+            </span>
+            <svg
+              class="h-4 w-4 text-gray-500"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M8.25 4.5l7.5 7.5-7.5 7.5"
+              />
+            </svg>
+          </button>
+          <div
+            class="menu-child{nest} invisible absolute top-0 left-full transform opacity-0 transition-all duration-300"
+          >
+            <svelte:self menu={submenu} nest={nest + 1} />
+          </div>
+        </div>
+      {:else}
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <div
+          role="menuitem"
+          data-cmd-id={cmdId}
+          class="min-w-[18em] flex items-center justify-between px-3 py-1 whitespace-nowrap"
+          on:mouseleave={handleMouseLeave}
+          on:mouseover={handleMouseOver}
+        >
+          <span class="flex items-center">
+            <svg
+              class="w-4 h-4 check invisible"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              ><path
+                fill="currentColor"
+                d="m10 16.4l-4-4L7.4 11l2.6 2.6L16.6 7L18 8.4Z"
+              /></svg
+            >
             <span class="ml-2">{text}</span>
           </span>
-          <svg
-            class="h-4 w-4 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
-          </svg>
-        </button>
-        <div
-          class="menu-child{nest} invisible absolute top-0 left-full transform opacity-0 transition-all duration-300"
-        >
-          <svelte:self menu={submenu} nest={nest + 1} />
+          <span class="ml-2 text-xs opacity-75">{shortcut || ""}</span>
         </div>
-      </div>
-    {:else}
-      <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-      <div
-        role="menuitem"
-        data-cmd-id={cmdId}
-        class="min-w-[18em] flex items-center justify-between px-3 py-1 whitespace-nowrap"
-        on:mouseleave={handleMouseLeave}
-        on:mouseover={handleMouseOver}
-      >
-        <span class="flex items-center">
-          <svg
-            class="w-4 h-4 check invisible"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            ><path
-              fill="currentColor"
-              d="m10 16.4l-4-4L7.4 11l2.6 2.6L16.6 7L18 8.4Z"
-            /></svg
-          >
-          <span class="ml-2">{text}</span>
-        </span>
-        <span class="ml-2 text-xs opacity-75">{shortcut || ""}</span>
-      </div>
+      {/if}
     {/if}
   {/each}
 </div>

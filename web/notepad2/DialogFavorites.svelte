@@ -47,7 +47,7 @@
     onDone(fav);
   }
 
-  async function btnRemoveClicked() {
+  async function removeFav() {
     switch (type) {
       case "recent":
         $recent = arrayRemove($recent, selected);
@@ -157,7 +157,7 @@
     <button
       disabled={btnDeleteDisabled}
       class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
-      on:click={btnRemoveClicked}>Remove</button
+      on:click={removeFav}>Remove</button
     >
     <div class="grow" />
     <button

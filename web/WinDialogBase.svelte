@@ -70,13 +70,13 @@
 {#if open}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
-    tabindex="0"
     class="fixed inset-0 z-40 bg-gray-600 bg-opacity-40"
     bind:this={overlay}
     on:click={handleClick}
     on:keydown={handleKeyDown}
   >
     <div
+      tabindex="0"
       role="dialog"
       class="absolute w-fit min-w-[360px] shadow-xl shadow-md bg-white flex flex-col text-black text-sm"
       bind:this={modal}

@@ -220,7 +220,6 @@
    * @param {Entry} e
    */
   function removeRecent(e) {
-    console.log("removeRecent:", e);
     $recent = arrayRemove($recent, e.fav);
     openRecent(null);
   }

@@ -11,6 +11,8 @@
 
   export let menuBar; // definition of the menubar
   export let noMenuCommands = null; // for commands that have shortcuts but no menu
+  /** @type {Function} */
+  export let filterFn = null;
   export let hidden = false;
   // function called when menu has been opened
   // allows the owner to modify the menu by changing DOM
@@ -25,6 +27,9 @@
 
   function buildKeyboarShortcutsMenu(menu) {
     for (let mi of menu) {
+      if (filterFn && filterFn(mi)) {
+        continue;
+      }
       let s = mi[0];
       let cmdIdOrSubmenu = mi[1];
       let isSubmenu = Array.isArray(cmdIdOrSubmenu);
@@ -179,7 +184,7 @@
           <div
             class="child invisible absolute top-0 top-full transform opacity-0 transition-all duration-100"
           >
-            <Menu on:menucmd {menu} />
+            <Menu {filterFn} on:menucmd {menu} />
           </div>
         </div>
       {/each}
