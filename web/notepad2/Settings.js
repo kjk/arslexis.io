@@ -1,3 +1,4 @@
+import { themeNameDefault } from "../CodeMirrorConfig";
 import * as m from "./menu-notepad2";
 
 // global Notepad2 settings
@@ -6,6 +7,7 @@ export class Settings {
   showToolbar = true;
   showStatusBar = true;
 
+  theme = themeNameDefault;
   showLineNumbers = true;
   showWhitespace = false;
   wordWrap = true;

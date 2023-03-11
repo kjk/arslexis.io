@@ -1,12 +1,15 @@
-import { EditorState, Compartment } from "@codemirror/state";
-import { EditorView, lineNumbers, scrollPastEnd } from "@codemirror/view";
-import { foldGutter, bracketMatching, indentUnit } from "@codemirror/language";
 import {
+  EditorView,
+  lineNumbers,
+  scrollPastEnd,
   highlightWhitespace,
   highlightTrailingWhitespace,
   highlightActiveLine,
 } from "@codemirror/view";
+import { EditorState, Compartment } from "@codemirror/state";
+import { foldGutter, bracketMatching, indentUnit } from "@codemirror/language";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
+import { oneDarkTheme } from "@codemirror/theme-one-dark";
 import * as m from "./notepad2/menu-notepad2";
 import { throwIf } from "./util";
 
@@ -265,5 +268,21 @@ export function updateScrollPastEnd(id) {
   const v = id === m.IDM_VIEW_SCROLLPASTLASTLINE_ONE ? scrollPastEnd() : [];
   editorView.dispatch({
     effects: scrollPastEndCompartment.reconfigure(v),
+  });
+}
+
+export const themeNameDark = "oneDark";
+export const themeNameDefault = "default";
+
+const themeCompartment = new Compartment();
+export function makeTheme(theme) {
+  const v = theme === themeNameDark ? oneDarkTheme : [];
+  return themeCompartment.of(v);
+}
+export function updateTheme(theme) {
+  if (!editorView) return;
+  const v = theme === themeNameDark ? oneDarkTheme : [];
+  editorView.dispatch({
+    effects: themeCompartment.reconfigure(v),
   });
 }

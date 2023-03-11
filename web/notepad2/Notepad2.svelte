@@ -33,7 +33,6 @@
   import { openSearchPanel } from "@codemirror/search";
   import * as commands from "@codemirror/commands";
   import * as m from "./menu-notepad2";
-  import { getTheme } from "../cmexts";
   import {
     getCMLangFromFileName,
     getCMLangFromLexer,
@@ -137,7 +136,9 @@
   import { tick } from "svelte";
   import { settings } from "./Settings";
   import {
+    themeNameDefault,
     setConfigEditorView,
+    themeNameDark,
     updateCodeFolding,
     updateEnableMultipleSelection,
     updateIndentGuides,
@@ -151,6 +152,7 @@
     updateShowWhitespace,
     updateTabSize,
     updateTabsState,
+    updateTheme,
     updateVisualBraceMatching,
     updateWordWrap,
   } from "../CodeMirrorConfig";
@@ -270,6 +272,7 @@
   $: updateWordWrap(settings.wordWrap);
   $: updateLineNumbersState(settings.showLineNumbers);
   $: updateScrollPastEnd(settings.scrollPastEnd);
+  $: updateTheme(settings.theme);
 
   // we use Scintila terminology, it's language in CodeMirror
   let lexerId = null;
@@ -480,9 +483,6 @@
    * @returns {Promise<EditorState>}
    */
   async function createEditorState(s, fileName = "") {
-    let theme = undefined;
-    let styles = undefined;
-
     // TODO: why is this [] and not null or something?
     let lang = await getCMLangFromFileName(fileName);
     statusLang = "Text";
@@ -493,7 +493,7 @@
       lang = [];
     }
 
-    const exts = [...makeConfig(settings, lang), ...getTheme(theme, styles)];
+    const exts = [...makeConfig(settings, lang)];
     let res = EditorState.create({
       doc: s ?? undefined,
       extensions: exts,
@@ -1207,6 +1207,13 @@
         settings.scrollPastEnd = cmdId;
         break;
 
+      case m.IDM_VIEW_STYLE_THEME_DARK:
+        settings.theme = themeNameDark;
+        break;
+      case m.IDM_VIEW_STYLE_THEME_DEFAULT:
+        settings.theme = themeNameDefault;
+        break;
+
       case m.IDM_VIEW_LINENUMBERS:
         settings.showLineNumbers = !settings.showLineNumbers;
         break;
@@ -1738,6 +1745,10 @@
         return settings.showCodeFolding;
       case m.IDM_VIEW_SHOWINDENTGUIDES:
         return settings.showIndentGuides;
+      case m.IDM_VIEW_STYLE_THEME_DARK:
+        return settings.theme === themeNameDark;
+      case m.IDM_VIEW_STYLE_THEME_DEFAULT:
+        return settings.theme === themeNameDefault;
     }
     return false;
   }

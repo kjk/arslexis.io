@@ -63,6 +63,7 @@ import {
   makeShowWhiteSpace,
   makeTabSize,
   makeTabState,
+  makeTheme,
   makeVisualBraceMatching,
   makeWordWrap,
 } from "../CodeMirrorConfig";
@@ -166,6 +167,7 @@ export function makeConfig(settings, lang) {
     makeIndentGuides(settings.showIndentGuides),
     makeCodeFolding(settings.showCodeFolding),
     makeScrollPastEnd(settings.scrollPastEnd),
+    makeTheme(settings.theme),
     makeLang(lang),
   ];
   return res;
