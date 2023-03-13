@@ -517,6 +517,10 @@
   }
 
   async function newEmptyFile() {
+    if (!editorView) {
+      console.log("newEmptyFile: no editorView");
+      return;
+    }
     file = null;
     name = "Untitled";
     initialState = await createEditorState("");
@@ -1596,7 +1600,9 @@
         }
         break;
       case m.IDT_EDIT_FIND:
+      case m.IDM_EDIT_FIND:
       case m.IDT_EDIT_REPLACE:
+      case m.IDM_EDIT_REPLACE:
         openSearchPanel(editorView);
         noEditorFocus = true;
         break;
@@ -1937,6 +1943,7 @@
     {:else}
       <MenuBar
         hidden={true}
+        filterFn={filterMenuItem}
         menuDidOpenFn={handleMenuDidOpen}
         menuBar={m.mainMenuBar}
         noMenuCommands={m.noMenuCommands}
