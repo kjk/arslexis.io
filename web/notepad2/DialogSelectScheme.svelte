@@ -25,6 +25,7 @@
     ["Diff", m.IDM_LEXER_DIFF],
     ["Go Source", m.IDM_LEXER_GO],
     ["HTML Source", m.IDM_LEXER_HTML],
+    ["JavaScript Source", m.IDM_LEXER_JS],
     ["Java Source", m.IDM_LEXER_JAVA],
     ["JSON Document", m.IDM_LEXER_JSON],
     ["LESS Source", m.IDM_LEXER_LESS],
