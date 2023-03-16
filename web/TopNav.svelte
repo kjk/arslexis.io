@@ -6,8 +6,8 @@
   export let gitHubURL = "https://github.com/kjk/onlinetool-docs";
 </script>
 
-<div class="flex items-center mx-4 pt-1 pb-2 text-gray-500">
-  <div class="flex font-bold text-lg items-center">
+<div class="flex items-center mx-4 pt-1 pb-2">
+  <div class="flex text-lg items-center">
     <a class="px-1 py-1 mr-1 hover:bg-gray-100" href="/">
       <SvgHome />
     </a>
