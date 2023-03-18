@@ -1,4 +1,4 @@
-<h1 align="center"><a href="https://onlinetool.io">OnlineTool.io</a></h1>
+<h1 align="center"><a target="_blank" href="https://onlinetool.io">OnlineTool.io</a></h1>
 <h3 align="center">Web-based Tools</h3>
 
 # Tools
