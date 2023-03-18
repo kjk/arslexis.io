@@ -7,6 +7,7 @@ import copy from "rollup-plugin-copy";
 export default defineConfig({
   root: "./web",
   build: {
+    // emptyOutDir: true,
     sourcemap: true,
     outDir: resolve("dist"),
     chunkSizeWarningLimit: 600000,
@@ -20,10 +21,28 @@ export default defineConfig({
       ],
       input: {
         main: resolve("web", "index.html"),
-
+        test: resolve("web", "test.html"),
+        // unzip
+        unzip: resolve("web", "unzip", "index.html"),
+        // wc
+        wc: resolve("web", "wc", "index.html"),
+        // image optim
+        image_resize_optimize: resolve(
+          "web",
+          "image-resize-optimize",
+          "index.html"
+        ),
+        // goplayground
+        goplayground: resolve("web", "goplayground", "index.html"),
+        // gist editor
+        gisteditor: resolve("web", "gisteditor", "index.html"),
+        gistedit: resolve("web", "gisteditor", "edit.html"),
+        nogist: resolve("web", "gisteditor", "nogist.html"),
+        github_success: resolve("web", "github_success.html"),
         // notepad2
         notepad2: resolve("web", "notepad2", "index.html"),
       },
+
       output: {
         manualChunks: {
           cm: ["codemirror"],
@@ -33,18 +52,29 @@ export default defineConfig({
           langjava: ["@codemirror/lang-java"],
           langvue: ["@codemirror/lang-vue"],
           langmarkdown: ["@codemirror/lang-markdown"],
+          langxml: ["@codemirror/lang-xml"],
+          langjson: ["@codemirror/lang-json"],
+          langsvelte: ["@replit/codemirror-lang-svelte"],
+
+          langrust: ["@codemirror/lang-rust"],
+          langsql: ["@codemirror/lang-sql"],
+          langpython: ["@codemirror/lang-python"],
+          langphp: ["@codemirror/lang-php"],
+          langcpp: ["@codemirror/lang-cpp"],
+
+          langlegacy: [
+            "@codemirror/legacy-modes/mode/lua",
+            "@codemirror/legacy-modes/mode/go",
+            "@codemirror/legacy-modes/mode/diff",
+            "@codemirror/legacy-modes/mode/css",
+            "@codemirror/legacy-modes/mode/octave",
+            "@codemirror/legacy-modes/mode/shell",
+            "@codemirror/legacy-modes/mode/clike",
+            "@codemirror/legacy-modes/mode/ruby",
+          ],
           cmlangs: [
-            "@codemirror/lang-angular",
-            "@codemirror/lang-wast",
-            "@codemirror/lang-xml",
-            "@codemirror/lang-rust",
-            "@codemirror/lang-sql",
-            "@codemirror/lang-python",
-            "@codemirror/lang-php",
-            "@codemirror/lang-cpp",
-            "@codemirror/lang-json",
-            // TODO: why this doesn't work
-            // "@codemirror/legacy-modes",
+            // "@codemirror/lang-angular",
+            // "@codemirror/lang-wast",
             "@codemirror/theme-one-dark",
           ],
         },

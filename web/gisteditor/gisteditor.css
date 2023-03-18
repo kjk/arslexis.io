@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+
+    /* font size as in stack overflow */
+    font-size: 12pt;
+
+    color: #333;
+
+  /* TODO: do I need this ? 
+    https://stackoverflow.com/questions/21209223/remove-bounce-on-scroll-in-browser-issue-with-positionfixed-div
+  */
+  overscroll-behavior-y: none;
+}
+
+/* centers navbar and list of gists */
+.center {
+  width: 95vw;
+  max-width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2px 0;
+}
+
+.dropdown {
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  margin-left: 1em;
+  padding: 4px 8px;
+}
+
+.dropdown:hover {
+  background-color: #ededed;
+}
+
+.dropdown:hover .dropdown-content {
+  display: flex;
+}
+
+.dropdown-content {
+  display: none;
+  flex-direction: column;
+
+  padding: 8px 0;
+  white-space: nowrap;
+  position: absolute;
+  line-height: 1.2em;
+  min-width: 180px;
+  /* border: 1px solid lightgray; */
+  z-index: 50;
+
+  background-color: white;
+  border: 1px solid lightgray;
+  border-radius: 4px;
+}
+
+.dropdown-content div {
+  display: flex;
+}
+
+.dropdown-content div a {
+  color: grey;
+  /* background-color: yellow; */
+  padding: 4px 16px;
+  flex-grow: 1;
+}
+
+.dropdown-content div a:hover {
+  background-color: #ededed;
+}
+
+svg {
+  fill: currentColor;
+  display: block;
+  flex-shrink: 0;
+  backface-visibility: hidden;
+}
+
+
