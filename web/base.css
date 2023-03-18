@@ -2,39 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --dbox-main-bg-color: rgb(243 243 244);
-  --dbox-sidebar-bg-color: #ededed;
-  --dbox-search-input-bg-color: #e0e0e1;
-  --dbox-sidebar-hover-bg-color: #d6d6d6;
-  --dbox-title-bg-color: #dcdcdc;
-  --dbox-sidebar-selected-bg-color: #3e92fc;
-  --dbox-sidebar-send-feedback-bg-color: #c5c0bd;
-}
-
-@layer components {
-  /* DevBox button */
-  .btn-db {
-    @apply text-xs py-0.5 px-2 border hover:bg-gray-200 bg-white rounded-md border border-gray-300;
-  }
-
-  .dbox-label {
-    @apply bg-white px-1 py-0.5 whitespace-nowrap border-b border-gray-200;
-  }
-
-  .dbox-title {
-    background-color: var(--dbox-title-bg-color);
-  }
-
-}
-
 * {
   box-sizing: border-box;
 }
 
 body {
-  /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; */
-
   /* https://bitsofco.de/the-new-system-font-stack/ */
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
   "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
@@ -49,19 +21,6 @@ body {
     https://stackoverflow.com/questions/21209223/remove-bounce-on-scroll-in-browser-issue-with-positionfixed-div
   */
   overscroll-behavior-y: none;
-}
-
-
-.dbox-sidebar {
-  background-color: var(--dbox-sidebar-bg-color);
-}
-
-.dbox-tool {
-  background-color: var(--dbox-main-bg-color);
-}
-
-.dbox-send-feedback {
-  background-color: var(--dbox-sidebar-send-feedback-bg-color);
 }
 
 /* svg {
