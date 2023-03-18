@@ -86,6 +86,7 @@ func main() {
 
 	if flgBuild {
 		build()
+		buildDocs()
 		return
 	}
 
@@ -134,6 +135,12 @@ func deploy() {
 
 func build() {
 	cmd := exec.Command("yarn", "build", "--emptyOutDir")
+	cmdLog(cmd)
+	must(cmd.Run())
+}
+
+func buildDocs() {
+	cmd := exec.Command("yarn", "docs:build")
 	cmdLog(cmd)
 	must(cmd.Run())
 }

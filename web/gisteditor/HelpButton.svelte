@@ -19,7 +19,7 @@
       <div>
         <a
           on:click={hideMenu}
-          href="https://docs.onlinetool.io/gist-editor"
+          href="https://onlinetool.io/docs/gist-editor"
           target="_blank"
           rel="noreferrer"
         >
@@ -29,7 +29,7 @@
       <div>
         <a
           on:click={hideMenu}
-          href="https://docs.onlinetool.io/gist-editor"
+          href="https://onlinetool.io/docs/gist-editor"
           target="_blank"
           rel="noreferrer"
         >

@@ -945,7 +945,7 @@
           {/each}
           <!-- <div>
             <a
-              href="https://docs.onlinetool.io/gist-editor"
+              href="https://onlinetool.io/docs/gist-editor"
               target="_blank"
               rel="noreferrer"
             >

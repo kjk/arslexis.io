@@ -154,7 +154,7 @@ const docsForLang = {
 export function docsForFile(fileName) {
   fileName = fileName.toLowerCase();
   if (fileName === "codeeval.yml") {
-    return [["codeeval.yml syntax", "https://docs.onlinetool.io/gist-editor"]];
+    return [["codeeval.yml syntax", "https://onlinetool.io/docs/gist-editor"]];
   }
   const li = getLangInfoFromFileName(fileName);
   if (!li) {

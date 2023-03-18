@@ -30,7 +30,7 @@
   <div class="flex justify-end mt-2">
     <a
       class="btn abtn"
-      href="https://docs.onlinetool.io/gist-editor"
+      href="https://onlinetool.io/docs/gist-editor"
       target="_blank"
       rel="noreferrer"
     >

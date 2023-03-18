@@ -487,7 +487,7 @@
       target="_blank"
       rel="noreferrer"
       class="text-blue-700 underline mr-2"
-      href="https://docs.onlinetool.io/notepad2-browse-files"
+      href="https://onlinetool.io/docs/notepad2-browse-files"
     >
       help</a
     >
