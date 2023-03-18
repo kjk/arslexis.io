@@ -3,7 +3,7 @@
   import Twitter from "./icons/Twitter.svelte";
   import GitHub from "./icons/GitHub.svelte";
 
-  export let gitHubURL = "https://github.com/kjk/onlinetool-docs";
+  export let gitHubURL = "https://github.com/kjk/onlinetool.io";
 </script>
 
 <div class="flex items-center mx-4 pt-1 pb-2">
@@ -17,7 +17,7 @@
   <div class="grow" />
   <a
     class="px-1 py-1 mr-1 hover:underline text-xs"
-    href="https://github.com/kjk/onlinetool-docs/discussions"
+    href="https://github.com/kjk/onlinetool.io/discussions"
     target="_blank"
     rel="noreferrer"
   >

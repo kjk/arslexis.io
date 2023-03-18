@@ -1635,16 +1635,16 @@
       case m.IDM_HELP_REPORT_ISSUE:
       case m.IDM_HELP_FEATURE_REQUEST:
         window.open(
-          "https://github.com/kjk/onlinetool-docs/labels/notepad2",
+          "https://github.com/kjk/onlinetool.io/labels/notepad2",
           "_blank"
         );
         break;
       case m.IDM_HELP_SOURCE_CODE:
-        window.open("https://github.com/kjk/notepad2web", "_blank");
+        window.open("https://github.com/kjk/onlinetool.io", "_blank");
         break;
       case m.IDM_HELP_DISCUSS:
         window.open(
-          "https://github.com/kjk/onlinetool-docs/discussions/categories/notepad2",
+          "https://github.com/kjk/onlinetool.io/discussions/categories/notepad2",
           "_blank"
         );
         break;
@@ -1918,7 +1918,7 @@
       <div class="grow" />
       <a
         class="px-1 py-1 mr-1 hover:underline text-xs"
-        href="https://github.com/kjk/onlinetool-docs/discussions"
+        href="https://github.com/kjk/onlinetool.io/discussions"
         target="_blank"
         rel="noreferrer"
       >
@@ -1926,7 +1926,7 @@
       </a>
       <a
         class="px-1 py-1 mr-1 hover:bg-gray-100"
-        href="https://github.com/kjk/notepad2web"
+        href="https://github.com/kjk/onlinetool.io"
         target="_blank"
         rel="noreferrer"
       >

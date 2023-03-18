@@ -33,7 +33,7 @@
       class="ml-2 underline focus-within:outline"
       rel="noreferrer"
       target="_blank"
-      href="https://github.com/kjk/notepad2web/issues"
+      href="https://github.com/kjk/onlinetool.io/issues"
       >report bugs, request features</a
     >
     <a
@@ -46,7 +46,7 @@
       class="ml-2 underline focus-within:outline"
       rel="noreferrer"
       target="_blank"
-      href="https://github.com/kjk/notepad2web">see source code</a
+      href="https://github.com/kjk/onlinetool.io">see source code</a
     >
 
     <div class="mt-1">Credits:</div>
