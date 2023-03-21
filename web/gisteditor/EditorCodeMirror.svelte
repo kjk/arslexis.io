@@ -796,13 +796,11 @@
   class="grid fixed top-0 left-0 w-screen h-screen max-h-screen"
   style="grid-template-rows: auto auto 1fr;"
 >
-  <div class="flex items-center text-sm px-4 mb-1">
-    <div>
-      <a href="/" class="hover:bg-gray-100" on:click|preventDefault={goHome}>
-        Home
-      </a>
-    </div>
-    <div class="px-2 text-gray-400">/</div>
+  <div class="flex items-baseline text-sm px-4 mb-1 gap-x-2">
+    <a href="/" class="hover:bg-gray-100" on:click|preventDefault={goHome}>
+      Home
+    </a>
+    <div class="text-gray-400">/</div>
     <GistDescription {gist} {descriptionChanged} />
     <Login showTwitter={false} onGoHome={goHome} {onNewGist} gistid={gist.id} />
   </div>
@@ -971,7 +969,7 @@
   <div class="flex overflow-hidden">
     <div
       class:halfwidth={doublePane}
-      class="codemirror-wrapper overflow-auto flex-grow bg-transparent"
+      class="codemirror-wrapper text-sm overflow-auto flex-grow bg-transparent"
       bind:this={editorElement}
     />
 

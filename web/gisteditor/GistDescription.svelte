@@ -55,37 +55,34 @@
 </script>
 
 {#if editingDescription === null}
-  <div class="flex items-baseline flex-grow border border-transparent">
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div
-      class="truncate"
-      use:tooltip={"Click to edit description"}
-      on:click={startEditDescription}
-      class:no-description={!description}
-    >
-      {description || "no description"}
-    </div>
-    {#if gistType}
-      <div
-        class="text-xs text-gray-600 border border-gray-300 mt-1 ml-2 px-2 py-0.5"
-      >
-        {gistType}
-      </div>
-    {/if}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div
+    class="truncate"
+    use:tooltip={"Click to edit description"}
+    on:click={startEditDescription}
+    class:no-description={!description}
+  >
+    {description || "no description"}
   </div>
+  {#if gistType}
+    <div
+      class="text-xs text-gray-600 border border-gray-300 px-1 pt-0.25 pb-0.5"
+    >
+      {gistType}
+    </div>
+    <div class="flex-grow" />
+  {/if}
 {:else}
   <!-- svelte-ignore a11y-autofocus -->
-  <div class="flex-grow border border-transparent">
-    <input
-      class="outline-none w-full border border-gray-400"
-      autofocus
-      spellcheck={false}
-      bind:value={editingDescription}
-      on:focus={selectDescriptionInput}
-      on:blur={closeDescriptionEdit}
-      on:keydown={descriptionEditKeyDown}
-    />
-  </div>
+  <input
+    class="flex-grow outline-none w-full border border-gray-400"
+    autofocus
+    spellcheck={false}
+    bind:value={editingDescription}
+    on:focus={selectDescriptionInput}
+    on:blur={closeDescriptionEdit}
+    on:keydown={descriptionEditKeyDown}
+  />
 {/if}
 
 <style>
