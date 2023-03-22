@@ -33,8 +33,8 @@ func main() {
   let formatShortcut = browser.mac ? "⌘+S" : "Ctrl+S";
 
   function clearOutput() {
-    console.log("clearOutput");
     outputMsg = "";
+    errorMsg = "";
   }
 
   function createEditorView() {
@@ -340,7 +340,7 @@ func main() {
 
 {#if errorMsg !== ""}
   <div
-    class="status fixed min-w-[12em] border px-2 py-1 text-sm bg-white text-red-500"
+    class="status fixed min-w-[12em] border px-2 py-1 text-sm bg-white text-red-500 whitespace-pre"
   >
     {errorMsg}
   </div>
