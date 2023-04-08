@@ -53,9 +53,16 @@ func getSecretsFromEnv() {
 	}
 }
 
+var (
+	flgRunDev bool
+)
+
+func isDev() bool {
+	return flgRunDev
+}
+
 func main() {
 	var (
-		flgRunDev  bool
 		flgRunProd bool
 		flgDeploy  bool
 		flgBuild   bool

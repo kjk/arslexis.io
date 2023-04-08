@@ -33,7 +33,7 @@ func logHTTPReq(r *http.Request, code int, size int64, dur time.Duration) {
 
 	err := httpLogger.LogReq(r, code, size, dur)
 	if err != nil {
-		logerrf(ctx(), "httpLogger.LogReq() failed with '%s'\n", err)
+		logErrorf(ctx(), "httpLogger.LogReq() failed with '%s'\n", err)
 	}
 }
 
@@ -50,7 +50,7 @@ func uploadCompressedHTTPLog(app, path string) {
 	remotePath += ".br"
 	_, err := mc.UploadFileBrotliCompressed(remotePath, path, true)
 	if err != nil {
-		logerrf(ctx(), "uploadCompressedHTTPLog: minioUploadFilePublic() failed with '%s'\n", err)
+		logErrorf(ctx(), "uploadCompressedHTTPLog: minioUploadFilePublic() failed with '%s'\n", err)
 		return
 	}
 	logf(ctx(), "uploadCompressedHTTPLog: uploaded '%s' as '%s' in %s\n", path, remotePath, time.Since(timeStart))

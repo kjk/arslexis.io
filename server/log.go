@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-var (
-	verbose bool
-)
-
 func logf(ctx context.Context, s string, args ...interface{}) {
 	if len(args) > 0 {
 		s = fmt.Sprintf(s, args...)
@@ -16,34 +12,35 @@ func logf(ctx context.Context, s string, args ...interface{}) {
 	fmt.Print(s)
 }
 
-func verbosef(ctx context.Context, format string, args ...interface{}) {
-	if !verbose {
-		return
-	}
-	logf(ctx, format, args...)
-}
-
-func logerrf(ctx context.Context, format string, args ...interface{}) {
+func logErrorf(ctx context.Context, format string, args ...interface{}) {
 	s := format
 	if len(args) > 0 {
 		s = fmt.Sprintf(format, args...)
 	}
-	fmt.Printf("Error: %s", s)
-}
-
-func logErrorf(ctx context.Context, s string, args ...interface{}) {
-	if len(args) > 0 {
-		s = fmt.Sprintf(s, args...)
-	}
 	cs := getCallstack(1)
-	fmt.Printf("%s\n%s\n", s, cs)
+	logf(ctx, "Error: %s\n%s\n", s, cs)
 }
 
 // return true if there was an error
-func logIfError(ctx context.Context, err error) bool {
+func logIfErrf(ctx context.Context, err error, msgAndArgs ...interface{}) bool {
 	if err == nil {
 		return false
 	}
-	logErrorf(ctx, "err.Error(): %s", err.Error())
+	msg := ""
+	if len(msgAndArgs) > 0 {
+		// first arg should be a format string but we're playing it safe
+		msg = fmt.Sprintf("%s", msgAndArgs)
+		if len(msgAndArgs) > 1 {
+			msg = fmt.Sprintf(msg, msgAndArgs[1:]...)
+		}
+	}
+
+	cs := getCallstack(1)
+	if msg != "" {
+		logf(ctx, "Error: %s\n%s\n%s\n", err, msg, cs)
+
+	} else {
+		logf(ctx, "Error: %s\n%s\n", err, cs)
+	}
 	return true
 }

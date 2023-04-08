@@ -47,7 +47,7 @@ func pirschSendHit(r *http.Request) {
 	// TODO: use HitWithOptions and set better RemoteIP
 	err := pirschClient.Hit(r)
 	if err != nil {
-		logerrf(ctx(), "pirschClient.Hit() failed with '%s'\n", err)
+		logErrorf(ctx(), "pirschClient.Hit() failed with '%s'\n", err)
 	}
 }
 
@@ -64,7 +64,7 @@ func pirschSendEvent(r *http.Request, name string, durMs int, meta map[string]st
 	// number so I'm sending it as milliseconds
 	err := pirschClient.Event(name, durMs, meta, r)
 	if err != nil {
-		logerrf(ctx(), "pirschClient.Event() failed with '%s'\n", err)
+		logErrorf(ctx(), "pirschClient.Event() failed with '%s'\n", err)
 		return
 	}
 	s := "event: " + name

@@ -28,10 +28,6 @@ func ctx() context.Context {
 	return context.Background()
 }
 
-func isDev() bool {
-	return u.IsWinOrMac()
-}
-
 func cmdLog(cmd *exec.Cmd) {
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
@@ -114,9 +110,7 @@ func serveJSONWithCode(w http.ResponseWriter, r *http.Request, code int, v inter
 	}
 	writeHeader(w, code, jsMimeType)
 	_, err = w.Write(d)
-	if err != nil {
-		logErrorf(r.Context(), "err: '%s'\n", err)
-	}
+	logIfErrf(r.Context(), err)
 }
 
 func serveJSONOK(w http.ResponseWriter, r *http.Request, v interface{}) {

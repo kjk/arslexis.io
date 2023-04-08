@@ -24,7 +24,8 @@ import (
 )
 
 var (
-	httpPort = 9219
+	httpPort    = 9219
+	proxyURLStr = "http://localhost:3025"
 )
 
 var (
@@ -255,7 +256,6 @@ func runServerDev() {
 	defer stopVite()
 
 	// must be same as vite.config.js
-	proxyURLStr := "http://localhost:3025"
 	proxyURL, err := url.Parse(proxyURLStr)
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
