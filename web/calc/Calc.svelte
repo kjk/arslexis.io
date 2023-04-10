@@ -112,11 +112,11 @@ speed in mps
     <textarea
       bind:value={expression}
       bind:this={textarea}
-      class="w-[50%] px-4 py-1 border-none text-sm focus-visible:outline-none"
+      class="grow px-4 py-1 border-none text-sm focus-visible:outline-none"
       placeholder="expression"
     />
     <div
-      class="w-[50%] bg-slate-50 px-4 py-1 text-sm flex flex-col items-start"
+      class="min-w-[20%] bg-slate-50 px-4 py-1 text-sm flex flex-col items-start"
     >
       {#each results as result}
         {#if isError(result)}
