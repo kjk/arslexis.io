@@ -1,6 +1,6 @@
 import "../base.css";
 
-import App from "./GoPlayground.svelte";
+import App from "./Calc.svelte";
 
 const args = {
   target: document.getElementById("app"),

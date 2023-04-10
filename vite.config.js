@@ -1,7 +1,7 @@
+import copy from "rollup-plugin-copy";
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import copy from "rollup-plugin-copy";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -41,6 +41,8 @@ export default defineConfig({
         github_success: resolve("web", "github_success.html"),
         // notepad2
         notepad2: resolve("web", "notepad2", "index.html"),
+        // calc
+        calc: resolve("web", "calc", "index.html")
       },
 
       output: {
