@@ -303,7 +303,7 @@ func main() {
   });
 </script>
 
-<div class="g">
+<div class="g grid h-screen">
   <TopNav>
     <div class="flex items-baseline">
       <div class="text-purple-800 font-bold"><tt>Go Playground</tt></div>
@@ -372,6 +372,10 @@ func main() {
 {/if}
 
 <style>
+  .g {
+    grid-template-rows: auto 1fr;
+  }
+
   .output {
     max-height: 80vh;
     min-height: 12em;
@@ -395,11 +399,6 @@ func main() {
     .hide-if-small {
       display: none;
     }
-  }
-  .g {
-    display: grid;
-    height: 100vh;
-    grid-template-rows: auto 1fr;
   }
 
   /* have to undo some of the taildwindcss reset */

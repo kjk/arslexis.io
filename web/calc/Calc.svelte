@@ -3,6 +3,7 @@
   import { len } from "../util";
   import { focus } from "../actions/focus";
   import { onMount } from "svelte";
+  import TopNav from "../TopNav.svelte";
 
   var defaultExpression = `# this is a comment
 radius : 23
@@ -82,7 +83,21 @@ speed in mps
 </script>
 
 <div class="h-screen flex flex-col">
-  <div class="flex px-4 py-2 gap-x-2 bg-slate-200">
+  <TopNav>
+    <div class="flex items-baseline">
+      <div class="text-purple-800 font-bold"><tt>Calc</tt></div>
+      <div class="text-gray-700 text-sm ml-2 hide-if-small">
+        notepad-like calculator
+      </div>
+    </div>
+    <button
+      on:click={clear}
+      class="shadow-md text-sm text-gray-700 ml-4 px-4 border hover:bg-gray-200"
+      >clear</button
+    >
+  </TopNav>
+
+  <!-- <div class="flex px-4 py-2 gap-x-2 bg-slate-200">
     <a href="/" class="underline">Home</a>
     <div>/</div>
     <div>This is a notepad-like calculator</div>
@@ -92,8 +107,8 @@ speed in mps
       class="border border-slate-400 px-4 py-0.5 text-xs bg-white hover:bg-slate-50"
       >clear</button
     >
-  </div>
-  <div class="flex font-mono h-min-0 h-full">
+  </div> -->
+  <div class="flex font-mono h-min-0 h-full border-t">
     <textarea
       bind:value={expression}
       bind:this={textarea}
