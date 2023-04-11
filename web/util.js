@@ -322,6 +322,7 @@ export function trapFocus2(parent, e) {
  * @returns {string}
  */
 export function fmtSize(n) {
+  /** @type {[number, string][]} */
   const a = [
     [1024 * 1024 * 1024 * 1024, "TB"],
     [1024 * 1024 * 1024, "GB"],
@@ -331,7 +332,6 @@ export function fmtSize(n) {
   for (const el of a) {
     const size = el[0];
     if (n >= size) {
-      // @ts-ignore
       let s = (n / size).toFixed(2);
       return s.replace(".00", "") + " " + el[1];
     }
