@@ -52,7 +52,7 @@ func pirschSendHit(r *http.Request) {
 }
 
 func pirschSendEvent(r *http.Request, name string, durMs int, meta map[string]string) {
-	if r == nil || r.URL == nil {
+	if pirschClientSecret == "" || r == nil || r.URL == nil {
 		return
 	}
 	if !strings.Contains(r.Host, pirschHost) {

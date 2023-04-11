@@ -84,9 +84,9 @@ speed in mps
 <div class="h-screen flex flex-col">
   <TopNav>
     <div class="flex items-baseline">
-      <div class="text-purple-800 font-bold"><tt>Calc</tt></div>
+      <div class="text-purple-800 font-bold">Calcula</div>
       <div class="text-gray-700 text-sm ml-2 hide-if-small">
-        notepad-like calculator
+        a notepad-like calculator
       </div>
     </div>
     <button
