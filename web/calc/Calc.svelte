@@ -1,7 +1,6 @@
 <script>
   import { Fcal } from "fcal";
   import { len } from "../util";
-  import { focus } from "../actions/focus";
   import { onMount } from "svelte";
   import TopNav from "../TopNav.svelte";
 
