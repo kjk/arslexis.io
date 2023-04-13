@@ -4,9 +4,6 @@ import (
 	"flag"
 	"os"
 	"os/exec"
-	"strings"
-
-	"github.com/kjk/common/httputil"
 )
 
 var (
@@ -42,14 +39,6 @@ func getSecretsFromEnv() {
 		secretGitHubLocal = ""
 	} else {
 		logf(ctx(), "Got GitHub local secret\n")
-	}
-
-	renderDeployURL = os.Getenv("ONLINETOOL_DEPLOY_URL")
-	if !strings.HasPrefix(renderDeployURL, "https://") {
-		logf(ctx(), "No render deploy URL\n")
-		renderDeployURL = ""
-	} else {
-		logf(ctx(), "Got render deploy URL\n")
 	}
 }
 
@@ -126,18 +115,19 @@ func startVite() func() {
 	}
 }
 
-var (
-	renderDeployURL string
-)
+func cmdRunLoggedMust(cmd *exec.Cmd) {
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	err := cmd.Run()
+	must(err)
+}
 
 func deploy() {
-	if renderDeployURL == "" {
-		logf(ctx(), "can't deploy because renderDeployURL not set\n")
-		return
-	}
-	d, err := httputil.Get(renderDeployURL)
-	must(err)
-	logf(ctx(), "deploy result: %s\n", string(d))
+	cmd := exec.Command("git", "rebase", "deploy", "main")
+	cmdRunLoggedMust(cmd)
+	cmd = exec.Command("git", "push")
+	cmdRunLoggedMust(cmd)
 }
 
 func build() {
