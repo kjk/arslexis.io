@@ -116,6 +116,7 @@ func startVite() func() {
 }
 
 func cmdRunLoggedMust(cmd *exec.Cmd) {
+	logf(ctx(), "> %s\n", cmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -126,7 +127,7 @@ func cmdRunLoggedMust(cmd *exec.Cmd) {
 func deploy() {
 	cmd := exec.Command("git", "rebase", "deploy", "main")
 	cmdRunLoggedMust(cmd)
-	cmd = exec.Command("git", "push")
+	cmd = exec.Command("git", "push", "deploy")
 	cmdRunLoggedMust(cmd)
 }
 
