@@ -125,9 +125,9 @@ func cmdRunLoggedMust(cmd *exec.Cmd) {
 }
 
 func deploy() {
-	cmd := exec.Command("git", "rebase", "deploy", "main")
+	cmd := exec.Command("git", "rebase", "main", "deploy")
 	cmdRunLoggedMust(cmd)
-	cmd = exec.Command("git", "push", "deploy")
+	cmd = exec.Command("git", "push")
 	cmdRunLoggedMust(cmd)
 }
 
