@@ -1,8 +1,9 @@
 // https://www.npmjs.com/package/idb
 
-import { KV, makeIndexedDBStore } from "../dbutil";
-import { len, throwIf } from "../util";
 import { FsFile, fsTypeFolder, fsTypeIndexedDB, setIDB } from "./FsFile";
+import { KV, makeIndexedDBStore } from "../dbutil";
+
+import { throwIf } from "../util";
 
 const db = new KV("np2store", "keyval");
 

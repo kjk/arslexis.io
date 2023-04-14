@@ -7,13 +7,23 @@
     placeholder as placeholderExt,
   } from "@codemirror/view";
   import { EditorState } from "@codemirror/state";
-  import { debounce, throwIf } from "../util";
+  import { debounce, len, throwIf } from "../util";
   import { basicSetup2 } from "../cmexts";
   import { getCMLangFromFileName } from "../cmlangs";
   import { onMount } from "svelte";
   import { indentUnit } from "@codemirror/language";
   import { indentWithTab } from "@codemirror/commands";
   import { focusEditorView } from "../cmutil";
+  import {
+    Note,
+    addNoteVersion,
+    getNoteCurrentVersion,
+    getNotes,
+    setNoteTitle,
+    setNotes,
+  } from "./noteddb";
+
+  let notes = [];
 
   /** @type {HTMLElement} */
   let editorElement = null;
@@ -23,6 +33,38 @@
   let statusMsg = "";
   let errorMsg = "";
 
+  /** @type {import("./noteddb").Note} */
+  let note;
+
+  let title;
+  /** @type {HTMLElement}*/
+  let titleEl;
+
+  let debouncedTitleChanged = debounce(titleChanged, 500);
+
+  $: noteChanged(note);
+  $: debouncedTitleChanged(title);
+
+  async function titleChanged(title) {
+    if (!title || !note) {
+      return;
+    }
+    console.log("titleChanged:", title);
+    setNoteTitle(note, title);
+    await setNotes(notes);
+    notes = notes;
+  }
+
+  async function noteChanged(note) {
+    if (!note) {
+      return;
+    }
+    console.log("noteChanged:", note);
+    title = note.title;
+    let s = await getNoteCurrentVersion(note);
+    setEditorText(s);
+  }
+
   function clearOutput() {
     outputMsg = "";
     errorMsg = "";
@@ -31,7 +73,11 @@
   function createEditorView() {
     throwIf(!editorElement);
 
-    function handleEditorChange(tr) {}
+    async function handleEditorChange(tr) {
+      let s = editorView.state.doc.toString();
+      await addNoteVersion(note, s);
+      await setNotes(notes);
+    }
 
     /** @type {Function} */
     const changeFn = debounce(handleEditorChange, 300);
@@ -42,7 +88,6 @@
       if (tr.docChanged) {
         changeFn(tr);
         console.log("doc changed");
-        setHash("");
       }
     }
 
@@ -134,37 +179,6 @@
   }
 
   /**
-   * @param {string} hash
-   */
-  function setHash(hash) {
-    console.log("setHash:", hash);
-    if (hash != "") {
-      hash = "#" + hash;
-    }
-    if (hash === location.hash) {
-      return;
-    }
-    const uri = location.pathname + hash;
-    if (history.pushState) {
-      history.pushState(null, null, uri);
-    } else {
-      location.href = uri;
-    }
-  }
-
-  function getError(res) {
-    // TODO: don't get why there are Error and Errors
-    // maybe can improve backend code?
-    if (res.Error && res.Error !== "") {
-      return res.Error;
-    }
-    if (res.Errors && res.Errors !== "") {
-      return res.Errors;
-    }
-    return "";
-  }
-
-  /**
    * @param {KeyboardEvent} ev
    */
   function onKeyDown(ev) {
@@ -192,39 +206,104 @@
     }
   }
 
-  function newNote() {}
+  async function newNote(title, type = "md") {
+    let note = new Note();
+    note.title = title;
+    note.type = type;
+    notes.push(note);
+    await setNotes(notes);
+    return note;
+  }
+
+  async function createNewNote() {
+    console.log("createNewNote");
+    note = await newNote("");
+    titleEl.focus();
+  }
+
+  /**
+   * @param {Note} n
+   */
+  function openNote(n) {
+    note = n;
+  }
+
   onMount(async () => {
+    notes = await getNotes();
+    let nNotes = len(notes);
+    console.log("notes:", nNotes);
+
     editorView = createEditorView();
     document.addEventListener("keydown", onKeyDown);
 
     clearProcessingMessage();
     setEditorText("");
 
+    if (nNotes === 0) {
+      await createNewNote();
+    } else {
+      note = notes[nNotes - 1];
+      for (let n of notes) {
+        console.log(n.title);
+      }
+    }
+
     return () => {
       editorView = null;
       document.removeEventListener("keydown", onKeyDown);
+      setNotes(notes);
     };
   });
 </script>
 
-<div class="g grid h-screen px-4 py-2">
+<div class="g grid grid-rows-[auto_1fr_auto] h-screen px-4 py-2">
   <div class=" ml-1 flex justify-between">
     <div
+      bind:this={titleEl}
       on:keydown={onTitleKeyDown}
       contenteditable="true"
-      class="user-modify-plain grow text-xl font-semibold focus-within:outline-white"
-    >
-      Title
-    </div>
+      bind:textContent={title}
+      role="textbox"
+      aria-multiline="false"
+      class="px-0.5 ml-[-0.125rem] block user-modify-plain grow text-xl font-semibold focus-within:outline-white bg-white"
+    />
     <button
-      on:click={newNote}
-      class="text-sm border ml-4 border-gray-500 hover:bg-gray-100 rounded-md px-2"
+      on:click={createNewNote}
+      class="relative text-sm border ml-4 border-gray-500 hover:bg-gray-100 rounded-md px-2"
       >new note</button
     >
   </div>
+
   <div class="overflow-auto">
     <div class="codemirror-wrapper flex-grow" bind:this={editorElement} />
   </div>
+
+  {#if len(notes) === 0}
+    <div />
+  {:else}
+    <div class="bg-gray-50 flex items-baseline gap-x-2">
+      <div>Recent notes:</div>
+      {#each notes as n, i}
+        {@const n2 = notes[len(notes) - 1 - i]}
+        {#if i < 4}
+          <button
+            class="underline max-w-[6rem] truncate"
+            on:click={() => openNote(n2)}>{n2.title}</button
+          >
+          {#if i < 3}
+            <!-- <div>&bull;</div> -->
+          {/if}
+        {/if}
+      {/each}
+      {#if len(notes) > 3}
+        {@const n = len(notes) - 3}
+        <div class="flex">
+          <div>and</div>
+          <button class="underline ml-1">{n} more</button>
+        </div>
+      {/if}
+    </div>
+  {/if}
 </div>
 
 {#if statusMsg != ""}
@@ -268,7 +347,6 @@
 
 <style>
   .g {
-    grid-template-rows: auto 1fr;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system,
       BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans,
       sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol,
