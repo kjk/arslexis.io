@@ -1,36 +1,36 @@
+import { Compartment, EditorState } from "@codemirror/state";
 import {
-  keymap,
-  highlightSpecialChars,
-  drawSelection,
-  highlightActiveLine,
-  dropCursor,
-  rectangularSelection,
-  crosshairCursor,
-  highlightActiveLineGutter,
   EditorView,
+  crosshairCursor,
+  drawSelection,
+  dropCursor,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+  highlightSpecialChars,
+  keymap,
   placeholder as placeholderExt,
+  rectangularSelection,
 } from "@codemirror/view";
 import {
-  defaultHighlightStyle,
-  syntaxHighlighting,
-  indentOnInput,
-  bracketMatching,
-  foldGutter,
-  foldKeymap,
-} from "@codemirror/language";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
-import {
   autocompletion,
-  completionKeymap,
   closeBrackets,
   closeBracketsKeymap,
+  completionKeymap,
 } from "@codemirror/autocomplete";
-import { lintKeymap } from "@codemirror/lint";
+import {
+  bracketMatching,
+  defaultHighlightStyle,
+  foldGutter,
+  foldKeymap,
+  indentOnInput,
+  syntaxHighlighting,
+} from "@codemirror/language";
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 
-import { EditorState, Compartment } from "@codemirror/state";
-import { indentWithTab } from "@codemirror/commands";
 import { indentUnit } from "@codemirror/language";
+import { indentWithTab } from "@codemirror/commands";
+import { lintKeymap } from "@codemirror/lint";
 
 /** @typedef { import("@codemirror/state").Extension} Extension */
 
@@ -88,6 +88,34 @@ export const basicSetup = (() => [
   rectangularSelection(),
   crosshairCursor(),
   highlightActiveLine(),
+  highlightSelectionMatches(),
+  keymap.of([
+    ...closeBracketsKeymap,
+    ...defaultKeymap,
+    ...searchKeymap,
+    ...historyKeymap,
+    ...foldKeymap,
+    ...completionKeymap,
+    ...lintKeymap,
+  ]),
+])();
+
+export const basicSetup2 = (() => [
+  // highlightActiveLineGutter(),
+  highlightSpecialChars(),
+  history(),
+  // foldGutter(),
+  drawSelection(),
+  dropCursor(),
+  EditorState.allowMultipleSelections.of(true),
+  indentOnInput(),
+  syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+  bracketMatching(),
+  closeBrackets(),
+  autocompletion(),
+  rectangularSelection(),
+  crosshairCursor(),
+  // highlightActiveLine(),
   highlightSelectionMatches(),
   keymap.of([
     ...closeBracketsKeymap,
