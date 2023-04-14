@@ -1,3 +1,5 @@
+import { get } from "svelte/store";
+import { len } from "./util";
 import { openDB } from "idb";
 
 export class KV {
@@ -21,6 +23,10 @@ export class KV {
   async set(key, val) {
     return (await this.dbPromise).put(this.storeName, val, key);
   }
+  // rejects if already exists
+  async add(key, val) {
+    return (await this.dbPromise).add(this.storeName, val, key);
+  }
   async del(key) {
     return (await this.dbPromise).delete(this.storeName, key);
   }
@@ -39,7 +45,13 @@ export class KV {
  * @param {boolean} crossTab if true, changes are visible in other browser tabs (windows)
  * @returns {any}
  */
-export function makeIndexedDBStore(db, dbKey, initialValue, crossTab) {
+export function makeIndexedDBStore(
+  db,
+  dbKey,
+  initialValue,
+  crossTab,
+  log = false
+) {
   function makeStoreMaker(dbKey, initialValue, crossTab) {
     const lsKey = "store-notify:" + dbKey;
     let curr = initialValue;
@@ -47,6 +59,8 @@ export function makeIndexedDBStore(db, dbKey, initialValue, crossTab) {
 
     function getCurrentValue() {
       db.get(dbKey).then((v) => {
+        console.log(`getCurrentValue: key: '${dbKey}'`);
+        console.log("v:", v);
         curr = v || [];
         subscribers.forEach((cb) => cb(curr));
       });
@@ -67,9 +81,14 @@ export function makeIndexedDBStore(db, dbKey, initialValue, crossTab) {
     }
 
     function set(v) {
+      if (log) {
+        console.log(`db.set() key '${dbKey}', len(v): ${len(v)}`);
+        console.log("v:", v);
+      }
       curr = v;
       subscribers.forEach((cb) => cb(curr));
       db.set(dbKey, v).then((v) => {
+        console.log("saved");
         if (crossTab) {
           const n = +localStorage.getItem(lsKey) || 0;
           localStorage.setItem(lsKey, `${n + 1}`);
@@ -92,4 +111,13 @@ export function makeIndexedDBStore(db, dbKey, initialValue, crossTab) {
     return { set, subscribe };
   }
   return makeStoreMaker(dbKey, initialValue, crossTab);
+}
+
+/**
+ * @param {import("svelte/store").Writable<any>} store
+ */
+export function resaveStore(store) {
+  let v = get(store);
+  console.log("resaveStore: Len(v)", len(v));
+  store.set(v);
 }
