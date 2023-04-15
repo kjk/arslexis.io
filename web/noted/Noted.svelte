@@ -22,6 +22,7 @@
     setNoteTitle,
     setNotes,
   } from "./noteddb";
+  import GlobalTooltip, { gtooltip } from "./GlobalTooltip.svelte";
 
   let notes = [];
 
@@ -256,9 +257,12 @@
   });
 </script>
 
+<GlobalTooltip />
+
 <div class="g grid grid-rows-[auto_1fr_auto] h-screen px-4 py-2">
   <div class=" ml-1 flex justify-between items-baseline">
     <div
+      use:gtooltip={"click to edit title, <b><tt>Ctrl + 1</tt></b> to switch"}
       bind:this={titleEl}
       on:keydown={onTitleKeyDown}
       contenteditable="true"
@@ -267,8 +271,14 @@
       aria-multiline="false"
       class="px-0.5 ml-[-0.125rem] block user-modify-plain grow text-xl font-semibold focus-within:outline-white bg-white"
     />
-    <div class="cursor-pointer">{len(notes)} notes</div>
+    <div
+      use:gtooltip={"click for a list, <b>Ctrl + K</b> to invoke"}
+      class="cursor-pointer"
+    >
+      {len(notes)} notes
+    </div>
     <button
+      use:gtooltip={"<b>Ctrl + Shift + N</b>"}
       on:click={createNewNote}
       class="relative text-sm border ml-4 border-gray-500 hover:bg-gray-100 rounded-md py-0.5 px-2"
       >new note</button
