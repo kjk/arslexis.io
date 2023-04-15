@@ -22,7 +22,7 @@
     setNoteTitle,
     setNotes,
   } from "./noteddb";
-  import GlobalTooltip, { gtooltip } from "./GlobalTooltip.svelte";
+  import GlobalTooltip, { gtooltip } from "../GlobalTooltip.svelte";
 
   let notes = [];
 
