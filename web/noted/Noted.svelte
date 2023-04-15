@@ -80,7 +80,7 @@
     }
 
     /** @type {Function} */
-    const changeFn = debounce(handleEditorChange, 300);
+    const changeFn = debounce(handleEditorChange, 1000);
 
     function dispatchTransaction(tr) {
       editorView.update([tr]);
@@ -257,7 +257,7 @@
 </script>
 
 <div class="g grid grid-rows-[auto_1fr_auto] h-screen px-4 py-2">
-  <div class=" ml-1 flex justify-between">
+  <div class=" ml-1 flex justify-between items-baseline">
     <div
       bind:this={titleEl}
       on:keydown={onTitleKeyDown}
@@ -267,9 +267,10 @@
       aria-multiline="false"
       class="px-0.5 ml-[-0.125rem] block user-modify-plain grow text-xl font-semibold focus-within:outline-white bg-white"
     />
+    <div class="cursor-pointer">{len(notes)} notes</div>
     <button
       on:click={createNewNote}
-      class="relative text-sm border ml-4 border-gray-500 hover:bg-gray-100 rounded-md px-2"
+      class="relative text-sm border ml-4 border-gray-500 hover:bg-gray-100 rounded-md py-0.5 px-2"
       >new note</button
     >
   </div>
