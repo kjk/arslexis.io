@@ -1,5 +1,6 @@
-import { KV, makeIndexedDBStore, resaveStore } from "../dbutil";
 import { genRandomID, len, sha1 } from "../util";
+
+import { KV } from "../dbutil";
 
 const db = new KV("noted", "keyval");
 
