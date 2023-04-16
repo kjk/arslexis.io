@@ -1,4 +1,5 @@
 import "../base.css";
+import "./theme.css";
 
 import App from "./Noted.svelte";
 
