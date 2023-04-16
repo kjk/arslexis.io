@@ -1,5 +1,6 @@
-import type { CompletionContext, CompletionResult } from "../deps.ts";
-import { useRef, useState } from "../deps.ts";
+import type { CompletionContext, CompletionResult } from "../deps.js";
+import { useRef, useState } from "../deps.js";
+
 import { MiniEditor } from "./mini_editor.tsx";
 
 export function Prompt({

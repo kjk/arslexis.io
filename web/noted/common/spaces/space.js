@@ -1,6 +1,6 @@
-import { EventEmitter } from "../../plugos/event.ts";
-import { plugPrefix } from "./constants.ts";
-import { safeRun } from "../util.ts";
+import { EventEmitter } from "../../plugos/event.js";
+import { plugPrefix } from "./constants.js";
+import { safeRun } from "../util.js";
 const pageWatchInterval = 2e3;
 export class Space extends EventEmitter {
   constructor(spacePrimitives) {
@@ -24,8 +24,8 @@ export class Space extends EventEmitter {
     return this.spacePrimitives.deleteFile(path);
   }
   async listFiles(path) {
-    return (await this.spacePrimitives.fetchFileList()).filter(
-      (f) => f.name.startsWith(path)
+    return (await this.spacePrimitives.fetchFileList()).filter((f) =>
+      f.name.startsWith(path)
     );
   }
   async updatePageList() {
@@ -35,9 +35,15 @@ export class Space extends EventEmitter {
       const pageName = meta.name;
       const oldPageMeta = this.pageMetaCache.get(pageName);
       const newPageMeta = { ...meta };
-      if (!oldPageMeta && (pageName.startsWith(plugPrefix) || !this.initialPageListLoad)) {
+      if (
+        !oldPageMeta &&
+        (pageName.startsWith(plugPrefix) || !this.initialPageListLoad)
+      ) {
         this.emit("pageCreated", newPageMeta);
-      } else if (oldPageMeta && oldPageMeta.lastModified !== newPageMeta.lastModified) {
+      } else if (
+        oldPageMeta &&
+        oldPageMeta.lastModified !== newPageMeta.lastModified
+      ) {
         this.emit("pageChanged", newPageMeta);
       }
       deletedPages.delete(pageName);
@@ -81,7 +87,10 @@ export class Space extends EventEmitter {
     await this.spacePrimitives.deleteFile(`${name}.md`);
     this.pageMetaCache.delete(name);
     this.emit("pageDeleted", name);
-    this.emit("pageListUpdated", /* @__PURE__ */ new Set([...this.pageMetaCache.values()]));
+    this.emit(
+      "pageListUpdated",
+      /* @__PURE__ */ new Set([...this.pageMetaCache.values()])
+    );
   }
   async getPageMeta(name) {
     const oldMeta = this.pageMetaCache.get(name);
@@ -103,16 +112,15 @@ export class Space extends EventEmitter {
   }
   async listPlugs() {
     const files = await this.spacePrimitives.fetchFileList();
-    return files.filter((fileMeta) => fileMeta.name.endsWith(".plug.json")).map((fileMeta) => fileMeta.name);
+    return files
+      .filter((fileMeta) => fileMeta.name.endsWith(".plug.json"))
+      .map((fileMeta) => fileMeta.name);
   }
   proxySyscall(plug, name, args) {
     return this.spacePrimitives.proxySyscall(plug, name, args);
   }
   async readPage(name) {
-    const pageData = await this.spacePrimitives.readFile(
-      `${name}.md`,
-      "utf8"
-    );
+    const pageData = await this.spacePrimitives.readFile(`${name}.md`, "utf8");
     const previousMeta = this.pageMetaCache.get(name);
     const newMeta = fileMetaToPageMeta(pageData.meta);
     if (previousMeta) {
@@ -123,7 +131,7 @@ export class Space extends EventEmitter {
     const meta = this.metaCacher(name, newMeta);
     return {
       text: pageData.data,
-      meta
+      meta,
     };
   }
   watchPage(pageName) {
@@ -152,11 +160,16 @@ export class Space extends EventEmitter {
     }
   }
   async fetchPageList() {
-    return (await this.spacePrimitives.fetchFileList()).filter((fileMeta) => fileMeta.name.endsWith(".md")).map(fileMetaToPageMeta);
+    return (await this.spacePrimitives.fetchFileList())
+      .filter((fileMeta) => fileMeta.name.endsWith(".md"))
+      .map(fileMetaToPageMeta);
   }
   async fetchAttachmentList() {
     return (await this.spacePrimitives.fetchFileList()).filter(
-      (fileMeta) => !fileMeta.name.endsWith(".md") && !fileMeta.name.endsWith(".plug.json") && fileMeta.name !== "data.db"
+      (fileMeta) =>
+        !fileMeta.name.endsWith(".md") &&
+        !fileMeta.name.endsWith(".plug.json") &&
+        fileMeta.name !== "data.db"
     );
   }
   readAttachment(name, encoding) {
@@ -181,6 +194,6 @@ export class Space extends EventEmitter {
 function fileMetaToPageMeta(fileMeta) {
   return {
     ...fileMeta,
-    name: fileMeta.name.substring(0, fileMeta.name.length - 3)
+    name: fileMeta.name.substring(0, fileMeta.name.length - 3),
   };
 }

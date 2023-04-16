@@ -1,4 +1,4 @@
-import { editor } from "$sb/silverbullet-syscall/mod.ts";
+import { editor } from "$sb/silverbullet-syscall/mod.js";
 export async function replaceAsync(str, regex, asyncFn) {
   const promises = [];
   str.replace(regex, (match, ...args) => {
@@ -10,7 +10,9 @@ export async function replaceAsync(str, regex, asyncFn) {
   return str.replace(regex, () => data.shift());
 }
 export function isServer() {
-  return typeof window === "undefined" || typeof window.document === "undefined";
+  return (
+    typeof window === "undefined" || typeof window.document === "undefined"
+  );
 }
 export function isBrowser() {
   return !isServer();

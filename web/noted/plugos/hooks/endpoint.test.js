@@ -1,8 +1,8 @@
-import { createSandbox } from "../environments/deno_sandbox.ts";
-import { EndpointHook } from "./endpoint.ts";
-import { System } from "../system.ts";
-import { Application } from "../../server/deps.ts";
-import { assertEquals } from "../../test_deps.ts";
+import { Application } from "../../server/deps.js";
+import { EndpointHook } from "./endpoint.js";
+import { System } from "../system.js";
+import { assertEquals } from "../../test_deps.js";
+import { createSandbox } from "../environments/deno_sandbox.js";
 Deno.test("Run a plugos endpoint server", async () => {
   const system = new System("server");
   await system.load(
@@ -11,7 +11,7 @@ Deno.test("Run a plugos endpoint server", async () => {
       functions: {
         testhandler: {
           http: {
-            path: "/"
+            path: "/",
           },
           code: `(() => {
           return {
@@ -20,9 +20,9 @@ Deno.test("Run a plugos endpoint server", async () => {
               return {status: 200, body: [1, 2, 3], headers: {"Content-type": "application/json"}};
             }
           };
-        })()`
-        }
-      }
+        })()`,
+        },
+      },
     },
     createSandbox
   );

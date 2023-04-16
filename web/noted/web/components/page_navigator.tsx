@@ -1,6 +1,7 @@
+import { CompletionContext, CompletionResult } from "../deps.js";
+import { FilterOption, PageMeta } from "../../common/types.js";
+
 import { FilterList } from "./filter.tsx";
-import { FilterOption, PageMeta } from "../../common/types.ts";
-import { CompletionContext, CompletionResult } from "../deps.ts";
 
 export function PageNavigator({
   allPages,

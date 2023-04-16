@@ -1,20 +1,18 @@
-import { YAML } from "../../common/deps.ts";
-import {
-  compile,
-  esbuild,
-  sandboxCompileModule
-} from "../compile.ts";
-import { cacheDir, flags, path } from "../deps.ts";
-import { bundleAssets } from "../asset_bundle/builder.ts";
+import { cacheDir, flags, path } from "../deps.js";
+import { compile, esbuild, sandboxCompileModule } from "../compile.js";
+
+import { YAML } from "../../common/deps.js";
+import { bundleAssets } from "../asset_bundle/builder.js";
+
 export async function bundle(manifestPath, options = {}) {
   const rootPath = path.dirname(manifestPath);
-  const manifest = YAML.parse(
-    await Deno.readTextFile(manifestPath)
-  );
+  const manifest = YAML.parse(await Deno.readTextFile(manifestPath));
   if (!manifest.name) {
     throw new Error(`Missing 'name' in ${manifestPath}`);
   }
-  for (const [name, moduleSpec] of Object.entries(manifest.dependencies || {})) {
+  for (const [name, moduleSpec] of Object.entries(
+    manifest.dependencies || {}
+  )) {
     manifest.dependencies[name] = await sandboxCompileModule(moduleSpec);
   }
   const assetsBundle = await bundleAssets(
@@ -49,33 +47,27 @@ export async function bundle(manifestPath, options = {}) {
     if (!def.path) {
       continue;
     }
-    let jsFunctionName = "default", filePath = def.path;
+    let jsFunctionName = "default",
+      filePath = def.path;
     if (filePath.indexOf(":") !== -1) {
       [filePath, jsFunctionName] = filePath.split(":");
     }
     filePath = path.join(rootPath, filePath);
-    def.code = await compile(
-      filePath,
-      jsFunctionName,
-      {
-        ...options,
-        imports: [
-          manifest,
-          ...imports,
-          ...options.imports || []
-        ]
-      }
-    );
+    def.code = await compile(filePath, jsFunctionName, {
+      ...options,
+      imports: [manifest, ...imports, ...(options.imports || [])],
+    });
     delete def.path;
   }
   return manifest;
 }
 async function buildManifest(manifestPath, distPath, options = {}) {
   const generatedManifest = await bundle(manifestPath, options);
-  const outFile = manifestPath.substring(
-    0,
-    manifestPath.length - path.extname(manifestPath).length
-  ) + ".json";
+  const outFile =
+    manifestPath.substring(
+      0,
+      manifestPath.length - path.extname(manifestPath).length
+    ) + ".json";
   const outPath = path.join(distPath, path.basename(outFile));
   console.log("Emitting bundle to", outPath);
   await Deno.writeTextFile(outPath, JSON.stringify(generatedManifest, null, 2));
@@ -91,18 +83,16 @@ export async function bundleRun(manifestFiles, dist, watch, options = {}) {
     building = true;
     Deno.mkdirSync(dist, { recursive: true });
     const startTime = Date.now();
-    await Promise.all(manifestFiles.map(async (plugManifestPath) => {
-      const manifestPath = plugManifestPath;
-      try {
-        await buildManifest(
-          manifestPath,
-          dist,
-          options
-        );
-      } catch (e) {
-        console.error(`Error building ${manifestPath}:`, e);
-      }
-    }));
+    await Promise.all(
+      manifestFiles.map(async (plugManifestPath) => {
+        const manifestPath = plugManifestPath;
+        try {
+          await buildManifest(manifestPath, dist, options);
+        } catch (e) {
+          console.error(`Error building ${manifestPath}:`, e);
+        }
+      })
+    );
     console.log(`Done building plugs in ${Date.now() - startTime}ms`);
     building = false;
   }
@@ -125,7 +115,7 @@ if (import.meta.main) {
   const args = flags.parse(Deno.args, {
     boolean: ["debug", "watch", "reload", "info"],
     string: ["dist", "importmap"],
-    alias: { w: "watch" }
+    alias: { w: "watch" },
   });
   if (args._.length === 0) {
     console.log(
@@ -136,16 +126,13 @@ if (import.meta.main) {
   if (!args.dist) {
     args.dist = path.resolve(".");
   }
-  await bundleRun(
-    args._,
-    args.dist,
-    args.watch,
-    {
-      debug: args.debug,
-      reload: args.reload,
-      info: args.info,
-      importMap: args.importmap ? new URL(args.importmap, `file://${Deno.cwd()}/`) : void 0
-    }
-  );
+  await bundleRun(args._, args.dist, args.watch, {
+    debug: args.debug,
+    reload: args.reload,
+    info: args.info,
+    importMap: args.importmap
+      ? new URL(args.importmap, `file://${Deno.cwd()}/`)
+      : void 0,
+  });
   esbuild.stop();
 }

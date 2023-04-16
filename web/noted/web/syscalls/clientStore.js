@@ -1,5 +1,5 @@
-import { proxySyscalls } from "../../plugos/syscalls/transport.ts";
-import { storeSyscalls } from "../../plugos/syscalls/store.dexie_browser.ts";
+import { proxySyscalls } from "../../plugos/syscalls/transport.js";
+import { storeSyscalls } from "../../plugos/syscalls/store.dexie_browser.js";
 export function clientStoreSyscalls() {
   const storeCalls = storeSyscalls("local", "localData");
   return proxySyscalls(

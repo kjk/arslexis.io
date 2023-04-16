@@ -1,11 +1,13 @@
-import { path } from "../deps.ts";
-import { readAll } from "../deps.ts";
-import { mime } from "https://deno.land/x/mimetypes@v1.0.0/mod.ts";
 import {
   base64DecodeDataUrl,
-  base64EncodedDataUrl
-} from "../../plugos/asset_bundle/base64.ts";
-import { walk } from "../../plugos/deps.ts";
+  base64EncodedDataUrl,
+} from "../../plugos/asset_bundle/base64.js";
+
+import { mime } from "https://deno.land/x/mimetypes@v1.0.0/mod.js";
+import { path } from "../deps.js";
+import { readAll } from "../deps.js";
+import { walk } from "../../plugos/deps.js";
+
 function lookupContentType(path2) {
   return mime.getType(path2) || "application/octet-stream";
 }
@@ -64,8 +66,8 @@ export class DiskSpacePrimitives {
           lastModified: s.mtime.getTime(),
           perm: "rw",
           size: s.size,
-          contentType
-        }
+          contentType,
+        },
       };
     } catch {
       throw Error(`Could not read file ${name}`);
@@ -80,10 +82,7 @@ export class DiskSpacePrimitives {
           await Deno.writeTextFile(`${localPath}`, data);
           break;
         case "dataurl":
-          await Deno.writeFile(
-            localPath,
-            base64DecodeDataUrl(data)
-          );
+          await Deno.writeFile(localPath, base64DecodeDataUrl(data));
           break;
         case "arraybuffer":
           await Deno.writeFile(localPath, new Uint8Array(data));
@@ -95,7 +94,7 @@ export class DiskSpacePrimitives {
         size: s.size,
         contentType: lookupContentType(name),
         lastModified: s.mtime.getTime(),
-        perm: "rw"
+        perm: "rw",
       };
     } catch (e) {
       console.error("Error while writing file", name, e);
@@ -111,7 +110,7 @@ export class DiskSpacePrimitives {
         size: s.size,
         contentType: lookupContentType(name),
         lastModified: s.mtime.getTime(),
-        perm: "rw"
+        perm: "rw",
       };
     } catch {
       throw Error(`Could not get meta for ${name}`);
@@ -125,9 +124,7 @@ export class DiskSpacePrimitives {
     const allFiles = [];
     for await (const file of walk(this.rootPath, {
       includeDirs: false,
-      skip: [
-        new RegExp(`^${escapeRegExp(this.rootPath)}.*\\/\\..+$`)
-      ]
+      skip: [new RegExp(`^${escapeRegExp(this.rootPath)}.*\\/\\..+$`)],
     })) {
       const fullPath = file.path;
       try {
@@ -141,7 +138,7 @@ export class DiskSpacePrimitives {
           lastModified: s.mtime.getTime(),
           contentType: mime.getType(fullPath) || "application/octet-stream",
           size: s.size,
-          perm: "rw"
+          perm: "rw",
         });
       } catch (e) {
         if (e instanceof Deno.errors.NotFound) {

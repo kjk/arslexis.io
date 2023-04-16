@@ -1,4 +1,4 @@
-import { readYamlPage } from "./yaml_page.ts";
+import { readYamlPage } from "./yaml_page.js";
 export async function readSecrets(keys) {
   try {
     let allSecrets = await readYamlPage("SECRETS", ["yaml", "secrets"]);

@@ -1,4 +1,4 @@
-import { safeRun } from "../common/util.ts";
+import { safeRun } from "../common/util.js";
 function encodePageUrl(name) {
   return name.replaceAll(" ", "_");
 }
@@ -30,7 +30,7 @@ export class PathPageNavigator {
     }
     window.dispatchEvent(
       new PopStateEvent("popstate", {
-        state: { page, pos }
+        state: { page, pos },
       })
     );
     await new Promise((resolve) => {

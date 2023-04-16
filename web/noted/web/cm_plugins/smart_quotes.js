@@ -1,10 +1,10 @@
-import { syntaxTree } from "../deps.ts";
+import { syntaxTree } from "../deps.js";
 const straightQuoteContexts = [
   "CommentBlock",
   "FencedCode",
   "InlineCode",
   "FrontMatterCode",
-  "DirectiveStart"
+  "DirectiveStart",
 ];
 function keyBindingForQuote(quote, left, right) {
   return {
@@ -32,17 +32,17 @@ function keyBindingForQuote(quote, left, right) {
       target.dispatch({
         changes: {
           insert: q,
-          from: cursorPos
+          from: cursorPos,
         },
         selection: {
-          anchor: cursorPos + 1
-        }
+          anchor: cursorPos + 1,
+        },
       });
       return true;
-    }
+    },
   };
 }
 export const smartQuoteKeymap = [
   keyBindingForQuote('"', "\u201C", "\u201D"),
-  keyBindingForQuote("'", "\u2018", "\u2019")
+  keyBindingForQuote("'", "\u2018", "\u2019"),
 ];

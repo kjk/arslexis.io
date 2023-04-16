@@ -1,15 +1,15 @@
-import { safeRun } from "../util.ts";
-import { ConsoleLogger } from "./custom_logger.ts";
+import { ConsoleLogger } from "./custom_logger.js";
+import { monkeyPatchFetch } from "../../plug-api/plugos-syscall/fetch.js";
+import { safeRun } from "../util.js";
 if (typeof Deno === "undefined") {
   self.Deno = {
     args: [],
     build: {
-      arch: "x86_64"
+      arch: "x86_64",
     },
     env: {
-      get() {
-      }
-    }
+      get() {},
+    },
   };
 }
 const loadedFunctions = /* @__PURE__ */ new Map();
@@ -30,7 +30,7 @@ self.syscall = async (name, ...args) => {
       type: "syscall",
       id: syscallReqId,
       name,
-      args
+      args,
     });
   });
 };
@@ -60,7 +60,7 @@ self.addEventListener("message", (event) => {
           loadedFunctions.set(data.name, fn2());
           workerPostMessage({
             type: "inited",
-            name: data.name
+            name: data.name,
           });
         }
         break;
@@ -71,7 +71,7 @@ self.addEventListener("message", (event) => {
           loadedModules.set(data.name, v);
           workerPostMessage({
             type: "dependency-inited",
-            name: data.name
+            name: data.name,
           });
         }
         break;
@@ -82,18 +82,18 @@ self.addEventListener("message", (event) => {
             throw new Error(`Function not loaded: ${data.name}`);
           }
           try {
-            const result = await Promise.resolve(fn(...data.args || []));
+            const result = await Promise.resolve(fn(...(data.args || [])));
             workerPostMessage({
               type: "result",
               id: data.id,
-              result
+              result,
             });
           } catch (e) {
             workerPostMessage({
               type: "result",
               id: data.id,
               error: e.message,
-              stack: e.stack
+              stack: e.stack,
             });
           }
         }
@@ -122,5 +122,4 @@ self.addEventListener("message", (event) => {
     }
   });
 });
-import { monkeyPatchFetch } from "../../plug-api/plugos-syscall/fetch.ts";
 monkeyPatchFetch();

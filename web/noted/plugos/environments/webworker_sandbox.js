@@ -1,12 +1,11 @@
-import { safeRun } from "../util.ts";
-import { Sandbox } from "../sandbox.ts";
+import { Sandbox } from "../sandbox.js";
+import { safeRun } from "../util.js";
 class WebWorkerWrapper {
   constructor(worker) {
     this.worker = worker;
     this.worker.addEventListener("message", (evt) => {
       let data = evt.data;
-      if (!data)
-        return;
+      if (!data) return;
       safeRun(async () => {
         await this.onMessage(data);
       });
@@ -22,9 +21,11 @@ class WebWorkerWrapper {
 }
 export function createSandbox(plug) {
   const worker = new Worker(
-    import.meta.url ? new URL("sandbox_worker.ts", import.meta.url) : new URL("worker.js", location.origin),
+    import.meta.url
+      ? new URL("sandbox_worker.ts", import.meta.url)
+      : new URL("worker.js", location.origin),
     {
-      type: "module"
+      type: "module",
     }
   );
   return new Sandbox(plug, new WebWorkerWrapper(worker));

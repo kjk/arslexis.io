@@ -1,4 +1,4 @@
-import { proxySyscalls } from "../../plugos/syscalls/transport.ts";
+import { proxySyscalls } from "../../plugos/syscalls/transport.js";
 export function storeSyscalls(space) {
   return proxySyscalls(
     [
@@ -8,7 +8,7 @@ export function storeSyscalls(space) {
       "store.set",
       "store.batchSet",
       "store.delete",
-      "store.deletePrefix"
+      "store.deletePrefix",
     ],
     (ctx, name, ...args) => space.proxySyscall(ctx.plug, name, args)
   );

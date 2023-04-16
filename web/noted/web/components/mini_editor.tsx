@@ -1,11 +1,14 @@
 import {
-  autocompletion,
-  closeBracketsKeymap,
   CompletionContext,
-  completionKeymap,
   CompletionResult,
   EditorState,
   EditorView,
+  ViewPlugin,
+  ViewUpdate,
+  Vim,
+  autocompletion,
+  closeBracketsKeymap,
+  completionKeymap,
   highlightSpecialChars,
   history,
   historyKeymap,
@@ -14,12 +17,9 @@ import {
   standardKeymap,
   useEffect,
   useRef,
-  ViewPlugin,
-  ViewUpdate,
-  Vim,
   vim,
   vimGetCm,
-} from "../deps.ts";
+} from "../deps.js";
 
 type MiniEditorEvents = {
   onEnter: (newText: string) => void;

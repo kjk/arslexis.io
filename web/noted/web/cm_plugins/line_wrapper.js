@@ -1,5 +1,7 @@
-import { Decoration, syntaxTree } from "../deps.ts";
-import { decoratorStateField } from "./util.ts";
+import { Decoration, syntaxTree } from "../deps.js";
+
+import { decoratorStateField } from "./util.js";
+
 export function lineWrapper(wrapElements) {
   return decoratorStateField((state) => {
     const widgets = [];
@@ -21,7 +23,7 @@ export function lineWrapper(wrapElements) {
               }
               widgets.push(
                 Decoration.line({
-                  class: cls
+                  class: cls,
                 }).range(doc.lineAt(idx).from)
               );
               idx += line.length + 1;
@@ -35,7 +37,7 @@ export function lineWrapper(wrapElements) {
             elementStack.pop();
           }
         }
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });

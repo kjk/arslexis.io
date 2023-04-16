@@ -1,9 +1,13 @@
-import { createSandbox } from "./environments/deno_sandbox.ts";
-import { System } from "./system.ts";
 import {
   assert,
-  assertEquals
-} from "https://deno.land/std@0.165.0/testing/asserts.ts";
+  assertEquals,
+} from "https://deno.land/std@0.165.0/testing/asserts.js";
+
+import { System } from "./system.js";
+import { createSandbox } from "./environments/deno_sandbox.js";
+import { esbuild } from "./compile.js";
+import { bundle as plugOsBundle } from "./bin/plugos-bundle.js";
+import { urlToPathname } from "./util.js";
 Deno.test("Run a deno sandbox", async () => {
   const system = new System("server");
   system.registerSyscalls([], {
@@ -12,17 +16,17 @@ Deno.test("Run a deno sandbox", async () => {
     },
     failingSyscall: () => {
       throw new Error("#fail");
-    }
+    },
   });
   system.registerSyscalls(["restricted"], {
     restrictedSyscall: () => {
       return "restricted";
-    }
+    },
   });
   system.registerSyscalls(["dangerous"], {
     dangerousSyscall: () => {
       return "yay";
-    }
+    },
   });
   const plug = await system.load(
     {
@@ -36,13 +40,13 @@ Deno.test("Run a deno sandbox", async () => {
               return n + 10;
             }
           };
-        })()`
+        })()`,
         },
         redirectTest: {
-          redirect: "addTen"
+          redirect: "addTen",
         },
         redirectTest2: {
-          redirect: "test.addTen"
+          redirect: "test.addTen",
         },
         addNumbersSyscall: {
           code: `(() => {
@@ -51,7 +55,7 @@ Deno.test("Run a deno sandbox", async () => {
               return await self.syscall("addNumbers", a, b);
             }
           };
-        })()`
+        })()`,
         },
         errorOut: {
           code: `(() => {
@@ -60,7 +64,7 @@ Deno.test("Run a deno sandbox", async () => {
               throw Error("BOOM");
             }
           };
-        })()`
+        })()`,
         },
         errorOutSys: {
           code: `(() => {
@@ -69,7 +73,7 @@ Deno.test("Run a deno sandbox", async () => {
               await self.syscall("failingSyscall");
             }
           };
-        })()`
+        })()`,
         },
         restrictedTest: {
           code: `(() => {
@@ -78,7 +82,7 @@ Deno.test("Run a deno sandbox", async () => {
               await self.syscall("restrictedSyscall");
             }
           };
-        })()`
+        })()`,
         },
         dangerousTest: {
           code: `(() => {
@@ -87,9 +91,9 @@ Deno.test("Run a deno sandbox", async () => {
               return await self.syscall("dangerousSyscall");
             }
           };
-        })()`
-        }
-      }
+        })()`,
+        },
+      },
     },
     createSandbox
   );
@@ -124,34 +128,27 @@ Deno.test("Run a deno sandbox", async () => {
   assertEquals(await plug.invoke("dangerousTest", []), "yay");
   await system.unloadAll();
 });
-import { bundle as plugOsBundle } from "./bin/plugos-bundle.ts";
-import { esbuild } from "./compile.ts";
-import { urlToPathname } from "./util.ts";
 const __dirname = urlToPathname(new URL(".", import.meta.url));
 Deno.test("Preload dependencies", async () => {
   const globalModules = await plugOsBundle(
     `${__dirname}../plugs/global.plug.yaml`
   );
-  const testPlugManifest = await plugOsBundle(
-    `${__dirname}test.plug.yaml`,
-    {
-      imports: [globalModules]
-    }
-  );
+  const testPlugManifest = await plugOsBundle(`${__dirname}test.plug.yaml`, {
+    imports: [globalModules],
+  });
   esbuild.stop();
   const system = new System("server");
   system.on({
     sandboxInitialized: async (sandbox) => {
-      for (const [modName, code] of Object.entries(globalModules.dependencies)) {
+      for (const [modName, code] of Object.entries(
+        globalModules.dependencies
+      )) {
         await sandbox.loadDependency(modName, code);
       }
-    }
+    },
   });
   console.log("Loading test module");
-  const testPlug = await system.load(
-    testPlugManifest,
-    createSandbox
-  );
+  const testPlug = await system.load(testPlugManifest, createSandbox);
   console.log("Running");
   const result = await testPlug.invoke("boot", []);
   console.log("Result", result);

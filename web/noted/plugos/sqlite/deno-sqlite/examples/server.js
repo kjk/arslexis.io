@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.134.0/http/mod.ts";
-import { DB } from "../mod.ts";
+import { DB } from "../mod.js";
+import { serve } from "https://deno.land/std@0.134.0/http/mod.js";
 const db = new DB();
 db.query(`
   CREATE TABLE visits (
@@ -15,11 +15,14 @@ const countVisitsQuery = db.prepareQuery(
   "SELECT COUNT(*) FROM visits WHERE url = :url"
 );
 console.log("Running server on localhost:8080");
-await serve((req) => {
-  addVisitQuery.execute({
-    url: req.url,
-    time: new Date()
-  });
-  const [count] = countVisitsQuery.one({ url: req.url });
-  return new Response(`This page was visited ${count} times!`);
-}, { port: 8080 });
+await serve(
+  (req) => {
+    addVisitQuery.execute({
+      url: req.url,
+      time: new Date(),
+    });
+    const [count] = countVisitsQuery.one({ url: req.url });
+    return new Response(`This page was visited ${count} times!`);
+  },
+  { port: 8080 }
+);

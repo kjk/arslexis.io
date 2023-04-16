@@ -1,4 +1,4 @@
-import { syscall } from "./syscall.ts";
+import { syscall } from "./syscall.js";
 export function invokeFunction(env, name, ...args) {
   return syscall("system.invokeFunction", env, name, ...args);
 }

@@ -1,12 +1,12 @@
-import { DB } from "../src/db.ts";
-import { loadFile, writeFile } from "./vfs.js";
 import { compile, instantiateBrowser } from "../build/sqlite.js";
-export { SqliteError } from "../src/error.ts";
-export { Status } from "../src/constants.ts";
+import { loadFile, writeFile } from "./vfs.js";
+
+import { DB } from "../src/db.js";
+export { SqliteError } from "../src/error.js";
+export { Status } from "../src/constants.js";
 const hasCompiled = compile();
 export async function open(file) {
-  if (file != null && file !== ":memory:")
-    await loadFile(file);
+  if (file != null && file !== ":memory:") await loadFile(file);
   await hasCompiled;
   await instantiateBrowser();
   return new DB(file);

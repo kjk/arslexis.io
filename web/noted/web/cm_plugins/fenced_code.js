@@ -1,10 +1,12 @@
-import { panelHtml } from "../components/panel.tsx";
-import { Decoration, syntaxTree, WidgetType } from "../deps.ts";
+import { Decoration, WidgetType, syntaxTree } from "../deps.js";
 import {
   decoratorStateField,
   invisibleDecoration,
-  isCursorInRange
-} from "./util.ts";
+  isCursorInRange,
+} from "./util.js";
+
+import { panelHtml } from "../components/panel.tsx";
+
 class IFrameWidget extends WidgetType {
   constructor(from, to, editor, bodyText, codeWidgetCallback) {
     super();
@@ -38,13 +40,13 @@ class IFrameWidget extends WidgetType {
             changes: {
               from: this.from,
               to: this.to,
-              insert: data.body
-            }
+              insert: data.body,
+            },
           });
           break;
         case "blur":
           this.editor.editorView.dispatch({
-            selection: { anchor: this.from }
+            selection: { anchor: this.from },
           });
           this.editor.focus();
           break;
@@ -53,25 +55,23 @@ class IFrameWidget extends WidgetType {
     iframe.onload = () => {
       globalThis.addEventListener("message", messageListener);
       iframe.onload = null;
-      this.codeWidgetCallback(this.bodyText).then(
-        (widgetContent) => {
-          if (widgetContent.html) {
-            iframe.contentWindow.postMessage({
-              type: "html",
-              html: widgetContent.html,
-              script: widgetContent.script
-            });
-          } else if (widgetContent.url) {
-            iframe.contentWindow.location.href = widgetContent.url;
-            if (widgetContent.height) {
-              iframe.style.height = widgetContent.height + "px";
-            }
-            if (widgetContent.width) {
-              iframe.style.width = widgetContent.width + "px";
-            }
+      this.codeWidgetCallback(this.bodyText).then((widgetContent) => {
+        if (widgetContent.html) {
+          iframe.contentWindow.postMessage({
+            type: "html",
+            html: widgetContent.html,
+            script: widgetContent.script,
+          });
+        } else if (widgetContent.url) {
+          iframe.contentWindow.location.href = widgetContent.url;
+          if (widgetContent.height) {
+            iframe.style.height = widgetContent.height + "px";
+          }
+          if (widgetContent.width) {
+            iframe.style.width = widgetContent.width + "px";
           }
         }
-      );
+      });
     };
     return iframe;
   }
@@ -85,11 +85,11 @@ export function fencedCodePlugin(editor) {
     syntaxTree(state).iterate({
       enter({ from, to, name, node }) {
         if (name === "FencedCode") {
-          if (isCursorInRange(state, [from, to]))
-            return;
+          if (isCursorInRange(state, [from, to])) return;
           const text = state.sliceDoc(from, to);
           const [_, lang] = text.match(/^```(\w+)?/);
-          const codeWidgetCallback = editor.codeWidgetHook.codeWidgetCallbacks.get(lang);
+          const codeWidgetCallback =
+            editor.codeWidgetHook.codeWidgetCallbacks.get(lang);
           if (codeWidgetCallback) {
             const lineStrings = text.split("\n");
             const lines = [];
@@ -97,27 +97,25 @@ export function fencedCodePlugin(editor) {
             for (const line of lineStrings) {
               lines.push({
                 from: fromIt,
-                to: fromIt + line.length
+                to: fromIt + line.length,
               });
               fromIt += line.length + 1;
             }
-            const firstLine = lines[0], lastLine = lines[lines.length - 1];
-            if (!firstLine || !lastLine)
-              return;
+            const firstLine = lines[0],
+              lastLine = lines[lines.length - 1];
+            if (!firstLine || !lastLine) return;
             widgets.push(
               invisibleDecoration.range(firstLine.from, firstLine.to)
             );
-            widgets.push(
-              invisibleDecoration.range(lastLine.from, lastLine.to)
-            );
+            widgets.push(invisibleDecoration.range(lastLine.from, lastLine.to));
             widgets.push(
               Decoration.line({
-                class: "sb-fenced-code-iframe"
+                class: "sb-fenced-code-iframe",
               }).range(firstLine.from)
             );
             widgets.push(
               Decoration.line({
-                class: "sb-fenced-code-hide"
+                class: "sb-fenced-code-hide",
               }).range(lastLine.from)
             );
             lines.slice(1, lines.length - 1).forEach((line) => {
@@ -135,7 +133,7 @@ export function fencedCodePlugin(editor) {
                   editor,
                   lineStrings.slice(1, lineStrings.length - 1).join("\n"),
                   codeWidgetCallback
-                )
+                ),
               }).range(from)
             );
             return false;
@@ -144,15 +142,18 @@ export function fencedCodePlugin(editor) {
         }
         if (name === "CodeMark") {
           const parent = node.parent;
-          if (parent.node.name !== "InlineCode" && !isCursorInRange(state, [parent.from, parent.to])) {
+          if (
+            parent.node.name !== "InlineCode" &&
+            !isCursorInRange(state, [parent.from, parent.to])
+          ) {
             widgets.push(
               Decoration.line({
-                class: "sb-line-code-outside"
+                class: "sb-line-code-outside",
               }).range(state.doc.lineAt(from).from)
             );
           }
         }
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });

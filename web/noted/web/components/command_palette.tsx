@@ -1,8 +1,9 @@
-import { isMacLike } from "../../common/util.ts";
+import { CompletionContext, CompletionResult, TerminalIcon } from "../deps.js";
+
+import { AppCommand } from "../hooks/command.js";
 import { FilterList } from "./filter.tsx";
-import { CompletionContext, CompletionResult, TerminalIcon } from "../deps.ts";
-import { AppCommand } from "../hooks/command.ts";
-import { FilterOption } from "../../common/types.ts";
+import { FilterOption } from "../../common/types.js";
+import { isMacLike } from "../../common/util.js";
 
 export function CommandPalette({
   commands,

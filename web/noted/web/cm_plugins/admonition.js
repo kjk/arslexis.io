@@ -1,10 +1,7 @@
-import {
-  Decoration,
-  syntaxTree,
-  WidgetType
-} from "../deps.ts";
-import { decoratorStateField, isCursorInRange } from "./util.ts";
-const ADMONITION_REGEX = /^>( *)\*{2}(Note|Warning)\*{2}( *)(.*)(?:\n([\s\S]*))?/im;
+import { Decoration, WidgetType, syntaxTree } from "../deps.js";
+import { decoratorStateField, isCursorInRange } from "./util.js";
+const ADMONITION_REGEX =
+  /^>( *)\*{2}(Note|Warning)\*{2}( *)(.*)(?:\n([\s\S]*))?/im;
 const ADMONITION_LINE_SPLIT_REGEX = /\n>/gm;
 class AdmonitionIconWidget extends WidgetType {
   constructor(pos, type, editorView) {
@@ -19,8 +16,8 @@ class AdmonitionIconWidget extends WidgetType {
     outerDiv.addEventListener("click", (e) => {
       this.editorView.dispatch({
         selection: {
-          anchor: this.pos
-        }
+          anchor: this.pos,
+        },
       });
     });
     switch (this.type) {
@@ -54,7 +51,7 @@ function extractAdmonitionFields(rawText) {
       admonitionType,
       postSpaces,
       admonitionTitle,
-      admonitionContent
+      admonitionContent,
     };
   }
   return null;
@@ -81,7 +78,14 @@ export function admonitionPlugin(editor) {
           });
           const iconRange = {
             from: from + 1,
-            to: from + preSpaces.length + 2 + admonitionType.length + 2 + postSpaces.length + 1
+            to:
+              from +
+              preSpaces.length +
+              2 +
+              admonitionType.length +
+              2 +
+              postSpaces.length +
+              1,
           };
           const classes = ["sb-admonition"];
           switch (admonitionType) {
@@ -95,13 +99,15 @@ export function admonitionPlugin(editor) {
           }
           widgets.push(
             Decoration.line({
-              class: "sb-admonition-title " + classes.join(" ")
+              class: "sb-admonition-title " + classes.join(" "),
             }).range(fromOffsets[0])
           );
-          if (!isCursorInRange(state, [
-            from,
-            fromOffsets.length > 1 ? fromOffsets[1] : to
-          ])) {
+          if (
+            !isCursorInRange(state, [
+              from,
+              fromOffsets.length > 1 ? fromOffsets[1] : to,
+            ])
+          ) {
             widgets.push(
               Decoration.replace({
                 widget: new AdmonitionIconWidget(
@@ -109,7 +115,7 @@ export function admonitionPlugin(editor) {
                   admonitionType,
                   editor.editorView
                 ),
-                inclusive: true
+                inclusive: true,
               }).range(iconRange.from, iconRange.to)
             );
           }
@@ -119,7 +125,7 @@ export function admonitionPlugin(editor) {
             );
           });
         }
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });

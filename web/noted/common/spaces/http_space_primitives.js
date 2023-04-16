@@ -1,9 +1,11 @@
 import {
   base64DecodeDataUrl,
   base64Encode,
-  base64EncodedDataUrl
-} from "../../plugos/asset_bundle/base64.ts";
-import { mime } from "../../plugos/deps.ts";
+  base64EncodedDataUrl,
+} from "../../plugos/asset_bundle/base64.js";
+
+import { mime } from "../../plugos/deps.js";
+
 export class HttpSpacePrimitives {
   constructor(url, user, password, base64Put) {
     this.user = user;
@@ -17,7 +19,9 @@ export class HttpSpacePrimitives {
       if (!options.headers) {
         options.headers = {};
       }
-      options.headers["cookie"] = `auth=${btoa(`${this.user}:${this.password}`)}`;
+      options.headers["cookie"] = `auth=${btoa(
+        `${this.user}:${this.password}`
+      )}`;
     }
     const result = await fetch(url, options);
     if (result.status === 401 || result.redirected) {
@@ -30,7 +34,7 @@ export class HttpSpacePrimitives {
   }
   async fetchFileList() {
     const req = await this.authenticatedFetch(this.fsUrl, {
-      method: "GET"
+      method: "GET",
     });
     return req.json();
   }
@@ -38,7 +42,7 @@ export class HttpSpacePrimitives {
     const res = await this.authenticatedFetch(
       `${this.fsUrl}/${encodeURI(name)}`,
       {
-        method: "GET"
+        method: "GET",
       }
     );
     if (res.status === 404) {
@@ -65,7 +69,7 @@ export class HttpSpacePrimitives {
     }
     return {
       data,
-      meta: this.responseToMeta(name, res)
+      meta: this.responseToMeta(name, res),
     };
   }
   async writeFile(name, encoding, data) {
@@ -82,7 +86,7 @@ export class HttpSpacePrimitives {
         break;
     }
     const headers = {
-      "Content-Type": "application/octet-stream"
+      "Content-Type": "application/octet-stream",
     };
     if (this.base64Put) {
       headers["X-Content-Base64"] = "true";
@@ -94,7 +98,7 @@ export class HttpSpacePrimitives {
       {
         method: "PUT",
         headers,
-        body
+        body,
       }
     );
     const newMeta = this.responseToMeta(name, res);
@@ -104,7 +108,7 @@ export class HttpSpacePrimitives {
     const req = await this.authenticatedFetch(
       `${this.fsUrl}/${encodeURI(name)}`,
       {
-        method: "DELETE"
+        method: "DELETE",
       }
     );
     if (req.status !== 200) {
@@ -115,7 +119,7 @@ export class HttpSpacePrimitives {
     const res = await this.authenticatedFetch(
       `${this.fsUrl}/${encodeURI(name)}`,
       {
-        method: "OPTIONS"
+        method: "OPTIONS",
       }
     );
     if (res.status === 404) {
@@ -129,7 +133,7 @@ export class HttpSpacePrimitives {
       size: +res.headers.get("X-Content-Length"),
       contentType: res.headers.get("Content-type"),
       lastModified: +(res.headers.get("X-Last-Modified") || "0"),
-      perm: res.headers.get("X-Permission") || "rw"
+      perm: res.headers.get("X-Permission") || "rw",
     };
   }
   async proxySyscall(plug, name, args) {
@@ -138,9 +142,9 @@ export class HttpSpacePrimitives {
       {
         method: "POST",
         headers: {
-          "Content-type": "application/json"
+          "Content-type": "application/json",
         },
-        body: JSON.stringify(args)
+        body: JSON.stringify(args),
       }
     );
     if (req.status !== 200) {
@@ -161,9 +165,9 @@ export class HttpSpacePrimitives {
       {
         method: "POST",
         headers: {
-          "Content-type": "application/json"
+          "Content-type": "application/json",
         },
-        body: JSON.stringify(args)
+        body: JSON.stringify(args),
       }
     );
     if (req.status !== 200) {

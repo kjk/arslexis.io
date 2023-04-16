@@ -1,4 +1,4 @@
-import { syscall } from "./syscall.ts";
+import { syscall } from "./syscall.js";
 export function set(key, value) {
   return syscall("store.set", key, value);
 }

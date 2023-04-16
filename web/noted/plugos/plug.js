@@ -1,4 +1,4 @@
-import { AssetBundle } from "./asset_bundle/bundle.ts";
+import { AssetBundle } from "./asset_bundle/bundle.js";
 export class Plug {
   constructor(system, name, sandboxFactory) {
     this.grantedPermissions = [];
@@ -16,7 +16,9 @@ export class Plug {
     this.sandboxInitialized = Promise.resolve().then(async () => {
       console.log("Now starting sandbox for", this.name);
       this.sandbox = this.sandboxFactory(this);
-      for (const [dep, code] of Object.entries(this.manifest.dependencies || {})) {
+      for (const [dep, code] of Object.entries(
+        this.manifest.dependencies || {}
+      )) {
         await this.sandbox.loadDependency(dep, code);
       }
       await this.system.emit("sandboxInitialized", this.sandbox, this);
@@ -25,9 +27,7 @@ export class Plug {
   }
   load(manifest) {
     this.manifest = manifest;
-    this.assets = new AssetBundle(
-      manifest.assets ? manifest.assets : {}
-    );
+    this.assets = new AssetBundle(manifest.assets ? manifest.assets : {});
     this.grantedPermissions = manifest.requiredPermissions || [];
   }
   syscall(name, args) {

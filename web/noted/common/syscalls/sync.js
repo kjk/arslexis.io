@@ -1,5 +1,5 @@
-import { SpaceSync } from "../spaces/sync.ts";
-import { HttpSpacePrimitives } from "../spaces/http_space_primitives.ts";
+import { HttpSpacePrimitives } from "../spaces/http_space_primitives.js";
+import { SpaceSync } from "../spaces/sync.js";
 export function syncSyscalls(localSpace, system) {
   return {
     "sync.syncAll": async (_ctx, endpoint, snapshot) => {
@@ -10,13 +10,13 @@ export function syncSyscalls(localSpace, system) {
         );
         return {
           snapshot: Object.fromEntries(spaceSync.snapshot),
-          operations
+          operations,
         };
       } catch (e) {
         return {
           snapshot: Object.fromEntries(spaceSync.snapshot),
           operations: -1,
-          error: e.message
+          error: e.message,
         };
       }
     },
@@ -41,13 +41,13 @@ export function syncSyscalls(localSpace, system) {
         );
         return {
           snapshot: Object.fromEntries(spaceSync.snapshot),
-          operations
+          operations,
         };
       } catch (e) {
         return {
           snapshot: Object.fromEntries(spaceSync.snapshot),
           operations: -1,
-          error: e.message
+          error: e.message,
         };
       }
     },
@@ -63,7 +63,7 @@ export function syncSyscalls(localSpace, system) {
         console.error("Sync check failure", e.message);
         throw e;
       }
-    }
+    },
   };
   function setupSync(endpoint, snapshot) {
     const remoteSpace = new HttpSpacePrimitives(
@@ -72,18 +72,11 @@ export function syncSyscalls(localSpace, system) {
       endpoint.password,
       true
     );
-    const syncStatusMap = new Map(
-      Object.entries(snapshot)
-    );
-    const spaceSync = new SpaceSync(
-      localSpace,
-      remoteSpace,
-      syncStatusMap,
-      {
-        excludePrefixes: endpoint.excludePrefixes,
-        logger: system.loadedPlugs.get("sync").sandbox
-      }
-    );
+    const syncStatusMap = new Map(Object.entries(snapshot));
+    const spaceSync = new SpaceSync(localSpace, remoteSpace, syncStatusMap, {
+      excludePrefixes: endpoint.excludePrefixes,
+      logger: system.loadedPlugs.get("sync").sandbox,
+    });
     return { spaceSync, remoteSpace };
   }
 }

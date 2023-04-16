@@ -1,11 +1,12 @@
-import { parse } from "./parse_tree.ts";
-import buildMarkdown from "./parser.ts";
+import { assertEquals, assertNotEquals } from "../../test_deps.js";
 import {
   collectNodesOfType,
   findNodeOfType,
-  renderToText
-} from "../../plug-api/lib/tree.ts";
-import { assertEquals, assertNotEquals } from "../../test_deps.ts";
+  renderToText,
+} from "../../plug-api/lib/tree.js";
+
+import buildMarkdown from "./parser.js";
+import { parse } from "./parse_tree.js";
 const sample1 = `---
 type: page
 tags:

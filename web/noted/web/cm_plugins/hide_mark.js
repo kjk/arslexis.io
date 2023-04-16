@@ -1,22 +1,22 @@
-import { Decoration, syntaxTree } from "../deps.ts";
+import { Decoration, syntaxTree } from "../deps.js";
 import {
   checkRangeOverlap,
   decoratorStateField,
   invisibleDecoration,
-  isCursorInRange
-} from "./util.ts";
+  isCursorInRange,
+} from "./util.js";
 const typesWithMarks = [
   "Emphasis",
   "StrongEmphasis",
   "InlineCode",
   "Highlight",
-  "Strikethrough"
+  "Strikethrough",
 ];
 const markTypes = [
   "EmphasisMark",
   "CodeMark",
   "HighlightMark",
-  "StrikethroughMark"
+  "StrikethroughMark",
 ];
 export function hideMarksPlugin() {
   return decoratorStateField((state) => {
@@ -27,25 +27,19 @@ export function hideMarksPlugin() {
         if (typesWithMarks.includes(type.name)) {
           if (parentRange && checkRangeOverlap([from, to], parentRange)) {
             return;
-          } else
-            parentRange = [from, to];
-          if (isCursorInRange(state, [from, to]))
-            return;
+          } else parentRange = [from, to];
+          if (isCursorInRange(state, [from, to])) return;
           const innerTree = node.toTree();
           innerTree.iterate({
             enter({ type: type2, from: markFrom, to: markTo }) {
-              if (!markTypes.includes(type2.name))
-                return;
+              if (!markTypes.includes(type2.name)) return;
               widgets.push(
-                invisibleDecoration.range(
-                  from + markFrom,
-                  from + markTo
-                )
+                invisibleDecoration.range(from + markFrom, from + markTo)
               );
-            }
+            },
           });
         }
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });
@@ -69,13 +63,8 @@ export function hideHeaderMarkPlugin() {
         if (spacePos === -1) {
           return;
         }
-        widgets.push(
-          invisibleDecoration.range(
-            from,
-            from + spacePos + 1
-          )
-        );
-      }
+        widgets.push(invisibleDecoration.range(from, from + spacePos + 1));
+      },
     });
     return Decoration.set(widgets, true);
   });

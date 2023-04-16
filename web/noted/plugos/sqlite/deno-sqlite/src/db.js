@@ -1,8 +1,9 @@
+import { OpenFlags, Status, Values } from "./constants.js";
+
+import { PreparedQuery } from "./query.js";
+import { SqliteError } from "./error.js";
 import { instantiate } from "../build/sqlite.js";
-import { setStr } from "./wasm.ts";
-import { OpenFlags, Status, Values } from "./constants.ts";
-import { SqliteError } from "./error.ts";
-import { PreparedQuery } from "./query.ts";
+import { setStr } from "./wasm.js";
 export class DB {
   constructor(path = ":memory:", options = {}) {
     this._wasm = instantiate().exports;
@@ -28,10 +29,8 @@ export class DB {
     if (options.uri === true) {
       flags |= OpenFlags.Uri;
     }
-    const status = setStr(
-      this._wasm,
-      path,
-      (ptr) => this._wasm.open(ptr, flags)
+    const status = setStr(this._wasm, path, (ptr) =>
+      this._wasm.open(ptr, flags)
     );
     if (status !== Status.SqliteOk) {
       throw new SqliteError(this._wasm, status);
@@ -64,11 +63,7 @@ export class DB {
     if (!this._open) {
       throw new SqliteError("Database was closed.");
     }
-    const stmt = setStr(
-      this._wasm,
-      sql,
-      (ptr) => this._wasm.prepare(ptr)
-    );
+    const stmt = setStr(this._wasm, sql, (ptr) => this._wasm.prepare(ptr));
     if (stmt === Values.Null) {
       throw new SqliteError(this._wasm);
     }
@@ -76,11 +71,7 @@ export class DB {
     return new PreparedQuery(this._wasm, stmt, this._statements);
   }
   execute(sql) {
-    const status = setStr(
-      this._wasm,
-      sql,
-      (ptr) => this._wasm.exec(ptr)
-    );
+    const status = setStr(this._wasm, sql, (ptr) => this._wasm.exec(ptr));
     if (status !== Status.SqliteOk) {
       throw new SqliteError(this._wasm, status);
     }

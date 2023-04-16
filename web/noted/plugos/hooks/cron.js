@@ -1,5 +1,5 @@
 import { Cron } from "https://cdn.jsdelivr.net/gh/hexagon/croner@4/src/croner.js";
-import { safeRun } from "../util.ts";
+import { safeRun } from "../util.js";
 export class CronHook {
   constructor(system) {
     this.system = system;
@@ -13,7 +13,7 @@ export class CronHook {
       },
       plugUnloaded: () => {
         this.reloadCrons();
-      }
+      },
     });
     this.reloadCrons();
   }
@@ -33,7 +33,9 @@ export class CronHook {
         if (!functionDef.cron) {
           continue;
         }
-        const crons = Array.isArray(functionDef.cron) ? functionDef.cron : [functionDef.cron];
+        const crons = Array.isArray(functionDef.cron)
+          ? functionDef.cron
+          : [functionDef.cron];
         for (const cronDef of crons) {
           this.tasks.push(
             new Cron(cronDef, () => {
@@ -56,7 +58,9 @@ export class CronHook {
       if (!functionDef.cron) {
         continue;
       }
-      const crons = Array.isArray(functionDef.cron) ? functionDef.cron : [functionDef.cron];
+      const crons = Array.isArray(functionDef.cron)
+        ? functionDef.cron
+        : [functionDef.cron];
       for (const _cronDef of crons) {
       }
     }

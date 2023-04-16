@@ -1,6 +1,7 @@
-import { removeDirectiveBody, SpaceSync } from "./sync.ts";
-import { DiskSpacePrimitives } from "./disk_space_primitives.ts";
-import { assertEquals } from "../../test_deps.ts";
+import { SpaceSync, removeDirectiveBody } from "./sync.js";
+
+import { DiskSpacePrimitives } from "./disk_space_primitives.js";
+import { assertEquals } from "../../test_deps.js";
 Deno.test("Test store", async () => {
   const primaryPath = await Deno.makeTempDir();
   const secondaryPath = await Deno.makeTempDir();
@@ -93,7 +94,7 @@ Deno.test("Test store", async () => {
     quaternary,
     /* @__PURE__ */ new Map(),
     {
-      excludePrefixes: ["index"]
+      excludePrefixes: ["index"],
     }
   );
   const selectingOps = await sync3.syncFiles(SpaceSync.primaryConflictResolver);
@@ -104,9 +105,7 @@ Deno.test("Test store", async () => {
   await Deno.remove(quaternaryPath, { recursive: true });
   async function doSync() {
     await sleep();
-    const r = await sync.syncFiles(
-      SpaceSync.primaryConflictResolver
-    );
+    const r = await sync.syncFiles(SpaceSync.primaryConflictResolver);
     await sleep();
     return r;
   }

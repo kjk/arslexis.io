@@ -1,11 +1,13 @@
-import { commandLinkRegex } from "../../common/markdown_parser/parser.ts";
-import { Decoration, syntaxTree } from "../deps.ts";
 import {
   ButtonWidget,
   decoratorStateField,
   invisibleDecoration,
-  isCursorInRange
-} from "./util.ts";
+  isCursorInRange,
+} from "./util.js";
+import { Decoration, syntaxTree } from "../deps.js";
+
+import { commandLinkRegex } from "../../common/markdown_parser/parser.js";
+
 export function cleanCommandLinkPlugin(editor) {
   return decoratorStateField((state) => {
     const widgets = [];
@@ -19,15 +21,9 @@ export function cleanCommandLinkPlugin(editor) {
         }
         const text = state.sliceDoc(from, to);
         const match = commandLinkRegex.exec(text);
-        if (!match)
-          return;
+        if (!match) return;
         const [_fullMatch, command, _pipePart, alias] = match;
-        widgets.push(
-          invisibleDecoration.range(
-            from,
-            to
-          )
-        );
+        widgets.push(invisibleDecoration.range(from, to));
         const linkText = alias || command;
         widgets.push(
           Decoration.widget({
@@ -38,7 +34,7 @@ export function cleanCommandLinkPlugin(editor) {
               (e) => {
                 if (e.altKey) {
                   return editor.editorView.dispatch({
-                    selection: { anchor: from + 2 }
+                    selection: { anchor: from + 2 },
                   });
                 }
                 const clickEvent = {
@@ -46,16 +42,16 @@ export function cleanCommandLinkPlugin(editor) {
                   ctrlKey: e.ctrlKey,
                   metaKey: e.metaKey,
                   altKey: e.altKey,
-                  pos: from
+                  pos: from,
                 };
-                editor.dispatchAppEvent("page:click", clickEvent).catch(
-                  console.error
-                );
+                editor
+                  .dispatchAppEvent("page:click", clickEvent)
+                  .catch(console.error);
               }
-            )
+            ),
           }).range(from)
         );
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });

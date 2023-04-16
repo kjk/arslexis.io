@@ -1,9 +1,7 @@
-import {
-  Decoration,
-  syntaxTree,
-  WidgetType
-} from "../deps.ts";
-import { decoratorStateField } from "./util.ts";
+import { Decoration, WidgetType, syntaxTree } from "../deps.js";
+
+import { decoratorStateField } from "./util.js";
+
 class InlineImageWidget extends WidgetType {
   constructor(url, title, space) {
     super();
@@ -19,11 +17,11 @@ class InlineImageWidget extends WidgetType {
     if (this.url.startsWith("http")) {
       img.src = this.url;
     } else {
-      this.space.readAttachment(decodeURIComponent(this.url), "dataurl").then(
-        ({ data }) => {
+      this.space
+        .readAttachment(decodeURIComponent(this.url), "dataurl")
+        .then(({ data }) => {
           img.src = data;
-        }
-      );
+        });
     }
     img.alt = this.title;
     img.title = this.title;
@@ -52,10 +50,10 @@ export function inlineImagesPlugin(space) {
         widgets.push(
           Decoration.widget({
             widget: new InlineImageWidget(url, title, space),
-            block: true
+            block: true,
           }).range(node.to)
         );
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });

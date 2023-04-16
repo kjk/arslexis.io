@@ -1,6 +1,7 @@
-import { getStr, setArr, setStr } from "./wasm.ts";
-import { Status, Types, Values } from "./constants.ts";
-import { SqliteError } from "./error.ts";
+import { Status, Types, Values } from "./constants.js";
+import { getStr, setArr, setStr } from "./wasm.js";
+
+import { SqliteError } from "./error.js";
 export class PreparedQuery {
   constructor(wasm, stmt, openStatements) {
     this._wasm = wasm;
@@ -25,10 +26,8 @@ export class PreparedQuery {
         if (name[0] !== ":" && name[0] !== "@" && name[0] !== "$") {
           name = `:${name}`;
         }
-        const idx = setStr(
-          this._wasm,
-          name,
-          (ptr) => this._wasm.bind_parameter_index(this._stmt, ptr)
+        const idx = setStr(this._wasm, name, (ptr) =>
+          this._wasm.bind_parameter_index(this._stmt, ptr)
         );
         if (idx === Values.Error) {
           throw new SqliteError(`No parameter named '${name}'.`);
@@ -69,25 +68,19 @@ export class PreparedQuery {
           }
           break;
         case "string":
-          status = setStr(
-            this._wasm,
-            value,
-            (ptr) => this._wasm.bind_text(this._stmt, i + 1, ptr)
+          status = setStr(this._wasm, value, (ptr) =>
+            this._wasm.bind_text(this._stmt, i + 1, ptr)
           );
           break;
         default:
           if (value instanceof Date) {
-            status = setStr(
-              this._wasm,
-              value.toISOString(),
-              (ptr) => this._wasm.bind_text(this._stmt, i + 1, ptr)
+            status = setStr(this._wasm, value.toISOString(), (ptr) =>
+              this._wasm.bind_text(this._stmt, i + 1, ptr)
             );
           } else if (value instanceof Uint8Array) {
             const size = value.length;
-            status = setArr(
-              this._wasm,
-              value,
-              (ptr) => this._wasm.bind_blob(this._stmt, i + 1, ptr, size)
+            status = setArr(this._wasm, value, (ptr) =>
+              this._wasm.bind_blob(this._stmt, i + 1, ptr, size)
             );
           } else if (value === null || value === void 0) {
             status = this._wasm.bind_null(this._stmt, i + 1);
@@ -116,12 +109,7 @@ export class PreparedQuery {
           row.push(this._wasm.column_double(this._stmt, i));
           break;
         case Types.Text:
-          row.push(
-            getStr(
-              this._wasm,
-              this._wasm.column_text(this._stmt, i)
-            )
-          );
+          row.push(getStr(this._wasm, this._wasm.column_text(this._stmt, i)));
           break;
         case Types.Blob: {
           const ptr = this._wasm.column_blob(this._stmt, i);
@@ -166,7 +154,10 @@ export class PreparedQuery {
   iter(params) {
     this.startQuery(params);
     this._status = this._wasm.step(this._stmt);
-    if (this._status !== Status.SqliteRow && this._status !== Status.SqliteDone) {
+    if (
+      this._status !== Status.SqliteRow &&
+      this._status !== Status.SqliteDone
+    ) {
       throw new SqliteError(this._wasm, this._status);
     }
     this._iterKv = false;
@@ -269,10 +260,7 @@ export class PreparedQuery {
     const columnCount = this._wasm.column_count(this._stmt);
     const columns = [];
     for (let i = 0; i < columnCount; i++) {
-      const name = getStr(
-        this._wasm,
-        this._wasm.column_name(this._stmt, i)
-      );
+      const name = getStr(this._wasm, this._wasm.column_name(this._stmt, i));
       const originName = getStr(
         this._wasm,
         this._wasm.column_origin_name(this._stmt, i)

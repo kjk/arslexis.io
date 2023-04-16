@@ -1,19 +1,20 @@
-import { AssetBundle } from "./asset_bundle/bundle.ts";
-import { compile } from "./compile.ts";
+import { AssetBundle } from "./asset_bundle/bundle.js";
+import { compile } from "./compile.js";
 console.log("Generating sandbox worker...");
-const bundlePath = new URL("./environments/worker_bundle.json", import.meta.url).pathname;
-const workerPath = new URL("./environments/sandbox_worker.ts", import.meta.url).pathname;
+const bundlePath = new URL("./environments/worker_bundle.json", import.meta.url)
+  .pathname;
+const workerPath = new URL("./environments/sandbox_worker.ts", import.meta.url)
+  .pathname;
 const workerCode = await compile(workerPath);
 const assetBundle = new AssetBundle();
 assetBundle.writeTextFileSync("worker.js", workerCode);
-Deno.writeTextFile(
-  bundlePath,
-  JSON.stringify(assetBundle.toJSON(), null, 2)
-);
+Deno.writeTextFile(bundlePath, JSON.stringify(assetBundle.toJSON(), null, 2));
 console.log(`Wrote updated bundle to ${bundlePath}`);
 console.log("Now generating SQLite worker...");
-const sqliteBundlePath = new URL("./sqlite/worker_bundle.json", import.meta.url).pathname;
-const sqliteWorkerPath = new URL("./sqlite/worker.ts", import.meta.url).pathname;
+const sqliteBundlePath = new URL("./sqlite/worker_bundle.json", import.meta.url)
+  .pathname;
+const sqliteWorkerPath = new URL("./sqlite/worker.ts", import.meta.url)
+  .pathname;
 const sqliteWorkerCode = await compile(sqliteWorkerPath);
 const sqliteAssetBundle = new AssetBundle();
 sqliteAssetBundle.writeTextFileSync("worker.js", sqliteWorkerCode);

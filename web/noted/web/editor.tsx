@@ -1,20 +1,43 @@
+import { AppCommand, CommandHook } from "./hooks/command.js";
+import type {
+  AppEvent,
+  ClickEvent,
+  CompleteEvent,
+} from "../plug-api/app_event.js";
+import { AppViewState, BuiltinSettings, initialViewState } from "./types.js";
+import {
+  BookIcon,
+  HomeIcon,
+  TerminalIcon,
+  preactRender,
+  useEffect,
+  useReducer,
+  vim,
+  yUndoManagerKeymap,
+} from "./deps.js";
 // Third party web dependencies
 import {
+  CompletionContext,
+  CompletionResult,
+  EditorSelection,
+  EditorState,
+  EditorView,
+  KeyBinding,
+  LanguageDescription,
+  LanguageSupport,
+  StreamLanguage,
+  ViewPlugin,
+  ViewUpdate,
   autocompletion,
   cLanguage,
   closeBrackets,
   closeBracketsKeymap,
-  CompletionContext,
   completionKeymap,
-  CompletionResult,
   cppLanguage,
   csharpLanguage,
   dartLanguage,
   drawSelection,
   dropCursor,
-  EditorSelection,
-  EditorState,
-  EditorView,
   highlightSpecialChars,
   history,
   historyKeymap,
@@ -23,11 +46,8 @@ import {
   javaLanguage,
   javascriptLanguage,
   jsonLanguage,
-  KeyBinding,
   keymap,
   kotlinLanguage,
-  LanguageDescription,
-  LanguageSupport,
   markdown,
   objectiveCLanguage,
   objectiveCppLanguage,
@@ -41,76 +61,56 @@ import {
   shellLanguage,
   sqlLanguage,
   standardKeymap,
-  StreamLanguage,
   syntaxHighlighting,
   syntaxTree,
   tomlLanguage,
   typescriptLanguage,
-  ViewPlugin,
-  ViewUpdate,
   xmlLanguage,
   yamlLanguage,
-} from "../common/deps.ts";
-import { SilverBulletHooks } from "../common/manifest.ts";
+} from "../common/deps.js";
+import { Confirm, Prompt } from "./components/basic_modals.tsx";
+import { FilterOption, PageMeta } from "../common/types.js";
 import {
-  loadMarkdownExtensions,
   MDExt,
-} from "../common/markdown_parser/markdown_ext.ts";
-import buildMarkdown from "../common/markdown_parser/parser.ts";
-import { Space } from "../common/spaces/space.ts";
-import { markdownSyscalls } from "../common/syscalls/markdown.ts";
-import { FilterOption, PageMeta } from "../common/types.ts";
-import { isMacLike, safeRun } from "../common/util.ts";
-import { createSandbox } from "../plugos/environments/webworker_sandbox.ts";
-import { EventHook } from "../plugos/hooks/event.ts";
-import assetSyscalls from "../plugos/syscalls/asset.ts";
-import { eventSyscalls } from "../plugos/syscalls/event.ts";
-import sandboxSyscalls from "../plugos/syscalls/sandbox.ts";
-import { System } from "../plugos/system.ts";
-import { cleanModePlugins } from "./cm_plugins/clean.ts";
-import { CollabState } from "./cm_plugins/collab.ts";
+  loadMarkdownExtensions,
+} from "../common/markdown_parser/markdown_ext.js";
 import {
   attachmentExtension,
   pasteLinkExtension,
-} from "./cm_plugins/editor_paste.ts";
-import { inlineImagesPlugin } from "./cm_plugins/inline_image.ts";
-import { lineWrapper } from "./cm_plugins/line_wrapper.ts";
-import { smartQuoteKeymap } from "./cm_plugins/smart_quotes.ts";
-import { Confirm, Prompt } from "./components/basic_modals.tsx";
+} from "./cm_plugins/editor_paste.js";
+import { isMacLike, safeRun } from "../common/util.js";
+
+import { CodeWidgetHook } from "./hooks/code_widget.js";
+import { CollabState } from "./cm_plugins/collab.js";
 import { CommandPalette } from "./components/command_palette.tsx";
+import { EventHook } from "../plugos/hooks/event.js";
 import { FilterList } from "./components/filter.tsx";
 import { PageNavigator } from "./components/page_navigator.tsx";
 import { Panel } from "./components/panel.tsx";
+import { PathPageNavigator } from "./navigator.js";
+import { SilverBulletHooks } from "../common/manifest.js";
+import { SlashCommandHook } from "./hooks/slash_command.js";
+import { Space } from "../common/spaces/space.js";
+import { System } from "../plugos/system.js";
 import { TopBar } from "./components/top_bar.tsx";
-import {
-  BookIcon,
-  HomeIcon,
-  preactRender,
-  TerminalIcon,
-  useEffect,
-  useReducer,
-  vim,
-  yUndoManagerKeymap,
-} from "./deps.ts";
-import { AppCommand, CommandHook } from "./hooks/command.ts";
-import { SlashCommandHook } from "./hooks/slash_command.ts";
-import { PathPageNavigator } from "./navigator.ts";
-import reducer from "./reducer.ts";
-import customMarkdownStyle from "./style.ts";
-import { collabSyscalls } from "./syscalls/collab.ts";
-import { editorSyscalls } from "./syscalls/editor.ts";
-import { spaceSyscalls } from "./syscalls/space.ts";
-import { systemSyscalls } from "./syscalls/system.ts";
-import { AppViewState, BuiltinSettings, initialViewState } from "./types.ts";
-
-import type {
-  AppEvent,
-  ClickEvent,
-  CompleteEvent,
-} from "../plug-api/app_event.ts";
-import { CodeWidgetHook } from "./hooks/code_widget.ts";
-import { throttle } from "../common/async_util.ts";
-import { readonlyMode } from "./cm_plugins/readonly.ts";
+import assetSyscalls from "../plugos/syscalls/asset.js";
+import buildMarkdown from "../common/markdown_parser/parser.js";
+import { cleanModePlugins } from "./cm_plugins/clean.js";
+import { collabSyscalls } from "./syscalls/collab.js";
+import { createSandbox } from "../plugos/environments/webworker_sandbox.js";
+import customMarkdownStyle from "./style.js";
+import { editorSyscalls } from "./syscalls/editor.js";
+import { eventSyscalls } from "../plugos/syscalls/event.js";
+import { inlineImagesPlugin } from "./cm_plugins/inline_image.js";
+import { lineWrapper } from "./cm_plugins/line_wrapper.js";
+import { markdownSyscalls } from "../common/syscalls/markdown.js";
+import { readonlyMode } from "./cm_plugins/readonly.js";
+import reducer from "./reducer.js";
+import sandboxSyscalls from "../plugos/syscalls/sandbox.js";
+import { smartQuoteKeymap } from "./cm_plugins/smart_quotes.js";
+import { spaceSyscalls } from "./syscalls/space.js";
+import { systemSyscalls } from "./syscalls/system.js";
+import { throttle } from "../common/async_util.js";
 
 const frontMatterRegex = /^---\n(.*?)---\n/ms;
 

@@ -1,5 +1,5 @@
-import { extname, fromFileUrl } from "../deps.ts";
-import { mediaTypeToLoader, transformRawIntoContent } from "./shared.ts";
+import { extname, fromFileUrl } from "../deps.js";
+import { mediaTypeToLoader, transformRawIntoContent } from "./shared.js";
 export async function load(url, _options) {
   switch (url.protocol) {
     case "http:":

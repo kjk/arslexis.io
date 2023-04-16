@@ -1,6 +1,9 @@
-import { HighlightStyle } from "../common/deps.ts";
-import { tagHighlighter, tags as t } from "./deps.ts";
-import * as ct from "../common/markdown_parser/customtags.ts";
+import * as ct from "../common/markdown_parser/customtags.js";
+
+import { tags as t, tagHighlighter } from "./deps.js";
+
+import { HighlightStyle } from "../common/deps.js";
+
 export default function highlightStyles(mdExtension) {
   tagHighlighter;
   return HighlightStyle.define([
@@ -46,6 +49,6 @@ export default function highlightStyles(mdExtension) {
     { tag: ct.HorizontalRuleTag, class: "sb-hr" },
     ...mdExtension.map((mdExt) => {
       return { tag: mdExt.tag, ...mdExt.styles, class: mdExt.className };
-    })
+    }),
   ]);
 }

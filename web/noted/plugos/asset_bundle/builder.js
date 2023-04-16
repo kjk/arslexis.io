@@ -1,5 +1,7 @@
-import { globToRegExp, path, walk } from "../deps.ts";
-import { AssetBundle } from "./bundle.ts";
+import { globToRegExp, path, walk } from "../deps.js";
+
+import { AssetBundle } from "./bundle.js";
+
 export async function bundleAssets(rootPath, patterns) {
   const bundle = new AssetBundle();
   if (patterns.length === 0) {
@@ -24,7 +26,9 @@ export async function bundleAssets(rootPath, patterns) {
 export async function bundleFolder(rootPath, bundlePath) {
   const bundle = new AssetBundle();
   await Deno.mkdir(path.dirname(bundlePath), { recursive: true });
-  for await (const { path: filePath } of walk(rootPath, { includeDirs: false })) {
+  for await (const { path: filePath } of walk(rootPath, {
+    includeDirs: false,
+  })) {
     console.log("Bundling", filePath);
     const cleanPath = filePath.substring(`${rootPath}/`.length);
     bundle.writeFileSync(cleanPath, await Deno.readFile(filePath));

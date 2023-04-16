@@ -1,4 +1,4 @@
-import { EditorView, Vim, vimGetCm } from "../deps.ts";
+import { EditorView, Vim, vimGetCm } from "../deps.js";
 export function editorSyscalls(editor) {
   const syscalls = {
     "editor.getCurrentPage": () => {
@@ -16,7 +16,13 @@ export function editorSyscalls(editor) {
     "editor.save": () => {
       return editor.save(true);
     },
-    "editor.navigate": async (_ctx, name, pos, replaceState = false, newWindow = false) => {
+    "editor.navigate": async (
+      _ctx,
+      name,
+      pos,
+      replaceState = false,
+      newWindow = false
+    ) => {
       await editor.navigate(name, pos, replaceState, newWindow);
     },
     "editor.reloadPage": async () => {
@@ -37,28 +43,34 @@ export function editorSyscalls(editor) {
     "editor.flashNotification": (_ctx, message, type = "info") => {
       editor.flashNotification(message, type);
     },
-    "editor.filterBox": (_ctx, label, options, helpText = "", placeHolder = "") => {
+    "editor.filterBox": (
+      _ctx,
+      label,
+      options,
+      helpText = "",
+      placeHolder = ""
+    ) => {
       return editor.filterBox(label, options, helpText, placeHolder);
     },
     "editor.showPanel": (_ctx, id, mode, html, script) => {
       editor.viewDispatch({
         type: "show-panel",
         id,
-        config: { html, script, mode }
+        config: { html, script, mode },
       });
     },
     "editor.hidePanel": (_ctx, id) => {
       editor.viewDispatch({
         type: "hide-panel",
-        id
+        id,
       });
     },
     "editor.insertAtPos": (_ctx, text, pos) => {
       editor.editorView.dispatch({
         changes: {
           insert: text,
-          from: pos
-        }
+          from: pos,
+        },
       });
     },
     "editor.replaceRange": (_ctx, from, to, text) => {
@@ -66,26 +78,23 @@ export function editorSyscalls(editor) {
         changes: {
           insert: text,
           from,
-          to
-        }
+          to,
+        },
       });
     },
     "editor.moveCursor": (_ctx, pos, center = false) => {
       editor.editorView.dispatch({
         selection: {
-          anchor: pos
-        }
+          anchor: pos,
+        },
       });
       if (center) {
         editor.editorView.dispatch({
           effects: [
-            EditorView.scrollIntoView(
-              pos,
-              {
-                y: "center"
-              }
-            )
-          ]
+            EditorView.scrollIntoView(pos, {
+              y: "center",
+            }),
+          ],
         });
       }
     },
@@ -94,8 +103,8 @@ export function editorSyscalls(editor) {
       editorView.dispatch({
         selection: {
           anchor: from,
-          head: to
-        }
+          head: to,
+        },
       });
     },
     "editor.insertAtCursor": (_ctx, text) => {
@@ -104,11 +113,11 @@ export function editorSyscalls(editor) {
       editorView.dispatch({
         changes: {
           insert: text,
-          from
+          from,
         },
         selection: {
-          anchor: from + text.length
-        }
+          anchor: from + text.length,
+        },
       });
     },
     "editor.dispatch": (_ctx, change) => {
@@ -127,13 +136,13 @@ export function editorSyscalls(editor) {
       editor.viewDispatch({
         type: "set-ui-option",
         key,
-        value
+        value,
       });
     },
     "editor.vimEx": (_ctx, exCommand) => {
       const cm = vimGetCm(editor.editorView);
       return Vim.handleEx(cm, exCommand);
-    }
+    },
   };
   return syscalls;
 }

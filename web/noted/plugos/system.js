@@ -1,5 +1,5 @@
-import { EventEmitter } from "./event.ts";
-import { Plug } from "./plug.ts";
+import { EventEmitter } from "./event.js";
+import { Plug } from "./plug.js";
 export class System extends EventEmitter {
   constructor(env) {
     super();
@@ -20,7 +20,7 @@ export class System extends EventEmitter {
       for (const [name, callback] of Object.entries(registrationObject)) {
         this.registeredSyscalls.set(name, {
           requiredPermissions: requiredCapabilities,
-          callback
+          callback,
         });
       }
     }
