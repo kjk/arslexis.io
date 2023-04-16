@@ -1,11 +1,6 @@
 export * from "../common/deps.js";
 export { Fragment, h, render as preactRender } from "preact";
-export {
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "https://esm.sh/preact@10.11.1/hooks";
+export { useEffect, useReducer, useRef, useState } from "preact/hooks";
 export {
   Book as BookIcon,
   Home as HomeIcon,
