@@ -1,4 +1,4 @@
-import { safeRun } from "../util.ts";
+import { safeRun } from "../util.js";
 export class EventHook {
   constructor() {
     this.localListeners = /* @__PURE__ */ new Map();
@@ -65,14 +65,12 @@ export class EventHook {
         safeRun(async () => {
           await this.dispatchEvent("plug:load", plug.name);
         });
-      }
+      },
     });
   }
   validateManifest(manifest) {
     const errors = [];
-    for (const [_, functionDef] of Object.entries(
-      manifest.functions || {}
-    )) {
+    for (const [_, functionDef] of Object.entries(manifest.functions || {})) {
       if (functionDef.events && !Array.isArray(functionDef.events)) {
         errors.push("'events' key must be an array of strings");
       }

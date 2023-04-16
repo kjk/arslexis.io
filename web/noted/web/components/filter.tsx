@@ -4,12 +4,13 @@ import {
   useEffect,
   useRef,
   useState,
-} from "../deps.ts";
-import { FilterOption } from "../../common/types.ts";
-import fuzzysort from "https://esm.sh/fuzzysort@2.0.1";
-import { FunctionalComponent } from "https://esm.sh/v99/preact@10.11.3/src/index";
+} from "../deps.js";
+
 import { FeatherProps } from "https://esm.sh/v99/preact-feather@4.2.1/dist/types";
+import { FilterOption } from "../../common/types.js";
+import { FunctionalComponent } from "https://esm.sh/v99/preact@10.11.3/src/index";
 import { MiniEditor } from "./mini_editor.tsx";
+import fuzzysort from "https://esm.sh/fuzzysort@2.0.1";
 
 function magicSorter(a: FilterOption, b: FilterOption): number {
   if (a.orderId && b.orderId) {

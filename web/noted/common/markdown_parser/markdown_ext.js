@@ -1,9 +1,5 @@
-import { Tag } from "../deps.ts";
-export function mdExtensionSyntaxConfig({
-  regex,
-  firstCharCodes,
-  nodeType
-}) {
+import { Tag } from "../deps.js";
+export function mdExtensionSyntaxConfig({ regex, firstCharCodes, nodeType }) {
   return {
     defineNodes: [nodeType],
     parseInline: [
@@ -18,14 +14,14 @@ export function mdExtensionSyntaxConfig({
             return -1;
           }
           return cx.addElement(cx.elt(nodeType, pos, pos + match[0].length));
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 }
 export function mdExtensionStyleTags({ nodeType, tag }) {
   return {
-    [nodeType]: tag
+    [nodeType]: tag,
   };
 }
 export function loadMarkdownExtensions(system) {
@@ -40,7 +36,7 @@ export function loadMarkdownExtensions(system) {
           firstCharCodes: def.firstCharacters.map((ch) => ch.charCodeAt(0)),
           regex: new RegExp("^" + def.regex),
           styles: def.styles,
-          className: def.className
+          className: def.className,
         });
       }
     }

@@ -1,6 +1,7 @@
-import { readLines, writeAll } from "https://deno.land/std@0.134.0/io/mod.ts";
-import AsciiTable from "https://deno.land/x/ascii_table@v0.1.0/mod.ts";
-import { DB } from "../mod.ts";
+import { readLines, writeAll } from "https://deno.land/std@0.134.0/io/mod.js";
+
+import AsciiTable from "https://deno.land/x/ascii_table@v0.1.0/mod.js";
+import { DB } from "../mod.js";
 const db = new DB(Deno.args[0] ?? void 0);
 async function print(str) {
   const enc = new TextEncoder();
@@ -13,17 +14,17 @@ const tablesQuery = db.prepareQuery(
   "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
 );
 const commands = {
-  "tables": async () => {
+  tables: async () => {
     for (const [name] of tablesQuery.iter()) {
       await print(`${name}
 `);
     }
   },
-  "quit": async () => {
+  quit: async () => {
     await print("\n");
     Deno.exit(0);
   },
-  "help": async () => {
+  help: async () => {
     await print(
       "Type an SQL query or run a command.\nThe following commands are available:\n"
     );
@@ -31,12 +32,14 @@ const commands = {
       await print(`.${key}
 `);
     }
-  }
+  },
 };
 await prompt();
 for await (const cmd of readLines(Deno.stdin)) {
   if (cmd[0] === ".") {
-    const action = commands[cmd.slice(1)] ?? (() => print("Unrecognized command, try .help\n"));
+    const action =
+      commands[cmd.slice(1)] ??
+      (() => print("Unrecognized command, try .help\n"));
     await action();
   } else {
     try {

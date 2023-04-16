@@ -1,4 +1,4 @@
-import { getStr } from "../src/wasm.ts";
+import { getStr } from "../src/wasm.js";
 
 const isWindows = Deno.build.os === "windows";
 
@@ -43,7 +43,7 @@ export default function env(inst) {
       const buffer = new Uint8Array(
         inst.exports.memory.buffer,
         buffer_ptr,
-        amount,
+        amount
       );
       Deno.seekSync(rid, offset, Deno.SeekMode.Start);
       return Deno.readSync(rid, buffer);
@@ -53,7 +53,7 @@ export default function env(inst) {
       const buffer = new Uint8Array(
         inst.exports.memory.buffer,
         buffer_ptr,
-        amount,
+        amount
       );
       Deno.seekSync(rid, offset, Deno.SeekMode.Start);
       return Deno.writeSync(rid, buffer);
@@ -87,7 +87,7 @@ export default function env(inst) {
     // Return the timezone offset in minutes for
     // the current locale.
     js_timezone: () => {
-      return (new Date()).getTimezoneOffset();
+      return new Date().getTimezoneOffset();
     },
     // Determine if a path exists
     js_exists: (path_ptr) => {

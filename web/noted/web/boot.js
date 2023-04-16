@@ -1,21 +1,23 @@
+import { parseYamlSettings, safeRun } from "../common/util.js";
+
 import { Editor } from "./editor.tsx";
-import { parseYamlSettings, safeRun } from "../common/util.ts";
-import { Space } from "../common/spaces/space.ts";
-import { HttpSpacePrimitives } from "../common/spaces/http_space_primitives.ts";
-import { PlugSpacePrimitives } from "../common/spaces/plug_space_primitives.ts";
-import { PageNamespaceHook } from "../common/hooks/page_namespace.ts";
-import { System } from "../plugos/system.ts";
-import { fulltextSyscalls } from "./syscalls/fulltext.ts";
-import { indexerSyscalls } from "./syscalls/index.ts";
-import { storeSyscalls } from "./syscalls/store.ts";
-import { EventHook } from "../plugos/hooks/event.ts";
-import { clientStoreSyscalls } from "./syscalls/clientStore.ts";
-import { sandboxFetchSyscalls } from "./syscalls/fetch.ts";
+import { EventHook } from "../plugos/hooks/event.js";
+import { HttpSpacePrimitives } from "../common/spaces/http_space_primitives.js";
+import { PageNamespaceHook } from "../common/hooks/page_namespace.js";
+import { PlugSpacePrimitives } from "../common/spaces/plug_space_primitives.js";
+import { Space } from "../common/spaces/space.js";
+import { System } from "../plugos/system.js";
+import { clientStoreSyscalls } from "./syscalls/clientStore.js";
+import { fulltextSyscalls } from "./syscalls/fulltext.js";
+import { indexerSyscalls } from "./syscalls/index.js";
+import { sandboxFetchSyscalls } from "./syscalls/fetch.js";
+import { storeSyscalls } from "./syscalls/store.js";
 safeRun(async () => {
   const httpPrimitives = new HttpSpacePrimitives("");
   let settingsPageText = "";
   try {
-    settingsPageText = (await httpPrimitives.readFile("SETTINGS.md", "utf8")).data;
+    settingsPageText = (await httpPrimitives.readFile("SETTINGS.md", "utf8"))
+      .data;
   } catch (e) {
     console.error("No settings page found", e.message);
   }
@@ -56,11 +58,13 @@ safeRun(async () => {
   await editor.init();
 });
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register(new URL("/service_worker.js", location.href), {
-    type: "module"
-  }).then(() => {
-    console.log("Service worker registered...");
-  });
+  navigator.serviceWorker
+    .register(new URL("/service_worker.js", location.href), {
+      type: "module",
+    })
+    .then(() => {
+      console.log("Service worker registered...");
+    });
 } else {
   console.log(
     "No launching service worker (not present, maybe because not running on localhost or over SSL)"

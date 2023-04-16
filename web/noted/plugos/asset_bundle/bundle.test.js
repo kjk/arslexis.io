@@ -1,5 +1,5 @@
-import { AssetBundle } from "./bundle.ts";
-import { assertEquals } from "../../test_deps.ts";
+import { AssetBundle } from "./bundle.js";
+import { assertEquals } from "../../test_deps.js";
 Deno.test("Asset bundle", () => {
   const assetBundle = new AssetBundle();
   assetBundle.writeTextFileSync("test.txt", "Sup yo");

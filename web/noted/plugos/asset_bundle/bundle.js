@@ -1,5 +1,7 @@
-import { base64Decode, base64EncodedDataUrl } from "./base64.ts";
-import { mime } from "../deps.ts";
+import { base64Decode, base64EncodedDataUrl } from "./base64.js";
+
+import { mime } from "../deps.js";
+
 export class AssetBundle {
   constructor(bundle = {}) {
     this.bundle = bundle;

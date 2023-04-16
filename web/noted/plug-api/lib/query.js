@@ -1,5 +1,6 @@
-import { renderToText, replaceNodesMatching } from "$sb/lib/tree.ts";
-export const queryRegex = /(<!--\s*#query\s+(.+?)-->)(.+?)(<!--\s*\/query\s*-->)/gs;
+import { renderToText, replaceNodesMatching } from "./tree.js";
+export const queryRegex =
+  /(<!--\s*#query\s+(.+?)-->)(.+?)(<!--\s*\/query\s*-->)/gs;
 export const directiveStartRegex = /<!--\s*#([\w\-]+)\s+(.+?)-->/s;
 export const directiveEndRegex = /<!--\s*\/([\w\-]+)\s*-->/s;
 export function applyQuery(parsedQuery, records) {
@@ -7,70 +8,69 @@ export function applyQuery(parsedQuery, records) {
   if (parsedQuery.filter.length === 0) {
     resultRecords = records.slice();
   } else {
-    recordLoop:
-      for (const record of records) {
-        const recordAny = record;
-        for (const { op, prop, value } of parsedQuery.filter) {
-          switch (op) {
-            case "=": {
-              const recordPropVal = recordAny[prop];
-              if (Array.isArray(recordPropVal) && !Array.isArray(value)) {
-                if (!recordPropVal.includes(value)) {
-                  continue recordLoop;
-                }
-              } else if (Array.isArray(recordPropVal) && Array.isArray(value)) {
-                if (!recordPropVal.some((v) => value.includes(v))) {
-                  continue recordLoop;
-                }
-              } else if (!(recordPropVal == value)) {
+    recordLoop: for (const record of records) {
+      const recordAny = record;
+      for (const { op, prop, value } of parsedQuery.filter) {
+        switch (op) {
+          case "=": {
+            const recordPropVal = recordAny[prop];
+            if (Array.isArray(recordPropVal) && !Array.isArray(value)) {
+              if (!recordPropVal.includes(value)) {
                 continue recordLoop;
               }
-              break;
+            } else if (Array.isArray(recordPropVal) && Array.isArray(value)) {
+              if (!recordPropVal.some((v) => value.includes(v))) {
+                continue recordLoop;
+              }
+            } else if (!(recordPropVal == value)) {
+              continue recordLoop;
             }
-            case "!=":
-              if (!(recordAny[prop] != value)) {
-                continue recordLoop;
-              }
-              break;
-            case "<":
-              if (!(recordAny[prop] < value)) {
-                continue recordLoop;
-              }
-              break;
-            case "<=":
-              if (!(recordAny[prop] <= value)) {
-                continue recordLoop;
-              }
-              break;
-            case ">":
-              if (!(recordAny[prop] > value)) {
-                continue recordLoop;
-              }
-              break;
-            case ">=":
-              if (!(recordAny[prop] >= value)) {
-                continue recordLoop;
-              }
-              break;
-            case "=~":
-              if (!new RegExp(value).exec(recordAny[prop])) {
-                continue recordLoop;
-              }
-              break;
-            case "!=~":
-              if (new RegExp(value).exec(recordAny[prop])) {
-                continue recordLoop;
-              }
-              break;
-            case "in":
-              if (!value.includes(recordAny[prop])) {
-                continue recordLoop;
-              }
-              break;
+            break;
           }
+          case "!=":
+            if (!(recordAny[prop] != value)) {
+              continue recordLoop;
+            }
+            break;
+          case "<":
+            if (!(recordAny[prop] < value)) {
+              continue recordLoop;
+            }
+            break;
+          case "<=":
+            if (!(recordAny[prop] <= value)) {
+              continue recordLoop;
+            }
+            break;
+          case ">":
+            if (!(recordAny[prop] > value)) {
+              continue recordLoop;
+            }
+            break;
+          case ">=":
+            if (!(recordAny[prop] >= value)) {
+              continue recordLoop;
+            }
+            break;
+          case "=~":
+            if (!new RegExp(value).exec(recordAny[prop])) {
+              continue recordLoop;
+            }
+            break;
+          case "!=~":
+            if (new RegExp(value).exec(recordAny[prop])) {
+              continue recordLoop;
+            }
+            break;
+          case "in":
+            if (!value.includes(recordAny[prop])) {
+              continue recordLoop;
+            }
+            break;
         }
-        resultRecords.push(recordAny);
       }
+      resultRecords.push(recordAny);
+    }
   }
   if (parsedQuery.orderBy) {
     resultRecords = resultRecords.sort((a, b) => {
@@ -109,7 +109,7 @@ export function removeQueries(pt) {
     return {
       from: t.from,
       to: t.to,
-      text: new Array(renderedText.length + 1).join(" ")
+      text: new Array(renderedText.length + 1).join(" "),
     };
   });
 }

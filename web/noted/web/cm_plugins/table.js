@@ -1,15 +1,13 @@
-import {
-  Decoration,
-  syntaxTree,
-  WidgetType
-} from "../deps.ts";
+import { Decoration, WidgetType, syntaxTree } from "../deps.js";
 import {
   decoratorStateField,
   invisibleDecoration,
-  isCursorInRange
-} from "./util.ts";
-import { renderMarkdownToHtml } from "../../plugs/markdown/markdown_render.ts";
-import { lezerToParseTree } from "../../common/markdown_parser/parse_tree.ts";
+  isCursorInRange,
+} from "./util.js";
+
+import { lezerToParseTree } from "../../common/markdown_parser/parse_tree.js";
+import { renderMarkdownToHtml } from "../../plugs/markdown/markdown_render.js";
+
 class TableViewWidget extends WidgetType {
   constructor(pos, editor, t) {
     super();
@@ -24,8 +22,8 @@ class TableViewWidget extends WidgetType {
       const dataAttributes = e.target.dataset;
       this.editor.editorView.dispatch({
         selection: {
-          anchor: dataAttributes.pos ? +dataAttributes.pos : this.pos
-        }
+          anchor: dataAttributes.pos ? +dataAttributes.pos : this.pos,
+        },
       });
     });
     renderMarkdownToHtml(this.t, {
@@ -41,7 +39,7 @@ class TableViewWidget extends WidgetType {
           }
         }
         return url;
-      }
+      },
     }).then((html) => {
       dom.innerHTML = html;
     });
@@ -54,10 +52,8 @@ export function tablePlugin(editor) {
     syntaxTree(state).iterate({
       enter: (node) => {
         const { from, to, name } = node;
-        if (name !== "Table")
-          return;
-        if (isCursorInRange(state, [from, to]))
-          return;
+        if (name !== "Table") return;
+        if (isCursorInRange(state, [from, to])) return;
         const tableText = state.sliceDoc(from, to);
         const lineStrings = tableText.split("\n");
         const lines = [];
@@ -65,20 +61,18 @@ export function tablePlugin(editor) {
         for (const line of lineStrings) {
           lines.push({
             from: fromIt,
-            to: fromIt + line.length
+            to: fromIt + line.length,
           });
           fromIt += line.length + 1;
         }
-        const firstLine = lines[0], lastLine = lines[lines.length - 1];
-        if (!firstLine || !lastLine)
-          return;
+        const firstLine = lines[0],
+          lastLine = lines[lines.length - 1];
+        if (!firstLine || !lastLine) return;
         widgets.push(invisibleDecoration.range(firstLine.from, firstLine.to));
         widgets.push(invisibleDecoration.range(lastLine.from, lastLine.to));
         lines.slice(1, lines.length - 1).forEach((line) => {
           widgets.push(
-            Decoration.line({ class: "sb-line-table-outside" }).range(
-              line.from
-            )
+            Decoration.line({ class: "sb-line-table-outside" }).range(line.from)
           );
         });
         const text = state.sliceDoc(0, to);
@@ -88,10 +82,10 @@ export function tablePlugin(editor) {
               from,
               editor,
               lezerToParseTree(text, node.node)
-            )
+            ),
           }).range(from)
         );
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });

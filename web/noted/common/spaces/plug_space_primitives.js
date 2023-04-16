@@ -1,4 +1,4 @@
-import { base64DecodeDataUrl } from "../../plugos/asset_bundle/base64.ts";
+import { base64DecodeDataUrl } from "../../plugos/asset_bundle/base64.js";
 export class PlugSpacePrimitives {
   constructor(wrapped, hook, env) {
     this.wrapped = wrapped;
@@ -6,8 +6,13 @@ export class PlugSpacePrimitives {
     this.env = env;
   }
   performOperation(type, pageName, ...args) {
-    for (const { operation, pattern, plug, name, env } of this.hook.spaceFunctions) {
-      if (operation === type && pageName.match(pattern) && (!this.env || env && env === this.env)) {
+    for (const { operation, pattern, plug, name, env } of this.hook
+      .spaceFunctions) {
+      if (
+        operation === type &&
+        pageName.match(pattern) &&
+        (!this.env || (env && env === this.env))
+      ) {
         return plug.invoke(name, [pageName, ...args]);
       }
     }
@@ -43,7 +48,7 @@ export class PlugSpacePrimitives {
       if (wantArrayBuffer) {
         return {
           data: base64DecodeDataUrl(result.data),
-          meta: result.meta
+          meta: result.meta,
         };
       } else {
         return result;

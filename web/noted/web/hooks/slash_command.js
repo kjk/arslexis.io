@@ -1,5 +1,5 @@
-import { safeRun } from "../../common/util.ts";
-import { syntaxTree } from "../deps.ts";
+import { safeRun } from "../../common/util.js";
+import { syntaxTree } from "../deps.js";
 const slashCommandRegexp = /([^\w:]|^)\/[\w\-]*/;
 export class SlashCommandHook {
   constructor(editor) {
@@ -20,7 +20,7 @@ export class SlashCommandHook {
           slashCommand: cmd,
           run: () => {
             return plug.invoke(name, [cmd]);
-          }
+          },
         });
       }
     }
@@ -46,19 +46,19 @@ export class SlashCommandHook {
             changes: {
               from: prefix.from + prefixText.indexOf("/"),
               to: ctx.pos,
-              insert: ""
-            }
+              insert: "",
+            },
           });
           safeRun(async () => {
             await def.run();
             this.editor.focus();
           });
-        }
+        },
       });
     }
     return {
       from: prefix.from + prefixText.indexOf("/") + 1,
-      options
+      options,
     };
   }
   apply(system) {
@@ -66,7 +66,7 @@ export class SlashCommandHook {
     system.on({
       plugLoaded: () => {
         this.buildAllCommands(system);
-      }
+      },
     });
   }
   validateManifest(manifest) {

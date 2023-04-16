@@ -1,4 +1,4 @@
-import { SqliteError } from "./error.ts";
+import { SqliteError } from "./error.js";
 export function setStr(wasm, str, closure) {
   const bytes = new TextEncoder().encode(str);
   const ptr = wasm.malloc(bytes.length + 1);
@@ -49,20 +49,20 @@ export function getStr(wasm, ptr) {
       }
       const u1 = bytes[idx++] & 63;
       if ((u0 & 224) == 192) {
-        str += String.fromCharCode((u0 & 31) << 6 | u1);
+        str += String.fromCharCode(((u0 & 31) << 6) | u1);
         continue;
       }
       const u2 = bytes[idx++] & 63;
       if ((u0 & 240) == 224) {
-        u0 = (u0 & 15) << 12 | u1 << 6 | u2;
+        u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
       } else {
-        u0 = (u0 & 7) << 18 | u1 << 12 | u2 << 6 | bytes[idx++] & 63;
+        u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | (bytes[idx++] & 63);
       }
       if (u0 < 65536) {
         str += String.fromCharCode(u0);
       } else {
         const ch = u0 - 65536;
-        str += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
+        str += String.fromCharCode(55296 | (ch >> 10), 56320 | (ch & 1023));
       }
     }
     return str;

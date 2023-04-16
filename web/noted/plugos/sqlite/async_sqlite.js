@@ -1,4 +1,4 @@
-import { AssetBundle } from "../asset_bundle/bundle.ts";
+import { AssetBundle } from "../asset_bundle/bundle.js";
 import workerBundleJson from "./worker_bundle.json" assert { type: "json" };
 const workerBundle = new AssetBundle(workerBundleJson);
 export class AsyncSQLite {
@@ -7,18 +7,13 @@ export class AsyncSQLite {
     this.requestId = 0;
     this.outstandingRequests = /* @__PURE__ */ new Map();
     const workerHref = URL.createObjectURL(
-      new Blob([
-        workerBundle.readFileSync("worker.js")
-      ], {
-        type: "application/javascript"
+      new Blob([workerBundle.readFileSync("worker.js")], {
+        type: "application/javascript",
       })
     );
-    this.worker = new Worker(
-      workerHref,
-      {
-        type: "module"
-      }
-    );
+    this.worker = new Worker(workerHref, {
+      type: "module",
+    });
     this.worker.addEventListener("message", (event) => {
       const { data } = event;
       const { id, result, error } = data;

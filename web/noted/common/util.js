@@ -1,5 +1,5 @@
-import { SETTINGS_TEMPLATE } from "./settings_template.ts";
-import { YAML } from "./deps.ts";
+import { SETTINGS_TEMPLATE } from "./settings_template.js";
+import { YAML } from "./deps.js";
 export function safeRun(fn) {
   fn().catch((e) => {
     console.error(e);
@@ -25,17 +25,13 @@ export function parseYamlSettings(settingsMarkdown) {
 export async function ensureAndLoadSettings(space, dontCreate) {
   if (dontCreate) {
     return {
-      indexPage: "index"
+      indexPage: "index",
     };
   }
   try {
     await space.getPageMeta("SETTINGS");
   } catch {
-    await space.writePage(
-      "SETTINGS",
-      SETTINGS_TEMPLATE,
-      true
-    );
+    await space.writePage("SETTINGS", SETTINGS_TEMPLATE, true);
   }
   const { text: settingsText } = await space.readPage("SETTINGS");
   const settings = parseYamlSettings(settingsText);

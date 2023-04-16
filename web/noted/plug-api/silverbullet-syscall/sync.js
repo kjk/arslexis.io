@@ -1,4 +1,4 @@
-import { syscall } from "./syscall.ts";
+import { syscall } from "./syscall.js";
 export function syncAll(endpoint, snapshot) {
   return syscall("sync.syncAll", endpoint, snapshot);
 }

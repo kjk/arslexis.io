@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "../deps.ts";
+import { useEffect, useRef } from "../deps.js";
+
 import { Editor } from "../editor.tsx";
-import { PanelConfig } from "../types.ts";
+import { PanelConfig } from "../types.js";
 
 export const panelHtml = `<!DOCTYPE html>
 <html lang="en">

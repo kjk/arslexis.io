@@ -1,4 +1,4 @@
-import { syscall } from "./syscall.ts";
+import { syscall } from "./syscall.js";
 export function dispatchEvent(eventName, data, timeout) {
   return new Promise((resolve, reject) => {
     let timeouter = -1;
@@ -8,12 +8,14 @@ export function dispatchEvent(eventName, data, timeout) {
         reject("timeout");
       }, timeout);
     }
-    syscall("event.dispatch", eventName, data).then((r) => {
-      if (timeouter !== -1) {
-        clearTimeout(timeouter);
-      }
-      resolve(r);
-    }).catch(reject);
+    syscall("event.dispatch", eventName, data)
+      .then((r) => {
+        if (timeouter !== -1) {
+          clearTimeout(timeouter);
+        }
+        resolve(r);
+      })
+      .catch(reject);
   });
 }
 export function listEvents() {

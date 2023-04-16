@@ -1,13 +1,13 @@
 import {
   bench,
-  runBenchmarks
-} from "https://deno.land/std@0.135.0/testing/bench.ts";
-import { DB } from "./mod.ts";
+  runBenchmarks,
+} from "https://deno.land/std@0.135.0/testing/bench.js";
+
+import { DB } from "./mod.js";
 if (Deno.args[0]) {
   try {
     await Deno.remove(Deno.args[0]);
-  } catch (_) {
-  }
+  } catch (_) {}
 }
 const dbFile = Deno.args[0] || ":memory:";
 const db = new DB(dbFile);
@@ -29,7 +29,7 @@ bench({
     }
     db.query("commit");
     b.stop();
-  }
+  },
 });
 bench({
   name: "insert 10 000 (positional)",
@@ -45,18 +45,16 @@ bench({
     }
     db.query("commit");
     b.stop();
-  }
+  },
 });
 bench({
   name: "select 10 000 (select all)",
   runs: 100,
   func: (b) => {
     b.start();
-    db.query(
-      "SELECT name, balance FROM users LIMIT 10000"
-    );
+    db.query("SELECT name, balance FROM users LIMIT 10000");
     b.stop();
-  }
+  },
 });
 bench({
   name: "select 10 000 (select first)",
@@ -70,6 +68,6 @@ bench({
       query.first([id]);
     }
     b.stop();
-  }
+  },
 });
 runBenchmarks();

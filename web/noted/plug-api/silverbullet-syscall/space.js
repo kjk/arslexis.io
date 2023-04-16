@@ -1,4 +1,4 @@
-import { syscall } from "./syscall.ts";
+import { syscall } from "./syscall.js";
 export class SpaceFileSystem {
   listPages(unfiltered = false) {
     return syscall("space.listPages", unfiltered);

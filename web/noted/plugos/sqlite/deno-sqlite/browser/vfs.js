@@ -1,4 +1,4 @@
-import { getStr } from "../src/wasm.ts";
+import { getStr } from "../src/wasm.js";
 
 const DB_NAME = "sqlitevfs";
 const LOADED_FILES = new Map();
@@ -34,7 +34,7 @@ class Buffer {
     if (offset >= this._size) return 0;
     const toCopy = this._data.subarray(
       offset,
-      Math.min(this._size, offset + buffer.length),
+      Math.min(this._size, offset + buffer.length)
     );
     buffer.set(toCopy);
     return toCopy.length;
@@ -45,10 +45,10 @@ class Buffer {
     const neededBytes = capacity - this._data.length;
     const growBy = Math.min(
       MAX_GROW_BYTES,
-      Math.max(MIN_GROW_BYTES, this._data.length),
+      Math.max(MIN_GROW_BYTES, this._data.length)
     );
     const newArray = new Uint8Array(
-      this._data.length + Math.max(growBy, neededBytes),
+      this._data.length + Math.max(growBy, neededBytes)
     );
     newArray.set(this._data);
     this._data = newArray;
@@ -70,8 +70,12 @@ class Buffer {
   }
 }
 
-const indexedDB = window.indexedDB || window.mozIndexedDB ||
-  window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
+const indexedDB =
+  window.indexedDB ||
+  window.mozIndexedDB ||
+  window.webkitIndexedDB ||
+  window.msIndexedDB ||
+  window.shimIndexedDB;
 
 // Web browser indexedDB database
 const database = new Promise((resolve, reject) => {
@@ -165,7 +169,7 @@ export default function env(inst) {
       const buffer = new Uint8Array(
         inst.exports.memory.buffer,
         buffer_ptr,
-        amount,
+        amount
       );
       const file = getOpenFile(rid);
       return file.buffer.read(offset, buffer);
@@ -174,7 +178,7 @@ export default function env(inst) {
       const buffer = new Uint8Array(
         inst.exports.memory.buffer,
         buffer_ptr,
-        amount,
+        amount
       );
       const file = getOpenFile(rid);
       return file.buffer.write(offset, buffer);
@@ -195,7 +199,7 @@ export default function env(inst) {
       return Date.now();
     },
     js_timezone: () => {
-      return (new Date()).getTimezoneOffset();
+      return new Date().getTimezoneOffset();
     },
     js_exists: (path_ptr) => {
       const path = getStr(inst.exports, path_ptr);

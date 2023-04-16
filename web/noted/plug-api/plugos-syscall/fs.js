@@ -1,4 +1,4 @@
-import { syscall } from "./syscall.ts";
+import { syscall } from "./syscall.js";
 export class LocalFileSystem {
   constructor(root) {
     this.root = root;
@@ -18,11 +18,9 @@ export class LocalFileSystem {
     return syscall("fs.deleteFile", `${this.root}/${path}`);
   }
   async listFiles(dirName, recursive = false) {
-    return (await syscall(
-      "fs.listFiles",
-      `${this.root}/${dirName}`,
-      recursive
-    )).map(this.removeRootDir.bind(this));
+    return (
+      await syscall("fs.listFiles", `${this.root}/${dirName}`, recursive)
+    ).map(this.removeRootDir.bind(this));
   }
   removeRootDir(fileMeta) {
     fileMeta.name = fileMeta.name.substring(this.root.length + 1);

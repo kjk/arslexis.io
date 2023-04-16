@@ -1,5 +1,5 @@
-import { getStr } from "./wasm.ts";
-import { Status } from "./constants.ts";
+import { Status } from "./constants.js";
+import { getStr } from "./wasm.js";
 export class SqliteError extends Error {
   constructor(context, code) {
     let message;

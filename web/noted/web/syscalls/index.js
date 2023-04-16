@@ -1,4 +1,4 @@
-import { proxySyscalls } from "../../plugos/syscalls/transport.ts";
+import { proxySyscalls } from "../../plugos/syscalls/transport.js";
 export function indexerSyscalls(space) {
   return proxySyscalls(
     [
@@ -6,7 +6,7 @@ export function indexerSyscalls(space) {
       "index.get",
       "index.set",
       "index.batchSet",
-      "index.delete"
+      "index.delete",
     ],
     (ctx, name, ...args) => space.proxySyscall(ctx.plug, name, args)
   );

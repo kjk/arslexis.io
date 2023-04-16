@@ -1,6 +1,7 @@
-import { renderToText, replaceNodesMatching } from "../../plug-api/lib/tree.ts";
-import buildMarkdown from "../markdown_parser/parser.ts";
-import { parse } from "../markdown_parser/parse_tree.ts";
+import { renderToText, replaceNodesMatching } from "../../plug-api/lib/tree.js";
+
+import buildMarkdown from "../markdown_parser/parser.js";
+import { parse } from "../markdown_parser/parse_tree.js";
 class ConsoleLogger {
   log(_level, ...messageBits) {
     console.log(...messageBits);
@@ -35,7 +36,7 @@ export class SpaceSync {
       const allFilesToProcess = /* @__PURE__ */ new Set([
         ...this.snapshot.keys(),
         ...primaryFileMap.keys(),
-        ...secondaryFileMap.keys()
+        ...secondaryFileMap.keys(),
       ]);
       this.logger.log("info", "Iterating over all files");
       for (const name of allFilesToProcess) {
@@ -64,7 +65,11 @@ export class SpaceSync {
         return operations;
       }
     }
-    if (primaryHash !== void 0 && secondaryHash === void 0 && !this.snapshot.has(name)) {
+    if (
+      primaryHash !== void 0 &&
+      secondaryHash === void 0 &&
+      !this.snapshot.has(name)
+    ) {
       this.logger.log(
         "info",
         "New file created on primary, copying to secondary",
@@ -76,12 +81,13 @@ export class SpaceSync {
         "arraybuffer",
         data
       );
-      this.snapshot.set(name, [
-        primaryHash,
-        writtenMeta.lastModified
-      ]);
+      this.snapshot.set(name, [primaryHash, writtenMeta.lastModified]);
       operations++;
-    } else if (secondaryHash !== void 0 && primaryHash === void 0 && !this.snapshot.has(name)) {
+    } else if (
+      secondaryHash !== void 0 &&
+      primaryHash === void 0 &&
+      !this.snapshot.has(name)
+    ) {
       this.logger.log(
         "info",
         "New file created on secondary, copying from secondary to primary",
@@ -93,12 +99,13 @@ export class SpaceSync {
         "arraybuffer",
         data
       );
-      this.snapshot.set(name, [
-        writtenMeta.lastModified,
-        secondaryHash
-      ]);
+      this.snapshot.set(name, [writtenMeta.lastModified, secondaryHash]);
       operations++;
-    } else if (primaryHash !== void 0 && this.snapshot.has(name) && secondaryHash === void 0) {
+    } else if (
+      primaryHash !== void 0 &&
+      this.snapshot.has(name) &&
+      secondaryHash === void 0
+    ) {
       this.logger.log(
         "info",
         "File deleted on secondary, deleting from primary",
@@ -107,7 +114,11 @@ export class SpaceSync {
       await this.primary.deleteFile(name);
       this.snapshot.delete(name);
       operations++;
-    } else if (secondaryHash !== void 0 && this.snapshot.has(name) && primaryHash === void 0) {
+    } else if (
+      secondaryHash !== void 0 &&
+      this.snapshot.has(name) &&
+      primaryHash === void 0
+    ) {
       this.logger.log(
         "info",
         "File deleted on primary, deleting from secondary",
@@ -116,7 +127,11 @@ export class SpaceSync {
       await this.secondary.deleteFile(name);
       this.snapshot.delete(name);
       operations++;
-    } else if (this.snapshot.has(name) && primaryHash === void 0 && secondaryHash === void 0) {
+    } else if (
+      this.snapshot.has(name) &&
+      primaryHash === void 0 &&
+      secondaryHash === void 0
+    ) {
       this.logger.log(
         "info",
         "File deleted on both ends, deleting from status",
@@ -124,7 +139,13 @@ export class SpaceSync {
       );
       this.snapshot.delete(name);
       operations++;
-    } else if (primaryHash !== void 0 && secondaryHash !== void 0 && this.snapshot.get(name) && primaryHash !== this.snapshot.get(name)[0] && secondaryHash === this.snapshot.get(name)[1]) {
+    } else if (
+      primaryHash !== void 0 &&
+      secondaryHash !== void 0 &&
+      this.snapshot.get(name) &&
+      primaryHash !== this.snapshot.get(name)[0] &&
+      secondaryHash === this.snapshot.get(name)[1]
+    ) {
       this.logger.log(
         "info",
         "File changed on primary, copying to secondary",
@@ -136,12 +157,15 @@ export class SpaceSync {
         "arraybuffer",
         data
       );
-      this.snapshot.set(name, [
-        primaryHash,
-        writtenMeta.lastModified
-      ]);
+      this.snapshot.set(name, [primaryHash, writtenMeta.lastModified]);
       operations++;
-    } else if (primaryHash !== void 0 && secondaryHash !== void 0 && this.snapshot.get(name) && secondaryHash !== this.snapshot.get(name)[1] && primaryHash === this.snapshot.get(name)[0]) {
+    } else if (
+      primaryHash !== void 0 &&
+      secondaryHash !== void 0 &&
+      this.snapshot.get(name) &&
+      secondaryHash !== this.snapshot.get(name)[1] &&
+      primaryHash === this.snapshot.get(name)[0]
+    ) {
       this.logger.log(
         "info",
         "File has changed on secondary, but not primary: copy from secondary to primary",
@@ -153,12 +177,18 @@ export class SpaceSync {
         "arraybuffer",
         data
       );
-      this.snapshot.set(name, [
-        writtenMeta.lastModified,
-        secondaryHash
-      ]);
+      this.snapshot.set(name, [writtenMeta.lastModified, secondaryHash]);
       operations++;
-    } else if (primaryHash !== void 0 && secondaryHash !== void 0 && !this.snapshot.has(name) || primaryHash && secondaryHash && this.snapshot.get(name) && secondaryHash !== this.snapshot.get(name)[1] && primaryHash !== this.snapshot.get(name)[0]) {
+    } else if (
+      (primaryHash !== void 0 &&
+        secondaryHash !== void 0 &&
+        !this.snapshot.has(name)) ||
+      (primaryHash &&
+        secondaryHash &&
+        this.snapshot.get(name) &&
+        secondaryHash !== this.snapshot.get(name)[1] &&
+        primaryHash !== this.snapshot.get(name)[0])
+    ) {
       this.logger.log(
         "info",
         "File changed on both ends, potential conflict",
@@ -175,7 +205,13 @@ export class SpaceSync {
     }
     return operations;
   }
-  static async primaryConflictResolver(name, snapshot, primary, secondary, logger) {
+  static async primaryConflictResolver(
+    name,
+    snapshot,
+    primary,
+    secondary,
+    logger
+  ) {
     logger.log("info", "Starting conflict resolution for", name);
     const filePieces = name.split(".");
     const fileNameBase = filePieces.slice(0, -1).join(".");
@@ -197,7 +233,7 @@ export class SpaceSync {
         );
         snapshot.set(name, [
           pageData1.meta.lastModified,
-          pageData2.meta.lastModified
+          pageData2.meta.lastModified,
         ]);
         return 0;
       }
@@ -219,18 +255,17 @@ export class SpaceSync {
           logger.log("info", "Files are the same, no conflict");
           snapshot.set(name, [
             pageData1.meta.lastModified,
-            pageData2.meta.lastModified
+            pageData2.meta.lastModified,
           ]);
           return 0;
         }
       }
     }
-    const revisionFileName = filePieces.length === 1 ? `${name}.conflicted.${pageData2.meta.lastModified}` : `${fileNameBase}.conflicted.${pageData2.meta.lastModified}.${fileNameExt}`;
-    logger.log(
-      "info",
-      "Going to create conflicting copy",
-      revisionFileName
-    );
+    const revisionFileName =
+      filePieces.length === 1
+        ? `${name}.conflicted.${pageData2.meta.lastModified}`
+        : `${fileNameBase}.conflicted.${pageData2.meta.lastModified}.${fileNameExt}`;
+    logger.log("info", "Going to create conflicting copy", revisionFileName);
     const localConflictMeta = await primary.writeFile(
       revisionFileName,
       "arraybuffer",
@@ -243,7 +278,7 @@ export class SpaceSync {
     );
     snapshot.set(revisionFileName, [
       localConflictMeta.lastModified,
-      remoteConflictMeta.lastModified
+      remoteConflictMeta.lastModified,
     ]);
     const writeMeta = await secondary.writeFile(
       name,

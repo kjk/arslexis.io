@@ -1,4 +1,4 @@
-import { syscall } from "./syscall.ts";
+import { syscall } from "./syscall.js";
 export function start(serverUrl, token, username) {
   return syscall("collab.start", serverUrl, token, username);
 }

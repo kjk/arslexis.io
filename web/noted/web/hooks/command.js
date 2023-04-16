@@ -1,4 +1,4 @@
-import { EventEmitter } from "../../plugos/event.ts";
+import { EventEmitter } from "../../plugos/event.js";
 export class CommandHook extends EventEmitter {
   constructor() {
     super(...arguments);
@@ -18,7 +18,7 @@ export class CommandHook extends EventEmitter {
           command: cmd,
           run: () => {
             return plug.invoke(name, [cmd]);
-          }
+          },
         });
       }
     }
@@ -29,7 +29,7 @@ export class CommandHook extends EventEmitter {
     system.on({
       plugLoaded: () => {
         this.buildAllCommands(system);
-      }
+      },
     });
   }
   validateManifest(manifest) {

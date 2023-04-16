@@ -3,11 +3,12 @@ import {
   CompletionResult,
   useEffect,
   useRef,
-} from "../deps.ts";
-import type { ComponentChildren, FunctionalComponent } from "../deps.ts";
-import { Notification } from "../types.ts";
+} from "../deps.js";
+import type { ComponentChildren, FunctionalComponent } from "../deps.js";
+
 import { FeatherProps } from "https://esm.sh/v99/preact-feather@4.2.1/dist/types";
 import { MiniEditor } from "./mini_editor.tsx";
+import { Notification } from "../types.js";
 
 export type ActionButton = {
   icon: FunctionalComponent<FeatherProps>;

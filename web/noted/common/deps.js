@@ -2,19 +2,20 @@ export {
   history,
   historyKeymap,
   indentWithTab,
-  standardKeymap
+  standardKeymap,
 } from "@codemirror/commands";
 export {
   autocompletion,
   closeBrackets,
   closeBracketsKeymap,
   CompletionContext,
-  completionKeymap
+  completionKeymap,
 } from "@codemirror/autocomplete";
 export { styleTags, Tag, tagHighlighter, tags } from "@lezer/highlight";
-export * as YAML from "https://deno.land/std@0.177.0/encoding/yaml.ts";
-export * as path from "https://deno.land/std@0.177.0/path/mod.ts";
-export { readAll } from "https://deno.land/std@0.165.0/streams/conversion.ts";
+export * as YAML from "yaml"; // TODO: https://deno.land/std@0.177.0/encoding/yaml.ts, ported from js-yaml
+// export * as YAML from "https://deno.land/std@0.177.0/encoding/yaml.ts";
+// export * as path from "https://deno.land/std@0.177.0/path/mod.ts";
+// export { readAll } from "https://deno.land/std@0.165.0/streams/conversion.js";
 export {
   Emoji,
   GFM,
@@ -25,7 +26,7 @@ export {
   Subscript,
   Superscript,
   Table,
-  TaskList
+  TaskList,
 } from "@lezer/markdown";
 export { searchKeymap } from "@codemirror/search";
 export {
@@ -39,9 +40,9 @@ export {
   runScopeHandlers,
   ViewPlugin,
   ViewUpdate,
-  WidgetType
+  WidgetType,
 } from "@codemirror/view";
-export { markdown } from "https://esm.sh/@codemirror/lang-markdown@6.1.0?external=@codemirror/state,@lezer/common,@codemirror/language,@lezer/markdown,@codemirror/view,@lezer/highlight,@@codemirror/lang-html";
+export { markdown } from "@codemirror/lang-markdown";
 export {
   EditorSelection,
   EditorState,
@@ -49,7 +50,7 @@ export {
   SelectionRange,
   StateField,
   Text,
-  Transaction
+  Transaction,
 } from "@codemirror/state";
 export {
   defaultHighlightStyle,
@@ -67,22 +68,22 @@ export {
   ParseContext,
   StreamLanguage,
   syntaxHighlighting,
-  syntaxTree
+  syntaxTree,
 } from "@codemirror/language";
-export { yaml as yamlLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/yaml?external=@codemirror/language";
+export { yaml as yamlLanguage } from "@codemirror/legacy-modes/mode/yaml";
 export {
   pgSQL as postgresqlLanguage,
-  standardSQL as sqlLanguage
-} from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/sql?external=@codemirror/language";
-export { rust as rustLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/rust?external=@codemirror/language";
-export { css as cssLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/css?external=@codemirror/language";
-export { python as pythonLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/python?external=@codemirror/language";
-export { protobuf as protobufLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/protobuf?external=@codemirror/language";
-export { shell as shellLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/shell?external=@codemirror/language";
-export { swift as swiftLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/swift?external=@codemirror/language";
-export { toml as tomlLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/toml?external=@codemirror/language";
-export { xml as xmlLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/xml?external=@codemirror/language";
-export { json as jsonLanguage } from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/javascript?external=@codemirror/language";
+  standardSQL as sqlLanguage,
+} from "@codemirror/legacy-modes/mode/sql";
+export { rust as rustLanguage } from "@codemirror/legacy-modes/mode/rust";
+export { css as cssLanguage } from "@codemirror/legacy-modes/mode/css";
+export { python as pythonLanguage } from "@codemirror/legacy-modes/mode/python";
+export { protobuf as protobufLanguage } from "@codemirror/legacy-modes/mode/protobuf";
+export { shell as shellLanguage } from "@codemirror/legacy-modes/mode/shell";
+export { swift as swiftLanguage } from "@codemirror/legacy-modes/mode/swift";
+export { toml as tomlLanguage } from "@codemirror/legacy-modes/mode/toml";
+export { xml as xmlLanguage } from "@codemirror/legacy-modes/mode/xml";
+export { json as jsonLanguage } from "@codemirror/legacy-modes/mode/javascript";
 export {
   c as cLanguage,
   cpp as cppLanguage,
@@ -92,9 +93,9 @@ export {
   kotlin as kotlinLanguage,
   objectiveC as objectiveCLanguage,
   objectiveCpp as objectiveCppLanguage,
-  scala as scalaLanguage
-} from "https://esm.sh/@codemirror/legacy-modes@6.3.1/mode/clike?external=@codemirror/language";
+  scala as scalaLanguage,
+} from "@codemirror/legacy-modes/mode/clike";
 export {
   javascriptLanguage,
-  typescriptLanguage
-} from "https://esm.sh/@codemirror/lang-javascript@6.1.4?external=@codemirror/language,@codemirror/autocomplete,@codemirror/view,@codemirror/state,@codemirror/lint,@lezer/common,@lezer/lr,@lezer/javascript,@codemirror/commands";
+  typescriptLanguage,
+} from "@codemirror/lang-javascript";

@@ -1,8 +1,9 @@
-import { renderToText } from "./tree.ts";
-import wikiMarkdownLang from "../../common/markdown_parser/parser.ts";
-import { assert, assertEquals } from "../../test_deps.ts";
-import { parse } from "../../common/markdown_parser/parse_tree.ts";
-import { removeQueries } from "./query.ts";
+import { assert, assertEquals } from "../../test_deps.js";
+
+import { parse } from "../../common/markdown_parser/parse_tree.js";
+import { removeQueries } from "./query.js";
+import { renderToText } from "./tree.js";
+import wikiMarkdownLang from "../../common/markdown_parser/parser.js";
 const queryRemovalTest = `
 # Heading
 Before

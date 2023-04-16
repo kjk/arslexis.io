@@ -1,10 +1,11 @@
-import { assertEquals } from "../../test_deps.ts";
 import {
   base64Decode,
   base64DecodeDataUrl,
-  base64EncodedDataUrl
-} from "./base64.ts";
-import { base64Encode } from "./base64.ts";
+  base64EncodedDataUrl,
+} from "./base64.js";
+
+import { assertEquals } from "../../test_deps.js";
+import { base64Encode } from "./base64.js";
 Deno.test("Base 64 encoding", () => {
   const buf = new Uint8Array(3);
   buf[0] = 1;

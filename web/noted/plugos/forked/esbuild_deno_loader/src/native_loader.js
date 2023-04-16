@@ -1,6 +1,9 @@
-import { fromFileUrl } from "../deps.ts";
-import * as deno from "./deno.ts";
-import { mediaTypeToLoader, transformRawIntoContent } from "./shared.ts";
+import * as deno from "./deno.js";
+
+import { mediaTypeToLoader, transformRawIntoContent } from "./shared.js";
+
+import { fromFileUrl } from "../deps.js";
+
 export async function load(infoCache, url, options) {
   switch (url.protocol) {
     case "http:":
@@ -19,7 +22,7 @@ async function loadFromCLI(infoCache, specifier, options) {
   const specifierRaw = specifier.href;
   if (!infoCache.has(specifierRaw)) {
     const { modules, redirects } = await deno.info(specifier, {
-      importMap: options.importMapURL?.href
+      importMap: options.importMapURL?.href,
     });
     for (const module2 of modules) {
       infoCache.set(module2.specifier, module2);
@@ -36,10 +39,8 @@ async function loadFromCLI(infoCache, specifier, options) {
   if (!module) {
     throw new TypeError("Unreachable.");
   }
-  if (module.error)
-    throw new Error(module.error);
-  if (!module.local)
-    throw new Error("Module not downloaded yet.");
+  if (module.error) throw new Error(module.error);
+  if (!module.local) throw new Error("Module not downloaded yet.");
   const mediaType = module.mediaType ?? "Unknown";
   const loader = mediaTypeToLoader(mediaType);
   const raw = await Deno.readFile(module.local);

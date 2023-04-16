@@ -1,10 +1,10 @@
 import {
   Decoration,
   EditorView,
-  foldedRanges,
   StateField,
-  WidgetType
-} from "../deps.ts";
+  WidgetType,
+  foldedRanges,
+} from "../deps.js";
 export class LinkWidget extends WidgetType {
   constructor(options) {
     super();
@@ -51,7 +51,7 @@ export function decoratorStateField(stateToDecoratorMapper) {
     update(value, tr) {
       return stateToDecoratorMapper(tr.state);
     },
-    provide: (f) => EditorView.decorations.from(f)
+    provide: (f) => EditorView.decorations.from(f),
   });
 }
 export class ButtonWidget extends WidgetType {
@@ -82,22 +82,20 @@ export function checkRangeSubset(parent, child) {
   return child[0] >= parent[0] && child[1] <= parent[1];
 }
 export function isCursorInRange(state, range) {
-  return state.selection.ranges.some(
-    (selection) => checkRangeOverlap(range, [selection.from, selection.to])
+  return state.selection.ranges.some((selection) =>
+    checkRangeOverlap(range, [selection.from, selection.to])
   );
 }
 export const invisibleDecoration = Decoration.replace({});
 export function editorLines(view, from, to) {
-  let lines = view.viewportLineBlocks.filter(
-    (block) => checkRangeOverlap([block.from, block.to], [from, to])
+  let lines = view.viewportLineBlocks.filter((block) =>
+    checkRangeOverlap([block.from, block.to], [from, to])
   );
   const folded = foldedRanges(view.state).iter();
   while (folded.value) {
     lines = lines.filter(
-      (line) => !checkRangeOverlap(
-        [folded.from, folded.to],
-        [line.from, line.to]
-      )
+      (line) =>
+        !checkRangeOverlap([folded.from, folded.to], [line.from, line.to])
     );
     folded.next();
   }

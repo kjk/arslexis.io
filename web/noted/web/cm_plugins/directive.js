@@ -1,9 +1,9 @@
+import { Decoration, syntaxTree } from "../deps.js";
+import { HtmlWidget, decoratorStateField, isCursorInRange } from "./util.js";
 import {
   directiveEndRegex,
-  directiveStartRegex
-} from "../../plug-api/lib/query.ts";
-import { Decoration, syntaxTree } from "../deps.ts";
-import { decoratorStateField, HtmlWidget, isCursorInRange } from "./util.ts";
+  directiveStartRegex,
+} from "../../plug-api/lib/query.js";
 export function directivePlugin() {
   return decoratorStateField((state) => {
     const widgets = [];
@@ -32,18 +32,16 @@ export function directivePlugin() {
                 widget: new HtmlWidget(
                   `#${directiveName}`,
                   "sb-directive-placeholder"
-                )
+                ),
               }).range(from)
             );
             widgets.push(
               Decoration.line({
                 class: "sb-directive-start sb-directive-start-outside",
                 attributes: {
-                  spellcheck: "false"
-                }
-              }).range(
-                from
-              )
+                  spellcheck: "false",
+                },
+              }).range(from)
             );
           }
           return true;
@@ -66,15 +64,13 @@ export function directivePlugin() {
                 widget: new HtmlWidget(
                   `/${directiveName}`,
                   "sb-directive-placeholder"
-                )
+                ),
               }).range(from)
             );
             widgets.push(
               Decoration.line({
-                class: "sb-directive-end sb-directive-end-outside"
-              }).range(
-                from
-              )
+                class: "sb-directive-end sb-directive-end-outside",
+              }).range(from)
             );
           }
           return true;
@@ -86,7 +82,7 @@ export function directivePlugin() {
             if (pos !== to) {
               widgets.push(
                 Decoration.line({
-                  class: "sb-directive-body"
+                  class: "sb-directive-body",
                 }).range(pos)
               );
             }
@@ -94,7 +90,7 @@ export function directivePlugin() {
           }
           return true;
         }
-      }
+      },
     });
     return Decoration.set(widgets, true);
   });

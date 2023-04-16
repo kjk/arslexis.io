@@ -1,11 +1,13 @@
 import * as YAML from "yaml";
+
 import {
   addParentPointers,
   findNodeOfType,
   renderToText,
   replaceNodesMatching,
-  traverseTree
-} from "$sb/lib/tree.ts";
+  traverseTree,
+} from "./tree.js";
+
 export function extractFrontmatter(tree, removeKeys = []) {
   let data = {};
   addParentPointers(tree);
@@ -98,12 +100,13 @@ export function prepareFrontmatterDispatch(tree, data) {
       try {
         const parsedYaml = YAML.parse(yamlText);
         const newData = { ...parsedYaml, ...data };
+        // TODO: noArrayIndent: true to YAML.stringify()
         dispatchData = {
           changes: {
             from: bodyNode.from,
             to: bodyNode.to,
-            insert: YAML.stringify(newData, { noArrayIndent: true })
-          }
+            insert: YAML.stringify(newData, {}),
+          },
         };
       } catch (e) {
         console.error("Error parsing YAML", e);
@@ -113,12 +116,13 @@ export function prepareFrontmatterDispatch(tree, data) {
     return false;
   });
   if (!dispatchData) {
+    // TODO: noArrayIndent: true to YAML.stringify()
     dispatchData = {
       changes: {
         from: 0,
         to: 0,
-        insert: "---\n" + YAML.stringify(data, { noArrayIndent: true }) + "---\n"
-      }
+        insert: "---\n" + YAML.stringify(data, {}) + "---\n",
+      },
     };
   }
   return dispatchData;

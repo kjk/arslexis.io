@@ -5,11 +5,12 @@ import {
   nodeAtPos,
   removeParentPointers,
   renderToText,
-  replaceNodesMatching
-} from "./tree.ts";
-import wikiMarkdownLang from "../../common/markdown_parser/parser.ts";
-import { assertEquals, assertNotEquals } from "../../test_deps.ts";
-import { parse } from "../../common/markdown_parser/parse_tree.ts";
+  replaceNodesMatching,
+} from "./tree.js";
+import { assertEquals, assertNotEquals } from "../../test_deps.js";
+
+import { parse } from "../../common/markdown_parser/parse_tree.js";
+import wikiMarkdownLang from "../../common/markdown_parser/parser.js";
 const mdTest1 = `
 # Heading
 ## Sub _heading_ cool
@@ -59,7 +60,7 @@ Deno.test("Test parsing", () => {
   replaceNodesMatching(mdTree, (n) => {
     if (n.type === "Task") {
       return {
-        type: "Tosk"
+        type: "Tosk",
       };
     }
   });

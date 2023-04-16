@@ -22,7 +22,7 @@ also a list of examples in the [`examples`](./examples) folder.
 ## Example
 
 ```javascript
-import { DB } from "https://deno.land/x/sqlite/mod.ts";
+import { DB } from "https://deno.land/x/sqlite/mod.js";
 
 // Open a database
 const db = new DB("test.db");

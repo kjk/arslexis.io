@@ -1,22 +1,22 @@
-import { Capacitor } from "../../mobile/deps.ts";
-import { CapacitorSQLite } from "../deps.ts";
+import { Capacitor } from "../../mobile/deps.js";
+import { CapacitorSQLite } from "../deps.js";
 export class CapacitorDb {
   constructor(name) {
     this.name = name;
   }
   async init() {
     await CapacitorSQLite.createConnection({
-      database: this.name
+      database: this.name,
     });
     await CapacitorSQLite.open({
-      database: this.name
+      database: this.name,
     });
   }
   async query(sql, ...args) {
     const result = await CapacitorSQLite.query({
       statement: sql,
       database: this.name,
-      values: args
+      values: args,
     });
     if (Capacitor.getPlatform() === "ios") {
       return result.values.slice(1);
@@ -24,10 +24,12 @@ export class CapacitorDb {
     return result.values;
   }
   async execute(sql, ...args) {
-    return (await CapacitorSQLite.run({
-      statement: sql,
-      database: this.name,
-      values: args
-    })).changes.changes;
+    return (
+      await CapacitorSQLite.run({
+        statement: sql,
+        database: this.name,
+        values: args,
+      })
+    ).changes.changes;
   }
 }

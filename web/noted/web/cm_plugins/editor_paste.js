@@ -1,11 +1,13 @@
-import { EditorView, ViewPlugin } from "../deps.ts";
-import { safeRun } from "../../plugos/util.ts";
-import { maximumAttachmentSize } from "../../common/types.ts";
-import TurndownService from "https://cdn.skypack.dev/turndown@7.1.1";
+import { EditorView, ViewPlugin } from "../deps.js";
 import {
   tables,
-  taskListItems
+  taskListItems,
 } from "https://cdn.skypack.dev/@joplin/turndown-plugin-gfm@1.0.45";
+
+import TurndownService from "https://cdn.skypack.dev/turndown@7.1.1";
+import { maximumAttachmentSize } from "../../common/types.js";
+import { safeRun } from "../../plugos/util.js";
+
 const turndownService = new TurndownService({
   hr: "---",
   codeBlockStyle: "fenced",
@@ -13,14 +15,15 @@ const turndownService = new TurndownService({
   emDelimiter: "*",
   bulletListMarker: "*",
   strongDelimiter: "**",
-  linkStyle: "inlined"
+  linkStyle: "inlined",
 });
 turndownService.use(taskListItems);
 turndownService.use(tables);
 function striptHtmlComments(s) {
   return s.replace(/<!--[\s\S]*?-->/g, "");
 }
-const urlRegexp = /^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+const urlRegexp =
+  /^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 export const pasteLinkExtension = ViewPlugin.fromClass(
   class {
     update(update) {
@@ -47,9 +50,9 @@ export const pasteLinkExtension = ViewPlugin.fromClass(
                       insert: `[${update.startState.sliceDoc(
                         selection.from,
                         selection.to
-                      )}](${pastedString})`
-                    }
-                  ]
+                      )}](${pastedString})`,
+                    },
+                  ],
                 });
               });
             }
@@ -92,7 +95,9 @@ export function attachmentExtension(editor) {
       const payload = [...event.clipboardData.items];
       const richText = event.clipboardData?.getData("text/html");
       if (richText && !shiftDown) {
-        const markdown = striptHtmlComments(turndownService.turndown(richText)).trim();
+        const markdown = striptHtmlComments(
+          turndownService.turndown(richText)
+        ).trim();
         const view = editor.editorView;
         const selection = view.state.selection.main;
         view.dispatch({
@@ -100,13 +105,13 @@ export function attachmentExtension(editor) {
             {
               from: selection.from,
               to: selection.to,
-              insert: markdown
-            }
+              insert: markdown,
+            },
           ],
           selection: {
-            anchor: selection.from + markdown.length
+            anchor: selection.from + markdown.length,
           },
-          scrollIntoView: true
+          scrollIntoView: true,
         });
         return true;
       }
@@ -116,7 +121,7 @@ export function attachmentExtension(editor) {
       safeRun(async () => {
         await processItemTransfer(payload);
       });
-    }
+    },
   });
   async function processFileTransfer(payload) {
     const data = await payload[0].arrayBuffer();
@@ -129,14 +134,20 @@ export function attachmentExtension(editor) {
     }
     const fileType = file.type;
     const ext = fileType.split("/")[1];
-    const fileName = new Date().toISOString().split(".")[0].replace("T", "_").replaceAll(":", "-");
+    const fileName = new Date()
+      .toISOString()
+      .split(".")[0]
+      .replace("T", "_")
+      .replaceAll(":", "-");
     const data = await file.getAsFile()?.arrayBuffer();
     await saveFile(data, `${fileName}.${ext}`, fileType);
   }
   async function saveFile(data, suggestedName, mimeType) {
     if (data.byteLength > maximumAttachmentSize) {
       editor.flashNotification(
-        `Attachment is too large, maximum is ${maximumAttachmentSize / 1024 / 1024}MB`,
+        `Attachment is too large, maximum is ${
+          maximumAttachmentSize / 1024 / 1024
+        }MB`,
         "error"
       );
       return;
@@ -149,7 +160,9 @@ export function attachmentExtension(editor) {
       return;
     }
     await editor.space.writeAttachment(finalFileName, "arraybuffer", data);
-    let attachmentMarkdown = `[${finalFileName}](${encodeURIComponent(finalFileName)})`;
+    let attachmentMarkdown = `[${finalFileName}](${encodeURIComponent(
+      finalFileName
+    )})`;
     if (mimeType.startsWith("image/")) {
       attachmentMarkdown = `![](${encodeURIComponent(finalFileName)})`;
     }
@@ -157,9 +170,9 @@ export function attachmentExtension(editor) {
       changes: [
         {
           insert: attachmentMarkdown,
-          from: editor.editorView.state.selection.main.from
-        }
-      ]
+          from: editor.editorView.state.selection.main.from,
+        },
+      ],
     });
   }
 }

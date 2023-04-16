@@ -1,9 +1,11 @@
-import * as esbuildWasm from "https://deno.land/x/esbuild@v0.14.54/wasm.js";
 import * as esbuildNative from "https://deno.land/x/esbuild@v0.14.54/mod.js";
+import * as esbuildWasm from "https://deno.land/x/esbuild@v0.14.54/wasm.js";
+
+import { denoPlugin } from "./forked/esbuild_deno_loader/mod.js";
+import { patchDenoLibJS } from "./hack.js";
+import { path } from "./deps.js";
+
 export const esbuild = Deno.run === void 0 ? esbuildWasm : esbuildNative;
-import { path } from "./deps.ts";
-import { denoPlugin } from "./forked/esbuild_deno_loader/mod.ts";
-import { patchDenoLibJS } from "./hack.ts";
 function esBuildExternals(imports) {
   if (!imports) {
     return [];
@@ -25,10 +27,9 @@ export async function compile(filePath, functionName = void 0, options = {}) {
     inFile = await Deno.makeTempFile({ suffix: ".ts" });
     await Deno.writeTextFile(
       inFile,
-      `import {${functionName}} from "file://${path.resolve(filePath).replaceAll(
-        "\\",
-        "\\\\"
-      )}";export default ${functionName};`
+      `import {${functionName}} from "file://${path
+        .resolve(filePath)
+        .replaceAll("\\", "\\\\")}";export default ${functionName};`
     );
   }
   try {
@@ -46,11 +47,13 @@ export async function compile(filePath, functionName = void 0, options = {}) {
       treeShaking: true,
       plugins: [
         denoPlugin({
-          importMapURL: options.importMap || new URL("./../import_map.json", import.meta.url),
-          loader: "native"
-        })
+          importMapURL:
+            options.importMap ||
+            new URL("./../import_map.json", import.meta.url),
+          loader: "native",
+        }),
       ],
-      absWorkingDir: path.resolve(path.dirname(inFile))
+      absWorkingDir: path.resolve(path.dirname(inFile)),
     });
     if (options.info) {
       const text = await esbuild.analyzeMetafile(result.metafile);
@@ -73,14 +76,15 @@ export async function compileModule(cwd, moduleName, options = {}) {
   await Deno.remove(inFile);
   return code;
 }
-export async function sandboxCompile(filename, code, functionName, options = {}) {
+export async function sandboxCompile(
+  filename,
+  code,
+  functionName,
+  options = {}
+) {
   const tmpDir = await Deno.makeTempDir();
   await Deno.writeTextFile(`${tmpDir}/${filename}`, code);
-  const jsCode = await compile(
-    `${tmpDir}/${filename}`,
-    functionName,
-    options
-  );
+  const jsCode = await compile(`${tmpDir}/${filename}`, functionName, options);
   await Deno.remove(tmpDir, { recursive: true });
   return jsCode;
 }
