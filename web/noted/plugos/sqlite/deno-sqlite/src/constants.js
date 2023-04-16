@@ -1,0 +1,57 @@
+export var Status = /* @__PURE__ */ ((Status2) => {
+  Status2[Status2["Unknown"] = -1] = "Unknown";
+  Status2[Status2["SqliteOk"] = 0] = "SqliteOk";
+  Status2[Status2["SqliteError"] = 1] = "SqliteError";
+  Status2[Status2["SqliteInternal"] = 2] = "SqliteInternal";
+  Status2[Status2["SqlitePerm"] = 3] = "SqlitePerm";
+  Status2[Status2["SqliteAbort"] = 4] = "SqliteAbort";
+  Status2[Status2["SqliteBusy"] = 5] = "SqliteBusy";
+  Status2[Status2["SqliteLocked"] = 6] = "SqliteLocked";
+  Status2[Status2["SqliteNoMem"] = 7] = "SqliteNoMem";
+  Status2[Status2["SqliteReadOnly"] = 8] = "SqliteReadOnly";
+  Status2[Status2["SqliteInterrupt"] = 9] = "SqliteInterrupt";
+  Status2[Status2["SqliteIOErr"] = 10] = "SqliteIOErr";
+  Status2[Status2["SqliteCorrupt"] = 11] = "SqliteCorrupt";
+  Status2[Status2["SqliteNotFound"] = 12] = "SqliteNotFound";
+  Status2[Status2["SqliteFull"] = 13] = "SqliteFull";
+  Status2[Status2["SqliteCantOpen"] = 14] = "SqliteCantOpen";
+  Status2[Status2["SqliteProtocol"] = 15] = "SqliteProtocol";
+  Status2[Status2["SqliteEmpty"] = 16] = "SqliteEmpty";
+  Status2[Status2["SqliteSchema"] = 17] = "SqliteSchema";
+  Status2[Status2["SqliteTooBig"] = 18] = "SqliteTooBig";
+  Status2[Status2["SqliteConstraint"] = 19] = "SqliteConstraint";
+  Status2[Status2["SqliteMismatch"] = 20] = "SqliteMismatch";
+  Status2[Status2["SqliteMisuse"] = 21] = "SqliteMisuse";
+  Status2[Status2["SqliteNoLFS"] = 22] = "SqliteNoLFS";
+  Status2[Status2["SqliteAuth"] = 23] = "SqliteAuth";
+  Status2[Status2["SqliteFormat"] = 24] = "SqliteFormat";
+  Status2[Status2["SqliteRange"] = 25] = "SqliteRange";
+  Status2[Status2["SqliteNotADB"] = 26] = "SqliteNotADB";
+  Status2[Status2["SqliteNotice"] = 27] = "SqliteNotice";
+  Status2[Status2["SqliteWarning"] = 28] = "SqliteWarning";
+  Status2[Status2["SqliteRow"] = 100] = "SqliteRow";
+  Status2[Status2["SqliteDone"] = 101] = "SqliteDone";
+  return Status2;
+})(Status || {});
+export var OpenFlags = /* @__PURE__ */ ((OpenFlags2) => {
+  OpenFlags2[OpenFlags2["ReadOnly"] = 1] = "ReadOnly";
+  OpenFlags2[OpenFlags2["ReadWrite"] = 2] = "ReadWrite";
+  OpenFlags2[OpenFlags2["Create"] = 4] = "Create";
+  OpenFlags2[OpenFlags2["Uri"] = 64] = "Uri";
+  OpenFlags2[OpenFlags2["Memory"] = 128] = "Memory";
+  return OpenFlags2;
+})(OpenFlags || {});
+export var Types = /* @__PURE__ */ ((Types2) => {
+  Types2[Types2["Integer"] = 1] = "Integer";
+  Types2[Types2["Float"] = 2] = "Float";
+  Types2[Types2["Text"] = 3] = "Text";
+  Types2[Types2["Blob"] = 4] = "Blob";
+  Types2[Types2["Null"] = 5] = "Null";
+  Types2[Types2["BigInteger"] = 6] = "BigInteger";
+  return Types2;
+})(Types || {});
+export var Values = /* @__PURE__ */ ((Values2) => {
+  Values2[Values2["Error"] = -1] = "Error";
+  Values2[Values2["Null"] = 0] = "Null";
+  return Values2;
+})(Values || {});
