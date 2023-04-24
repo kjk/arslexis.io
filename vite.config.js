@@ -22,27 +22,22 @@ export default defineConfig({
       input: {
         main: resolve("web", "index.html"),
         test: resolve("web", "test.html"),
-        // unzip
         unzip: resolve("web", "unzip", "index.html"),
-        // wc
         wc: resolve("web", "wc", "index.html"),
-        // image optim
         image_resize_optimize: resolve(
           "web",
           "image-resize-optimize",
           "index.html"
         ),
-        // goplayground
         goplayground: resolve("web", "goplayground", "index.html"),
+        github_success: resolve("web", "github_success.html"),
+        notepad2: resolve("web", "notepad2", "index.html"),
+        calc: resolve("web", "calc", "index.html"),
+        qrscanner: resolve("web", "qrscanner", "index.html"),
         // gist editor
         gisteditor: resolve("web", "gisteditor", "index.html"),
         gistedit: resolve("web", "gisteditor", "edit.html"),
         nogist: resolve("web", "gisteditor", "nogist.html"),
-        github_success: resolve("web", "github_success.html"),
-        // notepad2
-        notepad2: resolve("web", "notepad2", "index.html"),
-        // calc
-        calc: resolve("web", "calc", "index.html")
       },
 
       output: {

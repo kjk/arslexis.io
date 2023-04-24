@@ -63,6 +63,7 @@
     "js-base64": "^3.7.5",
     "marked": "^4.2.12",
     "preact-feather": "^4.2.1",
+    "qr-scanner": "^1.4.2",
     "y-codemirror.next": "^0.3.2",
     "y-websocket": "^1.5.0",
     "yaml": "^2.2.1",
