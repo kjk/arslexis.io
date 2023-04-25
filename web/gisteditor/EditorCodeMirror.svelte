@@ -974,7 +974,7 @@
     />
 
     {#if doublePane}
-      <div class="second-pane w-1/2 bg-gray-50 h-full">
+      <div class="second-pane md-preview w-1/2 bg-gray-50 h-full">
         {@html secondPaneHTML}
       </div>
     {/if}
@@ -1117,5 +1117,49 @@
 
   .codemirror-wrapper :global(.cm-focused) {
     outline: none;
+  }
+
+  /* tailwind clears all styling so we have to restore styling for lists etc.
+    it's not perfect but covers the basics */
+
+  :global(.md-preview) {
+    padding: 0.25rem 0.75rem;
+  }
+  :global(.md-preview li) {
+    margin-left: 1rem;
+  }
+
+  :global(.md-preview ol) {
+    list-style: decimal;
+    margin-bottom: 1rem;
+  }
+
+  :global(.md-preview ul) {
+    list-style: disc;
+    margin-bottom: 1rem;
+  }
+
+  :global(.md-preview ul ul) {
+    list-style: circle;
+    margin-bottom: 0;
+  }
+
+  :global(.md-preview blockquote p) {
+    margin-bottom: 0;
+  }
+
+  :global(.md-preview blockquote) {
+    border: 1px solid lightgray;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-style: italic;
+    color: gray;
+    margin-bottom: 1rem;
+  }
+
+  :global(.md-preview p) {
+    margin-bottom: 1rem;
   }
 </style>
