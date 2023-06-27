@@ -3,6 +3,9 @@
   "license": "UNLICENSED",
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
