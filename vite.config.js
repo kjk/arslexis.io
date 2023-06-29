@@ -16,6 +16,10 @@ export default defineConfig({
         copy({
           targets: [
             { src: "./web/notepad2/*.bmp", dest: resolve("dist", "notepad2") },
+            {
+              src: "./web/libarchive/*",
+              dest: resolve("dist", "libarchive"),
+            },
           ],
         }),
       ],
