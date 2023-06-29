@@ -84,8 +84,8 @@ dependencies:
     specifier: ^1.1.6
     version: 1.1.6
   '@lezer/markdown':
-    specifier: ^1.0.3
-    version: 1.0.3
+    specifier: ^1.0.4
+    version: 1.0.4
   '@neodrag/svelte':
     specifier: ^2.0.3
     version: 2.0.3
@@ -141,7 +141,7 @@ dependencies:
 devDependencies:
   '@sveltejs/vite-plugin-svelte':
     specifier: ^2.4.2
-    version: 2.4.2(svelte@4.0.0)(vite@4.3.9)
+    version: 2.4.2(svelte@4.0.1)(vite@4.3.9)
   autoprefixer:
     specifier: ^10.4.14
     version: 10.4.14(postcss@8.4.24)
@@ -158,8 +158,8 @@ devDependencies:
     specifier: ^1.0.2
     version: 1.0.2
   svelte:
-    specifier: ^4.0.0
-    version: 4.0.0
+    specifier: ^4.0.1
+    version: 4.0.1
   tailwindcss:
     specifier: ^3.3.2
     version: 3.3.2
@@ -451,7 +451,7 @@ packages:
       '@codemirror/state': 6.2.1
       '@codemirror/view': 6.14.0
       '@lezer/common': 1.0.3
-      '@lezer/markdown': 1.0.3
+      '@lezer/markdown': 1.0.4
     dev: false
 
   /@codemirror/lang-php@6.0.1:
@@ -912,8 +912,8 @@ packages:
       '@lezer/common': 1.0.3
     dev: false
 
-  /@lezer/markdown@1.0.3:
-    resolution: {integrity: sha512-QEcXFCKf1TBdVhmxL2V9afJTIs4w795DTl2NKnsYZyMOtMsA+5AlEy0biPo/Ojv05ELkk6HIPSDBj0g+ShlkBw==}
+  /@lezer/markdown@1.0.4:
+    resolution: {integrity: sha512-Qgqrau7dc91S9L5EGWuNEawgqQe4rVaD4ebkyTAJYKlNN3lUGjvsX4Osv0a/06m6beU23jg4A+rZ0x2oB2c97w==}
     dependencies:
       '@lezer/common': 1.0.3
       '@lezer/highlight': 1.1.6
@@ -1028,7 +1028,7 @@ packages:
       '@codemirror/view': 6.14.0
     dev: false
 
-  /@sveltejs/vite-plugin-svelte-inspector@1.0.3(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.0)(vite@4.3.9):
+  /@sveltejs/vite-plugin-svelte-inspector@1.0.3(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.1)(vite@4.3.9):
     resolution: {integrity: sha512-Khdl5jmmPN6SUsVuqSXatKpQTMIifoQPDanaxC84m9JxIibWvSABJyHpyys0Z+1yYrxY5TTEQm+6elh0XCMaOA==}
     engines: {node: ^14.18.0 || >= 16}
     peerDependencies:
@@ -1036,28 +1036,28 @@ packages:
       svelte: ^3.54.0 || ^4.0.0
       vite: ^4.0.0
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 2.4.2(svelte@4.0.0)(vite@4.3.9)
+      '@sveltejs/vite-plugin-svelte': 2.4.2(svelte@4.0.1)(vite@4.3.9)
       debug: 4.3.4
-      svelte: 4.0.0
+      svelte: 4.0.1
       vite: 4.3.9(@types/node@20.3.2)
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /@sveltejs/vite-plugin-svelte@2.4.2(svelte@4.0.0)(vite@4.3.9):
+  /@sveltejs/vite-plugin-svelte@2.4.2(svelte@4.0.1)(vite@4.3.9):
     resolution: {integrity: sha512-ePfcC48ftMKhkT0OFGdOyycYKnnkT6i/buzey+vHRTR/JpQvuPzzhf1PtKqCDQfJRgoPSN2vscXs6gLigx/zGw==}
     engines: {node: ^14.18.0 || >= 16}
     peerDependencies:
       svelte: ^3.54.0 || ^4.0.0
       vite: ^4.0.0
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 1.0.3(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.0)(vite@4.3.9)
+      '@sveltejs/vite-plugin-svelte-inspector': 1.0.3(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.1)(vite@4.3.9)
       debug: 4.3.4
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.0
-      svelte: 4.0.0
-      svelte-hmr: 0.15.2(svelte@4.0.0)
+      svelte: 4.0.1
+      svelte-hmr: 0.15.2(svelte@4.0.1)
       vite: 4.3.9(@types/node@20.3.2)
       vitefu: 0.2.4(vite@4.3.9)
     transitivePeerDependencies:
@@ -1244,20 +1244,20 @@ packages:
     resolution: {integrity: sha512-7OjdcV8vQ74eiz1TZLzZP4JwqM5fA94K6yntPS5Z25r9HDuGNzaGdgvwKYq6S+MxwF0TFRwe50fIR/MYnakdkQ==}
     dev: true
 
-  /@vueuse/core@10.2.0(vue@3.3.4):
-    resolution: {integrity: sha512-aHBnoCteIS3hFu7ZZkVB93SanVDY6t4TIb7XDLxJT/HQdAZz+2RdIEJ8rj5LUoEJr7Damb5+sJmtpCwGez5ozQ==}
+  /@vueuse/core@10.2.1(vue@3.3.4):
+    resolution: {integrity: sha512-c441bfMbkAwTNwVRHQ0zdYZNETK//P84rC01aP2Uy/aRFCiie9NE/k9KdIXbno0eDYP5NPUuWv0aA/I4Unr/7w==}
     dependencies:
       '@types/web-bluetooth': 0.0.17
-      '@vueuse/metadata': 10.2.0
-      '@vueuse/shared': 10.2.0(vue@3.3.4)
+      '@vueuse/metadata': 10.2.1
+      '@vueuse/shared': 10.2.1(vue@3.3.4)
       vue-demi: 0.14.5(vue@3.3.4)
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
     dev: true
 
-  /@vueuse/integrations@10.2.0(focus-trap@7.4.3)(vue@3.3.4):
-    resolution: {integrity: sha512-e+MIRMi2Zo8DZKXszut8iVoZGlf07XXoaDt27W0DRJVYPdods50MV8Bnla5Tnuil0gHY/W5mMcqiQre9Xb246Q==}
+  /@vueuse/integrations@10.2.1(focus-trap@7.4.3)(vue@3.3.4):
+    resolution: {integrity: sha512-FDP5lni+z9FjHE9H3xuvwSjoRV9U8jmDvJpmHPCBjUgPGYRynwb60eHWXCFJXLUtb4gSIHy0e+iaEbrKdalCkQ==}
     peerDependencies:
       async-validator: '*'
       axios: '*'
@@ -1297,8 +1297,8 @@ packages:
       universal-cookie:
         optional: true
     dependencies:
-      '@vueuse/core': 10.2.0(vue@3.3.4)
-      '@vueuse/shared': 10.2.0(vue@3.3.4)
+      '@vueuse/core': 10.2.1(vue@3.3.4)
+      '@vueuse/shared': 10.2.1(vue@3.3.4)
       focus-trap: 7.4.3
       vue-demi: 0.14.5(vue@3.3.4)
     transitivePeerDependencies:
@@ -1306,12 +1306,12 @@ packages:
       - vue
     dev: true
 
-  /@vueuse/metadata@10.2.0:
-    resolution: {integrity: sha512-IR7Mkq6QSgZ38q/2ZzOt+Zz1OpcEsnwE64WBumDQ+RGKrosFCtUA2zgRrOqDEzPBXrVB+4HhFkwDjQMu0fDBKw==}
+  /@vueuse/metadata@10.2.1:
+    resolution: {integrity: sha512-3Gt68mY/i6bQvFqx7cuGBzrCCQu17OBaGWS5JdwISpMsHnMKKjC2FeB5OAfMcCQ0oINfADP3i9A4PPRo0peHdQ==}
     dev: true
 
-  /@vueuse/shared@10.2.0(vue@3.3.4):
-    resolution: {integrity: sha512-dIeA8+g9Av3H5iF4NXR/sft4V6vys76CpZ6hxwj8eMXybXk2WRl3scSsOVi+kQ9SX38COR7AH7WwY83UcuxbSg==}
+  /@vueuse/shared@10.2.1(vue@3.3.4):
+    resolution: {integrity: sha512-QWHq2bSuGptkcxx4f4M/fBYC3Y8d3M2UYyLsyzoPgEoVzJURQ0oJeWXu79OiLlBb8gTKkqe4mO85T/sf39mmiw==}
     dependencies:
       vue-demi: 0.14.5(vue@3.3.4)
     transitivePeerDependencies:
@@ -1436,7 +1436,7 @@ packages:
       postcss: ^8.1.0
     dependencies:
       browserslist: 4.21.9
-      caniuse-lite: 1.0.30001508
+      caniuse-lite: 1.0.30001509
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -1491,8 +1491,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001508
-      electron-to-chromium: 1.4.442
+      caniuse-lite: 1.0.30001509
+      electron-to-chromium: 1.4.445
       node-releases: 2.0.12
       update-browserslist-db: 1.0.11(browserslist@4.21.9)
     dev: true
@@ -1515,8 +1515,8 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
-  /caniuse-lite@1.0.30001508:
-    resolution: {integrity: sha512-sdQZOJdmt3GJs1UMNpCCCyeuS2IEGLXnHyAo9yIO5JJDjbjoVRij4M1qep6P6gFpptD1PqIYgzM+gwJbOi92mw==}
+  /caniuse-lite@1.0.30001509:
+    resolution: {integrity: sha512-2uDDk+TRiTX5hMcUYT/7CSyzMZxjfGu0vAUjS2g0LSD8UoXOv0LtpH4LxGMemsiPq6LCVIUjNwVM0erkOkGCDA==}
     dev: true
 
   /chai@4.3.7:
@@ -1697,8 +1697,8 @@ packages:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
     dev: true
 
-  /electron-to-chromium@1.4.442:
-    resolution: {integrity: sha512-RkrZF//Ya+0aJq2NM3OdisNh5ZodZq1rdXOS96G8DdDgpDKqKE81yTbbQ3F/4CKm1JBPsGu1Lp/akkna2xO06Q==}
+  /electron-to-chromium@1.4.445:
+    resolution: {integrity: sha512-++DB+9VK8SBJwC+X1zlMfJ1tMA3F0ipi39GdEp+x3cV2TyBihqAgad8cNMWtLDEkbH39nlDQP7PfGrDr3Dr7HA==}
     dev: true
 
   /encoding-down@6.3.0:
@@ -2599,17 +2599,17 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /svelte-hmr@0.15.2(svelte@4.0.0):
+  /svelte-hmr@0.15.2(svelte@4.0.1):
     resolution: {integrity: sha512-q/bAruCvFLwvNbeE1x3n37TYFb3mTBJ6TrCq6p2CoFbSTNhDE9oAtEfpy+wmc9So8AG0Tja+X0/mJzX9tSfvIg==}
     engines: {node: ^12.20 || ^14.13.1 || >= 16}
     peerDependencies:
       svelte: ^3.19.0 || ^4.0.0-next.0
     dependencies:
-      svelte: 4.0.0
+      svelte: 4.0.1
     dev: true
 
-  /svelte@4.0.0:
-    resolution: {integrity: sha512-+yCYu3AEUu9n91dnQNGIbnVp8EmNQtuF/YImW4+FTXRHard7NMo+yTsWzggPAbj3fUEJ1FBJLkql/jkp6YB5pg==}
+  /svelte@4.0.1:
+    resolution: {integrity: sha512-7n2u7A5cu8xCY6MBiXh/Mg6Lh3+Mw2qXlTDBYhzvCvmSM4L4gc4MVo540UtGcjqBiA48E1VDW+EUpBr7iuBlPg==}
     engines: {node: '>=16'}
     dependencies:
       '@ampproject/remapping': 2.2.1
@@ -2816,8 +2816,8 @@ packages:
       '@docsearch/js': 3.5.1(@algolia/client-search@4.18.0)(search-insights@2.6.0)
       '@vitejs/plugin-vue': 4.2.3(vite@4.3.9)(vue@3.3.4)
       '@vue/devtools-api': 6.5.0
-      '@vueuse/core': 10.2.0(vue@3.3.4)
-      '@vueuse/integrations': 10.2.0(focus-trap@7.4.3)(vue@3.3.4)
+      '@vueuse/core': 10.2.1(vue@3.3.4)
+      '@vueuse/integrations': 10.2.1(focus-trap@7.4.3)(vue@3.3.4)
       body-scroll-lock: 4.0.0-beta.0
       focus-trap: 7.4.3
       mark.js: 8.11.1
