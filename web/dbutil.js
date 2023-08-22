@@ -3,10 +3,16 @@ import { len } from "./util";
 import { openDB } from "idb";
 
 export class KV {
+  /** @type {string} */
   dbName;
+  /** @type {string} */
   storeName;
   dbPromise;
 
+  /**
+    * @param {string} dbName
+    * @param {string} storeName
+  */
   constructor(dbName, storeName) {
     this.dbName = dbName;
     this.storeName = storeName;
@@ -17,24 +23,46 @@ export class KV {
     });
   }
 
+  /**
+    * @param {string} key
+  */
   async get(key) {
     return (await this.dbPromise).get(this.storeName, key);
   }
+  /**
+    * @param {string} key
+    * @param {any} val
+  */
   async set(key, val) {
-    return (await this.dbPromise).put(this.storeName, val, key);
+    let db = await this.dbPromise;
+    return db.put(this.storeName, val, key);
   }
-  // rejects if already exists
+  /**
+    * rejects if already exists
+    * @param {string} key
+    * @param {any} val
+  */
   async add(key, val) {
-    return (await this.dbPromise).add(this.storeName, val, key);
+    let db = await this.dbPromise;
+    return db.add(this.storeName, val, key);
   }
+  /**
+    * @param {string} key
+  */
   async del(key) {
-    return (await this.dbPromise).delete(this.storeName, key);
+    let db = await this.dbPromise;
+    return db.delete(this.storeName, key);
   }
   async clear() {
-    return (await this.dbPromise).clear(this.storeName);
+    let db = await this.dbPromise;
+    return db.clear(this.storeName);
   }
+  /**
+    * @returns {Promise<IDBValidKey[]>}
+  */
   async keys() {
-    return (await this.dbPromise).getAllKeys(this.storeName);
+    let db = await this.dbPromise;
+    return db.getAllKeys(this.storeName);
   }
 }
 
@@ -52,6 +80,11 @@ export function makeIndexedDBStore(
   crossTab,
   log = false
 ) {
+  /**
+    * @param {string} dbKey
+    * @param {any} initialValue
+    * @param {boolean} crossTab
+  */
   function makeStoreMaker(dbKey, initialValue, crossTab) {
     const lsKey = "store-notify:" + dbKey;
     let curr = initialValue;
@@ -80,6 +113,9 @@ export function makeIndexedDBStore(
       window.addEventListener("storage", storageChanged, false);
     }
 
+    /**
+     * @param {any} v
+     */
     function set(v) {
       if (log) {
         console.log(`db.set() key '${dbKey}', len(v): ${len(v)}`);

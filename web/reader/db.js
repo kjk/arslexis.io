@@ -1,0 +1,4 @@
+/*
+Database for storing extracted files and their metadata.
+
+*/
