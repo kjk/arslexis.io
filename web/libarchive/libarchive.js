@@ -3,6 +3,8 @@ import { CompressedFile } from "./compressed-file.js";
 
 export class Archive {
 
+  static _options = {};
+
   /**
    * Initialize libarchivejs
    * @param {Object} options
@@ -19,7 +21,7 @@ export class Archive {
    * Creates new archive instance from browser native File object
    * @param {File} file
    * @param {object} options
-   * @returns {Archive}
+   * @returns {Promise<Archive>}
    */
   static open(file, options = null) {
     options = options ||
