@@ -14,6 +14,7 @@ export default defineConfig({
     rollupOptions: {
       plugins: [
         copy({
+          recursive: true,
           targets: [
             { src: "./web/notepad2/*.bmp", dest: resolve("dist", "notepad2") },
             {

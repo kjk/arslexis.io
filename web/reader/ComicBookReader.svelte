@@ -1,7 +1,7 @@
 <script>
   import FileDrop from "../FileDrop.svelte";
   import { fmtNum, fmtSize, len } from "../util";
-  import { Archive } from "libarchive.js/main.js";
+  import { Archive } from "../libarchive/libarchive.js";
   import TopNav from "../TopNav.svelte";
 
   Archive.init({
@@ -151,14 +151,18 @@
             {@const name = e.file.name}
             <div class="ml-4 table-row">
               {#if e.decompressProgress}
-                <div class="table-cell ml-4">{e.decompressProgress}%</div>
+                <div class="table-cell ml-4">
+                  {e.decompressProgress}%
+                </div>
               {:else}
                 <button
                   on:click={() => download(fi, e)}
                   class="table-cell underline text-blue-500">{name}</button
                 >
               {/if}
-              <div class="table-cell ml-4">{fileSizeFancy(size)}</div>
+              <div class="table-cell ml-4">
+                {fileSizeFancy(size)}
+              </div>
             </div>
             <!--
             <div class="ml-4 table-row">
