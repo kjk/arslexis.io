@@ -3,6 +3,9 @@
   import { fmtNum, fmtSize, len } from "../util";
   import { Archive } from "../libarchive/libarchive.js";
   import TopNav from "../TopNav.svelte";
+  import { naturalSort, setInsensitive } from "../natural_sort";
+
+  setInsensitive(true);
 
   Archive.init({
     workerUrl: "/libarchive/worker-bundle.js",
@@ -17,9 +20,18 @@
   /* @type {HTMLElement} */
   let hiddenLink;
 
+  function sortArchiveEntries(a) {
+    a.sort((a, b) => {
+      const aName = a.file.name;
+      const bName = b.file.name;
+      return naturalSort(aName, bName);
+    });
+  }
+
   async function getArchiveEntries(file) {
     let archive = await Archive.open(file);
     let res = await archive.getFilesArray();
+    sortArchiveEntries(res);
     console.log("getArchiveEntries:", res);
     return res;
   }

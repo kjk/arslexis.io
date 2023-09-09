@@ -65,6 +65,7 @@
     "dayjs": "^1.11.9",
     "fcal": "^0.4.3",
     "idb": "^7.1.1",
+    "javascript-natural-sort": "^0.7.1",
     "js-base64": "^3.7.5",
     "marked": "^5.1.2",
     "preact-feather": "^4.2.1",
