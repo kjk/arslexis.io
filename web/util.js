@@ -16,7 +16,7 @@ export function len(o) {
  * @returns {Promise}
  */
 export function lazyLoadScript(src, opts = {}) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     if (!src) {
       throw new Error("src parameter must be specified");
     }
@@ -62,11 +62,11 @@ export function lazyLoadScript(src, opts = {}) {
     if (opts.crossorigin) script.setAttribute("crossorigin", opts.crossorigin);
 
     // @ts-ignore
-    script.onload = function (event) {
+    script.onload = function(event) {
       // console.log(`loaded ${src}`);
       resolve(script);
     };
-    script.onerror = function (event) {
+    script.onerror = function(event) {
       reject(event);
     };
     document.body.appendChild(script);
@@ -80,7 +80,7 @@ export function lazyLoadScript(src, opts = {}) {
  */
 export function lazyLoadCSS(src, opts = {}) {
   // @ts-ignore
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     if (!src) {
       throw new Error("src parameter must be specified");
     }
@@ -97,8 +97,8 @@ export function lazyLoadCSS(src, opts = {}) {
       defaults,
       typeof opts === "string"
         ? {
-            id: opts,
-          }
+          id: opts,
+        }
         : opts
     );
 
@@ -125,7 +125,7 @@ export function lazyLoadCSS(src, opts = {}) {
       }
     }
     // @ts-ignore
-    link.onload = function (event) {
+    link.onload = function(event) {
       // console.log(`loaded ${src}`);
       resolve(link);
     };
@@ -193,7 +193,7 @@ export function error(args) {
 // returns a function that, when called, returns number of elapsed milliseconds
 export function startTimer() {
   const timeStart = performance.now();
-  return function () {
+  return function() {
     return Math.round(performance.now() - timeStart);
   };
 }
@@ -442,7 +442,7 @@ export async function getAllFileEntries(dataTransferItemList) {
   return fileEntries;
 }
 
-class FileWithPath {
+export class FileWithPath {
   /** @type {File} */
   file;
   path = "";

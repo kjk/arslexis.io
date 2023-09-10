@@ -15,7 +15,7 @@
   /** @type {Function} */
   export let onfiles;
 
-  console.log("FileDrop: allowedExts:", allowedExts);
+  // console.log("FileDrop: allowedExts:", allowedExts);
 
   /** @type {HTMLElement} */
   let dropArea;
@@ -71,7 +71,7 @@
   }
 
   onMount(() => {
-    console.log("FileDrop.svelte mounted");
+    // console.log("FileDrop.svelte mounted");
     preventDragOnElement(document);
     preventDragOnElement(dropArea);
     ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {

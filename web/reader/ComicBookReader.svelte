@@ -1,32 +1,27 @@
 <script context="module">
-  /**
-   * @typedef {Object} ArchiveFileInfo
-   * @property {string} name
-   * @property {number} size
-   */
+  import { Archive } from "../libarchive/libarchive.js";
+
+  /** @typedef {import("../libarchive/compressed-file").CompressedFile} CompressedFile */
+  /** @typedef {import("../util").FileWithPath} FileWithPath */
 
   /**
    * @typedef {Object} ArchiveFile
-   * @property {ArchiveFileInfo} file
+   * @property {CompressedFile} file
    * @property {string} path
+   * @property {URL} imgURL
    */
 
   /**
-   * @typedef {Object} ArchiveFileExt
-   * @property {File} file
+   * @typedef {Object} ArchiveExt
+   * @property {FileWithPath} file
+   * @property {Archive} archive
    * @property {ArchiveFile[]} entries
-   * @property {string} error
-   * @property {boolean} isDecompressing
    */
-
-  /** @type {import("../libarchive/compressed-file").CompressedFile} CompressedFile */
-  /** @type {import("../libarchive/libarchive").Archive} Archive */
 </script>
 
 <script>
   import FileDrop from "../FileDrop.svelte";
   import { fmtNum, fmtSize, len } from "../util";
-  import { Archive } from "../libarchive/libarchive.js";
   import TopNav from "../TopNav.svelte";
   import { naturalSort, setInsensitive } from "../natural_sort";
 
@@ -36,19 +31,8 @@
     workerUrl: "/libarchive/worker-bundle.js",
   });
 
-  // https://github.com/gildas-lormeau/zip.js/blob/gh-pages/demos/demo-read-file.js
-  // https://gildas-lormeau.github.io/zip.js/
-
-  /** @type {ArchiveFileExt[]} */
-  let files = [];
-
-  /* @type {HTMLElement} */
-  let hiddenLink;
-
-  let isShowingImage = false;
-
-  /* @type {HTMLImageElement} */
-  let imageEl = null;
+  /** @type {ArchiveExt} */
+  let archive = null;
 
   /**
    * @param {ArchiveFile[]} a
@@ -61,97 +45,87 @@
     });
   }
 
-  /**
-   * @returns {Promise<ArchiveFile[]>}
-   */
-  async function getArchiveEntries(file) {
-    let archive = await Archive.open(file); // TODO: why typing error?
-    let res = await archive.getFilesArray();
-    sortArchiveEntries(res);
-    console.log("getArchiveEntries:", res);
-    return res;
-  }
-
   function rerenderFiles() {
-    files = files;
+    archive = archive;
   }
 
-  // https://dev.to/nombrekeff/download-file-from-blob-21ho
-  // https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
+  async function decompressAll(a) {
+    for (let e of a.entries) {
+      console.log("started extracting ", e.file.name);
+      let data = await e.file.extract();
+      console.log("extracted ", e.file.name);
+      const uri = URL.createObjectURL(data);
+      e.imgURL = uri;
+      rerenderFiles();
+    }
+  }
+
   /**
-   * @param {ArchiveFileExt[]} filesIn
+   * @param {FileWithPath[]} filesIn
    */
   async function onfiles(filesIn) {
     console.log("onfiles:", filesIn);
     for (let fi of filesIn) {
-      fi.isDecompressing = false;
       try {
-        let e = await getArchiveEntries(fi.file);
-        // console.log("entries:", e);
-        fi.entries = e;
+        let a = {};
+        a.file = fi;
+        a.archive = await Archive.open(fi.file);
+        a.entries = await a.archive.getFilesArray();
+        sortArchiveEntries(a.entries);
+        console.log("getArchiveEntries:", a.entries);
+        archive = a;
+        decompressAll(a);
+        return;
       } catch (e) {
-        fi.error = e.toString();
-        fi.entries = [];
         console.log("e:", e);
       }
     }
-    files = filesIn;
   }
 
+  /**
+   * @param {FileWithPath} fi
+   */
   function fileInfo(fi) {
     return fi.path + ", " + fmtSize(fi.file.size);
   }
 
   /**
-   * @param {ArchiveFileExt} fi
    * @param {ArchiveFile} e
    */
-  async function showImage(fi, e) {
-    console.log("archive entry:", e);
-    // in percent, start with 1 for immediate progress
-    fi.isDecompressing = true;
-    rerenderFiles();
-
-    // TODO: password
-    const data = await e.file.extract();
-    // TODO: try/catch and show error
-    const uri = URL.createObjectURL(data);
-    imageEl.src = uri;
-    isShowingImage = true;
-    /*
-    hiddenLink.href = uri;
-    hiddenLink.download = e.file.name;
-    hiddenLink.dispatchEvent(new MouseEvent("click"));
-    URL.revokeObjectURL(uri);
-    */
-
-    fi.isDecompressing = false;
-    rerenderFiles();
-  }
-
-  function fileSizeFancy(n) {
-    const human = fmtSize(n);
-    const s = fmtNum(n);
-    return `${human} (${s})`;
+  function isImageEntry(e) {
+    const name = e.file.name.toLowerCase();
+    return (
+      name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png")
+    );
   }
 </script>
-
-<a href="/" class="hidden" bind:this={hiddenLink}>dummy for auto-downloads</a>
 
 <TopNav>
   <span class="text-purple-800">Comic Book (.cbz,.cbr) reader</span>
 </TopNav>
 
-<div class="flex justify-center pb-2">
-  <img bind:this={imageEl} class="max-w-[160px] border-1 min-w-[120px]" />
-</div>
-
-{#if len(files) > 0}
+{#if archive}
   <div class="flex justify-center">
     <button
       class="border-2 px-4 py-2 hover:bg-gray-100"
-      on:click={() => (files = [])}>Select another file to view</button
+      on:click={() => (archive = null)}>Select another file to view</button
     >
+  </div>
+
+  <div class="flex flex-col ml-4 mt-4">
+    <div class="font-bold">
+      {fileInfo(archive.file)}
+    </div>
+
+    <div class="flex flex-row flex-wrap gap-x-4 gap-y-4">
+      {#each archive.entries as e (e.file.name)}
+        {#if isImageEntry(e)}
+          {#if e.imgURL}
+            <img src={e.imgURL} class="w-[160px]" alt={e.file.name} />
+          {/if}
+        {/if}
+      {/each}
+    </div>
   </div>
 {:else}
   <div class="mx-4">
@@ -162,45 +136,3 @@
     />
   </div>
 {/if}
-
-<div class="flex flex-col">
-  {#each files as fi}
-    <div class="flex flex-col ml-4 mt-4">
-      <div class="font-bold">
-        {fileInfo(fi)}
-        {#if fi.error}<span class="text-red-500">Bad file. {fi.error}</span
-          >{/if}
-      </div>
-      {#if !fi.error}
-        <div class="table text-sm font-mono ml-4">
-          <div class="table-header-group">
-            <div class="table-row font-semibold">
-              <div class="table-cell">name</div>
-              <div class="table-cell">size</div>
-            </div>
-          </div>
-          {#each fi.entries as e}
-            {@const size = e.file.size}
-            {@const name = e.file.name}
-            <div class="ml-4 table-row">
-              {#if fi.isDecompressing}
-                <div class="table-cell ml-4">is decompressing</div>
-              {:else}
-                <button
-                  on:click={() => showImage(fi, e)}
-                  class="table-cell underline text-blue-500">{name}</button
-                >
-              {/if}
-              <div class="table-cell ml-4">
-                {fileSizeFancy(size)}
-              </div>
-            </div>
-            <!--
-            <div class="ml-4 table-row">
-            </div> -->
-          {/each}
-        </div>
-      {/if}
-    </div>
-  {/each}
-</div>
