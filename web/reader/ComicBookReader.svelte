@@ -1,3 +1,25 @@
+<script context="module">
+  /**
+   * @typedef {Object} ArchiveFileInfo
+   * @property {string} name
+   * @property {number} size
+   */
+
+  /**
+   * @typedef {Object} ArchiveFile
+   * @property {ArchiveFileInfo} file
+   * @property {string} path
+   */
+
+  /**
+   * @typedef {Object} ArchiveFileExt
+   * @property {File} file
+   * @property {ArchiveFile[]} entries
+   * @property {string} error
+   * @property {boolean} isDecompressing
+   */
+</script>
+
 <script>
   import FileDrop from "../FileDrop.svelte";
   import { fmtNum, fmtSize, len } from "../util";
@@ -14,12 +36,15 @@
   // https://github.com/gildas-lormeau/zip.js/blob/gh-pages/demos/demo-read-file.js
   // https://gildas-lormeau.github.io/zip.js/
 
-  /** {FileWithPath[]}*/
+  /** @type {ArchiveFileExt[]} */
   let files = [];
 
   /* @type {HTMLElement} */
   let hiddenLink;
 
+  /**
+   * @param {ArchiveFile[]} a
+   */
   function sortArchiveEntries(a) {
     a.sort((a, b) => {
       const aName = a.file.name;
@@ -28,8 +53,11 @@
     });
   }
 
+  /**
+   * @returns {Promise<ArchiveFile[]>}
+   */
   async function getArchiveEntries(file) {
-    let archive = await Archive.open(file);
+    let archive = await Archive.open(file); // TODO: why typing error?
     let res = await archive.getFilesArray();
     sortArchiveEntries(res);
     console.log("getArchiveEntries:", res);
@@ -42,9 +70,13 @@
 
   // https://dev.to/nombrekeff/download-file-from-blob-21ho
   // https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
+  /**
+   * @param {ArchiveFileExt[]} filesIn
+   */
   async function onfiles(filesIn) {
     console.log("onfiles:", filesIn);
     for (let fi of filesIn) {
+      fi.isDecompressing = false;
       try {
         let e = await getArchiveEntries(fi.file);
         // console.log("entries:", e);
@@ -62,48 +94,27 @@
     return fi.path + ", " + fmtSize(fi.file.size);
   }
 
+  /**
+   * @param {ArchiveFileExt} fi
+   * @param {ArchiveFile} e
+   */
   async function download(fi, e) {
     console.log("archive entry:", e);
     // in percent, start with 1 for immediate progress
-    fi.decompressProgress = 1;
-
+    fi.isDecompressing = true;
     rerenderFiles();
 
-    function onProgress(index, max) {
-      let perc = (100 * index) / max;
-      perc = Math.floor(Math.max(perc, 1));
-      // console.log("onProgress: index:", index, "max:", max, "perc:", perc);
-      if (e.decompressProgress != perc) {
-        e.decompressProgress = perc;
-        rerenderFiles();
-      }
-    }
     // TODO: password
-    // TODO: abort signal
-    /*
-				const abortButton = document.createElement("button");
-				abortButton.onclick = () => controller.abort();
-				abortButton.textContent = "✖";
-				abortButton.title = "Abort";
-				li.querySelector(".filename-container").appendChild(abortButton);
-    */
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const opts = {
-      //password: "",
-      onprogress: onProgress,
-      singal: signal,
-    };
+    const data = await e.file.extract();
     // TODO: try/catch and show error
-    const data = await e.getData(new zip.BlobWriter(), opts);
     const uri = URL.createObjectURL(data);
     hiddenLink.href = uri;
-    hiddenLink.download = e.filename;
+    hiddenLink.download = e.file.name;
 
     hiddenLink.dispatchEvent(new MouseEvent("click"));
 
     URL.revokeObjectURL(uri);
-    e.decompressProgress = 0;
+    fi.isDecompressing = false;
     rerenderFiles();
   }
 
@@ -111,11 +122,6 @@
     const human = fmtSize(n);
     const s = fmtNum(n);
     return `${human} (${s})`;
-  }
-
-  function fmtRatio(e) {
-    const p = (e.compressedSize * 100) / e.uncompressedSize;
-    return p.toFixed(2) + "%";
   }
 </script>
 
@@ -162,10 +168,8 @@
             {@const size = e.file.size}
             {@const name = e.file.name}
             <div class="ml-4 table-row">
-              {#if e.decompressProgress}
-                <div class="table-cell ml-4">
-                  {e.decompressProgress}%
-                </div>
+              {#if fi.isDecompressing}
+                <div class="table-cell ml-4">is decompressing</div>
               {:else}
                 <button
                   on:click={() => download(fi, e)}
