@@ -18,6 +18,9 @@
    * @property {string} error
    * @property {boolean} isDecompressing
    */
+
+  /** @type {import("../libarchive/compressed-file").CompressedFile} CompressedFile */
+  /** @type {import("../libarchive/libarchive").Archive} Archive */
 </script>
 
 <script>
@@ -41,6 +44,11 @@
 
   /* @type {HTMLElement} */
   let hiddenLink;
+
+  let isShowingImage = false;
+
+  /* @type {HTMLImageElement} */
+  let imageEl = null;
 
   /**
    * @param {ArchiveFile[]} a
@@ -98,7 +106,7 @@
    * @param {ArchiveFileExt} fi
    * @param {ArchiveFile} e
    */
-  async function download(fi, e) {
+  async function showImage(fi, e) {
     console.log("archive entry:", e);
     // in percent, start with 1 for immediate progress
     fi.isDecompressing = true;
@@ -108,12 +116,15 @@
     const data = await e.file.extract();
     // TODO: try/catch and show error
     const uri = URL.createObjectURL(data);
+    imageEl.src = uri;
+    isShowingImage = true;
+    /*
     hiddenLink.href = uri;
     hiddenLink.download = e.file.name;
-
     hiddenLink.dispatchEvent(new MouseEvent("click"));
-
     URL.revokeObjectURL(uri);
+    */
+
     fi.isDecompressing = false;
     rerenderFiles();
   }
@@ -130,6 +141,10 @@
 <TopNav>
   <span class="text-purple-800">Comic Book (.cbz,.cbr) reader</span>
 </TopNav>
+
+<div class="flex justify-center pb-2">
+  <img bind:this={imageEl} class="max-w-[160px] border-1 min-w-[120px]" />
+</div>
 
 {#if len(files) > 0}
   <div class="flex justify-center">
@@ -172,7 +187,7 @@
                 <div class="table-cell ml-4">is decompressing</div>
               {:else}
                 <button
-                  on:click={() => download(fi, e)}
+                  on:click={() => showImage(fi, e)}
                   class="table-cell underline text-blue-500">{name}</button
                 >
               {/if}
