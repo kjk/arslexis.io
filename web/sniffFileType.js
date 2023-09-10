@@ -2,6 +2,19 @@
 
 import { len } from "./util";
 
+/**
+  @typedef {Object} Size
+  @property {number} dx
+  @property {number} dy
+*/
+
+/**
+  @typedef {Object} FileTypeInfo
+  @property {string} kind
+  @property {number} [dx]
+  @property {number} [dy]
+*/
+
 export const kindFilePDF = "pdf";
 export const kindFilePS = "ps";
 export const kindFileXps = "xps";
@@ -36,40 +49,69 @@ export const kindFileSvg = "svg";
 export const kindFileHeic = "heic";
 export const kindFileAvif = "avif";
 
+// Note: splitting into fileSigTypes and fileSigs enables better type inference
+const fileSigTypes = [
+  kindFileRar,
+  kindFileRar,
+  kindFile7Z,
+  kindFileZip,
+  kindFileChm,
+  kindFileMobi,
+  kindFilePalmDoc,
+  kindFilePalmDoc,
+  kindFilePalmDoc,
+  kindFilePng,
+  kindFileJpeg,
+  kindFileGif,
+  kindFileGif,
+  kindFileBmp,
+  kindFileTiff,
+  kindFileTiff,
+  kindFileJxr,
+  kindFileJxr,
+  kindFileJp2,
+  kindFileDjVu,
+];
+
 // TODO: add mime type
 const fileSigs = [
-  [[0, "Rar!", 0x1a, 0x07, 0x00], kindFileRar],
-  [[0, "Rar!", 0x1a, 0x07, 0x01, 0x00], kindFileRar],
-  [[0, "7z", 0xbc, 0xaf, 0x27, 0x1c], kindFile7Z],
-  [[0, "PK", 0x03, 0x04], kindFileZip],
-  [[0, "ITSF"], kindFileChm],
-  [[0x3c, "BOOKMOBI"], kindFileMobi],
-  [[0x3c, "TEXtREAd"], kindFilePalmDoc],
-  [[0x3c, "TEXtTlDc"], kindFilePalmDoc],
-  [[0x3c, "DataPlkr"], kindFilePalmDoc],
-  [[0, 0x89, "PNG", 0x0d, 0x0a, 0x1a, 0x0a], kindFilePng],
+  [0, "Rar!", 0x1a, 0x07, 0x00],
+  [0, "Rar!", 0x1a, 0x07, 0x01, 0x00],
+  [0, "7z", 0xbc, 0xaf, 0x27, 0x1c],
+  [0, "PK", 0x03, 0x04],
+  [0, "ITSF"],
+  [0x3c, "BOOKMOBI"],
+  [0x3c, "TEXtREAd"],
+  [0x3c, "TEXtTlDc"],
+  [0x3c, "DataPlkr"],
+  [0, 0x89, "PNG", 0x0d, 0x0a, 0x1a, 0x0a],
   // TODO: be more specific, like:
   // case 'ffd8ffe0':
   //   case 'ffd8ffe1':
   //   case 'ffd8ffe2':
   //   case 'ffd8ffe3':
   //   case 'ffd8ffe8':
-  [[0, 0xff, 0xd8], kindFileJpeg],
-  [[0, "GIF87a"], kindFileGif],
-  [[0, "GIF89a"], kindFileGif],
-  [[0, "BM"], kindFileBmp],
-  [[0, "MM", 0x00, 0x2a], kindFileTiff],
-  [[0, "II", 0x2a, 0x00], kindFileTiff],
-  [[0, "II", 0xbc, 0x01], kindFileJxr],
-  [[0, "II", 0xbc, 0x00], kindFileJxr],
-  [[0, 0, 0, 0, 0x0c, "jP  ", 0x0d, 0x0a, 0x87, 0x0a], kindFileJp2],
-  [[0, "AT&T"], kindFileDjVu],
+  [0, 0xff, 0xd8],
+  [0, "GIF87a"],
+  [0, "GIF89a"],
+  [0, "BM"],
+  [0, "MM", 0x00, 0x2a],
+  [0, "II", 0x2a, 0x00],
+  [0, "II", 0xbc, 0x01],
+  [0, "II", 0xbc, 0x00],
+  [0, 0, 0, 0, 0x0c, "jP  ", 0x0d, 0x0a, 0x87, 0x0a],
+  [0, "AT&T"],
 ];
 
-function startsWith(d, idx, str) {
+/**
+ @param {Uint8Array} d
+ @param {number} off
+ @param {string} str
+ */
+function startsWith(d, off, str) {
   for (let c of str) {
     let n1 = c.charCodeAt(0);
-    let n2 = d[idx++];
+    let n2 = d[off++];
     if (n1 !== n2) {
       return false;
     }
@@ -77,6 +119,10 @@ function startsWith(d, idx, str) {
   return true;
 }
 
+/**
+ @param {Uint8Array} d
+ @param {number} off
+ */
 function rByte(d, off) {
   if (off + 1 > len(d)) {
     return 0;
@@ -84,6 +130,10 @@ function rByte(d, off) {
   return d[off];
 }
 
+/**
+ @param {Uint8Array} d
+ @param {number} off
+ */
 function rWordBE(d, off) {
   if (off + 2 > len(d)) {
     return 0;
@@ -91,6 +141,10 @@ function rWordBE(d, off) {
   return (d[off] << 8) | d[off + 1];
 }
 
+/**
+ @param {Uint8Array} d
+ @param {number} off
+ */
 function rDWordBE(d, off) {
   if (off + 4 > len(d)) {
     return 0;
@@ -98,11 +152,15 @@ function rDWordBE(d, off) {
   return (d[off] << 24) | (d[off + 1] << 16) | (d[off + 2] << 8) | d[off + 3];
 }
 
+/**
+ @param {Uint8Array} d
+ @returns {Size|undefined}
+ */
 function jpegSizeFromData(d) {
   // find the last start of frame marker for non-differential Huffman/arithmetic coding
   let n = len(d);
   let idx = 2;
-  for (;;) {
+  for (; ;) {
     if (idx + 9 > n) {
       return undefined;
     }
@@ -119,9 +177,12 @@ function jpegSizeFromData(d) {
     let off = rWordBE(d, idx + 2);
     idx += off + 2;
   }
-  return undefined;
 }
 
+/**
+ @param {Uint8Array} d
+ @returns {Size|undefined}
+ */
 function pngSizeFromData(d) {
   if (!startsWith(d, 12, "IHDR")) {
     return undefined;
@@ -131,6 +192,11 @@ function pngSizeFromData(d) {
   return { dx, dy };
 }
 
+/**
+ @param {Uint8Array} d
+ @param {any} sig
+ @returns {boolean}
+ */
 function matchesFileSig(d, sig) {
   let idx = sig[0];
   for (let i = 1; i < len(sig); i++) {
@@ -153,8 +219,8 @@ function matchesFileSig(d, sig) {
 }
 
 /**
- * @param {Uint8Array|File|Blob} dIn
- * @returns {Promise<Object|undefined>}
+ @param {Uint8Array|File|Blob} dIn
+ @returns {Promise<FileTypeInfo|undefined>}
  */
 export async function sniffFileType(dIn) {
   /** @type {Uint8Array} */
@@ -166,9 +232,11 @@ export async function sniffFileType(dIn) {
   } else {
     throw new Error("argument must be File, Blob or UInt8Array");
   }
+  let idx = -1;
   for (let sig of fileSigs) {
-    if (matchesFileSig(d, sig[0])) {
-      let kind = sig[1];
+    idx++;
+    if (matchesFileSig(d, sig)) {
+      let kind = fileSigTypes[idx];
       let size = {};
       if (kind === kindFilePng) {
         size = pngSizeFromData(d) || {};
