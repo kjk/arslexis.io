@@ -1,4 +1,5 @@
 // similar libraries: https://github.com/sindresorhus/file-type/blob/main/core.js#L67
+// https://github.com/gabriel-vasile/mimetype/tree/master
 
 import { len } from "./util";
 
