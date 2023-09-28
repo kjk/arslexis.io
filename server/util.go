@@ -28,6 +28,10 @@ func ctx() context.Context {
 	return context.Background()
 }
 
+func isLinux() bool {
+	return !u.IsWinOrMac()
+}
+
 func cmdLog(cmd *exec.Cmd) {
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
@@ -162,4 +166,27 @@ func runCmdLoggedMust(cmd *exec.Cmd) string {
 	logf(ctx(), "cmd '%s' failed with '%s'\n", cmd, err)
 	must(err)
 	return ""
+}
+
+func runCmdLoggedInDir(dir string, exe string, args ...string) error {
+	cmd := exec.Command(exe, args...)
+	cmd.Dir = dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
+}
+
+func startCmdLoggedInDir(dir string, exe string, args ...string) (func(), error) {
+	cmd := exec.Command(exe, args...)
+	cmd.Dir = dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	if err != nil {
+		return nil, err
+	}
+	return func() {
+		cmd.Process.Kill()
+	}, nil
 }

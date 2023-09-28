@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -24,7 +26,6 @@ import (
 )
 
 var (
-	httpPort    = 9219
 	proxyURLStr = "http://localhost:3025"
 )
 
@@ -132,14 +133,7 @@ func permRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
 
 // in dev, proxyHandler redirects assets to vite web server
 // in prod, assets must be pre-built in frontend/dist directory
-func makeHTTPServer(proxyHandler *httputil.ReverseProxy) *http.Server {
-	distDir := ""
-
-	if proxyHandler == nil {
-		distDir = "dist"
-		panicIf(!u.DirExists(distDir), "dir '%s' doesn't exist", distDir)
-	}
-
+func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Server {
 	wasBad := false
 	mainHandler := func(w http.ResponseWriter, r *http.Request) {
 
@@ -200,7 +194,7 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy) *http.Server {
 		}
 
 		opts := hutil.ServeFileOptions{
-			FS:               os.DirFS(distDir),
+			FS:               fsys,
 			SupportCleanURLS: true,
 			ForceCleanURLS:   true,
 			ServeCompressed:  false,
@@ -245,28 +239,66 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy) *http.Server {
 }
 
 func runServerProd() {
-	httpSrv := makeHTTPServer(nil)
+	var fsys fs.FS
+	fromZip := len(frontendZipData) > 1024
+	distDir := frontEndBuildDir
+	if fromZip {
+		distDir = "embedded zip"
+		var err error
+		fsys, err = u.NewMemoryFSForZipData(frontendZipData)
+		must(err)
+		sizeStr := u.FormatSize(int64(len(frontendZipData)))
+		logf(ctx(), "runServerProd(): will serve files from embedded zip of size '%v'\n", sizeStr)
+	} else {
+		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
+		// assuming this is not deployment: re-build the frontend
+		if u.IsMac() {
+			runCmdLoggedInDir(".", "bun", "install")
+			runCmdLoggedInDir(".", "bun", "run", "build")
+		} else if u.IsWindows() {
+			runCmdLoggedInDir(".", "yarn")
+			runCmdLoggedInDir(".", "yarn", "build")
+		}
+		panicIf(!u.DirExists(distDir), "dir '%s' doesn't exist", distDir)
+		fsys = os.DirFS(distDir)
+	}
+
+	httpSrv := makeHTTPServer(nil, fsys)
 	logf(ctx(), "runServerProd(): starting on 'http://%s', dev: %v\n", httpSrv.Addr, isDev())
-	err := httpSrv.ListenAndServe()
-	logf(ctx(), "httpSrv.ListenAndServe() exited with %v\n", err)
+	if isWinOrMac() {
+		time.Sleep(time.Second * 2)
+		u.OpenBrowser("http://" + httpSrv.Addr)
+	}
+	waitFn := serverListenAndWait(httpSrv)
+	waitFn()
 }
 
 func runServerDev() {
-	stopVite := startVite()
-	defer stopVite()
+	if u.IsMac() {
+		runCmdLoggedInDir(".", "bun", "install")
+		closeDev, err := startCmdLoggedInDir(".", "bun", "run", "dev")
+		must(err)
+		defer closeDev()
+	} else {
+		runCmdLoggedInDir(".", "yarn")
+		closeDev, err := startCmdLoggedInDir(".", "yarn", "dev")
+		must(err)
+		defer closeDev()
+	}
 
 	// must be same as vite.config.js
 	proxyURL, err := url.Parse(proxyURLStr)
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
 
-	httpSrv := makeHTTPServer(proxyHandler)
+	fsys := os.DirFS(filepath.Join(".", "public"))
+	httpSrv := makeHTTPServer(proxyHandler, fsys)
 
 	//closeHTTPLog := OpenHTTPLog("codeeval")
 	//defer closeHTTPLog()
 
 	logf(ctx(), "runServerDev(): starting on '%s', dev: %v\n", httpSrv.Addr, isDev())
-	if isDev() {
+	if isWinOrMac() {
 		time.Sleep(time.Second * 2)
 		u.OpenBrowser("http://" + httpSrv.Addr)
 	}

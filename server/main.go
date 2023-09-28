@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"os/exec"
+	"time"
 )
 
 var (
@@ -52,17 +53,19 @@ func isDev() bool {
 
 func main() {
 	var (
-		flgRunProd bool
-		flgDeploy  bool
-		flgBuild   bool
-		flgCi      bool
-		flgWc      bool
+		flgRunProd        bool
+		flgCi             bool
+		flgWc             bool
+		flgDeployHetzner  bool
+		flgSetupAndRun    bool
+		flgBuildLocalProd bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
-		flag.BoolVar(&flgDeploy, "deploy", false, "start deploy on render.com")
-		flag.BoolVar(&flgBuild, "build", false, "run yarn build to build frontend")
+		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
+		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
+		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.BoolVar(&flgCi, "ci", false, "true if needs to tell we're running under ci (github actions)")
 		flag.BoolVar(&flgWc, "wc", false, "count lines")
 		flag.Parse()
@@ -75,22 +78,6 @@ func main() {
 		setGitHubAuthDev()
 	}
 
-	if flgWc {
-		doLineCount()
-		return
-	}
-
-	if flgBuild {
-		build()
-		buildDocs()
-		return
-	}
-
-	if flgDeploy {
-		deploy()
-		return
-	}
-
 	if flgRunDev {
 		runServerDev()
 		return
@@ -100,6 +87,38 @@ func main() {
 		runServerProd()
 		return
 	}
+	timeStart := time.Now()
+	defer func() {
+		logf(ctx(), "took: %s\n", time.Since(timeStart))
+	}()
+
+	if flgWc {
+		doLineCount()
+		return
+	}
+
+	if flgBuildLocalProd {
+		buildLocalProd()
+		return
+	}
+
+	if flgDeployHetzner {
+		deployToHetzner()
+		return
+	}
+
+	if flgSetupAndRun {
+		setupAndRun()
+		return
+	}
+
+	/*
+		if flgBuild {
+			build()
+			buildDocs()
+			return
+		}
+	*/
 
 	flag.Usage()
 }
@@ -113,22 +132,6 @@ func startVite() func() {
 	return func() {
 		cmd.Process.Kill()
 	}
-}
-
-func cmdRunLoggedMust(cmd *exec.Cmd) {
-	logf(ctx(), "> %s\n", cmd)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	err := cmd.Run()
-	must(err)
-}
-
-func deploy() {
-	cmd := exec.Command("git", "rebase", "main", "deploy")
-	cmdRunLoggedMust(cmd)
-	cmd = exec.Command("git", "push")
-	cmdRunLoggedMust(cmd)
 }
 
 func build() {
