@@ -7,23 +7,13 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 export default defineConfig({
   root: "./web",
   build: {
-    // emptyOutDir: true,
+    // must be false because rollup-plugin-copy is called before
+    // the dir is emptied
+    emptyOutDir: false,
     sourcemap: true,
     outDir: resolve("dist"),
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
-      plugins: [
-        copy({
-          recursive: true,
-          targets: [
-            { src: "./web/notepad2/*.bmp", dest: resolve("dist", "notepad2") },
-            {
-              src: "./web/libarchive/*",
-              dest: resolve("dist", "libarchive"),
-            },
-          ],
-        }),
-      ],
       input: {
         main: resolve("web", "index.html"),
         test: resolve("web", "test.html"),
@@ -81,6 +71,22 @@ export default defineConfig({
           ],
         },
       },
+
+      plugins: [
+        copy({
+          verbose: true,
+          targets: [
+            {
+              src: "./web/notepad2/**/*.bmp",
+              dest: resolve("dist", "notepad2"),
+            },
+            {
+              src: "./web/libarchive/**/*",
+              dest: resolve("dist", "libarchive"),
+            },
+          ],
+        }),
+      ],
     },
   },
   server: {
