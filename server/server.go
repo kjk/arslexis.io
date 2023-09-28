@@ -131,7 +131,7 @@ func permRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
 }
 
 // in dev, proxyHandler redirects assets to vite web server
-// in prod, assets must be pre-built in web/dist directory
+// in prod, assets must be pre-built in frontend/dist directory
 func makeHTTPServer(proxyHandler *httputil.ReverseProxy) *http.Server {
 	distDir := ""
 

@@ -5,7 +5,7 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  root: "./web",
+  root: "./frontend",
   build: {
     // must be false because rollup-plugin-copy is called before
     // the dir is emptied
@@ -15,24 +15,24 @@ export default defineConfig({
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
       input: {
-        main: resolve("web", "index.html"),
-        test: resolve("web", "test.html"),
-        unzip: resolve("web", "unzip", "index.html"),
-        wc: resolve("web", "wc", "index.html"),
+        main: resolve("frontend", "index.html"),
+        test: resolve("frontend", "test.html"),
+        unzip: resolve("frontend", "unzip", "index.html"),
+        wc: resolve("frontend", "wc", "index.html"),
         image_resize_optimize: resolve(
-          "web",
+          "frontend",
           "image-resize-optimize",
           "index.html"
         ),
-        goplayground: resolve("web", "goplayground", "index.html"),
-        github_success: resolve("web", "github_success.html"),
-        notepad2: resolve("web", "notepad2", "index.html"),
-        calc: resolve("web", "calc", "index.html"),
-        qrscanner: resolve("web", "qrscanner", "index.html"),
+        goplayground: resolve("frontend", "goplayground", "index.html"),
+        github_success: resolve("frontend", "github_success.html"),
+        notepad2: resolve("frontend", "notepad2", "index.html"),
+        calc: resolve("frontend", "calc", "index.html"),
+        qrscanner: resolve("frontend", "qrscanner", "index.html"),
         // gist editor
-        gisteditor: resolve("web", "gisteditor", "index.html"),
-        gistedit: resolve("web", "gisteditor", "edit.html"),
-        nogist: resolve("web", "gisteditor", "nogist.html"),
+        gisteditor: resolve("frontend", "gisteditor", "index.html"),
+        gistedit: resolve("frontend", "gisteditor", "edit.html"),
+        nogist: resolve("frontend", "gisteditor", "nogist.html"),
       },
 
       output: {
@@ -77,11 +77,11 @@ export default defineConfig({
           verbose: true,
           targets: [
             {
-              src: "./web/notepad2/**/*.bmp",
+              src: "./frontend/notepad2/**/*.bmp",
               dest: resolve("dist", "notepad2"),
             },
             {
-              src: "./web/libarchive/**/*",
+              src: "./frontend/libarchive/**/*",
               dest: resolve("dist", "libarchive"),
             },
           ],
