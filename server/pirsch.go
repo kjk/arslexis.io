@@ -35,7 +35,7 @@ func pirschSendHit(r *http.Request) {
 		return
 	}
 	if pirschClient == nil {
-		pirschClient = pirsch.NewClient(pirschClientID, pirschClientSecret, pirschHost, nil)
+		pirschClient = pirsch.NewClient(pirschClientID, pirschClientSecret, nil)
 	}
 	uri := r.URL.Path
 	for _, ext := range pirschExtsNoLog {
