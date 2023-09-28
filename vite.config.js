@@ -78,11 +78,11 @@ export default defineConfig({
           targets: [
             {
               src: "./frontend/notepad2/**/*.bmp",
-              dest: resolve("dist", "notepad2"),
+              dest: resolve("frontend", "dist", "notepad2"),
             },
             {
               src: "./frontend/libarchive/**/*",
-              dest: resolve("dist", "libarchive"),
+              dest: resolve("frontend", "dist", "libarchive"),
             },
           ],
         }),

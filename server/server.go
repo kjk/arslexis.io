@@ -231,7 +231,7 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 		Handler:      http.HandlerFunc(handlerWithMetrics),
 	}
 	httpAddr := fmt.Sprintf(":%d", httpPort)
-	if isDev() {
+	if isWinOrMac() {
 		httpAddr = "localhost" + httpAddr
 	}
 	httpSrv.Addr = httpAddr
