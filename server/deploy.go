@@ -163,6 +163,7 @@ func copyToServerMaybeGzippedMust(client *goph.Client, sftp *sftp.Client, localP
 		sftpFileNotExistsMust(sftp, remotePath)
 		u.GzipFile(localPath+".gz", localPath)
 		localPath += ".gz"
+		defer os.Remove(localPath)
 	}
 	sizeStr := u.FormatSize(u.FileSize(localPath))
 	logf(ctx(), "uploading '%s' (%s) to '%s'", localPath, sizeStr, remotePath)
