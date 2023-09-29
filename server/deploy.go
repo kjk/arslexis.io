@@ -21,6 +21,8 @@ var (
 	httpPort         = 9219
 	frontEndBuildDir = filepath.Join("frontend", "dist")
 	frontendZipName  = filepath.Join("server", "frontend.zip")
+	secretsPath      = filepath.Join("server", "secrets.env")
+	secretsSrcPath   = filepath.Join("..", "secrets", "onlinetools.env")
 
 	tmuxSessionName             = exeBaseName
 	deployServerDir             = "/root/apps/" + exeBaseName
@@ -216,8 +218,16 @@ func deleteOldBuilds() {
 
 func buildForProd(forLinux bool) string {
 	// re-build the frontend
+	os.Remove(secretsPath)
 	os.Remove(frontendZipName)
 	os.RemoveAll(frontEndBuildDir)
+
+	d, err := os.ReadFile(secretsSrcPath)
+	must(err)
+	_ = parseEnv(d)
+	// TODO: validate has all the keys we need
+	err = os.WriteFile(secretsPath, d, 0644)
+	must(err)
 
 	if u.IsMac() {
 		runCmdLoggedInDir(".", "bun", "install")

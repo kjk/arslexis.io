@@ -190,3 +190,22 @@ func startCmdLoggedInDir(dir string, exe string, args ...string) (func(), error)
 		cmd.Process.Kill()
 	}, nil
 }
+
+func parseEnv(d []byte) map[string]string {
+	d = u.NormalizeNewlines(d)
+	s := string(d)
+	lines := strings.Split(s, "\n")
+	m := make(map[string]string)
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		panicIf(len(parts) != 2, "invalid line '%s' in .env\n", line)
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+		m[key] = val
+	}
+	return m
+}
