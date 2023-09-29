@@ -452,4 +452,25 @@ func setupAndRun() {
 	// update and reload caddy config
 	appendOrReplaceInFile(deployServerCaddyConfigPath, caddyConfig, caddyConfigDelim)
 	cmdRunLoggedMust("systemctl", "reload", "caddy")
+
+	// archive previous deploys
+	{
+		files, err := filepath.Glob(exeBaseName + "-*")
+		must(err)
+		backupDir := filepath.Join(deployServerDir, "backup")
+		err = os.MkdirAll(backupDir, 0755)
+		u.PanicIfErr(err, "os.MkdirAll('%s') failed with %s\n", backupDir, err)
+		for _, file := range files {
+			name := filepath.Base(file)
+			if name == ownExeName {
+				logf(ctx(), "skipping archiving of '%s' (myself)\n", name)
+				continue
+			}
+			backupPath := filepath.Join(backupDir, name)
+			err = os.Rename(file, backupPath)
+			u.PanicIfErr(err, "os.Rename('%s', '%s') failed with %s\n", file, backupPath, err)
+			logf(ctx(), "moved '%s' to '%s'\n", file, backupPath)
+		}
+	}
+
 }
