@@ -84,7 +84,7 @@ func collapseMultipleNewlines(s string) string {
 func appendOrReplaceInText(orig string, toAppend string, delim string) string {
 	addNewline(&toAppend)
 	addNewline(&delim)
-	content := delim + toAppend + delim
+	content := "\n\n" + delim + toAppend + delim
 	start := strings.Index(orig, delim)
 	if strings.Contains(orig, content) {
 		return collapseMultipleNewlines(orig)
@@ -93,7 +93,7 @@ func appendOrReplaceInText(orig string, toAppend string, delim string) string {
 		end := strings.Index(orig[start+1:], delim)
 		panicIf(end == -1, "didn't find end delim")
 		end += start + 1
-		orig = orig[:start] + "\n" + orig[end+len(delim):]
+		orig = orig[:start] + "\n\n" + orig[end+len(delim):]
 	}
 	res := addNewline(&orig) + delim + toAppend + delim
 	return collapseMultipleNewlines(res)
