@@ -474,6 +474,8 @@ func setupAndRun() {
 	}
 }
 
+// for debugging it might useful to take a look at frontend
+// files, so allow extracting them to filesystem
 func extractFrontend() {
 	panicIf(len(frontendZipData) == 0, "frontendZipData is empty\n")
 
