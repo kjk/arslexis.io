@@ -19,7 +19,7 @@ var (
 	exeBaseName      = "onlinetool"
 	domain           = "onlinetool.io"
 	httpPort         = 9219
-	wantedSecrets    = []string{"ONLINETOOL_AXIOM_TOKEN", "ONLINETOOL_PIRSCH_SECRET", "ONLINETOOL_GITHUB_SECRET_PROD", "ONLINETOOL_GITHUB_SECRET_LOCAL"}
+	wantedSecrets    = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL"}
 	frontEndBuildDir = filepath.Join("frontend", "dist")
 	frontendZipName  = filepath.Join("server", "frontend.zip")
 	secretsPath      = filepath.Join("server", "secrets.env")

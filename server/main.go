@@ -29,28 +29,28 @@ func loadSecrets() {
 		m = parseEnv(d)
 	}
 	validateSecrets(m)
-	axiomApiToken = m["ONLINETOOL_AXIOM_TOKEN"]
+	axiomApiToken = m["AXIOM_TOKEN"]
 	if len(axiomApiToken) != 41 {
 		logf(ctx(), "Axiom token missing or invalid length\n")
 		axiomApiToken = ""
 	} else {
 		logf(ctx(), "Got axiom token\n")
 	}
-	pirschClientSecret = m["ONLINETOOL_PIRSCH_SECRET"]
+	pirschClientSecret = m["PIRSCH_SECRET"]
 	if len(pirschClientSecret) != 64 {
 		logf(ctx(), "Pirsch secret missing or invalid length\n")
 		pirschClientSecret = ""
 	} else {
 		logf(ctx(), "Got pirsch token\n")
 	}
-	secretGitHub = m["ONLINETOOL_GITHUB_SECRET_PROD"]
+	secretGitHub = m["GITHUB_SECRET_PROD"]
 	if len(secretGitHub) != 40 {
 		logf(ctx(), "GitHub secret missing or invalid length\n")
 		secretGitHub = ""
 	} else {
 		logf(ctx(), "Got GitHub secret\n")
 	}
-	secretGitHubLocal = m["ONLINETOOL_GITHUB_SECRET_LOCAL"]
+	secretGitHubLocal = m["GITHUB_SECRET_LOCAL"]
 	if len(secretGitHubLocal) != 40 {
 		logf(ctx(), "GitHub Local secret missing or invalid length\n")
 		secretGitHubLocal = ""
