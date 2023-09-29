@@ -472,5 +472,25 @@ func setupAndRun() {
 			logf(ctx(), "moved '%s' to '%s'\n", file, backupPath)
 		}
 	}
+}
 
+func extractFrontend() {
+	panicIf(len(frontendZipData) == 0, "frontendZipData is empty\n")
+
+	m, err := u.ReadZipData(frontendZipData)
+	u.PanicIfErr(err, "u.ReadZipData() failed with %s\n", err)
+	ownPath := os.Args[0]
+	outDir := ownPath + "-frontend"
+	for name, d := range m {
+		// names in zip are unix-style, convert to windows-style
+		name = filepath.FromSlash(name)
+		path := filepath.Join(outDir, name)
+		dir := filepath.Dir(path)
+		err = os.MkdirAll(dir, 0755)
+		u.PanicIfErr(err, "os.MkdirAll('%s') failed with %s\n", dir, err)
+		err = os.WriteFile(path, d, 0644)
+		u.PanicIfErr(err, "os.WriteFile('%s') failed with %s\n", path, err)
+		logf(ctx(), "extracted '%s'\n", path)
+	}
+	logf(ctx(), "extracted %d files to '%s'\n", len(m), outDir)
 }

@@ -76,12 +76,13 @@ func isDev() bool {
 
 func main() {
 	var (
-		flgRunProd        bool
-		flgCi             bool
-		flgWc             bool
-		flgDeployHetzner  bool
-		flgSetupAndRun    bool
-		flgBuildLocalProd bool
+		flgRunProd         bool
+		flgCi              bool
+		flgWc              bool
+		flgDeployHetzner   bool
+		flgSetupAndRun     bool
+		flgBuildLocalProd  bool
+		flgExtractFrontend bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
@@ -90,6 +91,7 @@ func main() {
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.BoolVar(&flgCi, "ci", false, "true if needs to tell we're running under ci (github actions)")
+		flag.BoolVar(&flgExtractFrontend, "extract-frontend", false, "extract frontend files embedded as zip in the binary")
 		flag.BoolVar(&flgWc, "wc", false, "count lines")
 		flag.Parse()
 	}
@@ -114,6 +116,11 @@ func main() {
 	defer func() {
 		logf(ctx(), "took: %s\n", time.Since(timeStart))
 	}()
+
+	if flgExtractFrontend {
+		extractFrontend()
+		return
+	}
 
 	if flgWc {
 		doLineCount()
