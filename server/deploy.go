@@ -224,13 +224,6 @@ func validateSecrets(m map[string]string) {
 	}
 }
 
-func readSecretsMust() map[string]string {
-	d := readFileMust(secretsSrcPath)
-	m := parseEnv(d)
-	validateSecrets(m)
-	return m
-}
-
 func buildForProd(forLinux bool) string {
 	// re-build the frontend
 	os.Remove(secretsPath)
@@ -365,6 +358,7 @@ func deployToHetzner() {
 	}
 
 	sshRunCommandMust(client, serverExePath, "-setup-and-run")
+	logf(ctx(), "Running on http://%s:%d or https://%s\n", deployServerIP, httpPort, domain)
 }
 
 func setupAndRun() {
