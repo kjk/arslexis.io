@@ -1,6 +1,8 @@
 {
   "cSpell.enableFiletypes": [
+    "!c",
     "!css",
+    "!go",
     "!javascript",
     "!svelte"
   ]

@@ -17,12 +17,13 @@ import (
 
 var (
 	exeBaseName      = "onlinetool"
-	domain           = "onlinetool.arslexis.io"
+	domain           = "onlinetool.io"
 	httpPort         = 9219
+	wantedSecrets    = []string{"ONLINETOOL_AXIOM_TOKEN", "ONLINETOOL_PIRSCH_SECRET", "ONLINETOOL_GITHUB_SECRET_PROD", "ONLINETOOL_GITHUB_SECRET_LOCAL"}
 	frontEndBuildDir = filepath.Join("frontend", "dist")
 	frontendZipName  = filepath.Join("server", "frontend.zip")
 	secretsPath      = filepath.Join("server", "secrets.env")
-	secretsSrcPath   = filepath.Join("..", "secrets", "onlinetools.env")
+	secretsSrcPath   = filepath.Join("..", "secrets", "onlinetool.env")
 
 	tmuxSessionName             = exeBaseName
 	deployServerDir             = "/root/apps/" + exeBaseName
@@ -216,18 +217,36 @@ func deleteOldBuilds() {
 	}
 }
 
+func validateSecrets(m map[string]string) {
+	for _, k := range wantedSecrets {
+		_, ok := m[k]
+		panicIf(!ok, "didn't find secret '%s' in '%s'", k)
+	}
+}
+
+func readSecretsMust() map[string]string {
+	d := readFileMust(secretsSrcPath)
+	m := parseEnv(d)
+	validateSecrets(m)
+	return m
+}
+
 func buildForProd(forLinux bool) string {
 	// re-build the frontend
 	os.Remove(secretsPath)
 	os.Remove(frontendZipName)
 	os.RemoveAll(frontEndBuildDir)
 
-	d, err := os.ReadFile(secretsSrcPath)
-	must(err)
-	_ = parseEnv(d)
-	// TODO: validate has all the keys we need
-	err = os.WriteFile(secretsPath, d, 0644)
-	must(err)
+	// copy secrets from ../secrets/onlinetools.env to server/secrets.env
+	// so that it's included in the binary as secretsEnv
+	{
+		d, err := os.ReadFile(secretsSrcPath)
+		must(err)
+		m := parseEnv(d)
+		validateSecrets(m)
+		err = os.WriteFile(secretsPath, d, 0644)
+		must(err)
+	}
 
 	if u.IsMac() {
 		runCmdLoggedInDir(".", "bun", "install")

@@ -8,38 +8,60 @@ import (
 )
 
 var (
-	secretGitHub      = ""
+	// for github login when deployed to online.io
+	secretGitHub = ""
+	// for github login when running on localhost
 	secretGitHubLocal = ""
 )
 
-func getSecretsFromEnv() {
-	axiomApiToken = os.Getenv("ONLINETOOL_AXIOM_TOKEN")
+// in production deployment secrets are stored in binary as secretsEnv
+// when running non-prod we read secrets from secrets repo we assume
+// is parallel to this repo
+func loadSecrets() {
+	var m map[string]string
+	if len(secretsEnv) > 0 {
+		logf(ctx(), "loading secrets from secretsEnv\n")
+		m = parseEnv(secretsEnv)
+	} else {
+		panicIf(!isWinOrMac(), "secretsEnv is empty and running on linux")
+		d, err := os.ReadFile(secretsSrcPath)
+		must(err)
+		m = parseEnv(d)
+	}
+	validateSecrets(m)
+	axiomApiToken = m["ONLINETOOL_AXIOM_TOKEN"]
 	if len(axiomApiToken) != 41 {
 		logf(ctx(), "Axiom token missing or invalid length\n")
 		axiomApiToken = ""
 	} else {
 		logf(ctx(), "Got axiom token\n")
 	}
-	pirschClientSecret = os.Getenv("ONLINETOOL_PIRSCH_SECRET")
+	pirschClientSecret = m["ONLINETOOL_PIRSCH_SECRET"]
 	if len(pirschClientSecret) != 64 {
 		logf(ctx(), "Pirsch secret missing or invalid length\n")
 		pirschClientSecret = ""
 	} else {
 		logf(ctx(), "Got pirsch token\n")
 	}
-	secretGitHub = os.Getenv("ONLINETOOL_GITHUB_SECRET")
+	secretGitHub = m["ONLINETOOL_GITHUB_SECRET_PROD"]
 	if len(secretGitHub) != 40 {
 		logf(ctx(), "GitHub secret missing or invalid length\n")
 		secretGitHub = ""
 	} else {
 		logf(ctx(), "Got GitHub secret\n")
 	}
-	secretGitHubLocal = os.Getenv("ONLINETOOL_GITHUB_SECRET_LOCAL")
+	secretGitHubLocal = m["ONLINETOOL_GITHUB_SECRET_LOCAL"]
 	if len(secretGitHubLocal) != 40 {
 		logf(ctx(), "GitHub Local secret missing or invalid length\n")
 		secretGitHubLocal = ""
 	} else {
 		logf(ctx(), "Got GitHub local secret\n")
+	}
+
+	// when running locally don't do some things
+	if isWinOrMac() {
+		axiomApiToken = ""
+		pirschClientSecret = ""
 	}
 }
 
@@ -71,7 +93,7 @@ func main() {
 		flag.Parse()
 	}
 
-	getSecretsFromEnv()
+	loadSecrets()
 
 	setGitHubAuth()
 	if isDev() {
