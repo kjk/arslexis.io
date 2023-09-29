@@ -5,34 +5,34 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  root: "./frontend",
+  root: "./src",
   build: {
     // must be false because rollup-plugin-copy is called before
     // the dir is emptied
     emptyOutDir: false,
     sourcemap: true,
-    outDir: resolve("frontend", "dist"),
+    outDir: resolve("dist"),
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
       input: {
-        main: resolve("frontend", "index.html"),
-        test: resolve("frontend", "test.html"),
-        unzip: resolve("frontend", "unzip", "index.html"),
-        wc: resolve("frontend", "wc", "index.html"),
+        main: resolve("src", "index.html"),
+        test: resolve("src", "test.html"),
+        unzip: resolve("src", "unzip", "index.html"),
+        wc: resolve("src", "wc", "index.html"),
         image_resize_optimize: resolve(
-          "frontend",
+          "src",
           "image-resize-optimize",
           "index.html"
         ),
-        goplayground: resolve("frontend", "goplayground", "index.html"),
-        github_success: resolve("frontend", "github_success.html"),
-        notepad2: resolve("frontend", "notepad2", "index.html"),
-        calc: resolve("frontend", "calc", "index.html"),
-        qrscanner: resolve("frontend", "qrscanner", "index.html"),
+        goplayground: resolve("src", "goplayground", "index.html"),
+        github_success: resolve("src", "github_success.html"),
+        notepad2: resolve("src", "notepad2", "index.html"),
+        calc: resolve("src", "calc", "index.html"),
+        qrscanner: resolve("src", "qrscanner", "index.html"),
         // gist editor
-        gisteditor: resolve("frontend", "gisteditor", "index.html"),
-        gistedit: resolve("frontend", "gisteditor", "edit.html"),
-        nogist: resolve("frontend", "gisteditor", "nogist.html"),
+        gisteditor: resolve("src", "gisteditor", "index.html"),
+        gistedit: resolve("src", "gisteditor", "edit.html"),
+        nogist: resolve("src", "gisteditor", "nogist.html"),
       },
 
       output: {
@@ -77,12 +77,12 @@ export default defineConfig({
           verbose: true,
           targets: [
             {
-              src: "./frontend/notepad2/**/*.bmp",
-              dest: resolve("frontend", "dist", "notepad2"),
+              src: "./src/notepad2/**/*.bmp",
+              dest: resolve("dist", "notepad2"),
             },
             {
-              src: "./frontend/libarchive/**/*",
-              dest: resolve("frontend", "dist", "libarchive"),
+              src: "./src/libarchive/**/*",
+              dest: resolve("dist", "libarchive"),
             },
           ],
         }),

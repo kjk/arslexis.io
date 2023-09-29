@@ -258,11 +258,11 @@ func buildForProd(forLinux bool) string {
 	}
 
 	if u.IsMac() {
-		runCmdLoggedInDir(".", "bun", "install")
-		runCmdLoggedInDir(".", "bun", "run", "build")
+		runCmdLoggedInDir("frontend", "bun", "install")
+		runCmdLoggedInDir("frontend", "bun", "run", "build")
 	} else {
-		runCmdLoggedInDir(".", "yarn")
-		runCmdLoggedInDir(".", "yarn", "build")
+		runCmdLoggedInDir("frontend", "yarn")
+		runCmdLoggedInDir("frontend", "yarn", "build")
 	}
 
 	// get date and hash of current checkin

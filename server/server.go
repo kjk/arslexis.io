@@ -253,11 +253,11 @@ func runServerProd() {
 		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
 		// assuming this is not deployment: re-build the frontend
 		if u.IsMac() {
-			runCmdLoggedInDir(".", "bun", "install")
-			runCmdLoggedInDir(".", "bun", "run", "build")
+			runCmdLoggedInDir("frontend", "bun", "install")
+			runCmdLoggedInDir("frontend", "bun", "run", "build")
 		} else if u.IsWindows() {
-			runCmdLoggedInDir(".", "yarn")
-			runCmdLoggedInDir(".", "yarn", "build")
+			runCmdLoggedInDir("frontend", "yarn")
+			runCmdLoggedInDir("frontend", "yarn", "build")
 		}
 		panicIf(!u.DirExists(distDir), "dir '%s' doesn't exist", distDir)
 		fsys = os.DirFS(distDir)
@@ -275,13 +275,13 @@ func runServerProd() {
 
 func runServerDev() {
 	if u.IsMac() {
-		runCmdLoggedInDir(".", "bun", "install")
-		closeDev, err := startCmdLoggedInDir(".", "bun", "run", "dev")
+		runCmdLoggedInDir("frontend", "bun", "install")
+		closeDev, err := startCmdLoggedInDir("frontend", "bun", "run", "dev")
 		must(err)
 		defer closeDev()
 	} else {
-		runCmdLoggedInDir(".", "yarn")
-		closeDev, err := startCmdLoggedInDir(".", "yarn", "dev")
+		runCmdLoggedInDir("frontend", "yarn")
+		closeDev, err := startCmdLoggedInDir("frontend", "yarn", "dev")
 		must(err)
 		defer closeDev()
 	}

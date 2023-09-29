@@ -3,7 +3,7 @@
 const plugin = require("tailwindcss/plugin");
 
 module.exports = {
-  content: ["./frontend/**/*.{html,js,svelte}"],
+  content: ["./src/**/*.{html,js,svelte}"],
   theme: {
     extend: {
       animation: {
