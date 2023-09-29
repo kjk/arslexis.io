@@ -414,6 +414,7 @@
         {@const boldCls = isBold ? "font-bold" : ""}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         {#if f === selected}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
             class="{boldCls} bg-gray-100 hover:bg-gray-200"
             on:dblclick={() => entryDblClicked(f)}
@@ -422,6 +423,7 @@
             {f.name}
           </div>
         {:else}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
             class="{boldCls} hover:bg-gray-200"
             on:dblclick={() => entryDblClicked(f)}
@@ -440,7 +442,7 @@
         class="px-2 py-0.5 border-gray-300 border-b outline-none grow"
         spellcheck="false"
         placeholder="Enter file name..."
-        autocomplete="false"
+        autocomplete="off"
         bind:value={newFileName}
       />
       <button

@@ -61,7 +61,7 @@
       class="px-2 py-0.5 border-gray-300 border focus-within:outline-blue-500/50"
       use:focusAndSetCursor
       spellcheck="false"
-      autocomplete="false"
+      autocomplete="off"
       on:keydown={handleInputKeyDown}
       bind:value={lineNo}
     />
@@ -70,7 +70,7 @@
       type="number"
       class="px-2 py-0.5 border-gray-300 border focus-within:outline-blue-500/50"
       spellcheck="false"
-      autocomplete="false"
+      autocomplete="off"
       on:keydown={handleInputKeyDown}
       bind:value={colNo}
     />

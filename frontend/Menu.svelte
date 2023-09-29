@@ -129,7 +129,7 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-click-events-have-key-events a11y-interactive-supports-focus -->
 <div
   role="menu"
   class="mt-1 rounded-md border border-neutral-50 bg-white py-1 shadow-lg"

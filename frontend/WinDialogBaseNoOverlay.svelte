@@ -55,11 +55,12 @@
 
 {#if open}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
   <div
     tabindex="0"
     role="dialog"
     on:keydown={handleKeyDown}
-    class="absolute w-fit min-w-[360px] shadow-xl shadow-md bg-white flex flex-col text-black text-sm"
+    class="absolute w-fit min-w-[360px] shadow-md bg-white flex flex-col text-black text-sm"
     bind:this={modal}
     use:draggable={{ handle: dragHandle }}
     use:positionModal

@@ -769,6 +769,7 @@
     class="output-wrap absolute z-40 overflow-auto bg-white shadow bottom-16 right-8"
   >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       class="close-btn top-2 px-2 py-1 right-2 cursor-pointer z-40 absolute
       text-xs hover:bg-yellow-200"
@@ -808,6 +809,7 @@
   <div class="flex items-center text-sm py-0 px-4">
     {#each files as file, idx (file.fid)}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-interactive-supports-focus -->
       <div
         role="button"
         class="tab select-none"
@@ -836,6 +838,7 @@
           </span>
           {#if files.length > 1}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
             <span
               class="close"
               on:click|stopPropagation={(e) => removeFileAtIdx(idx)}
@@ -848,6 +851,7 @@
     {/each}
 
     <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       class="tab tab-plus select-none font-bold"
       style="color: gray;"
@@ -895,6 +899,7 @@
     {/if}
 
     <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       class="menu hover:bg-gray-100 px-2 py-1"
       bind:this={menuElement}
@@ -907,6 +912,7 @@
       <Overlay bind:open={showingMenu}>
         <!-- TOD: why need to use style and adding flex to class breaks things?-->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
           class="dropdown-content"
           on:click={() => {

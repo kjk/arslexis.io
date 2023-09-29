@@ -49,14 +49,13 @@
     </div>
   </Overlay>
 {:else}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div
+  <button
     class="help"
     use:tooltip={{ text: "Help, feedback", position: "top" }}
     on:click|preventDefault={showMenu}
   >
     ?
-  </div>
+  </button>
 {/if}
 
 <style>

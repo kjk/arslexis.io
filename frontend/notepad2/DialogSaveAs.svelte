@@ -78,6 +78,7 @@
       <div class="flex mx-4 flex-col overflow-auto border-2 mt-2 max-h-[60vh]">
         {#each fileList as f}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
             aria-selected={selectedFile === f}
             class="aria-selected:bg-gray-50 hover:bg-gray-100 aria-selected:hover:bg-gray-100"
@@ -90,14 +91,14 @@
       </div>
     {/if}
 
-    <div class="flex items-baseline mt-4 py-2 bg-gray-50 ">
+    <div class="flex items-baseline mt-4 py-2 bg-gray-50">
       <div class="ml-4">File name:</div>
       <input
         type="text"
         class="mx-4 px-2 py-0.5 border-gray-800 border-1"
         use:focus
         spellcheck="false"
-        autocomplete="false"
+        autocomplete="off"
         on:keydown={handleInputKeyDown}
         bind:value={name}
       />

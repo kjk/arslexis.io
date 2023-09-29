@@ -112,6 +112,7 @@
         {#each shownLangs as lang, idx}
           {#if idx === selectedIdx}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
             <div
               class="cursor-pointer px-3 py-1 bg-gray-100"
               use:scrollintoview
@@ -121,6 +122,7 @@
             </div>
           {:else}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
             <div
               class="cursor-pointer px-3 py-1"
               on:click={() => selectLang(lang)}

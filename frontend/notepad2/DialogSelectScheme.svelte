@@ -89,13 +89,13 @@
 <WinDialogBase bind:open onClose={close} {title}>
   <div slot="main" class="bg-white pt-2 pb-4 flex flex-col min-h-[4rem]">
     <div
-      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 cursor-pointer min-h-[24rem] max-h-[80vh] select-none	"
+      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 cursor-pointer min-h-[24rem] max-h-[80vh] select-none"
       tabindex="0"
       role="listbox"
     >
       {#each entries as e (e[0])}
         {@const name = e[0]}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
         {#if e === selected}
           <div
             class="bg-gray-100 hover:bg-gray-200"

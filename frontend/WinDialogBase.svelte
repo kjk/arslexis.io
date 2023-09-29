@@ -68,7 +68,7 @@
 </script>
 
 {#if open}
-  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-static-element-interactions -->
   <div
     class="fixed inset-0 z-40 bg-gray-600 bg-opacity-40"
     bind:this={overlay}

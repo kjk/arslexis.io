@@ -197,6 +197,7 @@
         {@const dataURL = info[2]}
         {@const disabled = !info[3]}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
         <img
           src={dataURL}
           alt={txt}

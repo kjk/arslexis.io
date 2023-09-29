@@ -66,20 +66,23 @@
   <div
     slot="main"
     class="bg-white pt-2 pb-4 flex flex-col min-h-[4rem]"
+    role="listbox"
+    tabindex="0"
     on:keydown={handleKeyDown}
   >
     {#if len(fileList) > 0}
-      <div class="mx-6 ">Select a file:</div>
+      <div class="mx-6">Select a file:</div>
       <div
         class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 max-h-[60vh] cursor-pointer"
-        tabindex="0"
-        role="listbox"
       >
         {#each fileList as f (f.id)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           {#if f === selectedFile}
             <div
               class="bg-gray-100 hover:bg-gray-200"
+              role="option"
+              aria-selected="true"
+              tabindex="0"
               on:dblclick={() => fileDblClicked(f)}
               on:click={() => fileClicked(f)}
             >
@@ -88,6 +91,9 @@
           {:else}
             <div
               class="hover:bg-gray-200"
+              role="option"
+              aria-selected="false"
+              tabindex="0"
               on:dblclick={() => fileDblClicked(f)}
               on:click={() => fileClicked(f)}
             >

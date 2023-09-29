@@ -48,7 +48,9 @@
   });
 </script>
 
-<video bind:this={videoElem} class="w-full h-full bg-blue-50" />
+<video bind:this={videoElem} class="w-full h-full bg-blue-50">
+  <track kind="captions" />
+</video>
 <div id="result" />
 
 <style>

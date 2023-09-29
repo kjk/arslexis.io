@@ -104,13 +104,14 @@
 </script>
 
 <WinDialogBase onClose={close} bind:open {title}>
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     slot="main"
     class="bg-white pt-2 pb-4 flex flex-col min-h-[4rem]"
     on:keydown={handleKeyDown}
   >
     <div
-      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 cursor-pointer min-h-[12rem] max-h-[8rem] select-none	"
+      class="flex mx-4 px-2 py-2 flex-col overflow-auto border-2 mt-2 cursor-pointer min-h-[12rem] max-h-[8rem] select-none"
       tabindex="0"
       role="listbox"
     >
@@ -118,8 +119,9 @@
         <div class="mx-auto my-auto">{emptyMsg}</div>
       {:else}
         {#each entries as f (f.id)}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
           {#if f === selected}
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
               class="bg-gray-100 hover:bg-gray-200"
               on:dblclick={() => dblClicked(f)}
@@ -128,6 +130,7 @@
               {f.name}
             </div>
           {:else}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
               class="hover:bg-gray-200"
               on:dblclick={() => dblClicked(f)}

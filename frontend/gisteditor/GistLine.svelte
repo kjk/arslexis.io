@@ -68,6 +68,7 @@
   </div>
   <div class="truncate whitespace-pre pr-4 text-gray-500">{filesString}</div>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="self-center text-gray-400 hover:bg-gray-200 px-2 py-1"
     bind:this={menuElement}

@@ -57,6 +57,8 @@
 {#if editingDescription === null}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
+    role="button"
+    tabindex=""
     class="truncate"
     use:tooltip={"Click to edit description"}
     on:click={startEditDescription}

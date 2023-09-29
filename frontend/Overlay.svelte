@@ -56,7 +56,7 @@
 </script>
 
 {#if open}
-  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-static-element-interactions -->
   <div
     tabindex="0"
     use:focus

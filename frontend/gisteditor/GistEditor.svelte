@@ -176,6 +176,7 @@
   {/if}
 
   <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="overflow-x-hidden gist-line-wrapper mt-2 text-sm"
     on:click={goToGist}

@@ -60,6 +60,7 @@ func loadSecrets() {
 
 	// when running locally don't do some things
 	if isWinOrMac() {
+		logf(ctx(), "running in dev, clearing axiom and pirsch\n")
 		axiomApiToken = ""
 		pirschClientSecret = ""
 	}
@@ -96,7 +97,7 @@ func main() {
 	loadSecrets()
 
 	setGitHubAuth()
-	if isDev() {
+	if isWinOrMac() {
 		setGitHubAuthDev()
 	}
 
