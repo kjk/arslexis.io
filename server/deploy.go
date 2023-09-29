@@ -211,6 +211,18 @@ func deleteOldBuilds() {
 	files, err := filepath.Glob(pattern)
 	must(err)
 	for _, path := range files {
+		isDir, err := u.PathIsDir(path)
+		must(err)
+		if isDir {
+			if strings.HasSuffix(path, "-frontend") {
+				err = os.RemoveAll(path)
+				must(err)
+				logf(ctx(), "removed directory %s\n", path)
+			} else {
+				logf(ctx(), "skipping removal of directory %s\n", path)
+			}
+			continue
+		}
 		err = os.Remove(path)
 		must(err)
 		logf(ctx(), "deleted %s\n", path)
@@ -225,9 +237,12 @@ func validateSecrets(m map[string]string) {
 }
 
 func buildForProd(forLinux bool) string {
-	// re-build the frontend
+	// re-build the frontend. remove build process artifacts
+	// to keep things clean
 	os.Remove(secretsPath)
+	defer os.Remove(secretsPath)
 	os.Remove(frontendZipName)
+	defer os.Remove(frontendZipName)
 	os.RemoveAll(frontEndBuildDir)
 
 	// copy secrets from ../secrets/onlinetools.env to server/secrets.env
@@ -295,9 +310,6 @@ func buildForProd(forLinux bool) string {
 		logf(ctx(), "created '%s' of size %s\n", exeName, sizeStr)
 	}
 
-	// remove to keep things clean
-	// for debuggint you can comment-out this line
-	os.Remove(frontendZipName)
 	return exeName
 }
 
@@ -455,11 +467,11 @@ func setupAndRun() {
 
 	// archive previous deploys
 	{
-		files, err := filepath.Glob(exeBaseName + "-*")
+		pattern := filepath.Join(deployServerDir, exeBaseName+"-*")
+		files, err := filepath.Glob(pattern)
 		must(err)
+		logf(ctx(), "archiving previous deploys, pattern: '%s', %d files\n", pattern, len(files))
 		backupDir := filepath.Join(deployServerDir, "backup")
-		err = os.MkdirAll(backupDir, 0755)
-		u.PanicIfErr(err, "os.MkdirAll('%s') failed with %s\n", backupDir, err)
 		for _, file := range files {
 			name := filepath.Base(file)
 			if name == ownExeName {
@@ -467,6 +479,8 @@ func setupAndRun() {
 				continue
 			}
 			backupPath := filepath.Join(backupDir, name)
+			err = os.MkdirAll(backupDir, 0755)
+			u.PanicIfErr(err, "os.MkdirAll('%s') failed with %s\n", backupDir, err)
 			err = os.Rename(file, backupPath)
 			u.PanicIfErr(err, "os.Rename('%s', '%s') failed with %s\n", file, backupPath, err)
 			logf(ctx(), "moved '%s' to '%s'\n", file, backupPath)
