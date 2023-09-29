@@ -252,6 +252,9 @@ func runServerProd() {
 	} else {
 		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
 		// assuming this is not deployment: re-build the frontend
+		err := os.RemoveAll(distDir)
+		must(err)
+		logf(ctx(), "deleted dir '%s'\n", distDir)
 		if u.IsMac() {
 			runCmdLoggedInDir("frontend", "bun", "install")
 			runCmdLoggedInDir("frontend", "bun", "run", "build")
@@ -291,7 +294,7 @@ func runServerDev() {
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
 
-	fsys := os.DirFS(filepath.Join(".", "public"))
+	fsys := os.DirFS(filepath.Join("frontend", "public"))
 	httpSrv := makeHTTPServer(proxyHandler, fsys)
 
 	//closeHTTPLog := OpenHTTPLog("codeeval")
