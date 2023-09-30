@@ -89,8 +89,8 @@ func main() {
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
-		flag.BoolVar(&flgCi, "ci", false, "true if needs to tell we're running under ci (github actions)")
 		flag.BoolVar(&flgExtractFrontend, "extract-frontend", false, "extract frontend files embedded as zip in the binary")
+		flag.BoolVar(&flgCi, "ci", false, "true if needs to tell we're running under ci (github actions)")
 		flag.BoolVar(&flgWc, "wc", false, "count lines")
 		flag.Parse()
 	}
