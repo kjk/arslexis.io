@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"os"
-	"os/exec"
 	"time"
 )
 
@@ -142,36 +141,5 @@ func main() {
 		return
 	}
 
-	/*
-		if flgBuild {
-			build()
-			buildDocs()
-			return
-		}
-	*/
-
 	flag.Usage()
-}
-
-func startVite() func() {
-	cmd := exec.Command("npx", "vite", "--strictPort=true", "--clearScreen=false")
-	logf(ctx(), "> %s\n", cmd)
-	cmdLog(cmd)
-	err := cmd.Start()
-	must(err)
-	return func() {
-		cmd.Process.Kill()
-	}
-}
-
-func build() {
-	cmd := exec.Command("yarn", "build", "--emptyOutDir")
-	cmdLog(cmd)
-	must(cmd.Run())
-}
-
-func buildDocs() {
-	cmd := exec.Command("yarn", "docs:build")
-	cmdLog(cmd)
-	must(cmd.Run())
 }

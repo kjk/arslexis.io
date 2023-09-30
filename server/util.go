@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -30,12 +29,6 @@ func ctx() context.Context {
 
 func isLinux() bool {
 	return !u.IsWinOrMac()
-}
-
-func cmdLog(cmd *exec.Cmd) {
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
 }
 
 func getCallstackFrames(skip int) []string {
@@ -136,48 +129,7 @@ func serveJSON(w http.ResponseWriter, r *http.Request, code int, v interface{}) 
 	_, _ = w.Write(d)
 }
 
-func printDir(dir string) {
-	ctx := context.Background()
-	fn := func(path string, info os.FileInfo, err error) error {
-		if info == nil {
-			logf(ctx, "%s\n", path)
-			return nil
-		}
-		logf(ctx, "%s: %d\n", path, info.Size())
-		return nil
-	}
-	filepath.Walk(dir, fn)
-}
-
-func readFileMust(path string) []byte {
-	d, err := os.ReadFile(path)
-	must(err)
-	return d
-}
-
-func runCmdLoggedMust(cmd *exec.Cmd) string {
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err == nil {
-		return ""
-	}
-	logf(ctx(), "cmd '%s' failed with '%s'\n", cmd, err)
-	must(err)
-	return ""
-}
-
-func runCmdLoggedInDir(dir string, exe string, args ...string) error {
-	cmd := exec.Command(exe, args...)
-	cmd.Dir = dir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	return err
-}
-
-func startCmdLoggedInDir(dir string, exe string, args ...string) (func(), error) {
+func startLoggedInDir(dir string, exe string, args ...string) (func(), error) {
 	cmd := exec.Command(exe, args...)
 	cmd.Dir = dir
 	cmd.Stdout = os.Stdout
@@ -189,23 +141,4 @@ func startCmdLoggedInDir(dir string, exe string, args ...string) (func(), error)
 	return func() {
 		cmd.Process.Kill()
 	}, nil
-}
-
-func parseEnv(d []byte) map[string]string {
-	d = u.NormalizeNewlines(d)
-	s := string(d)
-	lines := strings.Split(s, "\n")
-	m := make(map[string]string)
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		parts := strings.SplitN(line, "=", 2)
-		panicIf(len(parts) != 2, "invalid line '%s' in .env\n", line)
-		key := strings.TrimSpace(parts[0])
-		val := strings.TrimSpace(parts[1])
-		m[key] = val
-	}
-	return m
 }

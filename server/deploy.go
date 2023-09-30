@@ -15,15 +15,20 @@ import (
 	"github.com/pkg/sftp"
 )
 
+// variables to customize
 var (
-	exeBaseName      = "onlinetool"
-	domain           = "onlinetool.io"
-	httpPort         = 9219
-	wantedSecrets    = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL"}
+	exeBaseName    = "onlinetool"
+	domain         = "onlinetool.io"
+	httpPort       = 9219
+	secretsSrcPath = filepath.Join("..", "secrets", "onlinetool.env")
+	wantedSecrets  = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL"}
+)
+
+// stuff that is derived from the above
+var (
 	frontEndBuildDir = filepath.Join("frontend", "dist")
 	frontendZipName  = filepath.Join("server", "frontend.zip")
 	secretsPath      = filepath.Join("server", "secrets.env")
-	secretsSrcPath   = filepath.Join("..", "secrets", "onlinetool.env")
 
 	tmuxSessionName             = exeBaseName
 	deployServerDir             = "/root/apps/" + exeBaseName
@@ -118,7 +123,7 @@ func writeFileMust(path string, s string, perm fs.FileMode) {
 	logf(ctx(), "created '%s'\n", path)
 }
 
-func cmdRunMust(exe string, args ...string) string {
+func runMust(exe string, args ...string) string {
 	cmd := exec.Command(exe, args...)
 	d, err := cmd.CombinedOutput()
 	out := string(d)
@@ -126,13 +131,22 @@ func cmdRunMust(exe string, args ...string) string {
 	return out
 }
 
-func cmdRunLoggedMust(exe string, args ...string) string {
+func runLoggedMust(exe string, args ...string) string {
 	cmd := exec.Command(exe, args...)
 	d, err := cmd.CombinedOutput()
 	out := string(d)
 	panicIf(err != nil, "'%s' failed with '%s', out:\n'%s'\n", cmd.String(), err, out)
 	logf(ctx(), "%s:\n%s\n", cmd.String(), out)
 	return out
+}
+
+func runLoggedInDir(dir string, exe string, args ...string) error {
+	cmd := exec.Command(exe, args...)
+	cmd.Dir = dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
 }
 
 func sftpFileNotExistsMust(sftp *sftp.Client, path string) {
@@ -236,6 +250,24 @@ func validateSecrets(m map[string]string) {
 		panicIf(!ok, "didn't find secret '%s' in '%s'", k)
 	}
 }
+func parseEnv(d []byte) map[string]string {
+	d = u.NormalizeNewlines(d)
+	s := string(d)
+	lines := strings.Split(s, "\n")
+	m := make(map[string]string)
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		panicIf(len(parts) != 2, "invalid line '%s' in .env\n", line)
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+		m[key] = val
+	}
+	return m
+}
 
 func buildForProd(forLinux bool) string {
 	// re-build the frontend. remove build process artifacts
@@ -258,11 +290,11 @@ func buildForProd(forLinux bool) string {
 	}
 
 	if u.IsMac() {
-		runCmdLoggedInDir("frontend", "bun", "install")
-		runCmdLoggedInDir("frontend", "bun", "run", "build")
+		runLoggedInDir("frontend", "bun", "install")
+		runLoggedInDir("frontend", "bun", "run", "build")
 	} else {
-		runCmdLoggedInDir("frontend", "yarn")
-		runCmdLoggedInDir("frontend", "yarn", "build")
+		runLoggedInDir("frontend", "yarn")
+		runLoggedInDir("frontend", "yarn", "build")
 	}
 
 	// get date and hash of current checkin
@@ -390,7 +422,7 @@ func setupAndRun() {
 	// kill existing process
 	// note: muse use "ps ax" (and not e.g. "pkill") because we don't want to kill ourselves
 	{
-		out := cmdRunMust("ps", "ax")
+		out := runMust("ps", "ax")
 		lines := strings.Split(out, "\n")
 		pidsToKill := []string{}
 		for _, l := range lines {
@@ -420,7 +452,7 @@ func setupAndRun() {
 			logf(ctx(), "found process to kill: '%s' pid: '%s'\n", name, pid)
 		}
 		for _, pid := range pidsToKill {
-			cmdRunLoggedMust("kill", pid)
+			runLoggedMust("kill", pid)
 		}
 		if len(pidsToKill) == 0 {
 			logf(ctx(), "no %s* processes to kill\n", exeBaseName)
@@ -455,16 +487,16 @@ func setupAndRun() {
 		serviceName := exeBaseName + ".service"
 
 		// daemon-reload needed if service file changed
-		cmdRunLoggedMust("systemctl", "daemon-reload")
-		// cmdRunLoggedMust("systemctl", "start", serviceName)
-		cmdRunLoggedMust("systemctl", "enable", serviceName)
+		runLoggedMust("systemctl", "daemon-reload")
+		// runCmdLoggedMust("systemctl", "start", serviceName)
+		runLoggedMust("systemctl", "enable", serviceName)
 
-		cmdRunLoggedMust(systemdRunScriptPath)
+		runLoggedMust(systemdRunScriptPath)
 	}
 
 	// update and reload caddy config
 	appendOrReplaceInFile(deployServerCaddyConfigPath, caddyConfig, caddyConfigDelim)
-	cmdRunLoggedMust("systemctl", "reload", "caddy")
+	runLoggedMust("systemctl", "reload", "caddy")
 
 	// archive previous deploys
 	{

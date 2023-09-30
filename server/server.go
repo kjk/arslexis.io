@@ -256,11 +256,11 @@ func runServerProd() {
 		must(err)
 		logf(ctx(), "deleted dir '%s'\n", distDir)
 		if u.IsMac() {
-			runCmdLoggedInDir("frontend", "bun", "install")
-			runCmdLoggedInDir("frontend", "bun", "run", "build")
+			runLoggedInDir("frontend", "bun", "install")
+			runLoggedInDir("frontend", "bun", "run", "build")
 		} else if u.IsWindows() {
-			runCmdLoggedInDir("frontend", "yarn")
-			runCmdLoggedInDir("frontend", "yarn", "build")
+			runLoggedInDir("frontend", "yarn")
+			runLoggedInDir("frontend", "yarn", "build")
 		}
 		panicIf(!u.DirExists(distDir), "dir '%s' doesn't exist", distDir)
 		fsys = os.DirFS(distDir)
@@ -278,13 +278,13 @@ func runServerProd() {
 
 func runServerDev() {
 	if u.IsMac() {
-		runCmdLoggedInDir("frontend", "bun", "install")
-		closeDev, err := startCmdLoggedInDir("frontend", "bun", "run", "dev")
+		runLoggedInDir("frontend", "bun", "install")
+		closeDev, err := startLoggedInDir("frontend", "bun", "run", "dev")
 		must(err)
 		defer closeDev()
 	} else {
-		runCmdLoggedInDir("frontend", "yarn")
-		closeDev, err := startCmdLoggedInDir("frontend", "yarn", "dev")
+		runLoggedInDir("frontend", "yarn")
+		closeDev, err := startLoggedInDir("frontend", "yarn", "dev")
 		must(err)
 		defer closeDev()
 	}
