@@ -103,7 +103,7 @@ func appendOrReplaceInText(orig string, toAppend string, delim string) string {
 	return collapseMultipleNewlines(res)
 }
 
-func appendOrReplaceInFile(path string, toAppend string, delim string) {
+func appendOrReplaceInFile(path string, toAppend string, delim string) bool {
 	st, err := os.Lstat(path)
 	must(err)
 	perm := st.Mode().Perm()
@@ -111,9 +111,11 @@ func appendOrReplaceInFile(path string, toAppend string, delim string) {
 	must(err)
 	newContent := appendOrReplaceInText(string(orig), toAppend, delim)
 	if newContent == string(orig) {
-		return
+		return false
 	}
-	os.WriteFile(path, []byte(newContent), perm)
+	err = os.WriteFile(path, []byte(newContent), perm)
+	must(err)
+	return true
 }
 
 func writeFileMust(path string, s string, perm fs.FileMode) {
@@ -307,8 +309,7 @@ func buildForProd(forLinux bool) string {
 
 	// package frontend code into  a zip file
 	{
-		path := filepath.Join("frontend", "dist")
-		err := u.CreateZipWithDirContent(frontendZipName, path)
+		err := u.CreateZipWithDirContent(frontendZipName, frontEndBuildDir)
 		panicIf(err != nil, "u.CreateZipWithDirContent() failed with '%s'\n", err)
 		size := u.FormatSize(u.FileSize(frontendZipName))
 		logf(ctx(), "created %s of size %s\n", frontendZipName, size)
@@ -483,9 +484,10 @@ func setupAndRun() {
 	}
 
 	// update and reload caddy config
-	appendOrReplaceInFile(deployServerCaddyConfigPath, caddyConfig, caddyConfigDelim)
-	runLoggedMust("systemctl", "reload", "caddy")
-
+	didReplace := appendOrReplaceInFile(deployServerCaddyConfigPath, caddyConfig, caddyConfigDelim)
+	if didReplace {
+		runLoggedMust("systemctl", "reload", "caddy")
+	}
 	// archive previous deploys
 	{
 		pattern := filepath.Join(deployServerDir, exeBaseName+"-*")
