@@ -240,10 +240,8 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 
 func runServerProd() {
 	var fsys fs.FS
-	fromZip := len(frontendZipData) > 1024
-	distDir := frontEndBuildDir
+	fromZip := len(frontendZipData) > 0
 	if fromZip {
-		distDir = "embedded zip"
 		var err error
 		fsys, err = u.NewMemoryFSForZipData(frontendZipData)
 		must(err)
@@ -251,19 +249,11 @@ func runServerProd() {
 		logf(ctx(), "runServerProd(): will serve files from embedded zip of size '%v'\n", sizeStr)
 	} else {
 		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
+
+		rebuildFrontend()
 		// assuming this is not deployment: re-build the frontend
-		err := os.RemoveAll(distDir)
-		must(err)
-		logf(ctx(), "deleted dir '%s'\n", distDir)
-		if u.IsMac() {
-			runLoggedInDir("frontend", "bun", "install")
-			runLoggedInDir("frontend", "bun", "run", "build")
-		} else if u.IsWindows() {
-			runLoggedInDir("frontend", "yarn")
-			runLoggedInDir("frontend", "yarn", "build")
-		}
-		panicIf(!u.DirExists(distDir), "dir '%s' doesn't exist", distDir)
-		fsys = os.DirFS(distDir)
+		panicIf(!u.DirExists(frontEndBuildDir), "dir '%s' doesn't exist", frontEndBuildDir)
+		fsys = os.DirFS(frontEndBuildDir)
 	}
 
 	httpSrv := makeHTTPServer(nil, fsys)
@@ -278,12 +268,12 @@ func runServerProd() {
 
 func runServerDev() {
 	if u.IsMac() {
-		runLoggedInDir("frontend", "bun", "install")
+		u.RunLoggedInDir("frontend", "bun", "install")
 		closeDev, err := startLoggedInDir("frontend", "bun", "run", "dev")
 		must(err)
 		defer closeDev()
 	} else {
-		runLoggedInDir("frontend", "yarn")
+		u.RunLoggedInDir("frontend", "yarn")
 		closeDev, err := startLoggedInDir("frontend", "yarn", "dev")
 		must(err)
 		defer closeDev()

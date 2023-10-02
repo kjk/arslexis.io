@@ -67,94 +67,15 @@ WantedBy=multi-user.target
 	systemdServicePathLink = fmt.Sprintf("/etc/systemd/system/%s.service", exeBaseName)
 )
 
-func addNewline(s *string) string {
-	if strings.HasSuffix(*s, "\n") {
-		return *s
-	}
-	*s = *s + "\n"
-	return *s
-}
-
-func collapseMultipleNewlines(s string) string {
-	s = strings.ReplaceAll(s, "\r\n", "\n") // CRLF => CR
-	prev := ""
-	for prev != s {
-		prev = s
-		s = strings.ReplaceAll(s, "\n\n\n", "\n\n")
-	}
-	return s
-}
-
-func appendOrReplaceInText(orig string, toAppend string, delim string) string {
-	addNewline(&toAppend)
-	addNewline(&delim)
-	content := "\n\n" + delim + toAppend + delim
-	start := strings.Index(orig, delim)
-	if strings.Contains(orig, content) {
-		return collapseMultipleNewlines(orig)
-	}
-	if start >= 0 {
-		end := strings.Index(orig[start+1:], delim)
-		panicIf(end == -1, "didn't find end delim")
-		end += start + 1
-		orig = orig[:start] + "\n\n" + orig[end+len(delim):]
-	}
-	res := addNewline(&orig) + delim + toAppend + delim
-	return collapseMultipleNewlines(res)
-}
-
-func appendOrReplaceInFile(path string, toAppend string, delim string) bool {
-	st, err := os.Lstat(path)
-	must(err)
-	perm := st.Mode().Perm()
-	orig, err := os.ReadFile(path)
-	must(err)
-	newContent := appendOrReplaceInText(string(orig), toAppend, delim)
-	if newContent == string(orig) {
-		return false
-	}
-	err = os.WriteFile(path, []byte(newContent), perm)
-	must(err)
-	return true
-}
-
 func writeFileMust(path string, s string, perm fs.FileMode) {
 	err := os.WriteFile(path, []byte(s), perm)
 	panicIf(err != nil, "os.WriteFile(%s) failed with '%s'", path, err)
 	logf(ctx(), "created '%s'\n", path)
 }
 
-func runMust(exe string, args ...string) string {
-	cmd := exec.Command(exe, args...)
-	d, err := cmd.CombinedOutput()
-	out := string(d)
-	panicIf(err != nil, "'%s' failed with '%s', out:\n'%s'\n", cmd.String(), err, out)
-	return out
-}
-
-func runLoggedMust(exe string, args ...string) string {
-	cmd := exec.Command(exe, args...)
-	d, err := cmd.CombinedOutput()
-	out := string(d)
-	panicIf(err != nil, "'%s' failed with '%s', out:\n'%s'\n", cmd.String(), err, out)
-	logf(ctx(), "%s:\n%s\n", cmd.String(), out)
-	return out
-}
-
-func runLoggedInDir(dir string, exe string, args ...string) error {
-	cmd := exec.Command(exe, args...)
-	cmd.Dir = dir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	return err
-}
-
 func sftpFileNotExistsMust(sftp *sftp.Client, path string) {
 	_, err := sftp.Stat(path)
-	if err == nil {
-		logf(ctx(), "file '%s' already exists on the server\n", path)
-	}
+	u.PanicIf(err == nil, "file '%s' already exists on the server\n", path)
 }
 
 func sftpMkdirAllMust(sftp *sftp.Client, path string) {
@@ -213,15 +134,6 @@ func tmuxSendKeys(sessionName string, text string) {
 	panicIf(err != nil, "%s failed with %s\n", cmd.String(), err)
 }
 
-func ExpandTildeInPath(s string) string {
-	if strings.HasPrefix(s, "~") {
-		dir, err := os.UserHomeDir()
-		must(err)
-		return dir + s[1:]
-	}
-	return s
-}
-
 func deleteOldBuilds() {
 	pattern := exeBaseName + "-*"
 	files, err := filepath.Glob(pattern)
@@ -239,23 +151,18 @@ func validateSecrets(m map[string]string) {
 		panicIf(!ok, "didn't find secret '%s' in '%s'", k)
 	}
 }
-func parseEnv(d []byte) map[string]string {
-	d = u.NormalizeNewlines(d)
-	s := string(d)
-	lines := strings.Split(s, "\n")
-	m := make(map[string]string)
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		parts := strings.SplitN(line, "=", 2)
-		panicIf(len(parts) != 2, "invalid line '%s' in .env\n", line)
-		key := strings.TrimSpace(parts[0])
-		val := strings.TrimSpace(parts[1])
-		m[key] = val
+
+func rebuildFrontend() {
+	// assuming this is not deployment: re-build the frontend
+	must(os.RemoveAll(frontEndBuildDir))
+	logf(ctx(), "deleted frontend dist dir '%s'\n", frontEndBuildDir)
+	if u.IsMac() {
+		u.RunLoggedInDirMust("frontend", "bun", "install")
+		u.RunLoggedInDirMust("frontend", "bun", "run", "build")
+	} else if u.IsWindows() {
+		u.RunLoggedInDirMust("frontend", "yarn")
+		u.RunLoggedInDirMust("frontend", "yarn", "build")
 	}
-	return m
 }
 
 func buildForProd(forLinux bool) string {
@@ -266,26 +173,20 @@ func buildForProd(forLinux bool) string {
 	defer os.Remove(secretsPath)
 	os.Remove(frontendZipName)
 	defer os.Remove(frontendZipName)
-	os.RemoveAll(frontEndBuildDir)
 
 	// copy secrets from ../secrets/${me}.env to server/secrets.env
 	// so that it's included in the binary as secretsEnv
 	{
 		d, err := os.ReadFile(secretsSrcPath)
 		must(err)
-		m := parseEnv(d)
+		m := u.ParseEnvMust(d)
 		validateSecrets(m)
 		err = os.WriteFile(secretsPath, d, 0644)
 		must(err)
 	}
 
-	if u.IsMac() {
-		runLoggedInDir("frontend", "bun", "install")
-		runLoggedInDir("frontend", "bun", "run", "build")
-	} else {
-		runLoggedInDir("frontend", "yarn")
-		runLoggedInDir("frontend", "yarn", "build")
-	}
+	rebuildFrontend()
+	defer os.RemoveAll(frontEndBuildDir)
 
 	// get date and hash of current checkin
 	var exeName string
@@ -355,7 +256,7 @@ func deployToHetzner() {
 
 	serverExePath := path.Join(deployServerDir, exeName)
 
-	keyPath := ExpandTildeInPath(deployServerPrivateKeyPath)
+	keyPath := u.ExpandTildeInPath(deployServerPrivateKeyPath)
 	panicIf(!u.FileExists(keyPath), "key file '%s' doesn't exist", keyPath)
 	auth, err := goph.Key(keyPath, "")
 	panicIf(err != nil, "goph.Key() failed with '%s'", err)
@@ -411,7 +312,7 @@ func setupAndRun() {
 	// kill existing process
 	// note: muse use "ps ax" (and not e.g. "pkill") because we don't want to kill ourselves
 	{
-		out := runMust("ps", "ax")
+		out := u.RunMust("ps", "ax")
 		lines := strings.Split(out, "\n")
 		pidsToKill := []string{}
 		for _, l := range lines {
@@ -441,7 +342,7 @@ func setupAndRun() {
 			logf(ctx(), "found process to kill: '%s' pid: '%s'\n", name, pid)
 		}
 		for _, pid := range pidsToKill {
-			runLoggedMust("kill", pid)
+			u.RunLoggedMust("kill", pid)
 		}
 		if len(pidsToKill) == 0 {
 			logf(ctx(), "no %s* processes to kill\n", exeBaseName)
@@ -476,18 +377,19 @@ func setupAndRun() {
 		serviceName := exeBaseName + ".service"
 
 		// daemon-reload needed if service file changed
-		runLoggedMust("systemctl", "daemon-reload")
+		u.RunLoggedMust("systemctl", "daemon-reload")
 		// runLoggedMust("systemctl", "start", serviceName)
-		runLoggedMust("systemctl", "enable", serviceName)
+		u.RunLoggedMust("systemctl", "enable", serviceName)
 
-		runLoggedMust(systemdRunScriptPath)
+		u.RunLoggedMust(systemdRunScriptPath)
 	}
 
 	// update and reload caddy config
-	didReplace := appendOrReplaceInFile(deployServerCaddyConfigPath, caddyConfig, caddyConfigDelim)
+	didReplace := u.AppendOrReplaceInFileMust(deployServerCaddyConfigPath, caddyConfig, caddyConfigDelim)
 	if didReplace {
-		runLoggedMust("systemctl", "reload", "caddy")
+		u.RunLoggedMust("systemctl", "reload", "caddy")
 	}
+
 	// archive previous deploys
 	{
 		pattern := filepath.Join(deployServerDir, exeBaseName+"-*")
@@ -515,21 +417,9 @@ func setupAndRun() {
 // files, so allow extracting them to filesystem
 func extractFrontend() {
 	panicIf(len(frontendZipData) == 0, "frontendZipData is empty\n")
-
-	m, err := u.ReadZipData(frontendZipData)
-	u.PanicIfErr(err, "u.ReadZipData() failed with %s\n", err)
 	ownPath := os.Args[0]
 	outDir := ownPath + "-frontend"
-	for name, d := range m {
-		// names in zip are unix-style, convert to windows-style
-		name = filepath.FromSlash(name)
-		path := filepath.Join(outDir, name)
-		dir := filepath.Dir(path)
-		err = os.MkdirAll(dir, 0755)
-		u.PanicIfErr(err, "os.MkdirAll('%s') failed with %s\n", dir, err)
-		err = os.WriteFile(path, d, 0644)
-		u.PanicIfErr(err, "os.WriteFile('%s') failed with %s\n", path, err)
-		logf(ctx(), "extracted '%s'\n", path)
-	}
-	logf(ctx(), "extracted %d files to '%s'\n", len(m), outDir)
+	err := u.UnzipDataToDir(frontendZipData, outDir)
+	must(err)
+	logf(ctx(), "extracted frontend zip files to '%s'\n", outDir)
 }

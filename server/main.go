@@ -4,6 +4,8 @@ import (
 	"flag"
 	"os"
 	"time"
+
+	"github.com/kjk/common/u"
 )
 
 var (
@@ -20,12 +22,12 @@ func loadSecrets() {
 	var m map[string]string
 	if len(secretsEnv) > 0 {
 		logf(ctx(), "loading secrets from secretsEnv\n")
-		m = parseEnv(secretsEnv)
+		m = u.ParseEnvMust(secretsEnv)
 	} else {
 		panicIf(!isWinOrMac(), "secretsEnv is empty and running on linux")
 		d, err := os.ReadFile(secretsSrcPath)
 		must(err)
-		m = parseEnv(d)
+		m = u.ParseEnvMust(d)
 	}
 	validateSecrets(m)
 	axiomApiToken = m["AXIOM_TOKEN"]
