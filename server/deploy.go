@@ -17,17 +17,17 @@ import (
 
 // variables to customize
 var (
-	exeBaseName    = "onlinetool"
-	domain         = "onlinetool.io"
-	httpPort       = 9301
-	secretsSrcPath = filepath.Join("..", "secrets", "onlinetool.env")
-	wantedSecrets  = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL"}
+	exeBaseName      = "onlinetool"
+	domain           = "onlinetool.io"
+	httpPort         = 9301
+	wantedSecrets    = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL"}
+	frontEndBuildDir = filepath.Join("frontend", "dist")
 )
 
 // stuff that is derived from the above
 var (
-	frontEndBuildDir = filepath.Join("frontend", "dist")
-	frontendZipName  = filepath.Join("server", "frontend.zip")
+	secretsSrcPath  = filepath.Join("..", "secrets", exeBaseName+".env")
+	frontendZipName = filepath.Join("server", "frontend.zip")
 
 	tmuxSessionName             = exeBaseName
 	deployServerDir             = "/root/apps/" + exeBaseName
