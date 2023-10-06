@@ -7,7 +7,9 @@
   // https://github.com/gildas-lormeau/zip.js/blob/gh-pages/demos/demo-read-file.js
   // https://gildas-lormeau.github.io/zip.js/
 
-  /** {FileWithPath[]}*/
+  /** @typedef {import("../util").FileWithPath} FileWithPath */
+
+  /** @type {FileWithPath[]}*/
   let files = [];
 
   /* @type {HTMLElement} */
@@ -127,7 +129,7 @@
 
 <div class="flex flex-col">
   {#each files as fi}
-    <div class="flex flex-col ml-4  mt-4">
+    <div class="flex flex-col ml-4 mt-4">
       <div class="font-bold">
         {fileInfo(fi)}
         {#if fi.error}<span class="text-red-500">Bad .zip file. {fi.error}</span
