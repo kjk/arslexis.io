@@ -16,7 +16,7 @@ export function len(o) {
  * @returns {Promise}
  */
 export function lazyLoadScript(src, opts = {}) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!src) {
       throw new Error("src parameter must be specified");
     }
@@ -62,11 +62,11 @@ export function lazyLoadScript(src, opts = {}) {
     if (opts.crossorigin) script.setAttribute("crossorigin", opts.crossorigin);
 
     // @ts-ignore
-    script.onload = function(event) {
+    script.onload = function (event) {
       // console.log(`loaded ${src}`);
       resolve(script);
     };
-    script.onerror = function(event) {
+    script.onerror = function (event) {
       reject(event);
     };
     document.body.appendChild(script);
@@ -80,7 +80,7 @@ export function lazyLoadScript(src, opts = {}) {
  */
 export function lazyLoadCSS(src, opts = {}) {
   // @ts-ignore
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!src) {
       throw new Error("src parameter must be specified");
     }
@@ -97,8 +97,8 @@ export function lazyLoadCSS(src, opts = {}) {
       defaults,
       typeof opts === "string"
         ? {
-          id: opts,
-        }
+            id: opts,
+          }
         : opts
     );
 
@@ -125,7 +125,7 @@ export function lazyLoadCSS(src, opts = {}) {
       }
     }
     // @ts-ignore
-    link.onload = function(event) {
+    link.onload = function (event) {
       // console.log(`loaded ${src}`);
       resolve(link);
     };
@@ -193,7 +193,7 @@ export function error(args) {
 // returns a function that, when called, returns number of elapsed milliseconds
 export function startTimer() {
   const timeStart = performance.now();
-  return function() {
+  return function () {
     return Math.round(performance.now() - timeStart);
   };
 }
@@ -355,18 +355,18 @@ export function fmtNum(n, sep = ",") {
  * @returns {string}
  */
 export function notepad2Size(n) {
-  const a = [
-    [1024 * 1024 * 1024 * 1024, "TB"],
-    [1024 * 1024 * 1024, "GB"],
-    [1024 * 1024, "MB"],
-    [1024, "kB"],
+  const sizes = [
+    1024 * 1024 * 1024 * 1024,
+    1024 * 1024 * 1024,
+    1024 * 1024,
+    1024,
   ];
-  for (const el of a) {
-    const size = el[0];
+  const suffixes = ["TB", "GB", "MB", "kB"];
+  for (let i = 0; i < len(sizes); i++) {
+    const size = sizes[i];
     if (n >= size) {
-      // @ts-ignore
       let s = (n / size).toFixed(2);
-      return s.replace(".00", "") + " " + el[1];
+      return s.replace(".00", "") + " " + suffixes[i];
     }
   }
   return `${n} bytes`;
