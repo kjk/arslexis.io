@@ -136,6 +136,12 @@ func permRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
 func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Server {
 	mainHandler := func(w http.ResponseWriter, r *http.Request) {
 
+		serveOpts := hutil.ServeFileOptions{
+			FS:               fsys,
+			SupportCleanURLS: true,
+			ForceCleanURLS:   true,
+			ServeCompressed:  false,
+		}
 		uri := r.URL.Path
 
 		switch uri {
@@ -191,13 +197,7 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 			return
 		}
 
-		opts := hutil.ServeFileOptions{
-			FS:               fsys,
-			SupportCleanURLS: true,
-			ForceCleanURLS:   true,
-			ServeCompressed:  false,
-		}
-		if hutil.TryServeFile(w, r, &opts) {
+		if hutil.TryServeFile(w, r, &serveOpts) {
 			return
 		}
 
