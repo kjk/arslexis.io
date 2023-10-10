@@ -17,9 +17,9 @@ import (
 
 	"github.com/felixge/httpsnoop"
 	hutil "github.com/kjk/common/httputil"
+	"github.com/kjk/common/server"
 
 	"github.com/google/go-github/github"
-	"github.com/kjk/common/server"
 	"github.com/kjk/common/u"
 	"golang.org/x/exp/slices"
 	"golang.org/x/oauth2"
@@ -134,7 +134,6 @@ func permRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
 // in dev, proxyHandler redirects assets to vite web server
 // in prod, assets must be pre-built in frontend/dist directory
 func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Server {
-	wasBad := false
 	mainHandler := func(w http.ResponseWriter, r *http.Request) {
 
 		tryServeRedirect := func(uri string) bool {
@@ -142,8 +141,7 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 				http.Redirect(w, r, "/", http.StatusPermanentRedirect)
 				return true
 			}
-			wasBad = server.TryServeBadClient(w, r, nil)
-			return wasBad
+			return false
 		}
 		uri := r.URL.Path
 
@@ -207,7 +205,10 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 	}
 
 	handlerWithMetrics := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		wasBad = false
+		if server.TryServeBadClient(w, r, nil) {
+			return
+		}
+
 		m := httpsnoop.CaptureMetrics(http.HandlerFunc(mainHandler), w, r)
 		defer func() {
 			if p := recover(); p != nil {
@@ -217,7 +218,7 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 				return
 			}
 			logHTTPReq(r, m.Code, m.Written, m.Duration)
-			if m.Code == 200 && !wasBad {
+			if m.Code == 200 {
 				pirschSendHit(r)
 			}
 			axiomLogHTTPReq(ctx(), r, m.Code, int(m.Written), m.Duration)
