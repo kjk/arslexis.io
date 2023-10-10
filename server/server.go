@@ -136,13 +136,6 @@ func permRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
 func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Server {
 	mainHandler := func(w http.ResponseWriter, r *http.Request) {
 
-		tryServeRedirect := func(uri string) bool {
-			if uri == "/home" {
-				http.Redirect(w, r, "/", http.StatusPermanentRedirect)
-				return true
-			}
-			return false
-		}
 		uri := r.URL.Path
 
 		switch uri {
@@ -168,6 +161,13 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 			return
 		}
 
+		tryServeRedirect := func(uri string) bool {
+			if uri == "/home" {
+				http.Redirect(w, r, "/", http.StatusPermanentRedirect)
+				return true
+			}
+			return false
+		}
 		if tryServeRedirect(uri) {
 			return
 		}
