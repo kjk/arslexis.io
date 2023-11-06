@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -103,7 +102,7 @@ func getGithubToken() string {
 		return token
 	}
 	if !didNotifyUsingToken {
-		logf(context.Background(), "GITHUB_TOKEN set, using it for GitHub API requests\n")
+		logf("GITHUB_TOKEN set, using it for GitHub API requests\n")
 		didNotifyUsingToken = true
 	}
 	return ""

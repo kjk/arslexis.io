@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"os"
 	"strings"
@@ -21,9 +20,9 @@ func logHTTPReq(r *http.Request, code int, size int64, dur time.Duration) {
 	}
 	if code >= 400 {
 		// make 400 stand out more in logs
-		logf(ctx(), "%s %d %s %s in %s\n", "   ", code, r.RequestURI, formatSize(size), dur)
+		logf("%s %d %s %s in %s\n", "   ", code, r.RequestURI, formatSize(size), dur)
 	} else {
-		logf(ctx(), "%s %d %s %s in %s\n", r.Method, code, r.RequestURI, formatSize(size), dur)
+		logf("%s %d %s %s in %s\n", r.Method, code, r.RequestURI, formatSize(size), dur)
 	}
 
 	if code >= 300 && code < 400 {
@@ -33,7 +32,7 @@ func logHTTPReq(r *http.Request, code int, size int64, dur time.Duration) {
 
 	err := httpLogger.LogReq(r, code, size, dur)
 	if err != nil {
-		logErrorf(ctx(), "httpLogger.LogReq() failed with '%s'\n", err)
+		logErrorf("httpLogger.LogReq() failed with '%s'\n", err)
 	}
 }
 
@@ -44,16 +43,16 @@ func uploadCompressedHTTPLog(app, path string) {
 	mc := newMinioSpacesClient()
 	remotePath := httplogger.RemotePathFromFilePath(app, path)
 	if remotePath == "" {
-		logf(ctx(), "uploadCompressedHTTPLog: remotePathFromFilePath() failed for '%s'\n", path)
+		logf("uploadCompressedHTTPLog: remotePathFromFilePath() failed for '%s'\n", path)
 		return
 	}
 	remotePath += ".br"
 	_, err := mc.UploadFileBrotliCompressed(remotePath, path, true)
 	if err != nil {
-		logErrorf(ctx(), "uploadCompressedHTTPLog: minioUploadFilePublic() failed with '%s'\n", err)
+		logErrorf("uploadCompressedHTTPLog: minioUploadFilePublic() failed with '%s'\n", err)
 		return
 	}
-	logf(ctx(), "uploadCompressedHTTPLog: uploaded '%s' as '%s' in %s\n", path, remotePath, time.Since(timeStart))
+	logf("uploadCompressedHTTPLog: uploaded '%s' as '%s' in %s\n", path, remotePath, time.Since(timeStart))
 }
 
 func OpenHTTPLog(app string) func() {
@@ -63,7 +62,7 @@ func OpenHTTPLog(app string) func() {
 
 	didRotate := func(path string) {
 		canUpload := hasSpacesCreds() && !isWinOrMac()
-		logf(ctx(), "didRotateHTTPLog: '%s', hasSpacesCreds: %v\n", path, canUpload)
+		logf("didRotateHTTPLog: '%s', hasSpacesCreds: %v\n", path, canUpload)
 		if !canUpload {
 			return
 		}
@@ -73,7 +72,7 @@ func OpenHTTPLog(app string) func() {
 	httpLogger, err = httplogger.New(dir, didRotate)
 	must(err)
 	// TODO: should I change filerotate so that it opens the file immedaitely?
-	logf(context.Background(), "opened http log file\n")
+	logf("opened http log file\n")
 	return func() {
 		httpLogger.Close()
 	}

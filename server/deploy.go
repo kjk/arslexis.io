@@ -70,7 +70,7 @@ WantedBy=multi-user.target
 func writeFileMust(path string, s string, perm fs.FileMode) {
 	err := os.WriteFile(path, []byte(s), perm)
 	panicIf(err != nil, "os.WriteFile(%s) failed with '%s'", path, err)
-	logf(ctx(), "created '%s'\n", path)
+	logf("created '%s'\n", path)
 }
 
 func sftpFileNotExistsMust(sftp *sftp.Client, path string) {
@@ -81,15 +81,15 @@ func sftpFileNotExistsMust(sftp *sftp.Client, path string) {
 func sftpMkdirAllMust(sftp *sftp.Client, path string) {
 	err := sftp.MkdirAll(path)
 	panicIf(err != nil, "sftp.MkdirAll('%s') failed with '%s'", path, err)
-	logf(ctx(), "created '%s' dir on the server\n", path)
+	logf("created '%s' dir on the server\n", path)
 }
 
 func sshRunCommandMust(client *goph.Client, exe string, args ...string) {
 	cmd, err := client.Command(exe, args...)
 	panicIf(err != nil, "client.Command() failed with '%s'\n", err)
-	logf(ctx(), "running '%s' on the server\n", cmd.String())
+	logf("running '%s' on the server\n", cmd.String())
 	out, err := cmd.CombinedOutput()
-	logf(ctx(), "%s:\n%s\n", cmd.String(), string(out))
+	logf("%s:\n%s\n", cmd.String(), string(out))
 	panicIf(err != nil, "cmd.Output() failed with '%s'\n", err)
 }
 
@@ -102,11 +102,11 @@ func copyToServerMaybeGzippedMust(client *goph.Client, sftp *sftp.Client, localP
 		defer os.Remove(localPath)
 	}
 	sizeStr := u.FormatSize(u.FileSize(localPath))
-	logf(ctx(), "uploading '%s' (%s) to '%s'", localPath, sizeStr, remotePath)
+	logf("uploading '%s' (%s) to '%s'", localPath, sizeStr, remotePath)
 	timeStart := time.Now()
 	err := client.Upload(localPath, remotePath)
 	panicIf(err != nil, "\nclient.Upload() failed with '%s'", err)
-	logf(ctx(), " took %s\n", time.Since(timeStart))
+	logf(" took %s\n", time.Since(timeStart))
 
 	if gzipped {
 		// ungzip on the server
@@ -119,18 +119,18 @@ func createNewTmuxSession(name string) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		if strings.Contains(string(out), "duplicate session") {
-			logf(ctx(), "tmux session '%s' already exists\n", name)
+			logf("tmux session '%s' already exists\n", name)
 			return
 		}
 		panicIf(err != nil, "tmux new-session failed with '%s'\n", err)
-		logf(ctx(), "%s:\n%s\n", cmd.String(), string(out))
+		logf("%s:\n%s\n", cmd.String(), string(out))
 	}
 }
 
 func tmuxSendKeys(sessionName string, text string) {
 	cmd := exec.Command("tmux", "send-keys", "-t", sessionName, text, "Enter")
 	out, err := cmd.CombinedOutput()
-	logf(ctx(), "%s:\n%s\n", cmd.String(), string(out))
+	logf("%s:\n%s\n", cmd.String(), string(out))
 	panicIf(err != nil, "%s failed with %s\n", cmd.String(), err)
 }
 
@@ -141,7 +141,7 @@ func deleteOldBuilds() {
 	for _, path := range files {
 		err = os.Remove(path)
 		must(err)
-		logf(ctx(), "deleted %s\n", path)
+		logf("deleted %s\n", path)
 	}
 }
 
@@ -155,7 +155,7 @@ func validateSecrets(m map[string]string) {
 func rebuildFrontend() {
 	// assuming this is not deployment: re-build the frontend
 	must(os.RemoveAll(frontEndBuildDir))
-	logf(ctx(), "deleted frontend dist dir '%s'\n", frontEndBuildDir)
+	logf("deleted frontend dist dir '%s'\n", frontEndBuildDir)
 	if u.IsMac() {
 		u.RunLoggedInDirMust("frontend", "bun", "install")
 		u.RunLoggedInDirMust("frontend", "bun", "run", "build")
@@ -196,7 +196,7 @@ func buildForProd(forLinux bool) string {
 		out, err := cmd.Output()
 		panicIf(err != nil, "git log failed")
 		s := strings.TrimSpace(string(out))
-		//logf(ctx(), "exec out: '%s'\n", s)
+		//logf("exec out: '%s'\n", s)
 		parts := strings.SplitN(s, " ", 3)
 		panicIf(len(parts) != 3, "expected 3 parts in '%s'", s)
 		date := parts[1]
@@ -213,7 +213,7 @@ func buildForProd(forLinux bool) string {
 		err := u.CreateZipWithDirContent(frontendZipName, frontEndBuildDir)
 		panicIf(err != nil, "u.CreateZipWithDirContent() failed with '%s'\n", err)
 		size := u.FormatSize(u.FileSize(frontendZipName))
-		logf(ctx(), "created %s of size %s\n", frontendZipName, size)
+		logf("created %s of size %s\n", frontendZipName, size)
 	}
 
 	// build the binary, for linux if forLinux is true, otherwise for OS arh
@@ -226,11 +226,11 @@ func buildForProd(forLinux bool) string {
 			cmd.Env = append(cmd.Env, "GOOS=linux", "GOARCH=amd64")
 		}
 		out, err := cmd.CombinedOutput()
-		logf(ctx(), "%s:\n%s\n", cmd.String(), out)
+		logf("%s:\n%s\n", cmd.String(), out)
 		panicIf(err != nil, "go build failed")
 
 		sizeStr := u.FormatSize(u.FileSize(exeName))
-		logf(ctx(), "created '%s' of size %s\n", exeName, sizeStr)
+		logf("created '%s' of size %s\n", exeName, sizeStr)
 	}
 
 	return exeName
@@ -240,7 +240,7 @@ func buildLocalProd() {
 	deleteOldBuilds()
 	exeName := buildForProd(false)
 	exeSize := u.FormatSize(u.FileSize(exeName))
-	logf(ctx(), "created:\n%s %s\n", exeName, exeSize)
+	logf("created:\n%s %s\n", exeName, exeSize)
 }
 
 /*
@@ -289,23 +289,23 @@ func deployToHetzner() {
 	{
 		err = sftp.Chmod(serverExePath, 0755)
 		panicIf(err != nil, "sftp.Chmod() failed with '%s'", err)
-		logf(ctx(), "created dir on the server '%s'\n", deployServerDir)
+		logf("created dir on the server '%s'\n", deployServerDir)
 	}
 
 	sshRunCommandMust(client, serverExePath, "-setup-and-run")
-	logf(ctx(), "Running on http://%s:%d or https://%s\n", deployServerIP, httpPort, domain)
+	logf("Running on http://%s:%d or https://%s\n", deployServerIP, httpPort, domain)
 }
 
 func setupAndRun() {
-	logf(ctx(), "setupAndRun() for %s\n", exeBaseName)
+	logf("setupAndRun() for %s\n", exeBaseName)
 
 	if len(frontendZipData) < 1024 {
-		logf(ctx(), "frontendZipData is empty, must be embedded\n")
+		logf("frontendZipData is empty, must be embedded\n")
 		os.Exit(1)
 	}
 
 	if !u.FileExists(deployServerCaddyConfigPath) {
-		logf(ctx(), "%s doesn't exist.\nMust install caddy?\n", deployServerCaddyConfigPath)
+		logf("%s doesn't exist.\nMust install caddy?\n", deployServerCaddyConfigPath)
 		os.Exit(1)
 	}
 
@@ -322,30 +322,30 @@ func setupAndRun() {
 			parts := strings.Fields(l)
 			//parts := strings.SplitN(l, "\t", 5)
 			if len(parts) < 5 {
-				logf(ctx(), "unexpected line in ps ax: '%s', len(parts)=%d\n", l, len(parts))
+				logf("unexpected line in ps ax: '%s', len(parts)=%d\n", l, len(parts))
 				continue
 			}
 			pid := parts[0]
 			name := parts[4]
 			if !strings.Contains(name, exeBaseName) {
-				//logf(ctx(), "skipping process '%s' pid: '%s'\n", name, pid)
+				//logf("skipping process '%s' pid: '%s'\n", name, pid)
 				continue
 			}
-			logf(ctx(), "MAYBE KILLING process '%s' pid: '%s'\n", name, pid)
+			logf("MAYBE KILLING process '%s' pid: '%s'\n", name, pid)
 			myPid := fmt.Sprintf("%v", os.Getpid())
 			if pid == myPid {
-				logf(ctx(), "NOT KILLING because it's myself\n")
+				logf("NOT KILLING because it's myself\n")
 				// no suicide allowed
 				continue
 			}
 			pidsToKill = append(pidsToKill, pid)
-			logf(ctx(), "found process to kill: '%s' pid: '%s'\n", name, pid)
+			logf("found process to kill: '%s' pid: '%s'\n", name, pid)
 		}
 		for _, pid := range pidsToKill {
 			u.RunLoggedMust("kill", pid)
 		}
 		if len(pidsToKill) == 0 {
-			logf(ctx(), "no %s* processes to kill\n", exeBaseName)
+			logf("no %s* processes to kill\n", exeBaseName)
 		}
 	}
 
@@ -372,7 +372,7 @@ func setupAndRun() {
 		err := os.Symlink(systemdServicePath, systemdServicePathLink)
 		panicIf(err != nil, "os.Symlink(%s, %s) failed with '%s'", systemdServicePath,
 			systemdServicePathLink, err)
-		logf(ctx(), "created symlink '%s' to '%s'\n", systemdServicePathLink, systemdServicePath)
+		logf("created symlink '%s' to '%s'\n", systemdServicePathLink, systemdServicePath)
 
 		serviceName := exeBaseName + ".service"
 
@@ -395,12 +395,12 @@ func setupAndRun() {
 		pattern := filepath.Join(deployServerDir, exeBaseName+"-*")
 		files, err := filepath.Glob(pattern)
 		must(err)
-		logf(ctx(), "archiving previous deploys, pattern: '%s', %d files\n", pattern, len(files))
+		logf("archiving previous deploys, pattern: '%s', %d files\n", pattern, len(files))
 		backupDir := filepath.Join(deployServerDir, "backup")
 		for _, file := range files {
 			name := filepath.Base(file)
 			if name == ownExeName {
-				logf(ctx(), "skipping archiving of '%s' (myself)\n", name)
+				logf("skipping archiving of '%s' (myself)\n", name)
 				continue
 			}
 			backupPath := filepath.Join(backupDir, name)
@@ -408,7 +408,7 @@ func setupAndRun() {
 			u.PanicIfErr(err, "os.MkdirAll('%s') failed with %s\n", backupDir, err)
 			err = os.Rename(file, backupPath)
 			u.PanicIfErr(err, "os.Rename('%s', '%s') failed with %s\n", file, backupPath, err)
-			logf(ctx(), "moved '%s' to '%s'\n", file, backupPath)
+			logf("moved '%s' to '%s'\n", file, backupPath)
 		}
 	}
 }
@@ -421,5 +421,5 @@ func extractFrontend() {
 	outDir := ownPath + "-frontend"
 	err := u.UnzipDataToDir(frontendZipData, outDir)
 	must(err)
-	logf(ctx(), "extracted frontend zip files to '%s'\n", outDir)
+	logf("extracted frontend zip files to '%s'\n", outDir)
 }

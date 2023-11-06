@@ -21,7 +21,7 @@ var (
 func loadSecrets() {
 	var m map[string]string
 	if len(secretsEnv) > 0 {
-		logf(ctx(), "loading secrets from secretsEnv\n")
+		logf("loading secrets from secretsEnv\n")
 		m = u.ParseEnvMust(secretsEnv)
 	} else {
 		panicIf(!isWinOrMac(), "secretsEnv is empty and running on linux")
@@ -32,36 +32,36 @@ func loadSecrets() {
 	validateSecrets(m)
 	axiomApiToken = m["AXIOM_TOKEN"]
 	if len(axiomApiToken) != 41 {
-		logf(ctx(), "Axiom token missing or invalid length\n")
+		logf("Axiom token missing or invalid length\n")
 		axiomApiToken = ""
 	} else {
-		logf(ctx(), "Got axiom token\n")
+		logf("Got axiom token\n")
 	}
 	pirschClientSecret = m["PIRSCH_SECRET"]
 	if len(pirschClientSecret) != 64 {
-		logf(ctx(), "Pirsch secret missing or invalid length\n")
+		logf("Pirsch secret missing or invalid length\n")
 		pirschClientSecret = ""
 	} else {
-		logf(ctx(), "Got pirsch token\n")
+		logf("Got pirsch token\n")
 	}
 	secretGitHub = m["GITHUB_SECRET_PROD"]
 	if len(secretGitHub) != 40 {
-		logf(ctx(), "GitHub secret missing or invalid length\n")
+		logf("GitHub secret missing or invalid length\n")
 		secretGitHub = ""
 	} else {
-		logf(ctx(), "Got GitHub secret\n")
+		logf("Got GitHub secret\n")
 	}
 	secretGitHubLocal = m["GITHUB_SECRET_LOCAL"]
 	if len(secretGitHubLocal) != 40 {
-		logf(ctx(), "GitHub Local secret missing or invalid length\n")
+		logf("GitHub Local secret missing or invalid length\n")
 		secretGitHubLocal = ""
 	} else {
-		logf(ctx(), "Got GitHub local secret\n")
+		logf("Got GitHub local secret\n")
 	}
 
 	// when running locally don't do some things
 	if isWinOrMac() {
-		logf(ctx(), "running in dev, clearing axiom and pirsch\n")
+		logf("running in dev, clearing axiom and pirsch\n")
 		axiomApiToken = ""
 		pirschClientSecret = ""
 	}
@@ -111,7 +111,7 @@ func main() {
 	}
 	timeStart := time.Now()
 	defer func() {
-		logf(ctx(), "took: %s\n", time.Since(timeStart))
+		logf("took: %s\n", time.Since(timeStart))
 	}()
 
 	if flgExtractFrontend {

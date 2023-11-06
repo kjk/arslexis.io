@@ -69,10 +69,10 @@ func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
 	client := github.NewClient(oauthClient)
 	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
-		logf(ctx, "client.Users.Get() faled with '%s'\n", err)
+		logf("client.Users.Get() faled with '%s'\n", err)
 		return
 	}
-	logf(ctx, "logged in as GitHub user: %s\n", *user.Login)
+	logf("logged in as GitHub user: %s\n", *user.Login)
 	m := map[string]string{}
 	if user.Login != nil {
 		m["user"] = *user.Login
@@ -91,10 +91,10 @@ func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
 func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	logf(ctx, "handleGithubCallback: '%s'\n", r.URL)
+	logf("handleGithubCallback: '%s'\n", r.URL)
 	state := r.FormValue("state")
 	if !strings.HasPrefix(state, oauthSecretPrefix) {
-		logErrorf(ctx, "invalid oauth state, expected '%s*', got '%s'\n", oauthSecretPrefix, state)
+		logErrorf("invalid oauth state, expected '%s*', got '%s'\n", oauthSecretPrefix, state)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
@@ -102,14 +102,14 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 	token, err := oauthGitHubConf.Exchange(context.Background(), code)
 	if err != nil {
-		logErrorf(ctx, "oauthGoogleConf.Exchange() failed with '%s'\n", err)
+		logErrorf("oauthGoogleConf.Exchange() failed with '%s'\n", err)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	logf(ctx, "token: %#v", token)
+	logf("token: %#v", token)
 	ac := token.AccessToken
 	uri := "/github_success?access_token=" + ac
-	logf(ctx, "token: %#v\nuri: %s\n", token, uri)
+	logf("token: %#v\nuri: %s\n", token, uri)
 	http.Redirect(w, r, uri, http.StatusTemporaryRedirect)
 
 	// can't put in the background because that cancels ctx
@@ -118,12 +118,10 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 
 // /auth/ghlogin
 func handleLoginGitHub(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
 	// GitHub seems to completely ignore Redir, which makes testing locally hard
 	// TODO: generate temporary oathSecret
 	uri := oauthGitHubConf.AuthCodeURL(oauthSecretPrefix, oauth2.AccessTypeOnline)
-	logf(ctx, "handleLoginGitHub: to '%s'\n", uri)
+	logf("handleLoginGitHub: to '%s'\n", uri)
 	http.Redirect(w, r, uri, http.StatusTemporaryRedirect)
 }
 
@@ -212,7 +210,7 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 		m := httpsnoop.CaptureMetrics(http.HandlerFunc(mainHandler), w, r)
 		defer func() {
 			if p := recover(); p != nil {
-				logf(ctx(), "handlerWithMetrics: panicked with with %v\n", p)
+				logf("handlerWithMetrics: panicked with with %v\n", p)
 				errStr := fmt.Sprintf("Error: %v", p)
 				http.Error(w, errStr, http.StatusInternalServerError)
 				return
@@ -247,7 +245,7 @@ func runServerProd() {
 		fsys, err = u.NewMemoryFSForZipData(frontendZipData)
 		must(err)
 		sizeStr := u.FormatSize(int64(len(frontendZipData)))
-		logf(ctx(), "runServerProd(): will serve files from embedded zip of size '%v'\n", sizeStr)
+		logf("runServerProd(): will serve files from embedded zip of size '%v'\n", sizeStr)
 	} else {
 		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
 
@@ -258,7 +256,7 @@ func runServerProd() {
 	}
 
 	httpSrv := makeHTTPServer(nil, fsys)
-	logf(ctx(), "runServerProd(): starting on 'http://%s', dev: %v\n", httpSrv.Addr, isDev())
+	logf("runServerProd(): starting on 'http://%s', dev: %v\n", httpSrv.Addr, isDev())
 	if isWinOrMac() {
 		time.Sleep(time.Second * 2)
 		u.OpenBrowser("http://" + httpSrv.Addr)
@@ -291,7 +289,7 @@ func runServerDev() {
 	//closeHTTPLog := OpenHTTPLog("codeeval")
 	//defer closeHTTPLog()
 
-	logf(ctx(), "runServerDev(): starting on '%s', dev: %v\n", httpSrv.Addr, isDev())
+	logf("runServerDev(): starting on '%s', dev: %v\n", httpSrv.Addr, isDev())
 	if isWinOrMac() {
 		time.Sleep(time.Second * 2)
 		u.OpenBrowser("http://" + httpSrv.Addr)
@@ -309,9 +307,9 @@ func serverListenAndWait(httpSrv *http.Server) func() {
 			err = nil
 		}
 		if err == nil {
-			logf(ctx(), "HTTP server shutdown gracefully\n")
+			logf("HTTP server shutdown gracefully\n")
 		} else {
-			logf(ctx(), "httpSrv.ListenAndServe error '%s'\n", err)
+			logf("httpSrv.ListenAndServe error '%s'\n", err)
 		}
 		chServerClosed <- true
 	}()
@@ -322,14 +320,14 @@ func serverListenAndWait(httpSrv *http.Server) func() {
 		defer stop()
 		<-sctx.Done()
 
-		logf(ctx(), "Got one of the signals. Shutting down http server\n")
+		logf("Got one of the signals. Shutting down http server\n")
 		_ = httpSrv.Shutdown(ctx())
 		select {
 		case <-chServerClosed:
 			// do nothing
 		case <-time.After(time.Second * 5):
 			// timeout
-			logf(ctx(), "timed out trying to shut down http server")
+			logf("timed out trying to shut down http server")
 		}
 	}
 }

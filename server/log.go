@@ -1,28 +1,27 @@
 package main
 
 import (
-	"context"
 	"fmt"
 )
 
-func logf(ctx context.Context, s string, args ...interface{}) {
+func logf(s string, args ...interface{}) {
 	if len(args) > 0 {
 		s = fmt.Sprintf(s, args...)
 	}
 	fmt.Print(s)
 }
 
-func logErrorf(ctx context.Context, format string, args ...interface{}) {
+func logErrorf(format string, args ...interface{}) {
 	s := format
 	if len(args) > 0 {
 		s = fmt.Sprintf(format, args...)
 	}
 	cs := getCallstack(1)
-	logf(ctx, "Error: %s\n%s\n", s, cs)
+	logf("Error: %s\n%s\n", s, cs)
 }
 
 // return true if there was an error
-func logIfErrf(ctx context.Context, err error, msgAndArgs ...interface{}) bool {
+func logIfErrf(err error, msgAndArgs ...interface{}) bool {
 	if err == nil {
 		return false
 	}
@@ -37,10 +36,10 @@ func logIfErrf(ctx context.Context, err error, msgAndArgs ...interface{}) bool {
 
 	cs := getCallstack(1)
 	if msg != "" {
-		logf(ctx, "Error: %s\n%s\n%s\n", err, msg, cs)
+		logf("Error: %s\n%s\n%s\n", err, msg, cs)
 
 	} else {
-		logf(ctx, "Error: %s\n%s\n", err, cs)
+		logf("Error: %s\n%s\n", err, cs)
 	}
 	return true
 }

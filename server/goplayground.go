@@ -238,7 +238,7 @@ func handleGoPlayground(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
 	call := strings.TrimPrefix(uri, "/api/goplay/")
 	if call == "" {
-		logErrorf(ctx(), "/api/goplay/ has no name\n")
+		logErrorf("/api/goplay/ has no name\n")
 		return
 	}
 	switch call {

@@ -47,7 +47,7 @@ func pirschSendHit(r *http.Request) {
 	// TODO: use HitWithOptions and set better RemoteIP
 	err := pirschClient.Hit(r)
 	if err != nil {
-		logErrorf(ctx(), "pirschClient.Hit() failed with '%s'\n", err)
+		logErrorf("pirschClient.Hit() failed with '%s'\n", err)
 	}
 }
 
@@ -64,14 +64,14 @@ func pirschSendEvent(r *http.Request, name string, durMs int, meta map[string]st
 	// number so I'm sending it as milliseconds
 	err := pirschClient.Event(name, durMs, meta, r)
 	if err != nil {
-		logErrorf(ctx(), "pirschClient.Event() failed with '%s'\n", err)
+		logErrorf("pirschClient.Event() failed with '%s'\n", err)
 		return
 	}
 	s := "event: " + name
 	for k, v := range meta {
 		s = fmt.Sprintf("%s %s=%s", s, k, v)
 	}
-	logf(ctx(), "%s\n", s)
+	logf("%s\n", s)
 }
 
 // log event to pirsch analytics
@@ -82,7 +82,7 @@ func handleEvent(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
 	name := strings.TrimPrefix(uri, "/event/")
 	if name == "" {
-		logErrorf(ctx(), "/event/ has no name\n")
+		logErrorf("/event/ has no name\n")
 		http.NotFound(w, r)
 		return
 	}
@@ -105,7 +105,7 @@ func handleEvent(w http.ResponseWriter, r *http.Request) {
 		err := dec.Decode(&meta)
 		if err != nil {
 			// ignore but log
-			logErrorf(ctx(), "dec.Decode() failed with '%s'\n", err)
+			logErrorf("dec.Decode() failed with '%s'\n", err)
 		}
 		for k, v := range m {
 			vs := fmt.Sprintf("%s", v)

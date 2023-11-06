@@ -79,7 +79,7 @@ func fmtSmart(format string, args ...interface{}) string {
 }
 
 func serveInternalError(w http.ResponseWriter, r *http.Request, format string, args ...interface{}) {
-	logErrorf(r.Context(), u.AppendNewline(&format), args...)
+	logErrorf(u.AppendNewline(&format), args...)
 	errMsg := fmtSmart(format, args...)
 	v := map[string]interface{}{
 		"URL":      r.URL.String(),
@@ -101,7 +101,7 @@ func serveJSONWithCode(w http.ResponseWriter, r *http.Request, code int, v inter
 	}
 	writeHeader(w, code, jsMimeType)
 	_, err = w.Write(d)
-	logIfErrf(r.Context(), err)
+	logIfErrf(err)
 }
 
 func serveJSONOK(w http.ResponseWriter, r *http.Request, v interface{}) {
@@ -109,10 +109,9 @@ func serveJSONOK(w http.ResponseWriter, r *http.Request, v interface{}) {
 }
 
 func serveJSON(w http.ResponseWriter, r *http.Request, code int, v interface{}) {
-	ctx := r.Context()
 	d, err := json.Marshal(v)
 	if err != nil {
-		logf(ctx, "json.Marshal() failed with '%s'", err)
+		logf("json.Marshal() failed with '%s'", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "json.Marshal() failed with '%s'", err)
 		return
