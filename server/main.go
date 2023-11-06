@@ -79,7 +79,6 @@ func main() {
 	var (
 		flgRunProd         bool
 		flgCi              bool
-		flgWc              bool
 		flgDeployHetzner   bool
 		flgSetupAndRun     bool
 		flgBuildLocalProd  bool
@@ -93,7 +92,6 @@ func main() {
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.BoolVar(&flgExtractFrontend, "extract-frontend", false, "extract frontend files embedded as zip in the binary")
 		flag.BoolVar(&flgCi, "ci", false, "true if needs to tell we're running under ci (github actions)")
-		flag.BoolVar(&flgWc, "wc", false, "count lines")
 		flag.Parse()
 	}
 
@@ -120,11 +118,6 @@ func main() {
 
 	if flgExtractFrontend {
 		extractFrontend()
-		return
-	}
-
-	if flgWc {
-		doLineCount()
 		return
 	}
 
