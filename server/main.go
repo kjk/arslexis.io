@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/kjk/common/u"
@@ -30,34 +31,23 @@ func loadSecrets() {
 		m = u.ParseEnvMust(d)
 	}
 	validateSecrets(m)
-	axiomApiToken = m["AXIOM_TOKEN"]
-	if len(axiomApiToken) != 41 {
-		logf("Axiom token missing or invalid length\n")
-		axiomApiToken = ""
-	} else {
-		logf("Got axiom token\n")
+	getEnv := func(key string, val *string, minLen int) {
+		v := strings.TrimSpace(m[key])
+		if len(v) < minLen {
+			logf("missing %s, len: %d, wanted: %d\n", key, len(v), minLen)
+			return
+		}
+		*val = v
+		// logf("Got %s, '%s'\n", key, v)
+		logf("Got %s\n", key)
 	}
-	pirschClientSecret = m["PIRSCH_SECRET"]
-	if len(pirschClientSecret) != 64 {
-		logf("Pirsch secret missing or invalid length\n")
-		pirschClientSecret = ""
-	} else {
-		logf("Got pirsch token\n")
-	}
-	secretGitHub = m["GITHUB_SECRET_PROD"]
-	if len(secretGitHub) != 40 {
-		logf("GitHub secret missing or invalid length\n")
-		secretGitHub = ""
-	} else {
-		logf("Got GitHub secret\n")
-	}
-	secretGitHubLocal = m["GITHUB_SECRET_LOCAL"]
-	if len(secretGitHubLocal) != 40 {
-		logf("GitHub Local secret missing or invalid length\n")
-		secretGitHubLocal = ""
-	} else {
-		logf("Got GitHub local secret\n")
-	}
+
+	getEnv("AXIOM_TOKEN", &axiomApiToken, 40)
+	getEnv("PIRSCH_SECRET", &pirschClientSecret, 64)
+	getEnv("GITHUB_SECRET_PROD", &secretGitHub, 40)
+	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40)
+	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4)
+	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32)
 
 	// when running locally don't do some things
 	if isWinOrMac() {
@@ -68,20 +58,20 @@ func loadSecrets() {
 }
 
 var (
-	flgRunDev bool
+	flgRunDev  bool
+	flgRunProd bool
 )
 
+// TODO: edit usage
 func isDev() bool {
 	return flgRunDev
 }
 
 func main() {
 	var (
-		flgRunProd         bool
-		flgDeployHetzner   bool
-		flgSetupAndRun     bool
-		flgBuildLocalProd  bool
-		flgExtractFrontend bool
+		flgDeployHetzner  bool
+		flgSetupAndRun    bool
+		flgBuildLocalProd bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
@@ -89,7 +79,6 @@ func main() {
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
-		flag.BoolVar(&flgExtractFrontend, "extract-frontend", false, "extract frontend files embedded as zip in the binary")
 		flag.Parse()
 	}
 
@@ -113,11 +102,6 @@ func main() {
 	defer func() {
 		logf("took: %s\n", time.Since(timeStart))
 	}()
-
-	if flgExtractFrontend {
-		extractFrontend()
-		return
-	}
 
 	if flgBuildLocalProd {
 		buildLocalProd()

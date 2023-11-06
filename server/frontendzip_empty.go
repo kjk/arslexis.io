@@ -3,5 +3,3 @@
 package main
 
 var frontendZipData []byte
-
-var secretsEnv []byte

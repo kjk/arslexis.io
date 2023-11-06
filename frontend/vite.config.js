@@ -2,6 +2,7 @@ import copy from "rollup-plugin-copy";
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,7 +12,7 @@ export default defineConfig({
     // the dir is emptied
     emptyOutDir: false,
     sourcemap: true,
-    outDir: resolve("dist"),
+    outDir: resolve("..", "server", "dist"),
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
       input: {
@@ -93,5 +94,11 @@ export default defineConfig({
     // must be same as proxyURLStr in runServerDev
     port: 3025,
   },
-  plugins: [svelte()],
+  plugins: [
+    svelte(),
+    visualizer({
+      filename: `../server/dist/bundlestats.html`,
+      sourcemap: true,
+    }),
+  ],
 });

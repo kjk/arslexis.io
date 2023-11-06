@@ -20,8 +20,8 @@ var (
 	exeBaseName      = "onlinetool"
 	domain           = "onlinetool.io"
 	httpPort         = 9301
-	wantedSecrets    = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL"}
-	frontEndBuildDir = filepath.Join("frontend", "dist")
+	wantedSecrets    = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
+	frontEndBuildDir = filepath.Join("server", "dist")
 )
 
 // stuff that is derived from the above
@@ -152,9 +152,21 @@ func validateSecrets(m map[string]string) {
 	}
 }
 
+func createEmptyFile(path string) {
+	logf("createEmptyFile: '%s'\n", path)
+	must(os.MkdirAll(filepath.Dir(path), 0755))
+	os.Remove(path)
+	err := os.WriteFile(path, []byte{}, 0644)
+	must(err)
+}
+
+func emptyFrontEndBuildDir() {
+	os.RemoveAll(frontEndBuildDir)
+	createEmptyFile(path.Join(frontEndBuildDir, "gitkeep.txt"))
+}
 func rebuildFrontend() {
 	// assuming this is not deployment: re-build the frontend
-	must(os.RemoveAll(frontEndBuildDir))
+	emptyFrontEndBuildDir()
 	logf("deleted frontend dist dir '%s'\n", frontEndBuildDir)
 	if u.IsMac() {
 		u.RunLoggedInDirMust("frontend", "bun", "install")
@@ -411,15 +423,4 @@ func setupAndRun() {
 			logf("moved '%s' to '%s'\n", file, backupPath)
 		}
 	}
-}
-
-// for debugging it might useful to take a look at frontend
-// files, so allow extracting them to filesystem
-func extractFrontend() {
-	panicIf(len(frontendZipData) == 0, "frontendZipData is empty\n")
-	ownPath := os.Args[0]
-	outDir := ownPath + "-frontend"
-	err := u.UnzipDataToDir(frontendZipData, outDir)
-	must(err)
-	logf("extracted frontend zip files to '%s'\n", outDir)
 }

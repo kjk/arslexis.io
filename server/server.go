@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"embed"
 	"fmt"
 	"io/fs"
 	"net/http"
@@ -23,6 +24,16 @@ import (
 	"github.com/kjk/common/u"
 	"golang.org/x/exp/slices"
 	"golang.org/x/oauth2"
+)
+
+var (
+	//go:embed dist/*
+	wwwFS embed.FS
+	//go:embed secrets.env
+	secretsEnv []byte
+
+	serverStartTime = time.Now()
+	fsys            fs.FS
 )
 
 var (
