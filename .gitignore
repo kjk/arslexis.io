@@ -15,7 +15,6 @@
 # vendor/
 
 frontend/node_modules/
-frontend/dist/
 package-lock.json
 yarn.lock
 yarn-error.log
@@ -24,3 +23,4 @@ bun.lockb
 onlinetool-*
 node_modules
 dist/
+server/secrets.env
