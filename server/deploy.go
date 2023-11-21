@@ -36,6 +36,8 @@ var (
 	deployServerPrivateKeyPath  = "~/.ssh/hetzner_ed"
 	deployServerCaddyConfigPath = "/etc/caddy/Caddyfile"
 
+	GitCommitHash string
+
 	caddyConfigDelim = "# ---- " + domain
 	caddyConfig      = fmt.Sprintf(`%s {
 	reverse_proxy localhost:%v

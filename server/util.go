@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
@@ -16,8 +15,11 @@ import (
 )
 
 var (
+	f          = fmt.Sprintf
+	e          = fmt.Errorf
 	must       = u.Must
 	panicIf    = u.PanicIf
+	panicIfErr = u.PanicIfErr
 	isWinOrMac = u.IsWinOrMac
 	isLinux    = u.IsLinux
 	formatSize = u.FormatSize
@@ -78,50 +80,6 @@ func fmtSmart(format string, args ...interface{}) string {
 	return fmt.Sprintf(format, args...)
 }
 
-func serveInternalError(w http.ResponseWriter, r *http.Request, format string, args ...interface{}) {
-	logErrorf(u.AppendNewline(&format), args...)
-	errMsg := fmtSmart(format, args...)
-	v := map[string]interface{}{
-		"URL":      r.URL.String(),
-		"ErrorMsg": errMsg,
-	}
-	serveJSONWithCode(w, r, http.StatusInternalServerError, v)
-}
-
-func writeHeader(w http.ResponseWriter, code int, contentType string) {
-	w.Header().Set("Content-Type", contentType+"; charset=utf-8")
-	w.WriteHeader(code)
-}
-
-func serveJSONWithCode(w http.ResponseWriter, r *http.Request, code int, v interface{}) {
-	d, err := json.Marshal(v)
-	if err != nil {
-		serveInternalError(w, r, "json.Marshal() failed with '%s'", err)
-		return
-	}
-	writeHeader(w, code, jsMimeType)
-	_, err = w.Write(d)
-	logIfErrf(err)
-}
-
-func serveJSONOK(w http.ResponseWriter, r *http.Request, v interface{}) {
-	serveJSONWithCode(w, r, http.StatusOK, v)
-}
-
-func serveJSON(w http.ResponseWriter, r *http.Request, code int, v interface{}) {
-	d, err := json.Marshal(v)
-	if err != nil {
-		logf("json.Marshal() failed with '%s'", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "json.Marshal() failed with '%s'", err)
-		return
-	}
-
-	w.Header().Set("content-type", "text/json")
-	w.WriteHeader(code)
-	_, _ = w.Write(d)
-}
-
 func startLoggedInDir(dir string, exe string, args ...string) (func(), error) {
 	cmd := exec.Command(exe, args...)
 	cmd.Dir = dir
@@ -134,4 +92,15 @@ func startLoggedInDir(dir string, exe string, args ...string) (func(), error) {
 	return func() {
 		cmd.Process.Kill()
 	}, nil
+}
+
+func push[S ~[]E, E any](s *S, els ...E) {
+	*s = append(*s, els...)
+}
+
+func sliceLimit[S ~[]E, E any](s S, max int) S {
+	if len(s) > max {
+		return s[:max]
+	}
+	return s
 }

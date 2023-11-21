@@ -18,7 +18,6 @@ import (
 
 	"github.com/felixge/httpsnoop"
 	hutil "github.com/kjk/common/httputil"
-	"github.com/kjk/common/server"
 
 	"github.com/google/go-github/github"
 	"github.com/kjk/common/u"
@@ -214,10 +213,6 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 	}
 
 	handlerWithMetrics := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if server.TryServeBadClient(w, r, nil) {
-			return
-		}
-
 		m := httpsnoop.CaptureMetrics(http.HandlerFunc(mainHandler), w, r)
 		defer func() {
 			if p := recover(); p != nil {

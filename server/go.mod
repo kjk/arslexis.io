@@ -5,12 +5,14 @@ go 1.20
 require (
 	github.com/felixge/httpsnoop v1.0.3
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/kjk/common v0.0.0-20231002214336-9790127da65d
+	github.com/kjk/common v0.0.0-20231022204658-3439f1c9607f
 	github.com/kjk/minioutil v0.0.0-20230422073834-96945ac7e481
 	github.com/mailgun/mailgun-go/v4 v4.11.1
 	github.com/melbahja/goph v1.4.0
+	github.com/mileusna/useragent v1.3.4
 	github.com/pirsch-analytics/pirsch-go-sdk v1.9.0
 	github.com/pkg/sftp v1.13.6
+	github.com/rodaine/table v1.1.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	golang.org/x/oauth2 v0.12.0
 )

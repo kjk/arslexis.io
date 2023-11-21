@@ -21,7 +21,7 @@ var (
 // is parallel to this repo
 func loadSecrets() {
 	var m map[string]string
-	if len(secretsEnv) > 0 {
+	if len(secretsEnv) > 20 {
 		logf("loading secrets from secretsEnv\n")
 		m = u.ParseEnvMust(secretsEnv)
 	} else {
