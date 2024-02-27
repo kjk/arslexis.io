@@ -272,7 +272,7 @@ func runServerProd() {
 }
 
 func runServerDev() {
-	if u.IsMac() {
+	if hasBun() {
 		u.RunLoggedInDir("frontend", "bun", "install")
 		closeDev, err := startLoggedInDir("frontend", "bun", "run", "dev")
 		must(err)

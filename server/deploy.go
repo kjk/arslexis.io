@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kjk/common/u"
@@ -166,11 +167,25 @@ func emptyFrontEndBuildDir() {
 	os.RemoveAll(frontEndBuildDir)
 	createEmptyFile(path.Join(frontEndBuildDir, "gitkeep.txt"))
 }
+
+var foundBund = false
+var once sync.Once
+
+func hasBun() bool {
+	once.Do(func() {
+		_, err := exec.LookPath("bun")
+		if err == nil {
+			foundBund = true
+		}
+	})
+	return foundBund
+}
+
 func rebuildFrontend() {
 	// assuming this is not deployment: re-build the frontend
 	emptyFrontEndBuildDir()
 	logf("deleted frontend dist dir '%s'\n", frontEndBuildDir)
-	if u.IsMac() {
+	if hasBun() {
 		u.RunLoggedInDirMust("frontend", "bun", "install")
 		u.RunLoggedInDirMust("frontend", "bun", "run", "build")
 	} else if u.IsWindows() {
