@@ -136,6 +136,12 @@ func main() {
 		return
 	}
 
+	if flgSetupAndRun {
+		defer measureDuration()()
+		setupAndRun()
+		return
+	}
+
 	n := 0
 	if flgRunDev {
 		n++
@@ -153,7 +159,6 @@ func main() {
 	panicIf(n > 1, "can only use one of: -run-dev, -run-prod, -run-prod-local")
 
 	loadSecrets()
-
 	setGitHubAuth()
 
 	if flgRunDev {
@@ -166,8 +171,8 @@ func main() {
 		return
 	}
 
-	if flgSetupAndRun {
-		setupAndRun()
+	if flgRunProdLocal {
+		runProdLocal()
 		return
 	}
 

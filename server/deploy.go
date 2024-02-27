@@ -27,6 +27,7 @@ var (
 // stuff that is derived from the above
 var (
 	secretsSrcPath  = filepath.Join("..", "secrets", exeBaseName+".env")
+	secretsPath     = filepath.Join("server", "secrets.env")
 	frontendZipName = filepath.Join("server", "frontend.zip")
 
 	tmuxSessionName             = exeBaseName
@@ -185,28 +186,27 @@ func rebuildFrontend() {
 	}
 }
 
+func copySecrets() {
+	// copy secrets from ../secrets/${me}.env to server/secrets.env
+	// so that it's included in the binary as secretsEnv
+	d, err := os.ReadFile(secretsSrcPath)
+	must(err)
+	m := u.ParseEnvMust(d)
+	validateSecrets(m, wantedProdSecrets)
+	err = os.WriteFile(secretsPath, d, 0644)
+	must(err)
+}
+
 func buildForProd(forLinux bool) string {
 	// re-build the frontend. remove build process artifacts
 	// to keep things clean
-	secretsPath := filepath.Join("server", "secrets.env")
-	os.Remove(secretsPath)
-	defer os.Remove(secretsPath)
+	copySecrets()
+	defer createEmptyFile(secretsPath) // empty secrets after
+	rebuildFrontend()
+	defer emptyFrontEndBuildDir()
+
 	os.Remove(frontendZipName)
 	defer os.Remove(frontendZipName)
-
-	// copy secrets from ../secrets/${me}.env to server/secrets.env
-	// so that it's included in the binary as secretsEnv
-	{
-		d, err := os.ReadFile(secretsSrcPath)
-		must(err)
-		m := u.ParseEnvMust(d)
-		validateSecrets(m, wantedProdSecrets)
-		err = os.WriteFile(secretsPath, d, 0644)
-		must(err)
-	}
-
-	rebuildFrontend()
-	defer os.RemoveAll(frontEndBuildDir)
 
 	// get date and hash of current checkin
 	var exeName string

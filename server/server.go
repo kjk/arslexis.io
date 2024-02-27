@@ -10,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strings"
@@ -242,32 +243,38 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 	return httpSrv
 }
 
-func runServerProd() {
-	var fsys fs.FS
-	fromZip := len(frontendZipData) > 0
-	if fromZip {
-		var err error
-		fsys, err = u.NewMemoryFSForZipData(frontendZipData)
-		must(err)
-		sizeStr := u.FormatSize(int64(len(frontendZipData)))
-		logf("runServerProd(): will serve files from embedded zip of size '%v'\n", sizeStr)
-	} else {
-		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
+func serverListenAndWait(httpSrv *http.Server) func() {
+	chServerClosed := make(chan bool, 1)
+	go func() {
+		err := httpSrv.ListenAndServe()
+		// mute error caused by Shutdown()
+		if err == http.ErrServerClosed {
+			err = nil
+		}
+		if err == nil {
+			logf("HTTP server shutdown gracefully\n")
+		} else {
+			logf("httpSrv.ListenAndServe error '%s'\n", err)
+		}
+		chServerClosed <- true
+	}()
 
-		rebuildFrontend()
-		// assuming this is not deployment: re-build the frontend
-		panicIf(!u.DirExists(frontEndBuildDir), "dir '%s' doesn't exist", frontEndBuildDir)
-		fsys = os.DirFS(frontEndBuildDir)
-	}
+	return func() {
+		// Ctrl-C sends SIGINT
+		sctx, stop := signal.NotifyContext(ctx(), os.Interrupt /*SIGINT*/, os.Kill /* SIGKILL */, syscall.SIGTERM)
+		defer stop()
+		<-sctx.Done()
 
-	httpSrv := makeHTTPServer(nil, fsys)
-	logf("runServerProd(): starting on 'http://%s', dev: %v\n", httpSrv.Addr, isDev())
-	if isWinOrMac() {
-		time.Sleep(time.Second * 2)
-		u.OpenBrowser("http://" + httpSrv.Addr)
+		logf("Got one of the signals. Shutting down http server\n")
+		_ = httpSrv.Shutdown(ctx())
+		select {
+		case <-chServerClosed:
+			// do nothing
+		case <-time.After(time.Second * 5):
+			// timeout
+			logf("timed out trying to shut down http server")
+		}
 	}
-	waitFn := serverListenAndWait(httpSrv)
-	waitFn()
 }
 
 func runServerDev() {
@@ -303,36 +310,49 @@ func runServerDev() {
 	waitFn()
 }
 
-func serverListenAndWait(httpSrv *http.Server) func() {
-	chServerClosed := make(chan bool, 1)
-	go func() {
-		err := httpSrv.ListenAndServe()
-		// mute error caused by Shutdown()
-		if err == http.ErrServerClosed {
-			err = nil
-		}
-		if err == nil {
-			logf("HTTP server shutdown gracefully\n")
-		} else {
-			logf("httpSrv.ListenAndServe error '%s'\n", err)
-		}
-		chServerClosed <- true
-	}()
+func runServerProd() {
+	var fsys fs.FS
+	fromZip := len(frontendZipData) > 0
+	if fromZip {
+		var err error
+		fsys, err = u.NewMemoryFSForZipData(frontendZipData)
+		must(err)
+		sizeStr := u.FormatSize(int64(len(frontendZipData)))
+		logf("runServerProd(): will serve files from embedded zip of size '%v'\n", sizeStr)
+	} else {
+		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
 
-	return func() {
-		// Ctrl-C sends SIGINT
-		sctx, stop := signal.NotifyContext(ctx(), os.Interrupt /*SIGINT*/, os.Kill /* SIGKILL */, syscall.SIGTERM)
-		defer stop()
-		<-sctx.Done()
-
-		logf("Got one of the signals. Shutting down http server\n")
-		_ = httpSrv.Shutdown(ctx())
-		select {
-		case <-chServerClosed:
-			// do nothing
-		case <-time.After(time.Second * 5):
-			// timeout
-			logf("timed out trying to shut down http server")
-		}
+		rebuildFrontend()
+		// assuming this is not deployment: re-build the frontend
+		panicIf(!u.DirExists(frontEndBuildDir), "dir '%s' doesn't exist", frontEndBuildDir)
+		fsys = os.DirFS(frontEndBuildDir)
 	}
+
+	httpSrv := makeHTTPServer(nil, fsys)
+	logf("runServerProd(): starting on 'http://%s', dev: %v\n", httpSrv.Addr, isDev())
+	if isWinOrMac() {
+		time.Sleep(time.Second * 2)
+		u.OpenBrowser("http://" + httpSrv.Addr)
+	}
+	waitFn := serverListenAndWait(httpSrv)
+	waitFn()
+}
+
+func runProdLocal() {
+	deleteOldBuilds()
+	copySecrets()
+	rebuildFrontend()
+	cmd := exec.Command("go", "run", "./server", "-run-prod")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	logf("starting '%s'\n", cmd.String())
+
+	err := cmd.Start()
+	must(err)
+
+	waitForSigIntOrKill()
+	createEmptyFile(secretsPath)
+	emptyFrontEndBuildDir()
+	cmd.Process.Kill()
+	logf("leaving from flgRunProdLocal\n")
 }

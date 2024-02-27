@@ -7,9 +7,11 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/kjk/common/u"
 )
@@ -103,4 +105,11 @@ func sliceLimit[S ~[]E, E any](s S, max int) S {
 		return s[:max]
 	}
 	return s
+}
+
+func waitForSigIntOrKill() {
+	// Ctrl-C sends SIGINT
+	sctx, stop := signal.NotifyContext(ctx(), os.Interrupt /*SIGINT*/, os.Kill /* SIGKILL */, syscall.SIGTERM)
+	defer stop()
+	<-sctx.Done()
 }
