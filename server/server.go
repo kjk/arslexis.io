@@ -31,8 +31,7 @@ var (
 	//go:embed secrets.env
 	secretsEnv []byte
 
-	serverStartTime = time.Now()
-	fsys            fs.FS
+	fsys fs.FS
 )
 
 var (
@@ -58,16 +57,16 @@ var (
 	oauthSecretPrefix = "5576867039-"
 )
 
+// we need different oauth callbacks for dev and production so we registered 2 apps:
+// https://github.com/settings/applications/1159176 : onlinetool.io Local
 func setGitHubAuth() {
 	oauthGitHubConf.ClientID = "389af84bdce4b478ad7b"
 	oauthGitHubConf.ClientSecret = secretGitHub
-}
-
-// we need different oauth callbacks for dev and production so we registered 2 apps:
-// https://github.com/settings/applications/1159176 : onlinetool.io Local
-func setGitHubAuthDev() {
-	oauthGitHubConf.ClientID = "77ba1cbe7c0eff7c462b"
-	oauthGitHubConf.ClientSecret = secretGitHubLocal
+	// TODO: is there a better check for running locally?
+	if flgRunDev || flgRunProdLocal {
+		oauthGitHubConf.ClientID = "77ba1cbe7c0eff7c462b"
+		oauthGitHubConf.ClientSecret = secretGitHubLocal
+	}
 }
 
 var (

@@ -21,50 +21,86 @@ var (
 // is parallel to this repo
 func loadSecrets() {
 	var m map[string]string
-	if len(secretsEnv) > 20 {
-		logf("loading secrets from secretsEnv\n")
-		m = u.ParseEnvMust(secretsEnv)
+	var err error
+	d := secretsEnv
+	if isDev() {
+		logf("loadSecrets(): loading dev secrets from secretsDev\n")
+		d = []byte(secretsDev)
 	} else {
-		panicIf(!isWinOrMac(), "secretsEnv is empty and running on linux")
-		d, err := os.ReadFile(secretsSrcPath)
-		must(err)
-		m = u.ParseEnvMust(d)
+		if flgRunProdLocal {
+			logf("loadSecrets(): loading prod secrets from '%s'\n", secretsSrcPath)
+			d, err = os.ReadFile(secretsSrcPath)
+			must(err)
+		} else {
+			// using default secretsEnv
+			panicIf(len(secretsEnv) == 0, "-run-prod and secretsEnv is empty")
+			logf("loadSecrets(): loading prod secrets from secretsEnv\n")
+		}
 	}
-	validateSecrets(m)
-	getEnv := func(key string, val *string, minLen int) {
+	m = u.ParseEnvMust(d)
+
+	getEnv := func(key string, val *string, minLen int, must bool) {
 		v := strings.TrimSpace(m[key])
 		if len(v) < minLen {
+			panicIf(must, "missing %s, len: %d, wanted: %d\n", key, len(v), minLen)
 			logf("missing %s, len: %d, wanted: %d\n", key, len(v), minLen)
 			return
 		}
 		*val = v
-		// logf("Got %s, '%s'\n", key, v)
-		logf("Got %s\n", key)
+		if isDev() {
+			logf("Got %s='%s'\n", key, v)
+		} else {
+			logf("Got %s\n", key)
+		}
 	}
+	// those we want in prod and dev
+	must := true
+	// getEnv("COOKIE_AUTH_KEY", &cookieAuthKeyHex, 64, must)
+	// getEnv("COOKIE_ENCR_KEY", &cookieEncrKeyHex, 64, must)
 
-	getEnv("AXIOM_TOKEN", &axiomApiToken, 40)
-	getEnv("PIRSCH_SECRET", &pirschClientSecret, 64)
-	getEnv("GITHUB_SECRET_PROD", &secretGitHub, 40)
-	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40)
-	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4)
-	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32)
+	// those are only required in prod
+	must = isProd()
+	getEnv("AXIOM_TOKEN", &axiomApiToken, 40, must)
+	getEnv("PIRSCH_SECRET", &pirschClientSecret, 64, must)
+	getEnv("GITHUB_SECRET_PROD", &secretGitHub, 40, must)
+	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
+	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
+	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
 
-	// when running locally don't do some things
-	if isWinOrMac() {
-		logf("running in dev, clearing axiom and pirsch\n")
-		axiomApiToken = ""
-		pirschClientSecret = ""
+	// when running locally we shouldn't send axiom / pirsch
+	if isDev() {
+		panicIf(axiomApiToken != "")
+		panicIf(pirschClientSecret != "")
 	}
 }
 
 var (
-	flgRunDev  bool
-	flgRunProd bool
+	flgRunDev       bool
+	flgRunProd      bool
+	flgRunProdLocal bool
 )
 
 // TODO: edit usage
 func isDev() bool {
 	return flgRunDev
+}
+
+// TODO: edit usage, should we only use isDeployment() ?
+func isProd() bool {
+	return flgRunProd
+}
+
+// return true is running deployment i.e. production on linux server
+func isDeployment() bool {
+	// TODO: a stricter check but not sure what. needs to di
+	return flgRunProd
+}
+
+func measureDuration() func() {
+	timeStart := time.Now()
+	return func() {
+		logf("took %s\n", time.Since(timeStart))
+	}
 }
 
 func main() {
@@ -76,18 +112,49 @@ func main() {
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
+		flag.BoolVar(&flgRunProdLocal, "run-prod-local", false, "run server in production but locally")
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.Parse()
 	}
 
+	if GitCommitHash != "" {
+		uriBase := "https://github.com/kjk/sendmeafile/commit/"
+		logf("onlinetool.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
+	}
+
+	if flgBuildLocalProd {
+		defer measureDuration()()
+		buildLocalProd()
+		return
+	}
+
+	if flgDeployHetzner {
+		defer measureDuration()()
+		deployToHetzner()
+		return
+	}
+
+	n := 0
+	if flgRunDev {
+		n++
+	}
+	if flgRunProdLocal {
+		n++
+	}
+	if flgRunProd {
+		n++
+	}
+	if n == 0 {
+		flag.Usage()
+		return
+	}
+	panicIf(n > 1, "can only use one of: -run-dev, -run-prod, -run-prod-local")
+
 	loadSecrets()
 
 	setGitHubAuth()
-	if isWinOrMac() {
-		setGitHubAuthDev()
-	}
 
 	if flgRunDev {
 		runServerDev()
@@ -96,20 +163,6 @@ func main() {
 
 	if flgRunProd {
 		runServerProd()
-		return
-	}
-	timeStart := time.Now()
-	defer func() {
-		logf("took: %s\n", time.Since(timeStart))
-	}()
-
-	if flgBuildLocalProd {
-		buildLocalProd()
-		return
-	}
-
-	if flgDeployHetzner {
-		deployToHetzner()
 		return
 	}
 

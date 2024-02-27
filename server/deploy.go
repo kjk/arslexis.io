@@ -8,7 +8,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/kjk/common/u"
@@ -18,11 +17,11 @@ import (
 
 // variables to customize
 var (
-	exeBaseName      = "onlinetool"
-	domain           = "onlinetool.io"
-	httpPort         = 9301
-	wantedSecrets    = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
-	frontEndBuildDir = filepath.Join("server", "dist")
+	exeBaseName       = "onlinetool"
+	domain            = "onlinetool.io"
+	httpPort          = 9301
+	wantedProdSecrets = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
+	frontEndBuildDir  = filepath.Join("server", "dist")
 )
 
 // stuff that is derived from the above
@@ -148,7 +147,7 @@ func deleteOldBuilds() {
 	}
 }
 
-func validateSecrets(m map[string]string) {
+func validateSecrets(m map[string]string, wantedSecrets []string) {
 	for _, k := range wantedSecrets {
 		_, ok := m[k]
 		panicIf(!ok, "didn't find secret '%s' in '%s'", k)
@@ -168,17 +167,9 @@ func emptyFrontEndBuildDir() {
 	createEmptyFile(path.Join(frontEndBuildDir, "gitkeep.txt"))
 }
 
-var foundBund = false
-var once sync.Once
-
 func hasBun() bool {
-	once.Do(func() {
-		_, err := exec.LookPath("bun")
-		if err == nil {
-			foundBund = true
-		}
-	})
-	return foundBund
+	_, err := exec.LookPath("bun")
+	return err == nil
 }
 
 func rebuildFrontend() {
@@ -209,7 +200,7 @@ func buildForProd(forLinux bool) string {
 		d, err := os.ReadFile(secretsSrcPath)
 		must(err)
 		m := u.ParseEnvMust(d)
-		validateSecrets(m)
+		validateSecrets(m, wantedProdSecrets)
 		err = os.WriteFile(secretsPath, d, 0644)
 		must(err)
 	}
