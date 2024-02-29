@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"os"
 	"strings"
 	"time"
 
@@ -21,21 +20,14 @@ var (
 // is parallel to this repo
 func loadSecrets() {
 	var m map[string]string
-	var err error
 	d := secretsEnv
 	if isDev() {
 		logf("loadSecrets(): loading dev secrets from secretsDev\n")
 		d = []byte(secretsDev)
 	} else {
-		if flgRunProdLocal {
-			logf("loadSecrets(): loading prod secrets from '%s'\n", secretsSrcPath)
-			d, err = os.ReadFile(secretsSrcPath)
-			must(err)
-		} else {
-			// using default secretsEnv
-			panicIf(len(secretsEnv) == 0, "-run-prod and secretsEnv is empty")
-			logf("loadSecrets(): loading prod secrets from secretsEnv\n")
-		}
+		// using default secretsEnv
+		panicIf(len(secretsEnv) == 0, "-run-prod or -run-prod-local and secretsEnv is empty")
+		logf("loadSecrets(): loading prod secrets from secretsEnv\n")
 	}
 	m = u.ParseEnvMust(d)
 
@@ -59,13 +51,14 @@ func loadSecrets() {
 	// getEnv("COOKIE_ENCR_KEY", &cookieEncrKeyHex, 64, must)
 
 	// those are only required in prod
-	must = isProd()
-	getEnv("AXIOM_TOKEN", &axiomApiToken, 40, must)
-	getEnv("PIRSCH_SECRET", &pirschClientSecret, 64, must)
-	getEnv("GITHUB_SECRET_PROD", &secretGitHub, 40, must)
-	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
-	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
-	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
+	if !isDev() {
+		getEnv("AXIOM_TOKEN", &axiomApiToken, 40, must)
+		getEnv("PIRSCH_SECRET", &pirschClientSecret, 64, must)
+		getEnv("GITHUB_SECRET_PROD", &secretGitHub, 40, must)
+		getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
+		getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
+		getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
+	}
 
 	// when running locally we shouldn't send axiom / pirsch
 	if isDev() {
@@ -75,26 +68,13 @@ func loadSecrets() {
 }
 
 var (
-	flgRunDev  bool
-	flgRunProd bool
-	// TODO: this is not actually relevant
+	flgRunDev       bool
+	flgRunProd      bool
 	flgRunProdLocal bool
 )
 
-// TODO: edit usage
 func isDev() bool {
 	return flgRunDev
-}
-
-// TODO: edit usage, should we only use isDeployment() ?
-func isProd() bool {
-	return flgRunProd
-}
-
-// return true is running deployment i.e. production on linux server
-func isDeployment() bool {
-	// TODO: a stricter check but not sure what. needs to di
-	return flgRunProd
 }
 
 func measureDuration() func() {
@@ -106,17 +86,21 @@ func measureDuration() func() {
 
 func main() {
 	var (
-		flgDeployHetzner  bool
-		flgSetupAndRun    bool
-		flgBuildLocalProd bool
+		flgDeployHetzner     bool
+		flgSetupAndRun       bool
+		flgBuildLocalProd    bool
+		flgRunProdLocalStart bool
+		flgUpdateGoDeps      bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
-		flag.BoolVar(&flgRunProdLocal, "run-prod-local", false, "run server in production but locally")
+		flag.BoolVar(&flgRunProdLocalStart, "run-prod-local", false, "run server in production but locally")
+		flag.BoolVar(&flgRunProdLocal, "run-prod-local-2", false, "for internal use")
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
+		flag.BoolVar(&flgUpdateGoDeps, "update-go-deps", false, "update go dependencies")
 		flag.Parse()
 	}
 
@@ -125,9 +109,16 @@ func main() {
 		logf("onlinetool.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
 	}
 
+	if flgUpdateGoDeps {
+		defer measureDuration()()
+		updateGoDeps(true)
+		return
+	}
+
 	if flgBuildLocalProd {
 		defer measureDuration()()
-		buildLocalProd()
+		buildForProdLocal()
+		emptyFrontEndBuildDir()
 		return
 	}
 
@@ -140,6 +131,11 @@ func main() {
 	if flgSetupAndRun {
 		defer measureDuration()()
 		setupAndRun()
+		return
+	}
+
+	if flgRunProdLocalStart {
+		runServerProdLocalStart()
 		return
 	}
 
@@ -173,7 +169,7 @@ func main() {
 	}
 
 	if flgRunProdLocal {
-		runProdLocal()
+		runServerProdLocal()
 		return
 	}
 

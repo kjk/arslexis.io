@@ -133,17 +133,17 @@ func validateSecrets(m map[string]string, wantedSecrets []string) {
 	}
 }
 
-func createEmptyFile(path string) {
+func createEmptyFile(path string, content string) {
 	logf("createEmptyFile: '%s'\n", path)
 	must(os.MkdirAll(filepath.Dir(path), 0755))
 	os.Remove(path)
-	err := os.WriteFile(path, []byte{}, 0644)
+	err := os.WriteFile(path, []byte(content), 0644)
 	must(err)
 }
 
 func emptyFrontEndBuildDir() {
 	os.RemoveAll(frontEndBuildDir)
-	createEmptyFile(path.Join(frontEndBuildDir, "gitkeep.txt"))
+	createEmptyFile(path.Join(frontEndBuildDir, "gitkeep.txt"), "don't delete this folder\n")
 }
 
 func hasBun() bool {
@@ -164,24 +164,22 @@ func rebuildFrontend() {
 	}
 }
 
-func copySecrets() {
-	// copy secrets from ../secrets/${me}.env to server/secrets.env
-	// so that it's included in the binary as secretsEnv
-	d, err := os.ReadFile(secretsSrcPath)
-	must(err)
-	m := u.ParseEnvMust(d)
-	validateSecrets(m, wantedProdSecrets)
-	err = os.WriteFile(secretsPath, d, 0644)
-	must(err)
-}
-
 func buildForProd(forLinux bool) string {
 	// re-build the frontend. remove build process artifacts
 	// to keep things clean
-	copySecrets()
-	defer createEmptyFile(secretsPath) // empty secrets after
+	{
+		// copy secrets from ../secrets/${me}.env to server/secrets.env
+		// so that it's included in the binary as secretsEnv
+		d, err := os.ReadFile(secretsSrcPath)
+		must(err)
+		m := u.ParseEnvMust(d)
+		validateSecrets(m, wantedProdSecrets)
+		err = os.WriteFile(secretsPath, d, 0644)
+		must(err)
+	}
+	defer createEmptyFile(secretsPath, "# empty file, will be over-written with ../secrets/onlinetool.env")
+
 	rebuildFrontend()
-	defer emptyFrontEndBuildDir()
 
 	// get date and hash of current checkin
 	var exeName string
@@ -225,11 +223,12 @@ func buildForProd(forLinux bool) string {
 	return exeName
 }
 
-func buildLocalProd() {
+func buildForProdLocal() string {
 	deleteOldBuilds()
 	exeName := buildForProd(false)
 	exeSize := u.FormatSize(u.FileSize(exeName))
 	logf("created:\n%s %s\n", exeName, exeSize)
+	return exeName
 }
 
 /*
@@ -242,6 +241,7 @@ func deployToHetzner() {
 	deleteOldBuilds()
 	exeName := buildForProd(true)
 	panicIf(!u.FileExists(exeName), "file '%s' doesn't exist", exeName)
+	defer emptyFrontEndBuildDir()
 
 	serverExePath := path.Join(deployServerDir, exeName)
 

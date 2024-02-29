@@ -126,3 +126,27 @@ func printFS(fsys fs.FS, startDir string) {
 	})
 	logf("%d files\n", nFiles)
 }
+
+func updateGoDeps(noProxy bool) {
+	{
+		cmd := exec.Command("go", "get", "-u", ".")
+		cmd.Dir = "server"
+		if noProxy {
+			cmd.Env = append(os.Environ(), "GOPROXY=direct")
+		}
+		logf("running: %s in dir '%s'\n", cmd.String(), cmd.Dir)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		panicIf(err != nil, "go get failed with '%s'", err)
+	}
+	{
+		cmd := exec.Command("go", "mod", "tidy")
+		cmd.Dir = "server"
+		logf("running: %s in dir '%s'\n", cmd.String(), cmd.Dir)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		panicIf(err != nil, "go get failed with '%s'", err)
+	}
+}

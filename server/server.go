@@ -12,6 +12,8 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -141,16 +143,12 @@ func permRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
 
 // in dev, proxyHandler redirects assets to vite web server
 // in prod, assets must be pre-built in frontend/dist directory
-func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Server {
-	mainHandler := func(w http.ResponseWriter, r *http.Request) {
+func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.ReverseProxy) *http.Server {
+	panicIf(serveOpts == nil, "must provide serveOpts")
 
-		serveOpts := hutil.ServeFileOptions{
-			FS:               fsys,
-			SupportCleanURLS: true,
-			ForceCleanURLS:   true,
-			ServeCompressed:  false,
-		}
+	mainHandler := func(w http.ResponseWriter, r *http.Request) {
 		uri := r.URL.Path
+		logf("mainHandler: RequestURI: '%s', uri: '%s'\n", r.RequestURI, uri)
 
 		switch uri {
 		case "/ping", "/ping.txt":
@@ -205,7 +203,10 @@ func makeHTTPServer(proxyHandler *httputil.ReverseProxy, fsys fs.FS) *http.Serve
 			return
 		}
 
-		if hutil.TryServeFile(w, r, &serveOpts) {
+		urlPath := path.Join("/dist/", uri)
+		logf("mainHandler: before TryServeFileFromURL urlPath: '%s', uri: '%s'\n", urlPath, uri)
+		if hutil.TryServeFileFromURL(w, r, urlPath, serveOpts) {
+			logf("mainHandler: served '%s' via httputil.TryServeFile\n", uri)
 			return
 		}
 
@@ -309,8 +310,14 @@ func runServerDev() {
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
 
-	//fsys := os.DirFS(filepath.Join("frontend", "public"))
-	httpSrv := makeHTTPServer(proxyHandler, fsys)
+	fsys := os.DirFS(filepath.Join("frontend", "public"))
+	serveOpts := &hutil.ServeFileOptions{
+		SupportCleanURLS: true,
+		ForceCleanURLS:   true,
+		FS:               fsys,
+		//ServeCompressed:  true,
+	}
+	httpSrv := makeHTTPServer(serveOpts, proxyHandler)
 
 	//closeHTTPLog := OpenHTTPLog("onlinetool")
 	//defer closeHTTPLog()
@@ -328,8 +335,14 @@ func runServerProd() {
 	mkFsys()
 	checkHasEmbeddedFiles()
 
-	httpSrv := makeHTTPServer(nil, fsys)
-	logf("runServerProd(): starting on 'http://%s', dev: %v\n", httpSrv.Addr, isDev())
+	serveOpts := &hutil.ServeFileOptions{
+		SupportCleanURLS: true,
+		ForceCleanURLS:   true,
+		FS:               fsys,
+		//ServeCompressed:  true,
+	}
+	httpSrv := makeHTTPServer(serveOpts, nil)
+	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
 	if isWinOrMac() {
 		time.Sleep(time.Second * 2)
 		u.OpenBrowser("http://" + httpSrv.Addr)
@@ -338,21 +351,22 @@ func runServerProd() {
 	waitFn()
 }
 
-func runProdLocal() {
-	deleteOldBuilds()
-	copySecrets()
-	rebuildFrontend()
-	cmd := exec.Command("go", "run", "./server", "-run-prod")
+func runServerProdLocal() {
+	runServerProd()
+}
+
+func runServerProdLocalStart() {
+	exeName := buildForProdLocal()
+	defer emptyFrontEndBuildDir()
+
+	cmd := exec.Command("./"+exeName, "-run-prod-local-2")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	logf("starting '%s'\n", cmd.String())
-
 	err := cmd.Start()
 	must(err)
 
 	waitForSigIntOrKill()
-	createEmptyFile(secretsPath)
-	emptyFrontEndBuildDir()
 	cmd.Process.Kill()
-	logf("leaving from flgRunProdLocal\n")
+	logf("leaving from -run-prod-local\n")
 }
