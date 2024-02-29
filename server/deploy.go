@@ -38,7 +38,7 @@ var (
 	GitCommitHash string
 
 	caddyConfigDelim = "# ---- " + domain
-	caddyConfig      = fmt.Sprintf(`%s {
+	caddyConfig      = fmt.Sprintf(`%s, tools.arslexis.io {
 	reverse_proxy localhost:%v
 }`, domain, httpPort)
 

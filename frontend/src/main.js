@@ -1,6 +1,8 @@
 import "./base.css";
 
-if (location.host.includes("localhost")) {
-  let el = document.getElementById("in-progress");
-  el.classList.remove("hidden");
-}
+import App from "./Main.svelte";
+
+const args = {
+  target: document.getElementById("app"),
+};
+export const app = new App(args);
