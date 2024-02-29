@@ -203,6 +203,8 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 			return
 		}
 
+		// note that path.Join("/dist/", "/") returns "/dist" so we rely
+		// on TryServeFileFromURL() to serve "/dist" with "/dist/index.html" (if exists)
 		urlPath := path.Join("/dist/", uri)
 		logf("mainHandler: before TryServeFileFromURL urlPath: '%s', uri: '%s'\n", urlPath, uri)
 		if hutil.TryServeFileFromURL(w, r, urlPath, serveOpts) {
