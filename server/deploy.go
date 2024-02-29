@@ -17,21 +17,19 @@ import (
 
 // variables to customize
 var (
-	exeBaseName       = "onlinetool"
+	projectName       = "onlinetool"
 	domain            = "onlinetool.io"
 	httpPort          = 9301
-	wantedProdSecrets = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
 	frontEndBuildDir  = filepath.Join("server", "dist")
+	wantedProdSecrets = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_PROD", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
 )
 
 // stuff that is derived from the above
 var (
-	secretsSrcPath  = filepath.Join("..", "secrets", exeBaseName+".env")
-	secretsPath     = filepath.Join("server", "secrets.env")
-	frontendZipName = filepath.Join("server", "frontend.zip")
+	secretsSrcPath = filepath.Join("..", "secrets", projectName+".env")
+	secretsPath    = filepath.Join("server", "secrets.env")
 
-	tmuxSessionName             = exeBaseName
-	deployServerDir             = "/root/apps/" + exeBaseName
+	deployServerDir             = "/root/apps/" + projectName
 	deployServerUser            = "root"
 	deployServerIP              = "138.201.51.123"
 	deployServerPrivateKeyPath  = "~/.ssh/hetzner_ed"
@@ -66,8 +64,8 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 `, domain, systemdRunScriptPath)
 
-	systemdServicePath     = path.Join(deployServerDir, exeBaseName+".service")
-	systemdServicePathLink = fmt.Sprintf("/etc/systemd/system/%s.service", exeBaseName)
+	systemdServicePath     = path.Join(deployServerDir, projectName+".service")
+	systemdServicePathLink = fmt.Sprintf("/etc/systemd/system/%s.service", projectName)
 )
 
 func writeFileMust(path string, s string, perm fs.FileMode) {
@@ -117,28 +115,8 @@ func copyToServerMaybeGzippedMust(client *goph.Client, sftp *sftp.Client, localP
 	}
 }
 
-func createNewTmuxSession(name string) {
-	cmd := exec.Command("tmux", "new-session", "-d", "-s", name)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		if strings.Contains(string(out), "duplicate session") {
-			logf("tmux session '%s' already exists\n", name)
-			return
-		}
-		panicIf(err != nil, "tmux new-session failed with '%s'\n", err)
-		logf("%s:\n%s\n", cmd.String(), string(out))
-	}
-}
-
-func tmuxSendKeys(sessionName string, text string) {
-	cmd := exec.Command("tmux", "send-keys", "-t", sessionName, text, "Enter")
-	out, err := cmd.CombinedOutput()
-	logf("%s:\n%s\n", cmd.String(), string(out))
-	panicIf(err != nil, "%s failed with %s\n", cmd.String(), err)
-}
-
 func deleteOldBuilds() {
-	pattern := exeBaseName + "-*"
+	pattern := projectName + "-*"
 	files, err := filepath.Glob(pattern)
 	must(err)
 	for _, path := range files {
@@ -205,11 +183,9 @@ func buildForProd(forLinux bool) string {
 	rebuildFrontend()
 	defer emptyFrontEndBuildDir()
 
-	os.Remove(frontendZipName)
-	defer os.Remove(frontendZipName)
-
 	// get date and hash of current checkin
 	var exeName string
+	var hashShort string
 	{
 		// git log --pretty=format:"%h %ad %s" --date=short -1
 		cmd := exec.Command("git", "log", "-1", `--pretty=format:%h %ad %s`, "--date=short")
@@ -220,27 +196,20 @@ func buildForProd(forLinux bool) string {
 		parts := strings.SplitN(s, " ", 3)
 		panicIf(len(parts) != 3, "expected 3 parts in '%s'", s)
 		date := parts[1]
-		hashShort := parts[0]
-		exeName = fmt.Sprintf("%s-%s-%s", exeBaseName, date, hashShort)
+		hashShort = parts[0]
+		exeName = fmt.Sprintf("%s-%s-%s", projectName, date, hashShort)
 	}
 
-	if u.IsWindows() {
+	if u.IsWindows() && !forLinux {
 		exeName += ".exe"
-	}
-
-	// package frontend code into  a zip file
-	{
-		err := u.CreateZipWithDirContent(frontendZipName, frontEndBuildDir)
-		panicIf(err != nil, "u.CreateZipWithDirContent() failed with '%s'\n", err)
-		size := u.FormatSize(u.FileSize(frontendZipName))
-		logf("created %s of size %s\n", frontendZipName, size)
 	}
 
 	// build the binary, for linux if forLinux is true, otherwise for OS arh
 	{
 		// TODO: why needs ./server and not just "server"?
 		// it works in arslexis-website
-		cmd := exec.Command("go", "build", "-tags", "embed_frontend", "-o", exeName, "./server")
+		ldFlags := f("-X main.GitCommitHash=%s", hashShort)
+		cmd := exec.Command("go", "build", "-o", exeName, "-ldflags", ldFlags, "./server")
 		if forLinux {
 			cmd.Env = os.Environ()
 			cmd.Env = append(cmd.Env, "GOOS=linux", "GOARCH=amd64")
@@ -316,13 +285,26 @@ func deployToHetzner() {
 	logf("Running on http://%s:%d or https://%s\n", deployServerIP, httpPort, domain)
 }
 
-func setupAndRun() {
-	logf("setupAndRun() for %s\n", exeBaseName)
+func countEmbeddedFiles() int {
+	n := 0
+	u.IterReadDirFS(wwwFS, ".", func(filePath string, d fs.DirEntry) error {
+		n++
+		return nil
+	})
+	return n
+}
 
-	if len(frontendZipData) < 1024 {
-		logf("frontendZipData is empty, must be embedded\n")
+func checkHasEmbeddedFiles() {
+	nEmbedded := countEmbeddedFiles()
+	if nEmbedded < 5 {
+		logf("not enough embedded files ('%d')\n", nEmbedded)
 		os.Exit(1)
 	}
+}
+
+func setupAndRun() {
+	logf("setupAndRun() for %s\n", projectName)
+	checkHasEmbeddedFiles()
 
 	if !u.FileExists(deployServerCaddyConfigPath) {
 		logf("%s doesn't exist.\nMust install caddy?\n", deployServerCaddyConfigPath)
@@ -347,7 +329,7 @@ func setupAndRun() {
 			}
 			pid := parts[0]
 			name := parts[4]
-			if !strings.Contains(name, exeBaseName) {
+			if !strings.Contains(name, projectName) {
 				//logf("skipping process '%s' pid: '%s'\n", name, pid)
 				continue
 			}
@@ -365,24 +347,17 @@ func setupAndRun() {
 			u.RunLoggedMust("kill", pid)
 		}
 		if len(pidsToKill) == 0 {
-			logf("no %s* processes to kill\n", exeBaseName)
+			logf("no %s* processes to kill\n", projectName)
 		}
 	}
 
 	ownExeName := filepath.Base(os.Args[0])
-	if false {
-		createNewTmuxSession(tmuxSessionName)
-		// cd to deployServer
-		tmuxSendKeys(tmuxSessionName, fmt.Sprintf("cd %s", deployServerDir))
-		// run the server
-		tmuxSendKeys(tmuxSessionName, fmt.Sprintf("./%s -run-prod", ownExeName))
-	}
 
 	// configure systemd to restart on reboot
 	{
 		// systemd-run.sh script that will be called by systemd on reboot
 		runScript := strings.ReplaceAll(systemdRunScriptTmpl, "{exeName}", ownExeName)
-		runScript = strings.ReplaceAll(runScript, "{sessionName}", exeBaseName)
+		runScript = strings.ReplaceAll(runScript, "{sessionName}", projectName)
 		runScript = strings.ReplaceAll(runScript, "{workdDir}", deployServerDir)
 		writeFileMust(systemdRunScriptPath, runScript, 0755)
 
@@ -394,7 +369,7 @@ func setupAndRun() {
 			systemdServicePathLink, err)
 		logf("created symlink '%s' to '%s'\n", systemdServicePathLink, systemdServicePath)
 
-		serviceName := exeBaseName + ".service"
+		serviceName := projectName + ".service"
 
 		// daemon-reload needed if service file changed
 		u.RunLoggedMust("systemctl", "daemon-reload")
@@ -412,7 +387,7 @@ func setupAndRun() {
 
 	// archive previous deploys
 	{
-		pattern := filepath.Join(deployServerDir, exeBaseName+"-*")
+		pattern := filepath.Join(deployServerDir, projectName+"-*")
 		files, err := filepath.Glob(pattern)
 		must(err)
 		logf("archiving previous deploys, pattern: '%s', %d files\n", pattern, len(files))

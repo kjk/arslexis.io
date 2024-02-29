@@ -75,8 +75,9 @@ func loadSecrets() {
 }
 
 var (
-	flgRunDev       bool
-	flgRunProd      bool
+	flgRunDev  bool
+	flgRunProd bool
+	// TODO: this is not actually relevant
 	flgRunProdLocal bool
 )
 

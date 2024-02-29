@@ -12,7 +12,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -36,6 +35,7 @@ var (
 )
 
 var (
+	// must be same as vite.config.js
 	proxyURLStr = "http://localhost:3025"
 )
 
@@ -277,6 +277,19 @@ func serverListenAndWait(httpSrv *http.Server) func() {
 	}
 }
 
+func mkFsys() {
+	logf("mkFsys: isDev: %v, flgRunProd: %v\n", isDev(), flgRunProd)
+	if flgRunProd {
+		fsys = wwwFS
+		logf("serving from embedded FS\n")
+	} else {
+		dir := "server"
+		fsys = os.DirFS(dir)
+		logf("serving from dir '%s'\n", dir)
+	}
+	printFS(fsys, "dist")
+}
+
 func runServerDev() {
 	if hasBun() {
 		u.RunLoggedInDir("frontend", "bun", "install")
@@ -290,15 +303,16 @@ func runServerDev() {
 		defer closeDev()
 	}
 
-	// must be same as vite.config.js
+	mkFsys()
+
 	proxyURL, err := url.Parse(proxyURLStr)
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
 
-	fsys := os.DirFS(filepath.Join("frontend", "public"))
+	//fsys := os.DirFS(filepath.Join("frontend", "public"))
 	httpSrv := makeHTTPServer(proxyHandler, fsys)
 
-	//closeHTTPLog := OpenHTTPLog("codeeval")
+	//closeHTTPLog := OpenHTTPLog("onlinetool")
 	//defer closeHTTPLog()
 
 	logf("runServerDev(): starting on '%s', dev: %v\n", httpSrv.Addr, isDev())
@@ -311,22 +325,8 @@ func runServerDev() {
 }
 
 func runServerProd() {
-	var fsys fs.FS
-	fromZip := len(frontendZipData) > 0
-	if fromZip {
-		var err error
-		fsys, err = u.NewMemoryFSForZipData(frontendZipData)
-		must(err)
-		sizeStr := u.FormatSize(int64(len(frontendZipData)))
-		logf("runServerProd(): will serve files from embedded zip of size '%v'\n", sizeStr)
-	} else {
-		panicIf(isLinux(), "if running on Linux, must use frontendZipDataa")
-
-		rebuildFrontend()
-		// assuming this is not deployment: re-build the frontend
-		panicIf(!u.DirExists(frontEndBuildDir), "dir '%s' doesn't exist", frontEndBuildDir)
-		fsys = os.DirFS(frontEndBuildDir)
-	}
+	mkFsys()
+	checkHasEmbeddedFiles()
 
 	httpSrv := makeHTTPServer(nil, fsys)
 	logf("runServerProd(): starting on 'http://%s', dev: %v\n", httpSrv.Addr, isDev())

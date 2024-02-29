@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -112,4 +113,16 @@ func waitForSigIntOrKill() {
 	sctx, stop := signal.NotifyContext(ctx(), os.Interrupt /*SIGINT*/, os.Kill /* SIGKILL */, syscall.SIGTERM)
 	defer stop()
 	<-sctx.Done()
+}
+
+func printFS(fsys fs.FS, startDir string) {
+	logf("printFS('%s')\n", startDir)
+	dfs := fsys.(fs.ReadDirFS)
+	nFiles := 0
+	u.IterReadDirFS(dfs, startDir, func(filePath string, d fs.DirEntry) error {
+		logf("%s\n", filePath)
+		nFiles++
+		return nil
+	})
+	logf("%d files\n", nFiles)
 }
