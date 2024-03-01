@@ -41,38 +41,44 @@ var (
 var (
 	// random string for oauth2 API calls to protect against CSRF
 	oauthSecretPrefix = "3212431324-"
-)
-
-// we need different oauth callbacks for different hosts so we registered 3 apps:
-// https://github.com/settings/applications/1159176 : localhost
-// https://github.com/settings/applications/2098699 : onlinetool.io
-// https://github.com/settings/applications/2495749 : tools.arslexis.io
-func getGithubConfig(r *http.Request) *oauth2.Config {
-	endpoint := oauth2.Endpoint{
+	gitHubEndpoint    = oauth2.Endpoint{
 		AuthURL:  "https://github.com/login/oauth/authorize",
 		TokenURL: "https://github.com/login/oauth/access_token",
 	}
-	conf := &oauth2.Config{
+	githubConfig = oauth2.Config{
 		ClientID:     "",
 		ClientSecret: "",
 		// select level of access you want https://developer.github.com/v3/oauth/#scopes
 		Scopes:   []string{"user:email", "read:user", "gist"},
-		Endpoint: endpoint,
+		Endpoint: gitHubEndpoint,
 	}
+)
+
+func getGithubConfig(r *http.Request) *oauth2.Config {
+	logf("getGithubConfig: r.Host: '%s'\n", r.Host)
 	host := strings.ToLower(r.Host)
-	if strings.Contains("localhost", host) {
-		conf.ClientID = "77ba1cbe7c0eff7c462b"
-		conf.ClientSecret = secretGitHubLocal
-	} else if strings.Contains("onlinetool.io", host) {
-		conf.ClientID = "389af84bdce4b478ad7b"
-		conf.ClientSecret = secretGitHubOnlineTool
-	} else if strings.Contains("tools.arslexis.io", host) {
-		conf.ClientID = "ff6bcecdb5df037a208d"
-		conf.ClientSecret = secretGitHubToolsArslexis
-	} else {
-		panicIf(true, "unsupported host: %s", host)
+	if githubConfig.ClientID == "" {
+		// we need to register a GitHub app for each callback domain
+		if strings.Contains(host, "localhost") {
+			// https://github.com/settings/applications/1159176 : localhost
+			githubConfig.ClientID = "77ba1cbe7c0eff7c462b"
+			githubConfig.ClientSecret = secretGitHubLocal
+			logf("getGithubConfig: using localhost config\n")
+		} else if strings.Contains(host, "onlinetool.io") {
+			// https://github.com/settings/applications/2098699 : onlinetool.io
+			githubConfig.ClientID = "389af84bdce4b478ad7b"
+			githubConfig.ClientSecret = secretGitHubOnlineTool
+			logf("getGithubConfig: using onlinetool.io config\n")
+		} else if strings.Contains(host, "tools.arslexis.io") {
+			// https://github.com/settings/applications/2495749 : tools.arslexis.io
+			githubConfig.ClientID = "ff6bcecdb5df037a208d"
+			githubConfig.ClientSecret = secretGitHubToolsArslexis
+			logf("getGithubConfig: using tools.arslexis.io config\n")
+		} else {
+			panicIf(true, "unsupported host: %s", host)
+		}
 	}
-	return conf
+	return &githubConfig
 }
 
 func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
@@ -98,8 +104,23 @@ func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
 	pirschSendEvent(r, "github_login", 0, m)
 }
 
+// /auth/ghlogin
+func handleLoginGitHub(w http.ResponseWriter, r *http.Request) {
+	conf := getGithubConfig(r)
+	if conf.ClientID == "" {
+		serveInternalError(w, e("missing github client id"))
+		return
+	}
+	if conf.ClientSecret == "" {
+		serveInternalError(w, e("missing github client secret"))
+		return
+	}
+	uri := conf.AuthCodeURL(oauthSecretPrefix, oauth2.AccessTypeOnline)
+	logf("handleLoginGitHub: redirect to '%s'\n", uri)
+	tempRedirect(w, r, uri)
+}
+
 // /auth/githubcb
-// as set in https://github.com/settings/applications/1159140
 func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -127,16 +148,6 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 
 	// can't put in the background because that cancels ctx
 	logLogin(ctx, r, token)
-}
-
-// /auth/ghlogin
-func handleLoginGitHub(w http.ResponseWriter, r *http.Request) {
-	// GitHub seems to completely ignore Redir, which makes testing locally hard
-	// TODO: generate temporary oathSecret
-	conf := getGithubConfig(r)
-	uri := conf.AuthCodeURL(oauthSecretPrefix, oauth2.AccessTypeOnline)
-	logf("handleLoginGitHub: to '%s'\n", uri)
-	tempRedirect(w, r, uri)
 }
 
 // in dev, proxyHandler redirects assets to vite web server

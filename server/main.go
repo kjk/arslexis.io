@@ -34,30 +34,31 @@ MAILGUN_DOMAIN=
 MAILGUN_API_KEY=
 `
 
-// in production deployment secrets are stored in binary as secretsEnv
-// when running non-prod we read secrets from secrets repo we assume
-// is parallel to this repo
-func loadSecrets() {
-	d := secretsEnv
-	if len(secretsEnv) == 0 {
-		// secrets not embedded in the binary
-		// load from ../secrets/onlinetool.env or minimum from secretsDev
-		panicIf(flgRunProd, "when running in production must have secrets embedded in the binary")
-		var err error
-		d, err = os.ReadFile(secretsSrcPath)
-		if err == nil {
-			logf("loadSecrets(): using secrets from %s\n", secretsSrcPath)
-		} else {
-			// it's ok, those files are secret and only exist on my laptop
-			// this could be ran by someone else or by me on codespaces/gitpod etc.
-			// we default to minimum amount of secrets from secretsDev
-			d = []byte(secretsDev)
-			logf("loadSecrets(): using minimal dev secrets from secretsDev\n")
-		}
-	} else {
-		logf("using embedded secrets of lenght %d\n", len(secretsEnv))
+func getSecrets() []byte {
+	// in production deployment secrets are embedded in binary as secretsEnv
+	if len(secretsEnv) > 0 {
+		logf("getSecrets(): using secrets from embedded secretsEnv of length %d\n", len(secretsEnv))
+		return secretsEnv
 	}
+	panicIf(!flgRunProd, "when running in production must have secrets embedded in the binary")
+
+	// when running non-prod we try to read secrets from secrets repo
+	// secrets file only exists on my laptop so it's ok if read fails
+	// this could be because someone else is running or me on codespaces/gitpod etc.
+	d, err := os.ReadFile(secretsSrcPath)
+	if err == nil && len(d) > 0 {
+		logf("getSecrets(): using secrets from %s of size %d\n", secretsSrcPath, len(d))
+		return d
+	}
+	// we fallback to minimum amount of secrets from secretsDev
+	logf("getSecrets(): using minimal dev secrets from secretsDev of length %d\n", len(secretsDev))
+	return []byte(secretsDev)
+}
+
+func loadSecrets() {
+	d := getSecrets()
 	m := u.ParseEnvMust(d)
+	logf("loadSecret: got %d secrets\n", len(m))
 	getEnv := func(key string, val *string, minLen int, must bool) {
 		v := strings.TrimSpace(m[key])
 		if len(v) < minLen {
