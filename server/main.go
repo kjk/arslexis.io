@@ -9,10 +9,12 @@ import (
 )
 
 var (
-	// for github login when deployed to online.io
-	secretGitHub = ""
 	// for github login when running on localhost
 	secretGitHubLocal = ""
+	// for github login when running on onlinetool.io
+	secretGitHubOnlineTool = ""
+	// for github login when running on tools.arslexis.io
+	secretGitHubToolsArslexis = ""
 )
 
 // in production deployment secrets are stored in binary as secretsEnv
@@ -54,7 +56,8 @@ func loadSecrets() {
 	if !isDev() {
 		getEnv("AXIOM_TOKEN", &axiomApiToken, 40, must)
 		getEnv("PIRSCH_SECRET", &pirschClientSecret, 64, must)
-		getEnv("GITHUB_SECRET_PROD", &secretGitHub, 40, must)
+		getEnv("GITHUB_SECRET_ONLINETOOL", &secretGitHubOnlineTool, 40, must)
+		getEnv("GITHUB_SECRET_TOOLS_ARSLEXIS", &secretGitHubToolsArslexis, 40, must)
 		getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
 		getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
 		getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)

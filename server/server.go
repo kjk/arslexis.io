@@ -42,42 +42,45 @@ var (
 )
 
 var (
-	githubEndpoint = oauth2.Endpoint{
+	// random string for oauth2 API calls to protect against CSRF
+	oauthSecretPrefix = "3212431324-"
+)
+
+// we need different oauth callbacks for different hosts so we registered 3 apps:
+// https://github.com/settings/applications/1159176 : localhost
+// https://github.com/settings/applications/2098699 : onlinetool.io
+// https://github.com/settings/applications/2495749 : tools.arslexis.io
+func getGithubConfig(r *http.Request) *oauth2.Config {
+	endpoint := oauth2.Endpoint{
 		AuthURL:  "https://github.com/login/oauth/authorize",
 		TokenURL: "https://github.com/login/oauth/access_token",
 	}
-
-	// https://github.com/settings/applications/2098699
-	oauthGitHubConf = &oauth2.Config{
+	conf := &oauth2.Config{
 		ClientID:     "",
 		ClientSecret: "",
 		// select level of access you want https://developer.github.com/v3/oauth/#scopes
 		Scopes:   []string{"user:email", "read:user", "gist"},
-		Endpoint: githubEndpoint,
+		Endpoint: endpoint,
 	}
-
-	// random string for oauth2 API calls to protect against CSRF
-	oauthSecretPrefix = "5576867039-"
-)
-
-// we need different oauth callbacks for dev and production so we registered 2 apps:
-// https://github.com/settings/applications/1159176 : onlinetool.io Local
-func setGitHubAuth() {
-	oauthGitHubConf.ClientID = "389af84bdce4b478ad7b"
-	oauthGitHubConf.ClientSecret = secretGitHub
-	// TODO: is there a better check for running locally?
-	if flgRunDev || flgRunProdLocal {
-		oauthGitHubConf.ClientID = "77ba1cbe7c0eff7c462b"
-		oauthGitHubConf.ClientSecret = secretGitHubLocal
+	host := strings.ToLower(r.Host)
+	if strings.Contains("localhost", host) {
+		conf.ClientID = "77ba1cbe7c0eff7c462b"
+		conf.ClientSecret = secretGitHubLocal
+	} else if strings.Contains("onlinetool.io", host) {
+		conf.ClientID = "389af84bdce4b478ad7b"
+		conf.ClientSecret = secretGitHubOnlineTool
+	} else if strings.Contains("tools.arslexis.io", host) {
+		conf.ClientID = "ff6bcecdb5df037a208d"
+		conf.ClientSecret = secretGitHubToolsArslexis
+	} else {
+		panicIf(true, "unsupported host: %s", host)
 	}
+	return conf
 }
 
-var (
-	pongTxt = []byte("pong")
-)
-
 func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
-	oauthClient := oauthGitHubConf.Client(ctx, token)
+	conf := getGithubConfig(r)
+	oauthClient := conf.Client(ctx, token)
 	client := github.NewClient(oauthClient)
 	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
@@ -112,7 +115,8 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	code := r.FormValue("code")
-	token, err := oauthGitHubConf.Exchange(context.Background(), code)
+	conf := getGithubConfig(r)
+	token, err := conf.Exchange(context.Background(), code)
 	if err != nil {
 		logErrorf("oauthGoogleConf.Exchange() failed with '%s'\n", err)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -132,7 +136,8 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 func handleLoginGitHub(w http.ResponseWriter, r *http.Request) {
 	// GitHub seems to completely ignore Redir, which makes testing locally hard
 	// TODO: generate temporary oathSecret
-	uri := oauthGitHubConf.AuthCodeURL(oauthSecretPrefix, oauth2.AccessTypeOnline)
+	conf := getGithubConfig(r)
+	uri := conf.AuthCodeURL(oauthSecretPrefix, oauth2.AccessTypeOnline)
 	logf("handleLoginGitHub: to '%s'\n", uri)
 	http.Redirect(w, r, uri, http.StatusTemporaryRedirect)
 }
@@ -152,7 +157,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 
 		switch uri {
 		case "/ping", "/ping.txt":
-			content := bytes.NewReader(pongTxt)
+			content := bytes.NewReader([]byte("pong"))
 			http.ServeContent(w, r, "foo.txt", time.Time{}, content)
 			return
 		case "/auth/ghlogin":
