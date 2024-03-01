@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 	"strings"
 	"time"
 
@@ -17,22 +18,46 @@ var (
 	secretGitHubToolsArslexis = ""
 )
 
+// minimum amount of secrets that allows for running in dev mode
+// if some secrets are missing, the related functionality will be disabled
+// (e.g. sending mails or github loging)
+// you can put your own secrets here
+const secretsDev = `# secrets for dev mode
+# COOKIE_AUTH_KEY=baa18ad1db89a7e9fbb50638815be63150a4494ac465779ee2f30bc980f1a55e
+# COOKIE_ENCR_KEY=2780ffc17eec2d85960473c407ee37c0249db93e4586ec52e3ef9e153ba61e72
+AXIOM_TOKEN=
+PIRSCH_SECRET=
+GITHUB_SECRET_ONLINETOOL=
+GITHUB_SECRET_TOOLS_ARSLEXIS=
+GITHUB_SECRET_LOCAL=
+MAILGUN_DOMAIN=
+MAILGUN_API_KEY=
+`
+
 // in production deployment secrets are stored in binary as secretsEnv
 // when running non-prod we read secrets from secrets repo we assume
 // is parallel to this repo
 func loadSecrets() {
-	var m map[string]string
 	d := secretsEnv
-	if isDev() {
-		logf("loadSecrets(): loading dev secrets from secretsDev\n")
-		d = []byte(secretsDev)
+	if len(secretsEnv) == 0 {
+		// secrets not embedded in the binary
+		// load from ../secrets/onlinetool.env or minimum from secretsDev
+		panicIf(flgRunProd, "when running in production must have secrets embedded in the binary")
+		var err error
+		d, err = os.ReadFile(secretsSrcPath)
+		if err == nil {
+			logf("loadSecrets(): using secrets from %s\n", secretsSrcPath)
+		} else {
+			// it's ok, those files are secret and only exist on my laptop
+			// this could be ran by someone else or by me on codespaces/gitpod etc.
+			// we default to minimum amount of secrets from secretsDev
+			d = []byte(secretsDev)
+			logf("loadSecrets(): using minimal dev secrets from secretsDev\n")
+		}
 	} else {
-		// using default secretsEnv
-		panicIf(len(secretsEnv) == 0, "-run-prod or -run-prod-local and secretsEnv is empty")
-		logf("loadSecrets(): loading prod secrets from secretsEnv\n")
+		logf("using embedded secrets of lenght %d\n", len(secretsEnv))
 	}
-	m = u.ParseEnvMust(d)
-
+	m := u.ParseEnvMust(d)
 	getEnv := func(key string, val *string, minLen int, must bool) {
 		v := strings.TrimSpace(m[key])
 		if len(v) < minLen {
@@ -47,32 +72,35 @@ func loadSecrets() {
 			logf("Got %s\n", key)
 		}
 	}
-	// those we want in prod and dev
+	// those we need always
 	must := true
 	// getEnv("COOKIE_AUTH_KEY", &cookieAuthKeyHex, 64, must)
 	// getEnv("COOKIE_ENCR_KEY", &cookieEncrKeyHex, 64, must)
 
 	// those are only required in prod
-	if !isDev() {
-		getEnv("AXIOM_TOKEN", &axiomApiToken, 40, must)
-		getEnv("PIRSCH_SECRET", &pirschClientSecret, 64, must)
-		getEnv("GITHUB_SECRET_ONLINETOOL", &secretGitHubOnlineTool, 40, must)
-		getEnv("GITHUB_SECRET_TOOLS_ARSLEXIS", &secretGitHubToolsArslexis, 40, must)
-		getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
-		getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
-		getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
-	}
+	must = flgRunProd
+	getEnv("AXIOM_TOKEN", &axiomApiToken, 40, must)
+	getEnv("PIRSCH_SECRET", &pirschClientSecret, 64, must)
+	getEnv("GITHUB_SECRET_ONLINETOOL", &secretGitHubOnlineTool, 40, must)
+	getEnv("GITHUB_SECRET_TOOLS_ARSLEXIS", &secretGitHubToolsArslexis, 40, must)
+	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
+	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
+	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
 
 	// when running locally we shouldn't send axiom / pirsch
-	if isDev() {
+	if isDev() || flgRunProdLocal {
 		panicIf(axiomApiToken != "")
 		panicIf(pirschClientSecret != "")
 	}
 }
 
 var (
-	flgRunDev       bool
-	flgRunProd      bool
+	// assets being served on-demand by vite
+	flgRunDev bool
+	// compiled assets embedded in the binary
+	flgRunProd bool
+	// compiled assets served from server/dist directory
+	// mostly for testing that the assets are correctly built
 	flgRunProdLocal bool
 )
 
@@ -89,17 +117,15 @@ func measureDuration() func() {
 
 func main() {
 	var (
-		flgDeployHetzner     bool
-		flgSetupAndRun       bool
-		flgBuildLocalProd    bool
-		flgRunProdLocalStart bool
-		flgUpdateGoDeps      bool
+		flgDeployHetzner  bool
+		flgSetupAndRun    bool
+		flgBuildLocalProd bool
+		flgUpdateGoDeps   bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
-		flag.BoolVar(&flgRunProdLocalStart, "run-prod-local", false, "run server in production but locally")
-		flag.BoolVar(&flgRunProdLocal, "run-prod-local-2", false, "for internal use")
+		flag.BoolVar(&flgRunProdLocal, "run-prod-local", false, "run server in production but locally")
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
@@ -137,11 +163,6 @@ func main() {
 		return
 	}
 
-	if flgRunProdLocalStart {
-		runServerProdLocalStart()
-		return
-	}
-
 	n := 0
 	if flgRunDev {
 		n++
@@ -159,7 +180,6 @@ func main() {
 	panicIf(n > 1, "can only use one of: -run-dev, -run-prod, -run-prod-local")
 
 	loadSecrets()
-	setGitHubAuth()
 
 	if flgRunDev {
 		runServerDev()

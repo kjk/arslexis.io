@@ -10,7 +10,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path"
 	"path/filepath"
@@ -32,8 +31,6 @@ var (
 	wwwFS embed.FS
 	//go:embed secrets.env
 	secretsEnv []byte
-
-	fsys fs.FS
 )
 
 var (
@@ -285,17 +282,30 @@ func serverListenAndWait(httpSrv *http.Server) func() {
 	}
 }
 
-func mkFsys() {
-	logf("mkFsys: isDev: %v, flgRunProd: %v\n", isDev(), flgRunProd)
-	if flgRunProd {
-		fsys = wwwFS
-		logf("serving from embedded FS\n")
-	} else {
-		dir := "server"
-		fsys = os.DirFS(dir)
-		logf("serving from dir '%s'\n", dir)
-	}
+func mkFsysEmbedded() fs.FS {
+	logf("mkFsysEmbedded\n")
+	fsys := wwwFS
 	printFS(fsys, "dist")
+	logf("serving from embedded FS\n")
+	return fsys
+}
+
+func mkFsysDirDist() fs.FS {
+	logf("mkFsysDirDist\n")
+	dir := "server"
+	fsys := os.DirFS(dir)
+	printFS(fsys, "dist")
+	logf("serving from dir '%s'\n", dir)
+	return fsys
+}
+
+func mkFsysDirPublic() fs.FS {
+	logf("mkFsysDirPublic\n")
+	dir := filepath.Join("frontend", "public")
+	fsys := os.DirFS(dir)
+	printFS(fsys, "dist")
+	logf("serving from dir '%s'\n", dir)
+	return fsys
 }
 
 func runServerDev() {
@@ -311,13 +321,11 @@ func runServerDev() {
 		defer closeDev()
 	}
 
-	mkFsys()
-
 	proxyURL, err := url.Parse(proxyURLStr)
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
 
-	fsys := os.DirFS(filepath.Join("frontend", "public"))
+	fsys := mkFsysDirPublic()
 	serveOpts := &hutil.ServeFileOptions{
 		SupportCleanURLS: true,
 		ForceCleanURLS:   true,
@@ -339,9 +347,9 @@ func runServerDev() {
 }
 
 func runServerProd() {
-	mkFsys()
 	checkHasEmbeddedFiles()
 
+	fsys := mkFsysEmbedded()
 	serveOpts := &hutil.ServeFileOptions{
 		SupportCleanURLS: true,
 		ForceCleanURLS:   true,
@@ -359,21 +367,22 @@ func runServerProd() {
 }
 
 func runServerProdLocal() {
-	runServerProd()
-}
+	rebuildFrontend()
+	GitCommitHash, _ = getGitHashDateMust()
 
-func runServerProdLocalStart() {
-	exeName := buildForProdLocal()
-	defer emptyFrontEndBuildDir()
-
-	cmd := exec.Command("./"+exeName, "-run-prod-local-2")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	logf("starting '%s'\n", cmd.String())
-	err := cmd.Start()
-	must(err)
-
-	waitForSigIntOrKill()
-	cmd.Process.Kill()
-	logf("leaving from -run-prod-local\n")
+	fsys := mkFsysDirDist()
+	serveOpts := &hutil.ServeFileOptions{
+		SupportCleanURLS: true,
+		ForceCleanURLS:   true,
+		FS:               fsys,
+		//ServeCompressed:  true,
+	}
+	httpSrv := makeHTTPServer(serveOpts, nil)
+	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
+	if isWinOrMac() {
+		time.Sleep(time.Second * 2)
+		u.OpenBrowser("http://" + httpSrv.Addr)
+	}
+	waitFn := serverListenAndWait(httpSrv)
+	waitFn()
 }

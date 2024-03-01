@@ -164,6 +164,19 @@ func rebuildFrontend() {
 	}
 }
 
+// get date and hash of current git checkin
+func getGitHashDateMust() (string, string) {
+	// git log --pretty=format:"%h %ad %s" --date=short -1
+	cmd := exec.Command("git", "log", "-1", `--pretty=format:%h %ad %s`, "--date=short")
+	out, err := cmd.Output()
+	panicIf(err != nil, "git log failed")
+	s := strings.TrimSpace(string(out))
+	//logf("exec out: '%s'\n", s)
+	parts := strings.SplitN(s, " ", 3)
+	panicIf(len(parts) != 3, "expected 3 parts in '%s'", s)
+	return parts[0], parts[1] // hashShort, date
+}
+
 func buildForProd(forLinux bool) string {
 	// re-build the frontend. remove build process artifacts
 	// to keep things clean
@@ -181,23 +194,8 @@ func buildForProd(forLinux bool) string {
 
 	rebuildFrontend()
 
-	// get date and hash of current checkin
-	var exeName string
-	var hashShort string
-	{
-		// git log --pretty=format:"%h %ad %s" --date=short -1
-		cmd := exec.Command("git", "log", "-1", `--pretty=format:%h %ad %s`, "--date=short")
-		out, err := cmd.Output()
-		panicIf(err != nil, "git log failed")
-		s := strings.TrimSpace(string(out))
-		//logf("exec out: '%s'\n", s)
-		parts := strings.SplitN(s, " ", 3)
-		panicIf(len(parts) != 3, "expected 3 parts in '%s'", s)
-		date := parts[1]
-		hashShort = parts[0]
-		exeName = fmt.Sprintf("%s-%s-%s", projectName, date, hashShort)
-	}
-
+	hashShort, date := getGitHashDateMust()
+	exeName := fmt.Sprintf("%s-%s-%s", projectName, date, hashShort)
 	if u.IsWindows() && !forLinux {
 		exeName += ".exe"
 	}
