@@ -106,3 +106,7 @@ func getURLParams(urlVals url.Values, args ...any) error {
 	}
 	return nil
 }
+
+func tempRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
+	http.Redirect(w, r, newURL, http.StatusTemporaryRedirect)
+}

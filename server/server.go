@@ -107,7 +107,7 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	state := r.FormValue("state")
 	if !strings.HasPrefix(state, oauthSecretPrefix) {
 		logErrorf("invalid oauth state, expected '%s*', got '%s'\n", oauthSecretPrefix, state)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		tempRedirect(w, r, "/")
 		return
 	}
 
@@ -116,14 +116,14 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	token, err := conf.Exchange(context.Background(), code)
 	if err != nil {
 		logErrorf("oauthGoogleConf.Exchange() failed with '%s'\n", err)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		tempRedirect(w, r, "/")
 		return
 	}
 	logf("token: %#v", token)
 	ac := token.AccessToken
 	uri := "/github_success?access_token=" + ac
 	logf("token: %#v\nuri: %s\n", token, uri)
-	http.Redirect(w, r, uri, http.StatusTemporaryRedirect)
+	tempRedirect(w, r, uri)
 
 	// can't put in the background because that cancels ctx
 	logLogin(ctx, r, token)
@@ -136,11 +136,7 @@ func handleLoginGitHub(w http.ResponseWriter, r *http.Request) {
 	conf := getGithubConfig(r)
 	uri := conf.AuthCodeURL(oauthSecretPrefix, oauth2.AccessTypeOnline)
 	logf("handleLoginGitHub: to '%s'\n", uri)
-	http.Redirect(w, r, uri, http.StatusTemporaryRedirect)
-}
-
-func permRedirect(w http.ResponseWriter, r *http.Request, newURL string) {
-	http.Redirect(w, r, newURL, http.StatusPermanentRedirect)
+	tempRedirect(w, r, uri)
 }
 
 // in dev, proxyHandler redirects assets to vite web server
