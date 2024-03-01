@@ -290,28 +290,25 @@ func serverListenAndWait(httpSrv *http.Server) func() {
 }
 
 func mkFsysEmbedded() fs.FS {
-	logf("mkFsysEmbedded\n")
 	fsys := wwwFS
 	printFS(fsys, "dist")
-	logf("serving from embedded FS\n")
+	logf("mkFsysEmbedded: serving from embedded FS\n")
 	return fsys
 }
 
 func mkFsysDirDist() fs.FS {
-	logf("mkFsysDirDist\n")
 	dir := "server"
 	fsys := os.DirFS(dir)
 	printFS(fsys, "dist")
-	logf("serving from dir '%s'\n", dir)
+	logf("mkFsysDirDist: serving from dir '%s'\n", dir)
 	return fsys
 }
 
 func mkFsysDirPublic() fs.FS {
-	logf("mkFsysDirPublic\n")
 	dir := filepath.Join("frontend", "public")
 	fsys := os.DirFS(dir)
 	printFS(fsys, "dist")
-	logf("serving from dir '%s'\n", dir)
+	logf("mkFsysDirPublic: serving from dir '%s'\n", dir)
 	return fsys
 }
 
@@ -375,7 +372,7 @@ func runServerProd() {
 
 func runServerProdLocal() {
 	var fsys fs.FS
-	if countFilesInFS(wwwFS) > 0 {
+	if countFilesInFS(wwwFS) > 5 {
 		fsys = mkFsysEmbedded()
 	} else {
 		rebuildFrontend()
@@ -397,4 +394,5 @@ func runServerProdLocal() {
 	}
 	waitFn := serverListenAndWait(httpSrv)
 	waitFn()
+	emptyFrontEndBuildDir()
 }

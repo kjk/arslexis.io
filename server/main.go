@@ -135,7 +135,7 @@ func main() {
 	}
 
 	if GitCommitHash != "" {
-		uriBase := "https://github.com/kjk/sendmeafile/commit/"
+		uriBase := "https://github.com/kjk/onlinetool.io/commit/"
 		logf("onlinetool.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
 	}
 
