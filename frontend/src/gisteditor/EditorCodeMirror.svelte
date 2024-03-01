@@ -806,7 +806,7 @@
     <Login showTwitter={false} onGoHome={goHome} {onNewGist} gistid={gist.id} />
   </div>
 
-  <div class="flex items-center text-sm py-0 px-4">
+  <div class="flex items-center text-sm pt-2 px-4">
     {#each files as file, idx (file.fid)}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-interactive-supports-focus -->
@@ -1035,7 +1035,7 @@
   }
 
   .tab {
-    padding: 6px 0.75em;
+    padding: 2px 0.75em;
     background-color: white;
     white-space: nowrap;
   }

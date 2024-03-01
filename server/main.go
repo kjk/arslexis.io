@@ -40,7 +40,7 @@ func getSecrets() []byte {
 		logf("getSecrets(): using secrets from embedded secretsEnv of length %d\n", len(secretsEnv))
 		return secretsEnv
 	}
-	panicIf(!flgRunProd, "when running in production must have secrets embedded in the binary")
+	panicIf(flgRunProd, "when running in production must have secrets embedded in the binary")
 
 	// when running non-prod we try to read secrets from secrets repo
 	// secrets file only exists on my laptop so it's ok if read fails
@@ -90,8 +90,8 @@ func loadSecrets() {
 
 	// when running locally we shouldn't send axiom / pirsch
 	if isDev() || flgRunProdLocal {
-		panicIf(axiomApiToken != "")
-		panicIf(pirschClientSecret != "")
+		axiomApiToken = ""
+		pirschClientSecret = ""
 	}
 }
 
