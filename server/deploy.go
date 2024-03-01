@@ -283,9 +283,9 @@ func deployToHetzner() {
 	logf("Running on http://%s:%d or https://%s\n", deployServerIP, httpPort, domain)
 }
 
-func countEmbeddedFiles() int {
+func countFilesInFS(fsys fs.ReadDirFS) int {
 	n := 0
-	u.IterReadDirFS(wwwFS, ".", func(filePath string, d fs.DirEntry) error {
+	u.IterReadDirFS(fsys, ".", func(filePath string, d fs.DirEntry) error {
 		n++
 		return nil
 	})
@@ -293,7 +293,7 @@ func countEmbeddedFiles() int {
 }
 
 func checkHasEmbeddedFiles() {
-	nEmbedded := countEmbeddedFiles()
+	nEmbedded := countFilesInFS(wwwFS)
 	if nEmbedded < 5 {
 		logf("not enough embedded files ('%d')\n", nEmbedded)
 		os.Exit(1)

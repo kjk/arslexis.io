@@ -374,10 +374,15 @@ func runServerProd() {
 }
 
 func runServerProdLocal() {
-	rebuildFrontend()
+	var fsys fs.FS
+	if countFilesInFS(wwwFS) > 0 {
+		fsys = mkFsysEmbedded()
+	} else {
+		rebuildFrontend()
+		fsys = mkFsysDirDist()
+	}
 	GitCommitHash, _ = getGitHashDateMust()
 
-	fsys := mkFsysDirDist()
 	serveOpts := &hutil.ServeFileOptions{
 		SupportCleanURLS: true,
 		ForceCleanURLS:   true,
@@ -385,7 +390,7 @@ func runServerProdLocal() {
 		//ServeCompressed:  true,
 	}
 	httpSrv := makeHTTPServer(serveOpts, nil)
-	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
+	logf("runServerProdLocal(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
 	if isWinOrMac() {
 		time.Sleep(time.Second * 2)
 		u.OpenBrowser("http://" + httpSrv.Addr)
