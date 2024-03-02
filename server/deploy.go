@@ -239,7 +239,7 @@ func deployToHetzner() {
 	deleteOldBuilds()
 	exeName := buildForProd(true)
 	panicIf(!u.FileExists(exeName), "file '%s' doesn't exist", exeName)
-	defer emptyFrontEndBuildDir()
+	emptyFrontEndBuildDir()
 
 	serverExePath := path.Join(deployServerDir, exeName)
 
