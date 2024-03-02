@@ -3,12 +3,9 @@
   function isLocal() {
     return host.includes("localhost");
   }
-  let scheme = isLocal() ? "http://" : "https://";
 </script>
 
-<div class="flex items-center justify-between mx-4 mt-2">
-  <div></div>
-  <div>Tools for all kinds of things</div>
+<div class="flex items-center justify-between mx-4 mt-2 fixed top-0 right-0">
   <div class="flex">
     <a
       class="px-1 py-1 mr-1 hover:underline text-xs"
@@ -81,9 +78,32 @@
   </div>
 </div>
 
-<div class="mx-4 mt-4">
-  <div>Tools:</div>
-  <table class="table-auto ml-4">
+<div class="min-h-screen flex flex-col">
+  <div class="flex flex-col items-center pt-2 pb-4">
+    <div
+      class="text-6xl font-bold outlined-text"
+      style="font-family: 'Cooper Black', 'Roboto', sans-serif;"
+    >
+      <a href="https://arslexis.io">ArsLexis</a>
+    </div>
+    <!-- <img src={logo} alt="ArsLexis Logo" width="220" /> -->
+    <div class="text-sm text-gray-600 mt-2">
+      independent software company by creator of <a
+        class="underline"
+        target="_blank"
+        href="https://www.sumatrapdfreader.org/free-pdf-reader">SumatraPDF</a
+      >
+    </div>
+  </div>
+
+  <div class="text-center">
+    Tools in the browser by <a
+      class="underline text-gray-600"
+      href="https://arslexis.io">ArsLexis</a
+    >
+  </div>
+
+  <table class="table-auto mx-8 mt-2">
     <tr>
       <td class="text-left align-top"
         ><a class="underline whitespace-nowrap" href="/notepad2/">notepad2</a>
@@ -138,80 +158,69 @@
       <td class="pl-4 align-top">like <tt>wc</tt>, but in the browser</td>
     </tr>
   </table>
-</div>
 
-<div class="mx-4 mt-4">
   {#if isLocal()}
-    <div id="in-progress" class="mt-8">
+    <div id="in-progress" class="mt-4 text-center">
       Tools in progress <span class="text-red-500"
         >i.e. not fully implemented</span
       >:
-      <table class="table-auto ml-4">
-        <tr>
-          <td class="text-left align-top">
-            <a class="underline whitespace-nowrap" href="/reader/">reader</a>
-          </td>
-          <td class="pl-4 align-top">Comic Book (.cbz, .cbr) reader</td>
-        </tr>
-
-        <tr>
-          <td
-            ><a class="underline" href="/image-resize-optimize/"
-              >image resize and optimize</a
-            ></td
-          >
-          <td class="pl-4 align-top"
-            >optimize and resize multiple images at once</td
-          >
-        </tr>
-
-        <tr>
-          <td><a class="underline" href="/qrscanner/">qrscanner</a></td>
-          <td class="pl-4 align-top">qrscanner</td>
-        </tr>
-      </table>
-      <ul></ul>
     </div>
+
+    <table class="table-auto mx-8 mt-2">
+      <tr>
+        <td class="text-left align-top">
+          <a class="underline whitespace-nowrap" href="/reader/">reader</a>
+        </td>
+        <td class="pl-4 align-top">Comic Book (.cbz, .cbr) reader</td>
+      </tr>
+
+      <tr>
+        <td
+          ><a class="underline" href="/image-resize-optimize/"
+            >image resize and optimize</a
+          ></td
+        >
+        <td class="pl-4 align-top"
+          >optimize and resize multiple images at once</td
+        >
+      </tr>
+
+      <tr>
+        <td><a class="underline" href="/qrscanner/">qrscanner</a></td>
+        <td class="pl-4 align-top">qrscanner</td>
+      </tr>
+    </table>
   {/if}
 
-  <div class="mt-8">
-    <div>
-      Have feedback?
-      <ul>
-        <li class="ml-4">
-          <a
-            class="underline"
-            href="https://github.com/kjk/onlinetool.io/discussions"
-            target="_blank">discuss</a
-          >
-        </li>
-        <li class="ml-4">
-          <a
-            class="underline"
-            href="https://github.com/kjk/onlinetool.io/issues"
-            target="_blank">request features</a
-          >
-        </li>
-        <li class="ml-4">
-          <a
-            class="underline"
-            href="https://github.com/kjk/onlinetool.io/issues"
-            target="_blank">report bugs</a
-          >
-        </li>
-        <li class="ml-4">
-          <a
-            class="underline"
-            href="https://blog.kowalczyk.info/contactme"
-            target="_blank">contact me</a
-          >
-        </li>
-      </ul>
-    </div>
+  <div class="mt-8 mx-8 flex gap-2">
+    <div>Have feedback?</div>
+    <a
+      class="underline"
+      href="https://github.com/kjk/onlinetool.io/discussions"
+      target="_blank">discuss</a
+    >
+    <div>&bull;</div>
+    <a
+      class="underline"
+      href="https://github.com/kjk/onlinetool.io/issues"
+      target="_blank">request features</a
+    >
+    <div>&bull;</div>
+    <a
+      class="underline"
+      href="https://github.com/kjk/onlinetool.io/issues"
+      target="_blank">report bugs</a
+    >
+    <div>&bull;</div>
+    <a
+      class="underline"
+      href="https://blog.kowalczyk.info/contactme"
+      target="_blank">contact me</a
+    >
   </div>
-
-  <hr class="mt-8" />
-  <div class="flex justify-center">
+  <div class="grow" />
+  <hr class="mt-4" />
+  <div class="text-center my-2">
     Made by&nbsp;<a
       class="underline"
       target="_blank"
@@ -219,3 +228,15 @@
     >
   </div>
 </div>
+
+<style>
+  .outlined-text {
+    color: rgb(248 250 252);
+    color: #fff;
+    text-shadow:
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px 1px 0 #000;
+  }
+</style>
