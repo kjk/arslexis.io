@@ -143,7 +143,7 @@ func createEmptyFile(path string, content string) {
 
 func emptyFrontEndBuildDir() {
 	os.RemoveAll(frontEndBuildDir)
-	createEmptyFile(path.Join(frontEndBuildDir, "gitkeep.txt"), "don't delete this folder\n")
+	createEmptyFile(filepath.Join(frontEndBuildDir, "gitkeep.txt"), "don't delete this folder\n")
 }
 
 func hasBun() bool {
