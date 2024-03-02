@@ -149,12 +149,31 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	logLogin(ctx, r, token)
 }
 
+func maybeRedirectToToolArslexis(w http.ResponseWriter, r *http.Request) bool {
+	// if host is onlinetool.io redirect all urls to tools.arslexis.io
+	// this is to make sure that all urls are consistent
+	if strings.Contains(r.Host, "onlinetool.io") {
+		uri := "https://tools.arslexis.io" + r.URL.String()
+		logf("maybeRedirect: redirecting to '%s'\n", uri)
+		tempRedirect(w, r, uri)
+		return true
+	}
+	return false
+}
+
 // in dev, proxyHandler redirects assets to vite web server
 // in prod, assets must be pre-built in frontend/dist directory
 func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.ReverseProxy) *http.Server {
 	panicIf(serveOpts == nil, "must provide serveOpts")
 
 	mainHandler := func(w http.ResponseWriter, r *http.Request) {
+		// TODO: enable this and test
+		if false {
+			if maybeRedirectToToolArslexis(w, r) {
+				return
+			}
+		}
+
 		uri := r.URL.Path
 		logf("mainHandler: '%s'\n", r.RequestURI)
 
