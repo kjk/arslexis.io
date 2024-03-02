@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -157,7 +156,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 
 	mainHandler := func(w http.ResponseWriter, r *http.Request) {
 		uri := r.URL.Path
-		logf("mainHandler: RequestURI: '%s', uri: '%s'\n", r.RequestURI, uri)
+		logf("mainHandler: '%s'\n", r.RequestURI)
 
 		switch uri {
 		case "/ping", "/ping.txt":
@@ -212,11 +211,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 			return
 		}
 
-		// note that path.Join("/dist/", "/") returns "/dist" so we rely
-		// on TryServeFileFromURL() to serve "/dist" with "/dist/index.html" (if exists)
-		urlPath := path.Join("/dist/", uri)
-		logf("mainHandler: before TryServeFileFromURL urlPath: '%s', uri: '%s'\n", urlPath, uri)
-		if hutil.TryServeFileFromURL(w, r, urlPath, serveOpts) {
+		if hutil.TryServeURLFromFS(w, r, serveOpts) {
 			logf("mainHandler: served '%s' via httputil.TryServeFile\n", uri)
 			return
 		}
@@ -312,6 +307,17 @@ func mkFsysDirPublic() fs.FS {
 	return fsys
 }
 
+func mkServeFileOptions(fsys fs.FS) *hutil.ServeFileOptions {
+	return &hutil.ServeFileOptions{
+		SupportCleanURLS:     true,
+		ForceCleanURLS:       true,
+		FS:                   fsys,
+		DirPrefix:            "dist/",
+		LongLivedURLPrefixes: []string{"/assets/"},
+		//ServeCompressed:  true,
+	}
+}
+
 func runServerDev() {
 	if hasBun() {
 		u.RunLoggedInDir("frontend", "bun", "install")
@@ -330,12 +336,7 @@ func runServerDev() {
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
 
 	fsys := mkFsysDirPublic()
-	serveOpts := &hutil.ServeFileOptions{
-		SupportCleanURLS: true,
-		ForceCleanURLS:   true,
-		FS:               fsys,
-		//ServeCompressed:  true,
-	}
+	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, proxyHandler)
 
 	//closeHTTPLog := OpenHTTPLog("onlinetool")
@@ -354,12 +355,7 @@ func runServerProd() {
 	checkHasEmbeddedFiles()
 
 	fsys := mkFsysEmbedded()
-	serveOpts := &hutil.ServeFileOptions{
-		SupportCleanURLS: true,
-		ForceCleanURLS:   true,
-		FS:               fsys,
-		//ServeCompressed:  true,
-	}
+	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
 	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
 	if isWinOrMac() {
@@ -380,12 +376,7 @@ func runServerProdLocal() {
 	}
 	GitCommitHash, _ = getGitHashDateMust()
 
-	serveOpts := &hutil.ServeFileOptions{
-		SupportCleanURLS: true,
-		ForceCleanURLS:   true,
-		FS:               fsys,
-		//ServeCompressed:  true,
-	}
+	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
 	logf("runServerProdLocal(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
 	if isWinOrMac() {

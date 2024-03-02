@@ -1,5 +1,7 @@
 cloud.google.com/go/compute/metadata v0.2.0/go.mod h1:zFmK7XCadkQkj6TtorcaGlCW1hT1fIilQDwofLpJ20k=
 github.com/google/go-cmp v0.5.8/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/kjk/common v0.0.0-20240301235650-a0b932e9adc0 h1:fFwlhKGruc5RprTX0JIx9vhGuJI2HsciPak1RZeq0II=
+github.com/kjk/common v0.0.0-20240301235650-a0b932e9adc0/go.mod h1:nz7rSohO5slcZaZk2GVDeHejdojJ0eWAv/OGg3I0SpM=
 golang.org/x/mod v0.8.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/term v0.6.0 h1:clScbb1cHjoCkyRbWwBEUZ5H/tIFu5TAXIqaZD0Gcjw=
 golang.org/x/term v0.6.0/go.mod h1:m6U89DPEgQRMq3DNkDClhWw02AUbt2daBVO4cn4Hv9U=

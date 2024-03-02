@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/kjk/common v0.0.0-20240229151902-942a34b44210
+	github.com/kjk/common v0.0.0-20240301235650-a0b932e9adc0
 	github.com/kjk/minioutil v0.0.0-20230422073834-96945ac7e481
 	github.com/mailgun/mailgun-go/v4 v4.12.0
 	github.com/melbahja/goph v1.4.0
@@ -47,3 +47,4 @@ require (
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
+
