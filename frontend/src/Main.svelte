@@ -103,7 +103,18 @@
     >
   </div>
 
-  <table class="table-auto mx-8 mt-2">
+  <table class="table-auto mx-8 mt-2 striped-tr">
+    <tr>
+      <td class="text-left align-top"
+        ><a class="underline whitespace-nowrap" href="https://edna.arslexis.io"
+          >Edna</a
+        >
+      </td>
+      <td class="pl-4 align-top"
+        >a scratchpad / note taker for developers and race car drivers</td
+      >
+    </tr>
+
     <tr>
       <td class="text-left align-top"
         ><a class="underline whitespace-nowrap" href="/notepad2/">notepad2</a>
@@ -238,5 +249,8 @@
       1px -1px 0 #000,
       -1px 1px 0 #000,
       1px 1px 0 #000;
+  }
+  tr:nth-child(odd) {
+    @apply bg-slate-50;
   }
 </style>
