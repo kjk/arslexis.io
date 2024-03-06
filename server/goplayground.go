@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const userAgent = "http://onlinetool.io/goplayground/"
+const userAgent = "http://tools.arslexis.io/goplayground/"
 
 // maxSnippetSize value taken from
 // https://github.com/golang/playground/blob/master/app/goplay/share.go
@@ -61,7 +61,7 @@ func doRequest(method, url, contentType string, body io.Reader) ([]byte, error) 
 		return nil, err
 	}
 	if bodyBytes.Len() > maxSnippetSize {
-		return nil, errors.New("Snippet is too large")
+		return nil, errors.New("snippet is too large")
 	}
 	return bodyBytes.Bytes(), nil
 }
@@ -97,7 +97,7 @@ func fmtHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Failed to read request data", http.StatusInternalServerError)
 		return
@@ -122,7 +122,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Failed to read request data", http.StatusInternalServerError)
 		return
