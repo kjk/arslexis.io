@@ -82,7 +82,7 @@
   <div class="flex flex-col items-center pt-2 pb-4">
     <div
       class="text-6xl font-bold outlined-text"
-      style="font-family: 'Cooper Black', 'Roboto', sans-serif;"
+      style="font-family: 'Cooper Black', 'Arial Rounded MT Bold', 'Futura', 'Roboto', sans-serif;"
     >
       <a href="https://arslexis.io">ArsLexis</a>
     </div>
