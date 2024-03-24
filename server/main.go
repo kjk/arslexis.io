@@ -4,7 +4,6 @@ import (
 	"flag"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/kjk/common/u"
 )
@@ -107,13 +106,6 @@ var (
 
 func isDev() bool {
 	return flgRunDev
-}
-
-func measureDuration() func() {
-	timeStart := time.Now()
-	return func() {
-		logf("took %s\n", time.Since(timeStart))
-	}
 }
 
 func main() {

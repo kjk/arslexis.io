@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/kjk/common/u"
 )
@@ -148,5 +149,12 @@ func updateGoDeps(noProxy bool) {
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		panicIf(err != nil, "go get failed with '%s'", err)
+	}
+}
+
+func measureDuration() func() {
+	timeStart := time.Now()
+	return func() {
+		logf("took %s\n", time.Since(timeStart))
 	}
 }
