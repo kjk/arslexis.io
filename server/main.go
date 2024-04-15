@@ -118,7 +118,7 @@ func main() {
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
-		flag.BoolVar(&flgRunProdLocal, "run-prod-local", false, "run server in production but locally")
+		flag.BoolVar(&flgRunProdLocal, "run-local-prod", false, "run server in production but locally")
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
@@ -170,7 +170,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	panicIf(n > 1, "can only use one of: -run-dev, -run-prod, -run-prod-local")
+	panicIf(n > 1, "can only use one of: -run-dev, -run-prod, -run-local-prod")
 
 	loadSecrets()
 

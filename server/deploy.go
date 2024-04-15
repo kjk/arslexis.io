@@ -98,7 +98,7 @@ func copyToServerMaybeGzippedMust(client *goph.Client, sftp *sftp.Client, localP
 	if gzipped {
 		remotePath += ".gz"
 		sftpFileNotExistsMust(sftp, remotePath)
-		u.GzipFile(localPath+".gz", localPath)
+		u.GzipCompressFile(localPath+".gz", localPath)
 		localPath += ".gz"
 		defer os.Remove(localPath)
 	}

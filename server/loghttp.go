@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	httpLogger *httplogger.Logger
+	httpLogger *httplogger.File
 )
 
 func logHTTPReq(r *http.Request, code int, size int64, dur time.Duration) {
