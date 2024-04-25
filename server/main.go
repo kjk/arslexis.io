@@ -13,8 +13,6 @@ import (
 var (
 	// for github login when running on localhost
 	secretGitHubLocal = ""
-	// for github login when running on onlinetool.io
-	secretGitHubOnlineTool = ""
 	// for github login when running on tools.arslexis.io
 	secretGitHubToolsArslexis = ""
 
@@ -30,7 +28,6 @@ const secretsDev = `# secrets for dev mode
 # COOKIE_ENCR_KEY=2780ffc17eec2d85960473c407ee37c0249db93e4586ec52e3ef9e153ba61e72
 AXIOM_TOKEN=
 PIRSCH_SECRET=
-GITHUB_SECRET_ONLINETOOL=
 GITHUB_SECRET_TOOLS_ARSLEXIS=
 GITHUB_SECRET_LOCAL=
 MAILGUN_DOMAIN=
@@ -85,7 +82,6 @@ func loadSecrets() {
 	must = flgRunProd
 	getEnv("AXIOM_TOKEN", &axiomApiToken, 40, must)
 	getEnv("PIRSCH_SECRET", &pirschClientSecret, 64, must)
-	getEnv("GITHUB_SECRET_ONLINETOOL", &secretGitHubOnlineTool, 40, must)
 	getEnv("GITHUB_SECRET_TOOLS_ARSLEXIS", &secretGitHubToolsArslexis, 40, must)
 	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
 	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
@@ -151,8 +147,8 @@ func main() {
 	}
 
 	if GitCommitHash != "" {
-		uriBase := "https://github.com/kjk/onlinetool.io/commit/"
-		logf("onlinetool.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
+		uriBase := "https://github.com/kjk/tools.arslexis.io/commit/"
+		logf("tools.arslexis.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
 	}
 
 	if flgUpdateGoDeps {

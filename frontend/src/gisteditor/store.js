@@ -1,7 +1,3 @@
-import { writable } from "svelte/store";
-import { len, startTimer } from "../util.js";
-import { clearMessage, showError, showMessage } from "../Messages.svelte";
-import { setOnGitHubLogin } from "../github_login.js";
 import {
   addHeader,
   addToken,
@@ -9,9 +5,14 @@ import {
   checkResponse,
   getLinkNext,
 } from "../githubapi.js";
-import { logEvent } from "../events.js";
+import { clearMessage, showError, showMessage } from "../Messages.svelte";
+import { len, startTimer } from "../util.js";
+
 // @ts-ignore
 import Dexie from "https://esm.sh/dexie@3.2.3";
+import { getLoggedUser } from "../github_login.js";
+import { logEvent } from "../events.js";
+import { writable } from "svelte/store";
 
 // localStorage key for gists
 export const cacheKeyGistsForLoggedUser = "gists_for_logged_user";
@@ -236,6 +237,7 @@ export async function getGistsForLoggedUser() {
   const gists = v.result;
   const meta = {
     fromCache: v.fromCache,
+    user: getLoggedUser(),
   };
   logEvent("getGistsForLoggedUser", elapsedFn(), meta);
   console.log(`getGistsForLoggedUser: ${len(gists)} in ${elapsedFn()} ms`);

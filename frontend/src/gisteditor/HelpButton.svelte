@@ -19,7 +19,7 @@
       <div>
         <a
           on:click={hideMenu}
-          href="https://onlinetool.io/docs/gist-editor"
+          href="https://tools.arslexis.io/docs/gist-editor"
           target="_blank"
           rel="noreferrer"
         >
@@ -29,7 +29,7 @@
       <div>
         <a
           on:click={hideMenu}
-          href="https://onlinetool.io/docs/gist-editor"
+          href="https://tools.arslexis.io/docs/gist-editor"
           target="_blank"
           rel="noreferrer"
         >
@@ -62,7 +62,9 @@
   .help {
     cursor: pointer;
     user-select: none;
-    transition: opacity 700ms ease 0s, color 700ms ease 0s;
+    transition:
+      opacity 700ms ease 0s,
+      color 700ms ease 0s;
     position: absolute;
     display: flex;
     align-items: center;
@@ -74,7 +76,8 @@
     height: 36px;
     border-radius: 100%;
     font-size: 20px;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+    box-shadow:
+      rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
       rgba(15, 15, 15, 0.1) 0px 2px 4px;
     z-index: 40;
     opacity: 1;

@@ -7,4 +7,4 @@ Major reasons for differences:
 * differences between Scintilla editing component used by notepad2 and Code Mirror 6 editing component used by us
 * features that I haven't yet implemented
 
-Feel free to [request features](https://github.com/kjk/onlinetool.io/labels/notepad2) that are most important to you.
+Feel free to [request features](https://github.com/kjk/tools.arslexis.io/labels/notepad2) that are most important to you.

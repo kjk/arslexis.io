@@ -1,6 +1,6 @@
 # Gist Editor
 
-[Gist Editor](https://onlinetool.io/gisteditor/) is a better editor / manager for GitHub Gists.
+[Gist Editor](https://tools.arslexis.io/gisteditor/) is a better editor / manager for GitHub Gists.
 
 Log in with GitHub to:
 * edit existing gists

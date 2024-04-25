@@ -27,7 +27,7 @@
   <div class="ml-8">
     <a
       class="px-3 py-1 hover:bg-gray-100"
-      href="https://onlinetool.io/docs/gist-editor"
+      href="https://tools.arslexis.io/docs/gist-editor"
       on:click|preventDefault={() => (showingAbout = !showingAbout)}
       target="_blank"
       rel="noreferrer"
@@ -38,7 +38,7 @@
   <div>
     <a
       class="px-3 py-1 hover:bg-gray-100"
-      href="https://onlinetool.io/docs/gist-editor"
+      href="https://tools.arslexis.io/docs/gist-editor"
       target="_blank"
       rel="noreferrer"
     >

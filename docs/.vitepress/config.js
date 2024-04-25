@@ -1,15 +1,15 @@
 export default {
-  title: "onlinetool.io",
-  description: "Documentation for onlintool.io tools",
+  title: "tools.arslexis.io",
+  description: "Documentation for tools.arslexis.io",
   cleanUrls: true,
   base: "/docs/",
   srcDir: "./markdown",
   outDir: "../dist/docs",
 
   themeConfig: {
-    siteTitle: "onlinetool.io",
+    siteTitle: "tools.arslexis.io",
     editLink: {
-      pattern: "https://github.com/kjk/onlinetool/edit/main/docs/:path",
+      pattern: "https://github.com/kjk/tools.arslexis.io/edit/main/docs/:path",
     },
     sidebar: [
       {

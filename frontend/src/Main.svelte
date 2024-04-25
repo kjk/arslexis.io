@@ -9,7 +9,7 @@
   <div class="flex">
     <a
       class="px-1 py-1 mr-1 hover:underline text-xs"
-      href="https://github.com/kjk/onlinetool.io/discussions"
+      href="https://github.com/kjk/tools.arslexis.io/discussions"
       target="_blank"
       rel="noreferrer"
     >
@@ -17,7 +17,7 @@
     </a>
     <a
       class="px-1 py-1 mr-1 hover:bg-gray-100"
-      href="https://github.com/kjk/onlinetool.io"
+      href="https://github.com/kjk/tools.arslexis.io"
       target="_blank"
       rel="noreferrer"
     >
@@ -207,19 +207,19 @@
     <div>Have feedback?</div>
     <a
       class="underline"
-      href="https://github.com/kjk/onlinetool.io/discussions"
+      href="https://github.com/kjk/tools.arslexis.io/discussions"
       target="_blank">discuss</a
     >
     <div>&bull;</div>
     <a
       class="underline"
-      href="https://github.com/kjk/onlinetool.io/issues"
+      href="https://github.com/kjk/tools.arslexis.io/issues"
       target="_blank">request features</a
     >
     <div>&bull;</div>
     <a
       class="underline"
-      href="https://github.com/kjk/onlinetool.io/issues"
+      href="https://github.com/kjk/tools.arslexis.io/issues"
       target="_blank">report bugs</a
     >
     <div>&bull;</div>

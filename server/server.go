@@ -62,11 +62,6 @@ func getGithubConfig(r *http.Request) *oauth2.Config {
 			githubConfig.ClientID = "77ba1cbe7c0eff7c462b"
 			githubConfig.ClientSecret = secretGitHubLocal
 			logf("getGithubConfig: using localhost config\n")
-		} else if strings.Contains(host, "onlinetool.io") {
-			// https://github.com/settings/applications/2098699 : onlinetool.io
-			githubConfig.ClientID = "389af84bdce4b478ad7b"
-			githubConfig.ClientSecret = secretGitHubOnlineTool
-			logf("getGithubConfig: using onlinetool.io config\n")
 		} else if strings.Contains(host, "tools.arslexis.io") {
 			// https://github.com/settings/applications/2495749 : tools.arslexis.io
 			githubConfig.ClientID = "ff6bcecdb5df037a208d"
@@ -148,31 +143,12 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
 	logLogin(ctx, r, token)
 }
 
-func maybeRedirectToToolArslexis(w http.ResponseWriter, r *http.Request) bool {
-	// if host is onlinetool.io redirect all urls to tools.arslexis.io
-	// this is to make sure that all urls are consistent
-	if strings.Contains(r.Host, "onlinetool.io") {
-		uri := "https://tools.arslexis.io" + r.URL.String()
-		logf("maybeRedirect: redirecting to '%s'\n", uri)
-		tempRedirect(w, r, uri)
-		return true
-	}
-	return false
-}
-
 // in dev, proxyHandler redirects assets to vite web server
 // in prod, assets must be pre-built in frontend/dist directory
 func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.ReverseProxy) *http.Server {
 	panicIf(serveOpts == nil, "must provide serveOpts")
 
 	mainHandler := func(w http.ResponseWriter, r *http.Request) {
-		// TODO: enable this and test
-		if false {
-			if maybeRedirectToToolArslexis(w, r) {
-				return
-			}
-		}
-
 		uri := r.URL.Path
 		logf("mainHandler: '%s'\n", r.RequestURI)
 

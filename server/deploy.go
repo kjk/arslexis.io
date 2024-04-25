@@ -18,10 +18,10 @@ import (
 // variables to customize
 var (
 	projectName       = "onlinetool"
-	domain            = "onlinetool.io"
+	domain            = "tools.arslexis.io"
 	httpPort          = 9301
 	frontEndBuildDir  = filepath.Join("server", "dist")
-	wantedProdSecrets = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_ONLINETOOL", "GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
+	wantedProdSecrets = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
 )
 
 // stuff that is derived from the above
@@ -38,7 +38,7 @@ var (
 	GitCommitHash string
 
 	caddyConfigDelim = "# ---- " + domain
-	caddyConfig      = fmt.Sprintf(`%s, tools.arslexis.io {
+	caddyConfig      = fmt.Sprintf(`%s {
 	reverse_proxy localhost:%v
 }`, domain, httpPort)
 

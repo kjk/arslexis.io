@@ -3,7 +3,7 @@ import { httpPostJSON } from "../httputil";
 export let disableEvents = false;
 
 export function logNpEvent(name, durMs = 0, meta = {}) {
-  if (disableEvents || window.location.host !== "onlinetool.io") {
+  if (disableEvents) {
     return;
   }
   if (durMs > 0) {

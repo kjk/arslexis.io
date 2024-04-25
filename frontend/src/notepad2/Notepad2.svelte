@@ -1630,21 +1630,21 @@
         clearClipboard();
         break;
       case m.IDM_HELP_PROJECT_HOME:
-        window.open("https://onlinetool.io/docs/notepad2", "_blank");
+        window.open("https://tools.arslexis.io/docs/notepad2", "_blank");
         break;
       case m.IDM_HELP_REPORT_ISSUE:
       case m.IDM_HELP_FEATURE_REQUEST:
         window.open(
-          "https://github.com/kjk/onlinetool.io/labels/notepad2",
+          "https://github.com/kjk/tools.arslexis.io/labels/notepad2",
           "_blank"
         );
         break;
       case m.IDM_HELP_SOURCE_CODE:
-        window.open("https://github.com/kjk/onlinetool.io", "_blank");
+        window.open("https://github.com/kjk/tools.arslexis.io", "_blank");
         break;
       case m.IDM_HELP_DISCUSS:
         window.open(
-          "https://github.com/kjk/onlinetool.io/discussions/categories/notepad2",
+          "https://github.com/kjk/tools.arslexis.io/discussions/categories/notepad2",
           "_blank"
         );
         break;
@@ -1918,7 +1918,7 @@
       <div class="grow" />
       <a
         class="px-1 py-1 mr-1 hover:underline text-xs"
-        href="https://github.com/kjk/onlinetool.io/discussions"
+        href="https://github.com/kjk/tools.arslexis.io/discussions"
         target="_blank"
         rel="noreferrer"
       >
@@ -1926,7 +1926,7 @@
       </a>
       <a
         class="px-1 py-1 mr-1 hover:bg-gray-100"
-        href="https://github.com/kjk/onlinetool.io"
+        href="https://github.com/kjk/tools.arslexis.io"
         target="_blank"
         rel="noreferrer"
       >
