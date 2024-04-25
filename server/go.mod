@@ -15,12 +15,13 @@ require (
 	github.com/pirsch-analytics/pirsch-go-sdk v1.9.0
 	github.com/pkg/sftp v1.13.6
 	github.com/rodaine/table v1.2.0
-	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
+	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 	golang.org/x/oauth2 v0.19.0
 )
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/carlmjohnson/requests v0.23.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emvi/null v1.3.1 // indirect

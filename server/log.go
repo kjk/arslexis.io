@@ -2,6 +2,13 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/kjk/common/logtastic"
+	"github.com/kjk/common/u"
+)
+
+var (
+	verboseLog = false
 )
 
 func logf(s string, args ...interface{}) {
@@ -9,6 +16,7 @@ func logf(s string, args ...interface{}) {
 		s = fmt.Sprintf(s, args...)
 	}
 	fmt.Print(s)
+	logtastic.Log(s)
 }
 
 func logErrorf(format string, args ...interface{}) {
@@ -16,8 +24,10 @@ func logErrorf(format string, args ...interface{}) {
 	if len(args) > 0 {
 		s = fmt.Sprintf(format, args...)
 	}
-	cs := getCallstack(1)
-	logf("Error: %s\n%s\n", s, cs)
+	cs := u.GetCallstack(1)
+	s = fmt.Sprintf("Error: %s\n%s\n", s, cs)
+	fmt.Print(s)
+	logtastic.LogError(nil, s)
 }
 
 // return true if there was an error
@@ -34,12 +44,25 @@ func logIfErrf(err error, msgAndArgs ...interface{}) bool {
 		}
 	}
 
-	cs := getCallstack(1)
+	cs := u.GetCallstack(1)
+	var s string
 	if msg != "" {
-		logf("Error: %s\n%s\n%s\n", err, msg, cs)
-
+		s = fmt.Sprintf("Error: %s\n%s\n%s\n", err, msg, cs)
 	} else {
-		logf("Error: %s\n%s\n", err, cs)
+		s = fmt.Sprintf("Error: %s\n%s\n", err, cs)
 	}
+	fmt.Print(s)
+	logtastic.LogError(nil, s)
 	return true
+}
+
+func logvf(s string, args ...interface{}) {
+	if !verboseLog {
+		return
+	}
+
+	if len(args) > 0 {
+		s = fmt.Sprintf(s, args...)
+	}
+	fmt.Print(s)
 }

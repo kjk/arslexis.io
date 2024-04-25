@@ -10,14 +10,13 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/felixge/httpsnoop"
 	hutil "github.com/kjk/common/httputil"
+	"github.com/kjk/common/logtastic"
 
 	"github.com/google/go-github/github"
 	"github.com/kjk/common/u"
@@ -191,7 +190,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 		}
 
 		if strings.HasPrefix(uri, "/event/") {
-			handleEvent(w, r)
+			logtastic.HandleEvent(w, r)
 			return
 		}
 
@@ -247,6 +246,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 				http.Error(w, errStr, http.StatusInternalServerError)
 				return
 			}
+			logtastic.LogHit(r, m.Code, m.Written, m.Duration)
 			logHTTPReq(r, m.Code, m.Written, m.Duration)
 			if m.Code == 200 {
 				pirschSendHit(r)
@@ -269,7 +269,19 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 	return httpSrv
 }
 
-func serverListenAndWait(httpSrv *http.Server) func() {
+func maybeOpenBrowserDelayed(httpSrv *http.Server) {
+	if !u.IsWinOrMac() {
+		return
+	}
+	// 3 secs to get the server tim to start up
+	time.AfterFunc(time.Second*3, func() {
+		u.OpenBrowser("http://" + httpSrv.Addr)
+	})
+}
+
+func serverListenAndWait(httpSrv *http.Server) {
+	logf("serverListenAndWait: listening on '%s', isDev: %v\n", httpSrv.Addr, isDev())
+
 	chServerClosed := make(chan bool, 1)
 	go func() {
 		err := httpSrv.ListenAndServe()
@@ -285,22 +297,19 @@ func serverListenAndWait(httpSrv *http.Server) func() {
 		chServerClosed <- true
 	}()
 
-	return func() {
-		// Ctrl-C sends SIGINT
-		sctx, stop := signal.NotifyContext(ctx(), os.Interrupt /*SIGINT*/, os.Kill /* SIGKILL */, syscall.SIGTERM)
-		defer stop()
-		<-sctx.Done()
+	waitForSigIntOrKill()
 
-		logf("Got one of the signals. Shutting down http server\n")
-		_ = httpSrv.Shutdown(ctx())
-		select {
-		case <-chServerClosed:
-			// do nothing
-		case <-time.After(time.Second * 5):
-			// timeout
-			logf("timed out trying to shut down http server")
-		}
+	logf("Got one of the signals. Shutting down http server\n")
+	_ = httpSrv.Shutdown(ctx())
+	select {
+	case <-chServerClosed:
+		// do nothing
+	case <-time.After(time.Second * 5):
+		// timeout
+		logf("timed out trying to shut down http server")
 	}
+	logf("stopping logtastic\n")
+	logtastic.Stop()
 }
 
 func mkFsysEmbedded() fs.FS {
@@ -362,12 +371,8 @@ func runServerDev() {
 	//defer closeHTTPLog()
 
 	logf("runServerDev(): starting on '%s', dev: %v\n", httpSrv.Addr, isDev())
-	if isWinOrMac() {
-		time.Sleep(time.Second * 2)
-		u.OpenBrowser("http://" + httpSrv.Addr)
-	}
-	waitFn := serverListenAndWait(httpSrv)
-	waitFn()
+	maybeOpenBrowserDelayed(httpSrv)
+	serverListenAndWait(httpSrv)
 }
 
 func runServerProd() {
@@ -377,12 +382,7 @@ func runServerProd() {
 	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
 	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
-	if isWinOrMac() {
-		time.Sleep(time.Second * 2)
-		u.OpenBrowser("http://" + httpSrv.Addr)
-	}
-	waitFn := serverListenAndWait(httpSrv)
-	waitFn()
+	serverListenAndWait(httpSrv)
 }
 
 func runServerProdLocal() {
@@ -398,11 +398,7 @@ func runServerProdLocal() {
 	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
 	logf("runServerProdLocal(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
-	if isWinOrMac() {
-		time.Sleep(time.Second * 2)
-		u.OpenBrowser("http://" + httpSrv.Addr)
-	}
-	waitFn := serverListenAndWait(httpSrv)
-	waitFn()
+	maybeOpenBrowserDelayed(httpSrv)
+	serverListenAndWait(httpSrv)
 	emptyFrontEndBuildDir()
 }

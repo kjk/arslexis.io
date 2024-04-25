@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/kjk/common/logtastic"
 	"github.com/kjk/common/u"
 )
 
@@ -15,6 +17,8 @@ var (
 	secretGitHubOnlineTool = ""
 	// for github login when running on tools.arslexis.io
 	secretGitHubToolsArslexis = ""
+
+	dataDirCached string
 )
 
 // minimum amount of secrets that allows for running in dev mode
@@ -86,12 +90,32 @@ func loadSecrets() {
 	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
 	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
 	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
+	getEnv("LOGTASTIC_API_KEY", &logtastic.ApiKey, 30, must)
 
 	// when running locally we shouldn't send axiom / pirsch
 	if isDev() || flgRunProdLocal {
 		axiomApiToken = ""
 		pirschClientSecret = ""
 	}
+}
+
+func getDataDirMust() string {
+	if dataDirCached != "" {
+		return dataDirCached
+	}
+	dataDirCached = "data"
+	if flgRunProd {
+		dataDirCached = "/home/data/" + projectName
+	}
+	must(os.MkdirAll(dataDirCached, 0755))
+	return dataDirCached
+}
+
+func getLogsDirMust() string {
+	res := filepath.Join(getDataDirMust(), "logs")
+	err := os.MkdirAll(res, 0755)
+	must(err)
+	return res
 }
 
 var (
@@ -173,6 +197,15 @@ func main() {
 	panicIf(n > 1, "can only use one of: -run-dev, -run-prod, -run-local-prod")
 
 	loadSecrets()
+
+	logtastic.BuildHash = GitCommitHash
+	logtastic.LogDir = getLogsDirMust()
+	if flgRunProd {
+		logtastic.Server = "l.arslexis.io"
+	} else {
+		logtastic.Server = "127.0.0.1:9327"
+	}
+	logf("logtatistic server: %s\n", logtastic.Server)
 
 	if flgRunDev {
 		runServerDev()

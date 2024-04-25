@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kjk/common/u"
 	"github.com/mailgun/mailgun-go/v4"
 )
 
@@ -45,7 +46,7 @@ func notifyMeViaEmail(subject, body, userEmail string) {
 
 func sendCrashEmail(errStr string, r *http.Request) {
 	// for now e-mail myself about panics in prod
-	cs := getCallstack(3)
+	cs := u.GetCallstack(3)
 	uri := ""
 	if r != nil {
 		uri = r.RequestURI
