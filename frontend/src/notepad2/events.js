@@ -1,4 +1,4 @@
-import { httpPostJSON } from "../httputil";
+import { logEventRaw } from "../events";
 
 export let disableEvents = false;
 
@@ -10,6 +10,6 @@ export function logNpEvent(name, durMs = 0, meta = {}) {
     meta.dur = durMs.toFixed(0);
   }
   meta["app"] = "notepad2";
-  httpPostJSON(`/event/${name}`, meta);
-  console.log(`ev '${name}' took ${durMs} ms`);
+  meta["name"] = name;
+  logEventRaw(meta);
 }

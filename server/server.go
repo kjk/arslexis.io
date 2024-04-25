@@ -165,7 +165,8 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 			return
 		}
 
-		if strings.HasPrefix(uri, "/event/") {
+		if uri == "/event" {
+			logf("mainHandler: Logging event\n")
 			logtastic.HandleEvent(w, r)
 			return
 		}

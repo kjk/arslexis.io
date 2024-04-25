@@ -32,6 +32,7 @@ export function logEvent(name, durMs = 0, meta = {}) {
   if (durMs > 0) {
     meta.dur = durMs.toFixed(0);
   }
-  meta.name = name;
+  meta["app"] = "gistEditor";
+  meta["name"] = name;
   logEventRaw(meta);
 }
