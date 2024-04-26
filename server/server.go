@@ -275,8 +275,8 @@ func serverListenAndWait(httpSrv *http.Server) {
 	}()
 
 	u.WaitForSigIntOrKill()
+	logf("Got stop signal. Shutting down http server\n")
 
-	logf("Got one of the signals. Shutting down http server\n")
 	_ = httpSrv.Shutdown(ctx())
 	select {
 	case <-chServerClosed:
