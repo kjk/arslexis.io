@@ -274,7 +274,7 @@ func serverListenAndWait(httpSrv *http.Server) {
 		chServerClosed <- true
 	}()
 
-	waitForSigIntOrKill()
+	u.WaitForSigIntOrKill()
 
 	logf("Got one of the signals. Shutting down http server\n")
 	_ = httpSrv.Shutdown(ctx())

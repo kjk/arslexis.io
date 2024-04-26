@@ -153,7 +153,7 @@ func main() {
 
 	if flgUpdateGoDeps {
 		defer measureDuration()()
-		updateGoDeps(true)
+		u.UpdateGoDeps("server", true)
 		return
 	}
 

@@ -8,8 +8,6 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/kjk/common/u"
@@ -85,13 +83,6 @@ func sliceLimit[S ~[]E, E any](s S, max int) S {
 	return s
 }
 
-func waitForSigIntOrKill() {
-	// Ctrl-C sends SIGINT
-	sctx, stop := signal.NotifyContext(ctx(), os.Interrupt /*SIGINT*/, os.Kill /* SIGKILL */, syscall.SIGTERM)
-	defer stop()
-	<-sctx.Done()
-}
-
 func printFS(fsys fs.FS, startDir string) {
 	logf("printFS('%s')\n", startDir)
 	dfs := fsys.(fs.ReadDirFS)
@@ -102,30 +93,6 @@ func printFS(fsys fs.FS, startDir string) {
 		return nil
 	})
 	logf("%d files\n", nFiles)
-}
-
-func updateGoDeps(noProxy bool) {
-	{
-		cmd := exec.Command("go", "get", "-u", ".")
-		cmd.Dir = "server"
-		if noProxy {
-			cmd.Env = append(os.Environ(), "GOPROXY=direct")
-		}
-		logf("running: %s in dir '%s'\n", cmd.String(), cmd.Dir)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		panicIf(err != nil, "go get failed with '%s'", err)
-	}
-	{
-		cmd := exec.Command("go", "mod", "tidy")
-		cmd.Dir = "server"
-		logf("running: %s in dir '%s'\n", cmd.String(), cmd.Dir)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		panicIf(err != nil, "go get failed with '%s'", err)
-	}
 }
 
 func measureDuration() func() {
