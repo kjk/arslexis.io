@@ -3,6 +3,7 @@
   import { fmtNum, fmtSize, len } from "../util";
   import * as zip from "@zip.js/zip.js";
   import TopNav from "../TopNav.svelte";
+  import { logUnzipEvent } from "../events";
 
   // https://github.com/gildas-lormeau/zip.js/blob/gh-pages/demos/demo-read-file.js
   // https://gildas-lormeau.github.io/zip.js/
@@ -44,7 +45,9 @@
       }
     }
     files = filesIn;
+    logUnzipEvent("openZipFile");
   }
+
   function fileInfo(fi) {
     return fi.path + ", " + fmtSize(fi.file.size);
   }
@@ -93,11 +96,13 @@
     e.decompressProgress = 0;
     rerenderFiles();
   }
+
   function fileSizeFancy(n) {
     const human = fmtSize(n);
     const s = fmtNum(n);
     return `${human} (${s})`;
   }
+
   function fmtRatio(e) {
     const p = (e.compressedSize * 100) / e.uncompressedSize;
     return p.toFixed(2) + "%";
@@ -136,33 +141,37 @@
           >{/if}
       </div>
       {#if !fi.error}
-        <div class="table text-sm font-mono ml-4">
+        <div class="table text-sm font-mono w-fit">
           <div class="table-header-group">
             <div class="table-row font-semibold">
-              <div class="table-cell">name</div>
-              <div class="table-cell">uncompressed</div>
-              <div class="table-cell">compressed</div>
-              <div class="table-cell">ratio</div>
+              <div class="table-cell pr-4">name</div>
+              <div class="table-cell pr-4">uncompressed</div>
+              <div class="table-cell pr-4">compressed</div>
+              <div class="table-cell pr-4">ratio</div>
             </div>
           </div>
           {#each fi.entries as e}
             <div class="ml-4 table-row">
               {#if e.decompressProgress}
-                <div class="table-cell ml-4">{e.decompressProgress}%</div>
+                <div class="table-cell pr-4">{e.decompressProgress}%</div>
               {:else}
                 <button
                   on:click={() => download(fi, e)}
-                  class="table-cell underline text-blue-500"
+                  class="truncate table-cell pr-4 underline text-blue-500"
                   >{e.filename}</button
                 >
               {/if}
-              <div class="table-cell ml-4">
-                {fileSizeFancy(e.uncompressedSize)}
+              <div class="table-cell pr-4">
+                <span class="text-nowrap" title={fmtNum(e.uncompressedSize)}
+                  >{fmtSize(e.uncompressedSize)}</span
+                >
               </div>
-              <div class="table-cell ml-4">
-                {fileSizeFancy(e.compressedSize)}
+              <div class="table-cell pr-4">
+                <span class="text-nowrap" title={fmtNum(e.compressedSize)}
+                  >{fmtSize(e.compressedSize)}</span
+                >
               </div>
-              <div class="table-cell ml-4">
+              <div class="table-cell pr-4">
                 {fmtRatio(e)}
               </div>
             </div>

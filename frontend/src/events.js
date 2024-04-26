@@ -36,9 +36,26 @@ export function logEvent(name, durMs = 0, meta = {}) {
   logEventRaw(meta);
 }
 
+export function logNpEvent(name, durMs = 0, meta = {}) {
+  if (durMs > 0) {
+    meta.dur = durMs.toFixed(0);
+  }
+  meta["app"] = "notepad2";
+  meta["name"] = name;
+  logEventRaw(meta);
+}
+
 export function logWcEvent(name, o = {}) {
   logEventRaw({
     app: "wc",
+    name: name,
+    ...o,
+  });
+}
+
+export function logUnzipEvent(name, o = {}) {
+  logEventRaw({
+    app: "unzip",
     name: name,
     ...o,
   });

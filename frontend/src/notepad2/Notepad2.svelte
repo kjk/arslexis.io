@@ -168,7 +168,7 @@
   } from "./np2store";
   import Messages, { showError } from "../Messages.svelte";
   import DialogSelectScheme from "./DialogSelectScheme.svelte";
-  import { logEventRaw } from "../events";
+  import { logEventRaw, logNpEvent } from "../events";
 
   let toolbarFuncs;
 
@@ -212,15 +212,6 @@
     }
     hasSelection = nonEmptySelection();
     setToolbarEnabledState();
-  }
-
-  function logNpEvent(name, durMs = 0, meta = {}) {
-    if (durMs > 0) {
-      meta.dur = durMs.toFixed(0);
-    }
-    meta["app"] = "notepad2";
-    meta["name"] = name;
-    logEventRaw(meta);
   }
 
   async function setToolbarEnabledState() {
