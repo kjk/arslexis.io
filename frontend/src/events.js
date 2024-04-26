@@ -6,6 +6,9 @@ export let disableEvents = false;
  * @param {Object} o
  */
 export function logEventRaw(o) {
+  if (disableEvents) {
+    return;
+  }
   fetch("/event", {
     method: "POST",
     headers: {
@@ -26,13 +29,9 @@ export function logEventRaw(o) {
 }
 
 export function logEvent(name, durMs = 0, meta = {}) {
-  if (disableEvents) {
-    return;
-  }
   if (durMs > 0) {
     meta.dur = durMs.toFixed(0);
   }
-  meta["app"] = "gistEditor";
   meta["name"] = name;
   logEventRaw(meta);
 }

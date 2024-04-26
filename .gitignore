@@ -24,3 +24,4 @@ onlinetool-*
 node_modules
 dist/
 server/secrets.env
+data/

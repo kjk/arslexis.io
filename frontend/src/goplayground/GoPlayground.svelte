@@ -9,6 +9,7 @@
   import { getCMLangFromFileName } from "../cmlangs";
   import { onMount } from "svelte";
   import browser from "../browser";
+  import { logEventRaw } from "../events";
 
   const sampleGo = `// You can edit this code!
 // Click here and start typing.
@@ -123,6 +124,7 @@ func main() {
   }
 
   async function share() {
+    logGoPlaygroundEvent("share");
     const s = editorView.state.doc.toString();
     setProcessingMessage("Creating sharable link...");
     const rsp = await fetch("/api/goplay/share", {
@@ -210,7 +212,16 @@ func main() {
     return "";
   }
 
+  function logGoPlaygroundEvent(name, o = {}) {
+    logEventRaw({
+      app: "goplayground",
+      name: name,
+      ...o,
+    });
+  }
+
   async function run() {
+    logGoPlaygroundEvent("run");
     const code = editorView.state.doc.toString();
     setProcessingMessage("Executing code...");
     clearOutput();
@@ -241,6 +252,7 @@ func main() {
   }
 
   async function format() {
+    logGoPlaygroundEvent("format");
     const s = editorView.state.doc.toString();
     setProcessingMessage("Formatting code...");
     // const uri = "play.golang.org/fmt";
@@ -284,7 +296,9 @@ func main() {
     ev.stopPropagation();
   }
 
-  onMount(async () => {
+  onMount(() => {
+    logGoPlaygroundEvent("appOpen");
+
     editorView = createEditorView();
     document.addEventListener("keydown", onKeyDown);
 
