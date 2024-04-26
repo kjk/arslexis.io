@@ -79,11 +79,11 @@ export default defineConfig({
           targets: [
             {
               src: "./src/notepad2/**/*.bmp",
-              dest: resolve("dist", "notepad2"),
+              dest: resolve("..", "server", "dist", "notepad2"),
             },
             {
               src: "./src/libarchive/**/*",
-              dest: resolve("dist", "libarchive"),
+              dest: resolve("..", "server", "dist", "libarchive"),
             },
           ],
         }),
