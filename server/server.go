@@ -207,7 +207,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 		}
 
 		if hutil.TryServeURLFromFS(w, r, serveOpts) {
-			logf("mainHandler: served '%s' via httputil.TryServeFile\n", uri)
+			logf("mainHandler: served '%s' via httputil.TryServeURLFromFS\n", uri)
 			return
 		}
 
