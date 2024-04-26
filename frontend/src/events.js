@@ -35,3 +35,11 @@ export function logEvent(name, durMs = 0, meta = {}) {
   meta["name"] = name;
   logEventRaw(meta);
 }
+
+export function logWcEvent(name, o = {}) {
+  logEventRaw({
+    app: "wc",
+    name: name,
+    ...o,
+  });
+}

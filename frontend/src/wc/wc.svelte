@@ -19,6 +19,7 @@
     forEachFsEntry,
   } from "../fileutil";
   import { fmtNum, fmtSize, len } from "../util";
+  import { logWcEvent } from "../events";
 
   /** @typedef {import("./wcstore").RecentEntry} RecentEntry */
   /** @typedef {import("../fileutil").FsEntry} FsEntry */
@@ -91,7 +92,16 @@
     await verifyHandlePermission(dirHandle, false);
     dirRoot = null;
     $progress = "Reading directory entries...";
-    let di = await readDirRecur(dirHandle, shouldSkipEntry, "");
+    let di;
+    try {
+      di = await readDirRecur(dirHandle, shouldSkipEntry, "");
+    } catch (e) {
+      console.log("error reading dir", e);
+      // can fail if e.g. saved directory was deleted
+      $progress = "";
+      return;
+    }
+    logWcEvent("openDir");
     forEachFsEntry(di, shouldExclude);
     calcDirSizes(di);
     dirRoot = di;
@@ -205,9 +215,9 @@
               <th class="sticky top-0 bg-white px-1">files</th>
               <th class="sticky top-0 bg-white px-1">lines</th>
               <!-- delete -->
-              <th class="sticky top-0 bg-white px-1 bg-white" />
+              <th class="sticky top-0 px-1 bg-white" />
               <!-- exclude / include -->
-              <th class="sticky top-0 bg-white px-1 bg-white" />
+              <th class="sticky top-0 px-1 bg-white" />
             </tr>
           </thead>
           <tbody>

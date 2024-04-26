@@ -153,6 +153,7 @@
   import { fmtNum, fmtSize, len } from "../util";
   import { showInfoMessage } from "../Messages.svelte";
   import { onMount } from "svelte";
+  import { logWcEvent } from "../events";
 
   /** @type {FsEntry} */
   export let dirInfo;
@@ -206,6 +207,9 @@
     showInfoMessage(`Deleted ${name}`);
     showingConfirmDelete = false;
     toDeleteIdx = -1;
+
+    let evt = e.isDir ? "deleteFolder" : "deleteFile";
+    logWcEvent(evt);
   }
 
   function deleteDirOrFile(idx) {
@@ -234,7 +238,7 @@
       on:click={() => toggleExpand(e)}
       class="hover:bg-gray-200 hover:cursor-pointer pl-8"
     >
-      <td class="ind-{indent} font-semibold ">
+      <td class="ind-{indent} font-semibold">
         {#if isExpanded(e)}
           ▼
         {:else}
