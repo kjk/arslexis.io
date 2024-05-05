@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/kjk/common v0.0.0-20240426141304-c217812bf00b
+	github.com/kjk/common v0.0.0-20240505172906-c29c0f359c42
 	github.com/kjk/minioutil v0.0.0-20230422073834-96945ac7e481
 	github.com/mailgun/mailgun-go/v4 v4.12.0
 	github.com/melbahja/goph v1.4.0
@@ -16,7 +16,7 @@ require (
 	github.com/pkg/sftp v1.13.6
 	github.com/rodaine/table v1.2.0
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
-	golang.org/x/oauth2 v0.19.0
+	golang.org/x/oauth2 v0.20.0
 )
 
 require (
@@ -42,7 +42,7 @@ require (
 	github.com/rs/xid v1.5.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
