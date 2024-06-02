@@ -5,14 +5,6 @@
 
   /**
    * @param {FsEntry} e
-   * @returns {number}
-   */
-  export function getLineCount(e) {
-    return e.getMeta("linecount") || 0;
-  }
-
-  /**
-   * @param {FsEntry} e
    * @param {number} n
    */
   export function setLineCount(e, n) {
@@ -108,44 +100,6 @@
     dirInfo.setMeta("dirs", dirs);
     return { size, files, dirs };
   }
-
-  /**
-   * @param {FsEntry} dirInfo
-   * @param {Function} onDir
-   * @returns {Promise<number>}
-   */
-  export async function calcLineCounts(dirInfo, onDir) {
-    let total = 0;
-    let a = dirInfo.dirEntries;
-    if (onDir) {
-      onDir(dirInfo);
-    }
-    for (let e of a) {
-      let excluded = isExcluded(e);
-      if (excluded) {
-        // TODO: for files this can be slow if we exclude and then include
-        // back, because we'll have to re-read the file
-        // we could have another meta prop: cachedLineCount
-        setLineCount(e, 0);
-        continue;
-      }
-      let path = e.path;
-      if (e.isDir) {
-        total += await calcLineCounts(e, onDir);
-      } else {
-        let lc = getLineCount(e);
-        // don't re-calculate lineCount if did it in the past
-        if (!isBinary(path) && lc == 0) {
-          let file = await e.getFile();
-          lc = await lineCount(file);
-        }
-        total += lc;
-        setLineCount(e, lc);
-      }
-    }
-    setLineCount(dirInfo, total);
-    return total;
-  }
 </script>
 
 <script>
@@ -153,7 +107,7 @@
   import { fmtNum, fmtSize, len } from "../util";
   import { showInfoMessage } from "../Messages.svelte";
   import { onMount } from "svelte";
-  import { logWcEvent } from "../events";
+  import { logFmEvent } from "../events";
 
   /** @type {FsEntry} */
   export let dirInfo;
@@ -209,30 +163,13 @@
     toDeleteIdx = -1;
 
     let evt = e.isDir ? "deleteFolder" : "deleteFile";
-    logWcEvent(evt);
-  }
-
-  function deleteDirOrFile(idx) {
-    let e = entries[idx];
-    // console.log("deleteDirOrFile: idx:", idx, "e:", e);
-    let name = e.name;
-    toDeleteIdx = idx;
-    let what = e.isDir ? "directory" : "file";
-    confirmDeleteTitle = `Delete ${what} ${name}?`;
-    confirmDeleteMessage = `Delete ${what} <b>${name}<b>?`;
-    showingConfirmDelete = true;
-  }
-
-  async function doExclude(e, exclude) {
-    setExcluded(e, exclude);
-    await recalc();
+    logFmEvent(evt);
   }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#each entries as e, idx}
   {@const meta = e.meta}
-  {@const excluded = isExcluded(e)}
   {#if e.isDir}
     <tr
       on:click={() => toggleExpand(e)}
@@ -251,28 +188,6 @@
       </td>
       <td class="pl-2 text-right">{fmtNum(meta.dirs)}</td>
       <td class="pl-2 text-right">{fmtNum(meta.files)}</td>
-      <td class="pl-2 text-right">{fmtNum(getLineCount(e))}</td>
-      <td class="text-center bg-white"
-        ><button
-          on:click|stopPropagation={() => deleteDirOrFile(idx)}
-          class="hover:underline px-4 hover:text-red-600">delete</button
-        ></td
-      >
-      {#if excluded}
-        <td class="text-center bg-white"
-          ><button
-            on:click|stopPropagation={() => doExclude(e, false)}
-            class="hover:underline px-4 text-blue-600">include</button
-          ></td
-        >
-      {:else}
-        <td class="text-center bg-white"
-          ><button
-            on:click|stopPropagation={() => doExclude(e, true)}
-            class="hover:underline px-4">exclude</button
-          ></td
-        >
-      {/if}
     </tr>
     {#if isExpanded(e)}
       <svelte:self {recalc} dirInfo={e} indent={indent + 1} />
@@ -281,35 +196,12 @@
 {/each}
 
 {#each entries as e, idx (idx)}
-  {@const excluded = isExcluded(e)}
   {#if !e.isDir}
     <tr class="hover:bg-gray-200 even:bg-gray-50">
       <td class="ind-{indent + 1}">{e.name} </td>
       <td class="pl-2 text-right whitespace-nowrap">{fmtSize(e.size)} </td>
       <td class="pl-2 text-right" />
       <td class="pl-2 text-right" />
-      <td class="pl-2 text-right">{fmtNum(getLineCount(e))}</td>
-      <td class="text-center bg-white"
-        ><button
-          on:click={() => deleteDirOrFile(idx)}
-          class="hover:underline px-4 hover:text-red-600">delete</button
-        ></td
-      >
-      {#if excluded}
-        <td class="text-center bg-white"
-          ><button
-            on:click|stopPropagation={() => doExclude(e, false)}
-            class="hover:underline px-4 text-blue-600">include</button
-          ></td
-        >
-      {:else}
-        <td class="text-center bg-white"
-          ><button
-            on:click|stopPropagation={() => doExclude(e, true)}
-            class="hover:underline px-4">exclude</button
-          ></td
-        >
-      {/if}
     </tr>
   {/if}
 {/each}

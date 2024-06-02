@@ -53,6 +53,14 @@ export function logWcEvent(name, o = {}) {
   });
 }
 
+export function logFmEvent(name, o = {}) {
+  logEventRaw({
+    app: "fm",
+    name: name,
+    ...o,
+  });
+}
+
 export function logUnzipEvent(name, o = {}) {
   logEventRaw({
     app: "unzip",
