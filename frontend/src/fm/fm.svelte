@@ -14,14 +14,28 @@
     readDirRecur,
     forEachFsEntry,
   } from "../fileutil";
-  import { fmtNum, fmtSize, len } from "../util";
   import { logFmEvent } from "../events";
+  import { len } from "../util";
 
   /** @typedef {import("./fmstore").RecentEntry} RecentEntry */
   /** @typedef {import("../fileutil").FsEntry} FsEntry */
 
+  /** @type {FsEntry[]} */
+  let dirPath = [];
+
   /** @type {FsEntry} */
   let dirRoot = null;
+  $: calcDirRoot(dirPath);
+
+  function calcDirRoot(dirPath) {
+    console.log("calcDirRoot:", dirPath);
+    let n = len(dirPath);
+    if (n > 0) {
+      dirRoot = dirPath[n - 1];
+      return;
+    }
+    dirRoot = null;
+  }
 
   // /** @type {boolean} */
   // let isShowingFiles = false;
@@ -90,7 +104,7 @@
    */
   async function openDirectory(dirHandle) {
     await verifyHandlePermission(dirHandle, false);
-    dirRoot = null;
+    dirPath = [];
     $progress = "Reading directory entries...";
     let di;
     try {
@@ -104,7 +118,7 @@
     logFmEvent("openDir");
     forEachFsEntry(di, shouldExclude);
     calcDirSizes(di);
-    dirRoot = di;
+    dirPath = [di];
     $progress = "";
   }
 
@@ -139,6 +153,20 @@
     calcDirSizes(dirRoot);
     // console.log("finished calcDIrSizes");
     dirRoot = dirRoot;
+  }
+  /**
+   * @param {FsEntry} dirEntry
+   */
+  function handleSelected(dirEntry) {
+    dirPath.push(dirEntry);
+    dirPath = dirPath;
+  }
+
+  function handleGoUp() {
+    if (len(dirPath) > 1) {
+      dirPath.pop();
+      dirPath = dirPath;
+    }
   }
 </script>
 
@@ -205,11 +233,21 @@
   {/if}
 
   {#if dirRoot}
-    {@const e = dirRoot}
+    <div class="flex font-bold font-mono text-sm ml-3">
+      {#each dirPath as e}
+        <div class="ml-1">{e.name}</div>
+        <div class="ml-1">/</div>
+      {/each}
+    </div>
     {#key dirRoot}
-      <div class="font-bold font-mono text-sm ml-2">{e.name}/</div>
       <div class="overflow-y-scroll h-min-0 h-full ml-2">
-        <Folder {recalc} {dirRoot} indent={0} />
+        <Folder
+          {recalc}
+          {dirRoot}
+          indent={0}
+          onSelected={handleSelected}
+          onGoUp={handleGoUp}
+        />
       </div>
     {/key}
   {/if}

@@ -79,6 +79,10 @@
   export let indent;
   /** @type {Function} */
   export let recalc;
+  /** @type {Function} */
+  export let onSelected;
+  /** @type {Function} */
+  export let onGoUp;
 
   /** @type {FsEntry[]} */
   let entries = [];
@@ -148,7 +152,7 @@
     let idx = findClickedIdx(el);
     let entry = entries[idx];
     if (entry.isDir) {
-      dirRoot = entry;
+      onSelected(entry);
     }
   }
 
@@ -169,7 +173,21 @@
     let nItems = len(entries);
     let key = e.key;
 
+    if (key === "Backspace") {
+      e.stopPropagation();
+      e.preventDefault();
+      onGoUp();
+      return;
+    }
+
     if (key === "Enter") {
+      e.stopPropagation();
+      e.preventDefault();
+      let idx = selectedIdx;
+      let entry = entries[idx];
+      if (entry.isDir) {
+        onSelected(entry);
+      }
       return;
     }
 
