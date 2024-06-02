@@ -23,8 +23,9 @@
   /** @type {FsEntry} */
   let dirRoot = null;
 
-  /** @type {boolean} */
-  let isShowngFiles = dirRoot != null;
+  // /** @type {boolean} */
+  // let isShowingFiles = false;
+  // $: isShowngFiles = dirRoot != null;
 
   $progress = "";
 
@@ -141,79 +142,83 @@
   }
 </script>
 
-<TopNav>
-  <span class="text-purple-800">File Manager in the browser</span>
-  {#if dirRoot}
-    <button
-      class="border ml-2 text-sm border-gray-500 px-2 py-0.5 hover:bg-gray-100"
-      on:click={openFolder}>Open another folder</button
-    >
-  {/if}
-</TopNav>
-
-{#if hasFileSystemSupport}
-  {#if !dirRoot}
-    <div class="flex items-baseline mx-4 mt-2 mb-2">
+<div class="h-screen fixed inset-0 flex flex-col overflow-y-hidden">
+  <TopNav>
+    <span class="text-purple-800">File Manager in the browser</span>
+    {#if dirRoot}
       <button
-        class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
-        on:click={openFolder}>Open folder</button
+        class="border ml-2 text-sm border-gray-500 px-2 py-0.5 hover:bg-gray-100"
+        on:click={openFolder}>Open another folder</button
       >
-      <div class="ml-2">from your computer to browse it.</div>
-    </div>
-  {/if}
-{:else}
-  <ShowSupportsFileSystem />
-{/if}
+      {#if len($recent) > 0}
+        <div class="flex ml-4 text-sm">
+          <div>recent:</div>
+          {#each $recent as e}
+            <button
+              class="ml-2 underline"
+              on:click={() => openRecentDir(e.dirHandle)}>{e.name}</button
+            >{/each}
+        </div>
+      {/if}
+    {/if}
+  </TopNav>
 
-{#if !dirRoot}
-  {#if len($recent) > 0}
-    <div class="ml-4 mt-2 mb-2">
-      <div>Recently opened:</div>
-      <table class="table-auto ml-4">
-        {#each $recent as e, idx}
-          <tr>
-            <td class="px-1">{e.name}</td>
-            <td class="px-1"
-              ><button
-                class="underline hover:cursor-pointer"
-                on:click={() => openRecentDir(e.dirHandle)}>open</button
-              ></td
-            >
-            <td class="px-1">
-              <button
-                class="underline hover:cursor-pointer"
-                on:click={() => removeFromRecent(idx)}>remove</button
-              >
-            </td>
-          </tr>
-        {/each}
-      </table>
-    </div>
+  {#if hasFileSystemSupport}
+    {#if !dirRoot}
+      <div class="flex items-baseline mx-4 mt-2 mb-2">
+        <button
+          class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
+          on:click={openFolder}>Open folder</button
+        >
+        <div class="ml-2">from your computer to browse it.</div>
+      </div>
+    {/if}
   {:else}
-    <div class="flex ml-4 mt-2 mb-2 text-sm">
-      <div>Recently opened:</div>
-      {#each $recent as e}
-        <button class="ml-2" on:click={() => openRecentDir(e.dirHandle)}
-          >{e.name}</button
-        >{/each}
-    </div>
+    <ShowSupportsFileSystem />
   {/if}
-{/if}
 
-<div class="mx-4 mt-2 text-sm font-mono">
+  {#if !dirRoot}
+    {#if len($recent) > 0}
+      <div class="ml-4 mt-2 mb-2">
+        <div>Recently opened:</div>
+        <table class="table-auto ml-4">
+          {#each $recent as e, idx}
+            <tr>
+              <td class="px-1">{e.name}</td>
+              <td class="px-1"
+                ><button
+                  class="underline hover:cursor-pointer"
+                  on:click={() => openRecentDir(e.dirHandle)}>open</button
+                ></td
+              >
+              <td class="px-1">
+                <button
+                  class="underline hover:cursor-pointer"
+                  on:click={() => removeFromRecent(idx)}>remove</button
+                >
+              </td>
+            </tr>
+          {/each}
+        </table>
+      </div>
+    {/if}
+  {/if}
+
   {#if dirRoot}
-    {@const meta = dirRoot.meta}
     {@const e = dirRoot}
     {#key dirRoot}
-      <div class="font-bold font-mono mt-2">{e.name}/</div>
-      <table class="relative table-auto">
-        <tbody>
-          <Folder {recalc} dirInfo={dirRoot} indent={0} />
-        </tbody>
-      </table>
+      <div class="font-bold font-mono text-xs">{e.name}/</div>
+      <div class="overflow-y-scroll h-min-0 h-full">
+        <table class="table-auto font-mono text-xs">
+          <tbody>
+            <Folder {recalc} dirInfo={dirRoot} indent={0} />
+          </tbody>
+        </table>
+      </div>
     {/key}
   {/if}
 </div>
+
 <div class="mt-4" />
 
 <Progress />
