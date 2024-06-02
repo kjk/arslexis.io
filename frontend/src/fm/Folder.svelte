@@ -1,6 +1,6 @@
 <script context="module">
   import { strCompareNoCase } from "../strutil";
-  import { verifyHandlePermission, isBinary, lineCount } from "../fileutil";
+  import { verifyHandlePermission } from "../fileutil";
   /** @typedef {import("../fileutil").FsEntry} FsEntry */
 
   /**
@@ -110,7 +110,7 @@
   import { logFmEvent } from "../events";
 
   /** @type {FsEntry} */
-  export let dirInfo;
+  export let dirRoot;
   export let indent;
   /** @type {Function} */
   export let recalc;
@@ -122,7 +122,7 @@
     // they could be used in calcLineCount()
     // we use and sort a copy
     /** @type {FsEntry[]} */
-    entries = [].concat(dirInfo.dirEntries);
+    entries = [].concat(dirRoot.dirEntries);
     sortEntries(entries);
   });
 
@@ -139,6 +139,21 @@
   let toDeleteIdx;
   let confirmDeleteTitle = "";
   let confirmDeleteMessage = "";
+
+  /**
+   * @param {FsEntry} e
+   * @returns {string}
+   */
+  function fmtEntrySize(e) {
+    let s = fmtSize(e.size);
+    if (!e.isDir) {
+      return s;
+    }
+    let meta = e.meta;
+    let s2 = "D: " + fmtNum(meta.dirs);
+    s2 += " F: " + fmtNum(meta.files);
+    return s2 + " " + s;
+  }
 
   async function handleDelete() {
     let e = entries[toDeleteIdx];
@@ -184,13 +199,11 @@
         {e.name}
       </td>
       <td class="pl-2 text-right whitespace-nowrap">
-        {fmtSize(e.size)}
+        {fmtEntrySize(e)}
       </td>
-      <td class="pl-2 text-right">{fmtNum(meta.dirs)}</td>
-      <td class="pl-2 text-right">{fmtNum(meta.files)}</td>
     </tr>
     {#if isExpanded(e)}
-      <svelte:self {recalc} dirInfo={e} indent={indent + 1} />
+      <svelte:self {recalc} dirRoot={e} indent={indent + 1} />
     {/if}
   {/if}
 {/each}
@@ -199,9 +212,7 @@
   {#if !e.isDir}
     <tr class="hover:bg-gray-200 even:bg-gray-50">
       <td class="ind-{indent + 1}">{e.name} </td>
-      <td class="pl-2 text-right whitespace-nowrap">{fmtSize(e.size)} </td>
-      <td class="pl-2 text-right" />
-      <td class="pl-2 text-right" />
+      <td class="pl-2 text-right whitespace-nowrap">{fmtEntrySize(e)} </td>
     </tr>
   {/if}
 {/each}

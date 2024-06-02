@@ -207,11 +207,11 @@
   {#if dirRoot}
     {@const e = dirRoot}
     {#key dirRoot}
-      <div class="font-bold font-mono text-xs">{e.name}/</div>
-      <div class="overflow-y-scroll h-min-0 h-full">
-        <table class="table-auto font-mono text-xs">
+      <div class="font-bold font-mono text-sm ml-2">{e.name}/</div>
+      <div class="overflow-y-scroll h-min-0 h-full ml-2">
+        <table class="table-auto font-mono text-sm">
           <tbody>
-            <Folder {recalc} dirInfo={dirRoot} indent={0} />
+            <Folder {recalc} {dirRoot} indent={0} />
           </tbody>
         </table>
       </div>
