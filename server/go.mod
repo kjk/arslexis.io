@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/kjk/common v0.0.0-20240505172906-c29c0f359c42
+	github.com/kjk/common v0.0.0-20240514175550-025f7649f574
 	github.com/kjk/minioutil v0.0.0-20230422073834-96945ac7e481
 	github.com/mailgun/mailgun-go/v4 v4.12.0
 	github.com/melbahja/goph v1.4.0
@@ -15,7 +15,7 @@ require (
 	github.com/pirsch-analytics/pirsch-go-sdk v1.9.0
 	github.com/pkg/sftp v1.13.6
 	github.com/rodaine/table v1.2.0
-	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
+	golang.org/x/exp v0.0.0-20240531132922-fd00a4e0eefc
 	golang.org/x/oauth2 v0.20.0
 )
 
@@ -26,7 +26,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emvi/null v1.3.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.12 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -40,8 +40,8 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/xid v1.5.0 // indirect
-	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
