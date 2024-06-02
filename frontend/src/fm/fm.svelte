@@ -158,6 +158,10 @@
    * @param {FsEntry} dirEntry
    */
   function handleSelected(dirEntry) {
+    if (dirEntry.name === "..") {
+      handleGoUp();
+      return;
+    }
     dirPath.push(dirEntry);
     dirPath = dirPath;
   }
@@ -244,6 +248,7 @@
         <Folder
           {recalc}
           {dirRoot}
+          isRoot={len(dirPath) == 1}
           indent={0}
           onSelected={handleSelected}
           onGoUp={handleGoUp}

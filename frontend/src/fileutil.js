@@ -308,6 +308,30 @@ export class FsEntry extends Array {
   }
 }
 
+export class FsEntryUpDir extends FsEntry {
+  get name() {
+    return "..";
+  }
+  get isDir() {
+    return true;
+  }
+  get size() {
+    return 0;
+  }
+  get path() {
+    return "..";
+  }
+  get meta() {
+    return {
+      dirs: 0,
+      files: 0,
+    };
+  }
+  get dirEntries() {
+    return [];
+  }
+}
+
 function dontSkip(entry, dir) {
   return false;
 }

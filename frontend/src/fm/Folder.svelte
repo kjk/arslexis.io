@@ -1,4 +1,5 @@
 <script context="module">
+  import { FsEntryUpDir } from "../fileutil";
   import { strCompareNoCase } from "../strutil";
   /** @typedef {import("../fileutil").FsEntry} FsEntry */
 
@@ -76,6 +77,7 @@
 
   /** @type {FsEntry} */
   export let dirRoot;
+  export let isRoot = false;
   export let indent;
   /** @type {Function} */
   export let recalc;
@@ -96,6 +98,10 @@
     /** @type {FsEntry[]} */
     entries = [].concat(dirRoot.dirEntries);
     sortEntries(entries);
+    if (!isRoot) {
+      let e = new FsEntryUpDir();
+      entries.unshift(e);
+    }
     if (len(entries) > 0) {
       tick().then(() => {
         setSelected(0);
@@ -173,14 +179,14 @@
     let nItems = len(entries);
     let key = e.key;
 
-    if (key === "Backspace") {
+    if (key === "Backspace" || key === "ArrowLeft") {
       e.stopPropagation();
       e.preventDefault();
       onGoUp();
       return;
     }
 
-    if (key === "Enter") {
+    if (key === "Enter" || key === "ArrowRight") {
       e.stopPropagation();
       e.preventDefault();
       let idx = selectedIdx;
@@ -236,7 +242,7 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <table
-  class="table-auto font-mono text-sm mt-[2px] ml-[2px]"
+  class="font-mono text-sm mt-[2px] w-full"
   on:click={handleClicked}
   on:dblclick={handleDoubleClicked}
   on:keydown={handleKeyDown}
@@ -247,7 +253,7 @@
         <tr
           data-idx={idx}
           tabindex="0"
-          class="hover:bg-gray-200 hover:cursor-pointer pl-8"
+          class="hover:bg-gray-200 hover:cursor-pointer"
         >
           <td class="ind-{indent} font-semibold">
             {#if isExpanded(e)}
@@ -339,6 +345,6 @@
   }
 
   tr:focus {
-    outline: 2px dashed blue; /* Custom focus style for specific elements */
+    @apply bg-blue-100;
   }
 </style>
