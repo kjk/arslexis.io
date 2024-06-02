@@ -116,6 +116,18 @@
     </tr>
 
     <tr>
+      <td class="text-left align-top">
+        <a class="underline whitespace-nowrap" href="/gisteditor/"
+          >Gist Editor</a
+        >
+      </td>
+      <td class="pl-4 align-top"
+        >GitHub Gist editor and a notepad for notes and code snippets stored
+        locally in the browser</td
+      >
+    </tr>
+
+    <tr>
       <td class="text-left align-top"
         ><a class="underline whitespace-nowrap" href="/notepad2/">notepad2</a>
       </td>
@@ -130,22 +142,11 @@
     </tr>
 
     <tr>
-      <td class="text-left align-top">
-        <a class="underline whitespace-nowrap" href="/gisteditor/"
-          >Gist Editor</a
-        >
-      </td>
-      <td class="pl-4 align-top"
-        >GitHub Gist editor and a notepad for notes and code snippets stored
-        locally in the browser</td
-      >
-    </tr>
-
-    <tr>
       <td><a class="underline" href="/goplayground/">Go Playground</a></td>
       <td class="pl-4 align-top">a better Go Playground</td>
     </tr>
 
+    <!--
     <tr>
       <td class="text-left align-top">
         <a class="underline whitespace-nowrap" href="/calc/">calc</a>
@@ -154,6 +155,7 @@
         >calculator as a notepad (like Numi or Soulver)</td
       >
     </tr>
+    -->
 
     <tr>
       <td class="text-left align-top">
@@ -167,6 +169,13 @@
         <a class="underline whitespace-nowrap" href="/wc/">wc</a>
       </td>
       <td class="pl-4 align-top">like <tt>wc</tt>, but in the browser</td>
+    </tr>
+
+    <tr>
+      <td class="text-left align-top">
+        <a class="underline whitespace-nowrap" href="/fm/">File Manager</a>
+      </td>
+      <td class="pl-4 align-top">file manager, but in the browser</td>
     </tr>
   </table>
 
