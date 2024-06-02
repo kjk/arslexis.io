@@ -10,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -325,7 +326,9 @@ func mkServeFileOptions(fsys fs.FS) *hutil.ServeFileOptions {
 
 func runServerDev() {
 	if hasBun() {
-		u.RunLoggedInDir("frontend", "bun", "install")
+		cmd := exec.Command("bun", "install")
+		cmd.Dir = "frontend"
+		must(runLogged(cmd))
 		closeDev, err := startLoggedInDir("frontend", "bun", "run", "dev")
 		must(err)
 		defer closeDev()

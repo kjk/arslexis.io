@@ -17,9 +17,10 @@
 frontend/node_modules/
 package-lock.json
 yarn.lock
+bun.lockb
+
 yarn-error.log
 .DS_Store
-bun.lockb
 onlinetool-*
 node_modules
 dist/

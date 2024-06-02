@@ -134,6 +134,7 @@ func main() {
 		flgSetupAndRun    bool
 		flgBuildLocalProd bool
 		flgUpdateGoDeps   bool
+		flgClean          bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
@@ -143,6 +144,7 @@ func main() {
 		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.BoolVar(&flgUpdateGoDeps, "update-go-deps", false, "update go dependencies")
+		flag.BoolVar(&flgClean, "clean", false, "clean build")
 		flag.Parse()
 	}
 
@@ -154,6 +156,11 @@ func main() {
 	if flgUpdateGoDeps {
 		defer measureDuration()()
 		u.UpdateGoDeps("server", true)
+		return
+	}
+
+	if flgClean {
+		clean()
 		return
 	}
 

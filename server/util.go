@@ -101,3 +101,10 @@ func measureDuration() func() {
 		logf("took %s\n", time.Since(timeStart))
 	}
 }
+
+func runLogged(cmd *exec.Cmd) error {
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
+}

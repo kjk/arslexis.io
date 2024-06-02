@@ -221,6 +221,15 @@ func buildForProd(forLinux bool) string {
 	return exeName
 }
 
+func clean() {
+	emptyFrontEndBuildDir()
+	deleteOldBuilds()
+	os.Remove(path.Join("frontend", "bun.lockb"))
+	os.Remove(path.Join("frontend", "package-lock.json"))
+	os.Remove(path.Join("frontend", "yarn.lock"))
+	os.RemoveAll(path.Join("frontend", "node_modules"))
+}
+
 func buildForProdLocal() string {
 	deleteOldBuilds()
 	exeName := buildForProd(false)
