@@ -85,6 +85,7 @@
   export let onSelected;
   /** @type {Function} */
   export let onGoUp;
+  export let initialSelectionIdx = 0;
 
   /** @type {FsEntry[]} */
   let entries = [];
@@ -104,7 +105,7 @@
     }
     if (len(entries) > 0) {
       tick().then(() => {
-        setSelected(0);
+        setSelected(initialSelectionIdx);
       });
     }
   }
@@ -158,7 +159,7 @@
     let idx = findClickedIdx(el);
     let entry = entries[idx];
     if (entry.isDir) {
-      onSelected(entry);
+      onSelected(entry, idx);
     }
   }
 
@@ -192,7 +193,7 @@
       let idx = selectedIdx;
       let entry = entries[idx];
       if (entry.isDir) {
-        onSelected(entry);
+        onSelected(entry, idx);
       }
       return;
     }

@@ -20,18 +20,32 @@
   /** @typedef {import("./fmstore").RecentEntry} RecentEntry */
   /** @typedef {import("../fileutil").FsEntry} FsEntry */
 
-  /** @type {FsEntry[]} */
+  class FsEntryWithIndex {
+    entry;
+    idx;
+    /**
+     * @param {FsEntry} e
+     * @param {number} i
+     */
+    constructor(e, i) {
+      this.entry = e;
+      this.idx = i;
+    }
+  }
+
+  /** @type {FsEntryWithIndex[]} */
   let dirPath = [];
 
   /** @type {FsEntry} */
   let dirRoot = null;
   $: calcDirRoot(dirPath);
+  let initialSelectionIdx = 0;
 
   function calcDirRoot(dirPath) {
     console.log("calcDirRoot:", dirPath);
     let n = len(dirPath);
     if (n > 0) {
-      dirRoot = dirPath[n - 1];
+      dirRoot = dirPath[n - 1].entry;
       return;
     }
     dirRoot = null;
@@ -118,7 +132,7 @@
     logFmEvent("openDir");
     forEachFsEntry(di, shouldExclude);
     calcDirSizes(di);
-    dirPath = [di];
+    dirPath = [new FsEntryWithIndex(di, 0)];
     $progress = "";
   }
 
@@ -157,18 +171,21 @@
   /**
    * @param {FsEntry} dirEntry
    */
-  function handleSelected(dirEntry) {
+  function handleSelected(dirEntry, idx) {
     if (dirEntry.name === "..") {
       handleGoUp();
       return;
     }
-    dirPath.push(dirEntry);
+    let ei = new FsEntryWithIndex(dirEntry, idx);
+    dirPath.push(ei);
     dirPath = dirPath;
+    initialSelectionIdx = 0;
   }
 
   function handleGoUp() {
     if (len(dirPath) > 1) {
-      dirPath.pop();
+      let el = dirPath.pop();
+      initialSelectionIdx = el.idx;
       dirPath = dirPath;
     }
   }
@@ -239,13 +256,14 @@
   {#if dirRoot}
     <div class="flex font-bold font-mono text-sm ml-3">
       {#each dirPath as e}
-        <div class="ml-1">{e.name}</div>
+        <div class="ml-1">{e.entry.name}</div>
         <div class="ml-1">/</div>
       {/each}
     </div>
     {#key dirRoot}
       <div class="overflow-y-scroll h-min-0 h-full ml-2">
         <Folder
+          {initialSelectionIdx}
           {recalc}
           {dirRoot}
           isRoot={len(dirPath) == 1}
