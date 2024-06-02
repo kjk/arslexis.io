@@ -1,31 +1,6 @@
 <script context="module">
   import { strCompareNoCase } from "../strutil";
-  import { verifyHandlePermission } from "../fileutil";
   /** @typedef {import("../fileutil").FsEntry} FsEntry */
-
-  /**
-   * @param {FsEntry} e
-   * @param {number} n
-   */
-  export function setLineCount(e, n) {
-    e.setMeta("linecount", n);
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @returns {boolean}
-   */
-  export function isExcluded(e) {
-    return e.getMeta("excluded");
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @param {boolean} excluded
-   */
-  export function setExcluded(e, excluded) {
-    e.setMeta("excluded", excluded);
-  }
 
   /**
    * @param {FsEntry} e
@@ -76,20 +51,13 @@
     let dirs = 0;
     let entries = dirInfo.dirEntries;
     for (let e of entries) {
-      let excluded = isExcluded(e);
       if (e.isDir) {
         dirs++;
         let sizes = calcDirSizes(e);
-        if (excluded) {
-          continue;
-        }
         size += sizes.size;
         files += sizes.files;
         dirs += sizes.dirs;
       } else {
-        if (excluded) {
-          continue;
-        }
         files++;
         size += e.size;
       }
@@ -103,11 +71,8 @@
 </script>
 
 <script>
-  import DialogConfirm from "../DialogConfirm.svelte";
   import { fmtNum, fmtSize, len } from "../util";
-  import { showInfoMessage } from "../Messages.svelte";
-  import { onMount } from "svelte";
-  import { logFmEvent } from "../events";
+  import { tick } from "svelte";
 
   /** @type {FsEntry} */
   export let dirRoot;
@@ -115,16 +80,24 @@
   /** @type {Function} */
   export let recalc;
 
+  /** @type {FsEntry[]} */
   let entries = [];
+  $: calcEntries(dirRoot);
 
-  onMount(() => {
+  function calcEntries(dirRoot) {
+    console.log("calcEntries");
     // SUBTLE: important to not re-order dirInfo.dirEntries because
     // they could be used in calcLineCount()
     // we use and sort a copy
     /** @type {FsEntry[]} */
     entries = [].concat(dirRoot.dirEntries);
     sortEntries(entries);
-  });
+    if (len(entries) > 0) {
+      tick().then(() => {
+        setSelected(0);
+      });
+    }
+  }
 
   /**
    * @param {FsEntry} e
@@ -134,11 +107,6 @@
     setExpanded(e, !expanded);
     entries = entries;
   }
-
-  let showingConfirmDelete = false;
-  let toDeleteIdx;
-  let confirmDeleteTitle = "";
-  let confirmDeleteMessage = "";
 
   /**
    * @param {FsEntry} e
@@ -155,75 +123,146 @@
     return s2 + " " + s;
   }
 
-  async function handleDelete() {
-    let e = entries[toDeleteIdx];
-    let name = e.name;
-    let opts;
-    if (e.isDir) {
-      opts = {
-        recursive: true,
-      };
+  /**
+   * @param {HTMLElement} el
+   * @returns {number}
+   */
+  function findClickedIdx(el) {
+    while (el) {
+      let idxStr = el.getAttribute("data-idx");
+      if (idxStr) {
+        let idx = parseInt(idxStr);
+        // console.log("idx:", idx);
+        return idx;
+      }
+      el = el.parentElement;
+    }
+    return -1;
+  }
+
+  /**
+   * @param {MouseEvent} e
+   */
+  function handleDoubleClicked(e) {
+    let el = /** @type {HTMLElement} */ (e.target);
+    let idx = findClickedIdx(el);
+    let entry = entries[idx];
+    if (entry.isDir) {
+      dirRoot = entry;
+    }
+  }
+
+  /**
+   * @param {MouseEvent} e
+   */
+  function handleClicked(e) {
+    let el = /** @type {HTMLElement} */ (e.target);
+    let idx = findClickedIdx(el);
+    setSelected(idx);
+    return;
+  }
+
+  /**
+   * @param {KeyboardEvent} e
+   */
+  function handleKeyDown(e) {
+    let nItems = len(entries);
+    let key = e.key;
+
+    if (key === "Enter") {
+      return;
     }
 
-    // re-ask for write permissions
-    let dirHandle = e.parentDirHandle;
-    await verifyHandlePermission(dirHandle, true);
-    dirHandle.removeEntry(name, opts);
+    if (key === "ArrowUp") {
+      e.stopPropagation();
+      e.preventDefault();
+      let idx = selectedIdx - 1;
+      if (idx < 0) {
+        return;
+      }
+      setSelected(idx);
+      return;
+    }
 
-    // console.log("deleted:", name);
-    entries.splice(toDeleteIdx, 1);
-    entries = entries;
-    showInfoMessage(`Deleted ${name}`);
-    showingConfirmDelete = false;
-    toDeleteIdx = -1;
+    if (key === "ArrowDown") {
+      e.stopPropagation();
+      e.preventDefault();
+      let idx = selectedIdx + 1;
+      if (idx >= nItems) {
+        return;
+      }
+      setSelected(idx);
+      return;
+    }
+  }
 
-    let evt = e.isDir ? "deleteFolder" : "deleteFile";
-    logFmEvent(evt);
+  let selectedIdx = 0;
+
+  /** @type {HTMLElement} */
+  let tbodyEl;
+
+  /**
+   * @param {number} idx
+   */
+  function setSelected(idx) {
+    let nItems = len(entries);
+    if (idx < 0 || idx >= nItems) {
+      return;
+    }
+    selectedIdx = idx;
+    let q = `[data-idx="${idx}"]`;
+    let el = /** @type {HTMLElement} */ (tbodyEl.querySelector(q));
+    el.focus();
   }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-{#each entries as e, idx}
-  {@const meta = e.meta}
-  {#if e.isDir}
-    <tr
-      on:click={() => toggleExpand(e)}
-      class="hover:bg-gray-200 hover:cursor-pointer pl-8"
-    >
-      <td class="ind-{indent} font-semibold">
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<table
+  class="table-auto font-mono text-sm mt-[2px] ml-[2px]"
+  on:click={handleClicked}
+  on:dblclick={handleDoubleClicked}
+  on:keydown={handleKeyDown}
+>
+  <tbody bind:this={tbodyEl}>
+    {#each entries as e, idx}
+      {#if e.isDir}
+        <tr
+          data-idx={idx}
+          tabindex="0"
+          class="hover:bg-gray-200 hover:cursor-pointer pl-8"
+        >
+          <td class="ind-{indent} font-semibold">
+            {#if isExpanded(e)}
+              ▼
+            {:else}
+              ▶
+            {/if}
+            {e.name}
+          </td>
+          <td class="pl-2 text-right whitespace-nowrap">
+            {fmtEntrySize(e)}
+          </td>
+        </tr>
         {#if isExpanded(e)}
-          ▼
-        {:else}
-          ▶
+          <svelte:self {recalc} dirRoot={e} indent={indent + 1} />
         {/if}
-        {e.name}
-      </td>
-      <td class="pl-2 text-right whitespace-nowrap">
-        {fmtEntrySize(e)}
-      </td>
-    </tr>
-    {#if isExpanded(e)}
-      <svelte:self {recalc} dirRoot={e} indent={indent + 1} />
-    {/if}
-  {/if}
-{/each}
+      {/if}
+    {/each}
 
-{#each entries as e, idx (idx)}
-  {#if !e.isDir}
-    <tr class="hover:bg-gray-200 even:bg-gray-50">
-      <td class="ind-{indent + 1}">{e.name} </td>
-      <td class="pl-2 text-right whitespace-nowrap">{fmtEntrySize(e)} </td>
-    </tr>
-  {/if}
-{/each}
-
-<DialogConfirm
-  bind:open={showingConfirmDelete}
-  message={confirmDeleteMessage}
-  title={confirmDeleteTitle}
-  confirmButton="Delete"
-  onConfirm={handleDelete}
-/>
+    {#each entries as e, idx (idx)}
+      {#if !e.isDir}
+        <tr
+          data-idx={idx}
+          tabindex="0"
+          class="hover:bg-gray-200 even:bg-gray-50"
+        >
+          <td class="ind-{indent + 1}">{e.name} </td>
+          <td class="pl-2 text-right whitespace-nowrap">{fmtEntrySize(e)} </td>
+        </tr>
+      {/if}
+    {/each}
+  </tbody>
+</table>
 
 <style>
   /*
@@ -279,5 +318,9 @@
   }
   :global(.ind-17) {
     padding-left: 8.5rem;
+  }
+
+  tr:focus {
+    outline: 2px dashed blue; /* Custom focus style for specific elements */
   }
 </style>

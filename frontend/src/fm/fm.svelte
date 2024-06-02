@@ -3,7 +3,7 @@
 
 <script>
   import TopNav from "../TopNav.svelte";
-  import Folder, { calcDirSizes, setExcluded } from "./Folder.svelte";
+  import Folder, { calcDirSizes } from "./Folder.svelte";
   import Messages from "../Messages.svelte";
   import Progress, { progress } from "../Progress.svelte";
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
@@ -45,9 +45,9 @@
     } else {
       exclude = defaultExcludeFiles.includes(name);
     }
-    if (exclude) {
-      setExcluded(entry, exclude);
-    }
+    // if (exclude) {
+    //   setExcluded(entry, exclude);
+    // }
     return exclude;
   }
 
@@ -209,11 +209,7 @@
     {#key dirRoot}
       <div class="font-bold font-mono text-sm ml-2">{e.name}/</div>
       <div class="overflow-y-scroll h-min-0 h-full ml-2">
-        <table class="table-auto font-mono text-sm">
-          <tbody>
-            <Folder {recalc} {dirRoot} indent={0} />
-          </tbody>
-        </table>
+        <Folder {recalc} {dirRoot} indent={0} />
       </div>
     {/key}
   {/if}
