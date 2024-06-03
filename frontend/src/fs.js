@@ -242,7 +242,6 @@ export class FileSysDir {
     let name = this.entryName(e);
     let parent = this.entryParent(e);
     let dh = this.handles[parent];
-    dh.getFileHandle(name);
     return await dh.getFileHandle(name);
   }
 

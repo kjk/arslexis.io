@@ -47,6 +47,7 @@
 
   /**
    * @param {FileSysDir} fs
+   * @param {FsEntry} e
    * @param {Function} fn
    */
   export function forEachFsEntry(fs, e, fn) {
@@ -125,7 +126,7 @@
       return;
     }
     logWcEvent("openDir");
-    forEachFsEntry(fsTemp, fsTemp.rootEntry, shouldExclude);
+    forEachFsEntry(fsTemp, fsTemp.rootEntry(), shouldExclude);
     calcDirSizes(fsTemp);
     fs = fsTemp;
     dirRoot = fsTemp.rootEntry();

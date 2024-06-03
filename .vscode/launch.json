@@ -8,7 +8,7 @@
 			"type": "chrome",
 			"request": "launch",
 			"name": "Launch Chrome",
-			"url": "http://127.0.0.1:9301/fm",
+			"url": "http://127.0.0.1:9301/wc",
 			"webRoot": "${workspaceFolder}/frontend/src"
 		},
     {
