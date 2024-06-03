@@ -5,7 +5,9 @@ and being able to represent various kinds of filesystem (disk, s3 etc.).
 FileSystem entries are represented by an opaque handle (a number).
 */
 
-import { len } from "./util";
+import { len, sleep, throwIf } from "./util";
+
+import { tick } from "svelte";
 
 export const kFileSysInvalidEntry = -1;
 
@@ -36,7 +38,8 @@ export const kFileSysInvalidEntry = -1;
 const kParentIdx = 0;
 const kSizeIdx = 1;
 const kModTimeIdx = 2;
-const kMultiNumPropsCount = 3;
+// const kFirstMetaIdx = 3;
+const kMultiNumPropsCount = 4;
 
 /**
  * @param {FileSys} fs
@@ -67,12 +70,45 @@ export class FileSysDir {
   /** @type {number[]} */
   multiNumInfo = [];
 
+  // this array interns keys used for meta values
+  // it should be very short, because there shouldn't be
+  // many unique meta values
+  /** @type {string[]} */
+  metaKeys = [];
+
+  // multiNumInfo[kMultiNumPropsCount] is an idx into metaIndex
+  // first element is interned key returned by internMetaKey(key)
+  // second element is index into metaValues
+  // third is idx into metaIndex and implements linked list of meta values
+  //       if -1, this is the last value
+  /** @type {number[]} */
+  metaIndex = [];
+
+  /** @type {any[]} */
+  metaValues = [];
+
   // TODO: optimize as a flat array and keeping info
   // as index / length into the array
   // if value is null, it's directory
   //
   /** @type {FsEntry[][]} */
   children = [];
+
+  /**
+   * @param {string} key
+   * @returns {number}
+   */
+  internMetaKey(key) {
+    let a = this.metaKeys;
+    let n = len(a);
+    for (let i = 0; i < n; i++) {
+      if (a[i] === key) {
+        return i;
+      }
+    }
+    this.metaKeys.push(key);
+    return n; // index of the newly appended key
+  }
 
   /**
    * @returns {FsEntry}
@@ -280,7 +316,10 @@ export class FileSysDir {
     this.names.push(name);
     this.handles.push(handle);
     this.children.push(null);
-    this.multiNumInfo.push(parent, -1, -1);
+    let oldSize = len(this.multiNumInfo);
+    this.multiNumInfo.push(parent, -1, -1, -1);
+    let newSize = len(this.multiNumInfo);
+    throwIf(newSize != oldSize + kMultiNumPropsCount);
     return e;
   }
 }
@@ -310,7 +349,11 @@ export async function readFileSysDirRecur(dirHandle, progress) {
   while (len(dirsToVisit) > 0) {
     let parent = dirsToVisit.shift();
     dirHandle = fs.handles[parent];
-    progress(fs, dirHandle.name, nFiles, nDirs, false);
+    if (nDirs % 10 == 0) {
+      progress(fs, dirHandle.name, nFiles, nDirs, false);
+      await tick();
+      await sleep(10);
+    }
     let children = [];
     // for await (const [name, handle] of dirHandle)
     for await (const fshandle of dirHandle.values()) {

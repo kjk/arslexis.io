@@ -2,14 +2,13 @@
   import TopNav from "../TopNav.svelte";
   import Folder from "./Folder.svelte";
   import Messages from "../Messages.svelte";
-  import Progress, { progress } from "../Progress.svelte";
+  import Progress2 from "../Progress2.svelte";
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
   import { recent } from "./fmstore";
   import { verifyHandlePermission, supportsFileSystem } from "../fileutil";
   import { logFmEvent } from "../events";
-  import { len, sleep } from "../util";
+  import { len } from "../util";
   import { readFileSysDirRecur, calcDirSizes } from "../fs";
-  import { tick } from "svelte";
 
   /** @typedef {import("../fs").FsEntry} FsEntry */
   /** @typedef {import("../fs").FileSysDir} FileSysDir */
@@ -37,7 +36,7 @@
     initialSelectionIdx = 0;
   }
 
-  $progress = "";
+  let progress = "";
 
   let hasFileSystemSupport = supportsFileSystem();
 
@@ -70,11 +69,11 @@
     await verifyHandlePermission(dirHandle, false);
     fs = null;
     dirPath = [];
-    $progress = "Reading directory entries...";
+    progress = "Reading directory entries...";
     function cbProgress(fs, dirName, nFiles, nDirs, finished) {
       let msg = `Reading ${dirName}, so far: ${nFiles} files, ${nDirs} dirs`;
       // console.log(msg);
-      $progress = msg;
+      progress = msg;
     }
 
     function finish(fsTemp) {
@@ -85,7 +84,7 @@
       let selectedIdx = 0;
       dirRoot = root;
       dirPath = [[root, selectedIdx]];
-      $progress = "";
+      progress = "";
       fs = fsTemp;
     }
     readFileSysDirRecur(dirHandle, cbProgress).then(finish);
@@ -240,6 +239,6 @@
 
 <div class="mt-4" />
 
-<Progress />
+<Progress2 msg={progress} />
 
 <Messages />
