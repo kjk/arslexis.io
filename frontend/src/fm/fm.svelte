@@ -62,6 +62,7 @@
     $recent = $recent;
   }
 
+  let fsStack = [];
   /**
    * @param {FileSystemDirectoryHandle} dirHandle
    */
@@ -71,21 +72,36 @@
     dirPath = [];
     progress = "Reading directory entries...";
     function cbProgress(fs, dirName, nFiles, nDirs, finished) {
+      // interrupt scans in progress if we started a new one
+      if (!fsStack.includes(fs)) {
+        fsStack.push(fs);
+      } else {
+        let lastIdx = len(fsStack) - 1;
+        if (fs !== fsStack[lastIdx]) {
+          return false;
+        }
+      }
       let msg = `Reading ${dirName}, so far: ${nFiles} files, ${nDirs} dirs`;
       // console.log(msg);
       progress = msg;
+      return true;
     }
 
     function finish(fsTemp) {
+      if (!fsTemp) {
+        // was interrupted
+        return;
+      }
       logFmEvent("openDir");
       calcDirSizes(fsTemp);
       // TODO: handle no files
       let root = fsTemp.rootEntry();
-      let selectedIdx = 0;
       dirRoot = root;
+      let selectedIdx = 0;
       dirPath = [[root, selectedIdx]];
       progress = "";
       fs = fsTemp;
+      fsStack = [];
     }
     readFileSysDirRecur(dirHandle, cbProgress).then(finish);
   }
@@ -124,15 +140,16 @@
   }
 
   /**
-   * @param {FsEntry} dirEntry
+   * @param {FsEntry} e
    */
-  function handleSelected(dirEntry, idx) {
-    // if (dirEntry.name === "..") {
-    //   handleGoUp();
-    //   return;
-    // }
+  function handleSelected(e, idx) {
+    let name = fs.entryName(e);
+    if (name === "..") {
+      handleGoUp();
+      return;
+    }
     // remember current directory and current selection
-    dirPath.push([dirEntry, idx]);
+    dirPath.push([e, idx]);
     initialSelectionIdx = 0;
     dirPath = dirPath;
   }

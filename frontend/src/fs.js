@@ -331,6 +331,7 @@ export class FileSysDir {
  * @param {number} nFiles
  * @param {number} nDirs
  * @param {boolean} finished
+ * @returns {boolean}
  */
 
 /**
@@ -350,9 +351,12 @@ export async function readFileSysDirRecur(dirHandle, progress) {
     let parent = dirsToVisit.shift();
     dirHandle = fs.handles[parent];
     if (nDirs % 10 == 0) {
-      progress(fs, dirHandle.name, nFiles, nDirs, false);
-      await tick();
-      await sleep(10);
+      let cont = progress(fs, dirHandle.name, nFiles, nDirs, false);
+      if (!cont) {
+        return fs;
+      }
+      // await tick();
+      // await sleep(10);
     }
     let children = [];
     // for await (const [name, handle] of dirHandle)
