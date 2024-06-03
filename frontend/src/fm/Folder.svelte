@@ -1,37 +1,41 @@
 <script context="module">
   import { FsEntryUpDir } from "../fileutil";
   import { strCompareNoCase } from "../strutil";
-  /** @typedef {import("../fileutil").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FileSys} FileSys */
 
   /**
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @returns {boolean}
    */
-  export function isExpanded(e) {
-    return e.getMeta("expanded");
+  export function isExpanded(fs, e) {
+    return fs.entryMetaValueByKey(e, "expanded");
   }
 
   /**
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @param {boolean} expanded
    */
-  export function setExpanded(e, expanded) {
-    e.setMeta("expanded", expanded);
+  export function setExpanded(fs, e, expanded) {
+    // e.setMeta("expanded", expanded);
   }
 
   /**
+   * @param {FileSys} fs
    * @param {FsEntry[]} entries
    */
-  export function sortEntries(entries) {
+  export function sortEntries(fs, entries) {
     /**
      * @param {FsEntry} e1
      * @param {FsEntry} e2
      */
     function sortFn(e1, e2) {
-      let e1Dir = e1.isDir;
-      let e2Dir = e2.isDir;
-      let name1 = e1.name;
-      let name2 = e2.name;
+      let e1Dir = fs.entryIsDir(e1);
+      let e2Dir = fs.entryIsDir(e2);
+      let name1 = fs.entryName(e1);
+      let name2 = fs.entryName(e1);
       if (e1Dir && e2Dir) {
         return strCompareNoCase(name1, name2);
       }
@@ -42,39 +46,14 @@
     }
     entries.sort(sortFn);
   }
-
-  /**
-   * @param {FsEntry} dirInfo
-   */
-  export function calcDirSizes(dirInfo) {
-    let size = 0;
-    let files = 0;
-    let dirs = 0;
-    let entries = dirInfo.dirEntries;
-    for (let e of entries) {
-      if (e.isDir) {
-        dirs++;
-        let sizes = calcDirSizes(e);
-        size += sizes.size;
-        files += sizes.files;
-        dirs += sizes.dirs;
-      } else {
-        files++;
-        size += e.size;
-      }
-    }
-    dirInfo.size = size;
-    dirInfo.setMeta("size", size);
-    dirInfo.setMeta("files", files);
-    dirInfo.setMeta("dirs", dirs);
-    return { size, files, dirs };
-  }
 </script>
 
 <script>
   import { fmtNum, fmtSize, len } from "../util";
   import { tick } from "svelte";
 
+  /** @type {FileSys}*/
+  export let fs;
   /** @type {FsEntry} */
   export let dirRoot;
   export let isRoot = false;
@@ -91,17 +70,22 @@
   let entries = [];
   $: calcEntries(dirRoot);
 
+  /**
+   * @param {FsEntry} dirRoot
+   */
   function calcEntries(dirRoot) {
     console.log("calcEntries");
     // SUBTLE: important to not re-order dirInfo.dirEntries because
     // they could be used in calcLineCount()
     // we use and sort a copy
+    let c = fs.entryChildren(dirRoot);
     /** @type {FsEntry[]} */
-    entries = [].concat(dirRoot.dirEntries);
-    sortEntries(entries);
+    entries = [].concat(c);
+    sortEntries(fs, entries);
     if (!isRoot) {
-      let e = new FsEntryUpDir();
-      entries.unshift(e);
+      // TODO: restore ".."
+      // let e = new FsEntryUpDir();
+      // entries.unshift(e);
     }
     if (len(entries) > 0) {
       tick().then(() => {
@@ -114,8 +98,8 @@
    * @param {FsEntry} e
    */
   function toggleExpand(e) {
-    let expanded = isExpanded(e);
-    setExpanded(e, !expanded);
+    let expanded = isExpanded(fs, e);
+    setExpanded(fs, e, !expanded);
     entries = entries;
   }
 
@@ -124,13 +108,17 @@
    * @returns {string}
    */
   function fmtEntrySize(e) {
-    let s = fmtSize(e.size);
-    if (!e.isDir) {
+    let size = fs.entrySize(e);
+    // console.log("e:", e, "size:", size);
+    let s = fmtSize(size);
+    let isDir = fs.entryIsDir(e);
+    if (!isDir) {
       return s;
     }
-    let meta = e.meta;
-    let s2 = "D: " + fmtNum(meta.dirs);
-    s2 += " F: " + fmtNum(meta.files);
+    let nDirs = fs.entryDirCount(e);
+    let nFiles = fs.entryFileCount(e);
+    let s2 = "D: " + fmtNum(nDirs);
+    s2 += " F: " + fmtNum(nFiles);
     return s2 + " " + s;
   }
 
@@ -158,7 +146,8 @@
     let el = /** @type {HTMLElement} */ (e.target);
     let idx = findClickedIdx(el);
     let entry = entries[idx];
-    if (entry.isDir) {
+    let isDir = fs.entryIsDir(entry);
+    if (isDir) {
       onSelected(entry, idx);
     }
   }
@@ -192,7 +181,8 @@
       e.preventDefault();
       let idx = selectedIdx;
       let entry = entries[idx];
-      if (entry.isDir) {
+      let isDir = fs.entryIsDir(entry);
+      if (isDir) {
         onSelected(entry, idx);
       }
       return;
@@ -250,38 +240,38 @@
 >
   <tbody bind:this={tbodyEl}>
     {#each entries as e, idx}
-      {#if e.isDir}
+      {#if fs.entryIsDir(e)}
         <tr
           data-idx={idx}
           tabindex="0"
           class="hover:bg-gray-200 hover:cursor-pointer"
         >
           <td class="ind-{indent} font-semibold">
-            {#if isExpanded(e)}
+            {#if isExpanded(fs, e)}
               ▼
             {:else}
               ▶
             {/if}
-            {e.name}
+            {fs.entryName(e)}
           </td>
           <td class="pl-2 text-right whitespace-nowrap">
             {fmtEntrySize(e)}
           </td>
         </tr>
-        {#if isExpanded(e)}
+        {#if isExpanded(fs, e)}
           <svelte:self {recalc} dirRoot={e} indent={indent + 1} />
         {/if}
       {/if}
     {/each}
 
     {#each entries as e, idx (idx)}
-      {#if !e.isDir}
+      {#if !fs.entryIsDir(e)}
         <tr
           data-idx={idx}
           tabindex="0"
           class="hover:bg-gray-200 even:bg-gray-50"
         >
-          <td class="ind-{indent + 1}">{e.name} </td>
+          <td class="ind-{indent + 1}">{fs.entryName(e)} </td>
           <td class="pl-2 text-right whitespace-nowrap">{fmtEntrySize(e)} </td>
         </tr>
       {/if}

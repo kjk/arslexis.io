@@ -1,43 +1,27 @@
-<script context="module">
-</script>
-
 <script>
   import TopNav from "../TopNav.svelte";
-  import Folder, { calcDirSizes } from "./Folder.svelte";
+  import Folder from "./Folder.svelte";
   import Messages from "../Messages.svelte";
   import Progress, { progress } from "../Progress.svelte";
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
   import { recent } from "./fmstore";
-  import {
-    verifyHandlePermission,
-    supportsFileSystem,
-    readDirRecur,
-    forEachFsEntry,
-  } from "../fileutil";
+  import { verifyHandlePermission, supportsFileSystem } from "../fileutil";
   import { logFmEvent } from "../events";
   import { len } from "../util";
+  import { readFileSysDirRecur, calcDirSizes } from "../fs";
+  import { tick } from "svelte";
 
-  /** @typedef {import("./fmstore").RecentEntry} RecentEntry */
-  /** @typedef {import("../fileutil").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FileSysDir} FileSysDir */
 
-  class FsEntryWithIndex {
-    entry;
-    idx;
-    /**
-     * @param {FsEntry} e
-     * @param {number} i
-     */
-    constructor(e, i) {
-      this.entry = e;
-      this.idx = i;
-    }
-  }
+  /** @type {FileSysDir} */
+  let fs = null;
 
-  /** @type {FsEntryWithIndex[]} */
+  /** @type {any[][]} */
   let dirPath = [];
 
   /** @type {FsEntry} */
-  let dirRoot = null;
+  let dirRoot = -1;
   $: calcDirRoot(dirPath);
   let initialSelectionIdx = 0;
 
@@ -45,39 +29,18 @@
     console.log("calcDirRoot:", dirPath);
     let n = len(dirPath);
     if (n > 0) {
-      dirRoot = dirPath[n - 1].entry;
+      let entrySel = dirPath[n - 1];
+      dirRoot = entrySel[0];
+      initialSelectionIdx = entrySel[1];
       return;
     }
     dirRoot = null;
+    initialSelectionIdx = -1;
   }
-
-  // /** @type {boolean} */
-  // let isShowingFiles = false;
-  // $: isShowngFiles = dirRoot != null;
 
   $progress = "";
 
   let hasFileSystemSupport = supportsFileSystem();
-
-  let defaultExcludeDirs = [".git", "node_modules", "dist"];
-  let defaultExcludeFiles = ["package-lock.json", "yarn.lock"];
-
-  /**
-   * @param {FsEntry} entry
-   */
-  function shouldExclude(entry) {
-    let name = entry.name.toLowerCase();
-    let exclude;
-    if (entry.isDir) {
-      exclude = defaultExcludeDirs.includes(name);
-    } else {
-      exclude = defaultExcludeFiles.includes(name);
-    }
-    // if (exclude) {
-    //   setExcluded(entry, exclude);
-    // }
-    return exclude;
-  }
 
   /**
    * @param {FileSystemDirectoryHandle} dh
@@ -102,27 +65,21 @@
   }
 
   /**
-   * @param {string} dir
-   * @returns {boolean}
-   */
-  function shouldSkipEntry(entry, dir) {
-    // use it to show progress
-    if (entry.kind === "directory") {
-      $progress = `Reading ${dir}`;
-    }
-    return false;
-  }
-
-  /**
    * @param {FileSystemDirectoryHandle} dirHandle
    */
   async function openDirectory(dirHandle) {
     await verifyHandlePermission(dirHandle, false);
     dirPath = [];
     $progress = "Reading directory entries...";
-    let di;
+    async function cbProgress(fs, dirName, nFiles, nDirs, finished) {
+      let msg = `Reading ${dirName}, so far: ${nFiles} files, ${nDirs} dirs`;
+      // console.log(msg);
+      $progress = msg;
+      await tick();
+    }
+    let fsTemp;
     try {
-      di = await readDirRecur(dirHandle, shouldSkipEntry, "");
+      fsTemp = await readFileSysDirRecur(dirHandle, cbProgress);
     } catch (e) {
       console.log("error reading dir", e);
       // can fail if e.g. saved directory was deleted
@@ -130,10 +87,14 @@
       return;
     }
     logFmEvent("openDir");
-    forEachFsEntry(di, shouldExclude);
-    calcDirSizes(di);
-    dirPath = [new FsEntryWithIndex(di, 0)];
+    calcDirSizes(fsTemp);
+    // TODO: handle no files
+    let root = fsTemp.rootEntry();
+    let selectedIdx = 0;
+    dirRoot = root;
+    dirPath = [[root, selectedIdx]];
     $progress = "";
+    fs = fsTemp;
   }
 
   /**
@@ -164,7 +125,7 @@
   }
 
   async function recalc() {
-    calcDirSizes(dirRoot);
+    calcDirSizes(fs);
     // console.log("finished calcDIrSizes");
     dirRoot = dirRoot;
   }
@@ -172,20 +133,18 @@
    * @param {FsEntry} dirEntry
    */
   function handleSelected(dirEntry, idx) {
-    if (dirEntry.name === "..") {
-      handleGoUp();
-      return;
-    }
-    let ei = new FsEntryWithIndex(dirEntry, idx);
-    dirPath.push(ei);
+    // if (dirEntry.name === "..") {
+    //   handleGoUp();
+    //   return;
+    // }
+    dirPath.push([dirEntry, idx]);
     dirPath = dirPath;
-    initialSelectionIdx = 0;
   }
 
   function handleGoUp() {
-    if (len(dirPath) > 1) {
-      let el = dirPath.pop();
-      initialSelectionIdx = el.idx;
+    let n = len(dirPath);
+    if (n > 1) {
+      dirPath.pop();
       dirPath = dirPath;
     }
   }
@@ -194,7 +153,7 @@
 <div class="h-screen fixed inset-0 flex flex-col overflow-y-hidden">
   <TopNav>
     <span class="text-purple-800">File Manager in the browser</span>
-    {#if dirRoot}
+    {#if fs}
       <button
         class="border ml-2 text-sm border-gray-500 px-2 py-0.5 hover:bg-gray-100"
         on:click={openFolder}>Open another folder</button
@@ -213,7 +172,7 @@
   </TopNav>
 
   {#if hasFileSystemSupport}
-    {#if !dirRoot}
+    {#if !fs}
       <div class="flex items-baseline mx-4 mt-2 mb-2">
         <button
           class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
@@ -226,7 +185,7 @@
     <ShowSupportsFileSystem />
   {/if}
 
-  {#if !dirRoot}
+  {#if !fs}
     {#if len($recent) > 0}
       <div class="ml-4 mt-2 mb-2">
         <div>Recently opened:</div>
@@ -253,10 +212,10 @@
     {/if}
   {/if}
 
-  {#if dirRoot}
+  {#if fs}
     <div class="flex font-bold font-mono text-sm ml-3">
       {#each dirPath as e}
-        <div class="ml-1">{e.entry.name}</div>
+        <div class="ml-1">{fs.entryName(e[0])}</div>
         <div class="ml-1">/</div>
       {/each}
     </div>
@@ -265,6 +224,7 @@
         <Folder
           {initialSelectionIdx}
           {recalc}
+          {fs}
           {dirRoot}
           isRoot={len(dirPath) == 1}
           indent={0}

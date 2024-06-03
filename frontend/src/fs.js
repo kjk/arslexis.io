@@ -36,9 +36,7 @@ export const kFileSysInvalidEntry = -1;
 const kParentIdx = 0;
 const kSizeIdx = 1;
 const kModTimeIdx = 2;
-const kMeta1Idx = 3; // arbitrary metadata 1 value as number
-const kMeta2Idx = 4; // arbitrary metadata 2 value as number
-const kMultiNumPropsCount = 5;
+const kMultiNumPropsCount = 3;
 
 /**
  * @param {FileSys} fs
@@ -57,8 +55,6 @@ export function entryPath(fs, e) {
   }
 }
 
-/** @typedef {FileSystemHandle|FileSystemDirectoryHandle} FileSysHandle */
-
 /**
  * Efficient implementation of storing info about direcotry
  * @implements {FileSys}
@@ -66,7 +62,7 @@ export function entryPath(fs, e) {
 export class FileSysDir {
   /** @type {string[]} */
   names = [];
-  /** @type {FileSystemHandle[]} */
+  /** @type {FileSystemDirectoryHandle[]} */
   handles = [];
   /** @type {number[]} */
   multiNumInfo = [];
@@ -132,7 +128,7 @@ export class FileSysDir {
    */
   entryIsDir(e) {
     let children = this.children[e];
-    return children === null;
+    return children !== null;
   }
 
   /**
@@ -176,7 +172,7 @@ export class FileSysDir {
         n++;
       }
     }
-    return;
+    return n;
   }
 
   /**
@@ -240,26 +236,6 @@ export class FileSysDir {
 
   /**
    * @param {FsEntry} e
-   * @param {number} metaIdx
-   * @param {number} val
-   */
-  setFixedMeta(e, metaIdx, val) {
-    let idx = e * kMultiNumPropsCount + kMeta1Idx + metaIdx;
-    this.multiNumInfo[idx] = val;
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @param {number} metaIdx
-   * @returns {number}
-   */
-  getFixedMeta(e, metaIdx) {
-    let idx = e * kMultiNumPropsCount + kMeta1Idx + metaIdx;
-    return this.multiNumInfo[idx];
-  }
-
-  /**
-   * @param {FsEntry} e
    * @returns {number}
    */
   entryMetaCount(e) {
@@ -296,15 +272,15 @@ export class FileSysDir {
   /**
    * @param {FsEntry} parent
    * @param {string} name
-   * @param {FileSysHandle} handle
+   * @param {FileSystemDirectoryHandle} handle
    * @returns {FsEntry}
    */
-  allocEntry(parent, name, handle = null) {
+  allocEntry(parent, name, handle) {
     let e = len(this.names);
     this.names.push(name);
     this.handles.push(handle);
     this.children.push(null);
-    this.multiNumInfo.push(parent, -1, -1, -1);
+    this.multiNumInfo.push(parent, -1, -1);
     return e;
   }
 }
@@ -312,6 +288,7 @@ export class FileSysDir {
 /**
  * @callback readFileSysDirCallback
  * @param {FileSysDir} fs
+ * @param {string} dirName
  * @param {number} nFiles
  * @param {number} nDirs
  * @param {boolean} finished
@@ -331,21 +308,29 @@ export async function readFileSysDirRecur(dirHandle, progress) {
   let nDirs = 0;
   let nFiles = 0;
   while (len(dirsToVisit) > 0) {
-    progress(fs, nFiles, nDirs, false);
     let parent = dirsToVisit.shift();
+    dirHandle = fs.handles[parent];
+    await progress(fs, dirHandle.name, nFiles, nDirs, false);
     let children = [];
-    fs.children[parent] = children;
     // for await (const [name, handle] of dirHandle)
     for await (const fshandle of dirHandle.values()) {
       name = fshandle.name;
-      let echild = fs.allocEntry(parent, name, fshandle);
+      let isDir = fshandle.kind === "directory";
+      let isFile = fshandle.kind === "file";
+      // perf: only store handle for directories
+      // we need it to access files
+      let h = null;
+      if (isDir) {
+        h = /** @type { FileSystemDirectoryHandle } */ (fshandle);
+      }
+      let echild = fs.allocEntry(parent, name, h);
       children.push(echild);
-      if (fshandle.kind === "directory") {
+      if (isDir) {
         dirsToVisit.push(echild);
         nDirs++;
         continue;
       }
-      if (fshandle.kind === "file") {
+      if (isFile) {
         // @ts-ignore
         let f = /** @type { File } */ (await fshandle.getFile());
         let info = fs.multiNumInfo;
@@ -357,8 +342,9 @@ export async function readFileSysDirRecur(dirHandle, progress) {
       }
       // should not be anything else
     }
+    fs.children[parent] = children;
   }
-  progress(fs, nFiles, nDirs, true);
+  // await progress(fs, "", nFiles, nDirs, true);
   return fs;
 }
 
@@ -391,3 +377,29 @@ export function calcDirSizes(fs) {
   let root = fs.rootEntry();
   calcDirSizeRecur(fs, root);
 }
+
+/*
+  export function calcDirSizes(dirInfo) {
+    let size = 0;
+    let files = 0;
+    let dirs = 0;
+    let entries = dirInfo.dirEntries;
+    for (let e of entries) {
+      if (e.isDir) {
+        dirs++;
+        let sizes = calcDirSizes(e);
+        size += sizes.size;
+        files += sizes.files;
+        dirs += sizes.dirs;
+      } else {
+        files++;
+        size += e.size;
+      }
+    }
+    dirInfo.size = size;
+    dirInfo.setMeta("size", size);
+    dirInfo.setMeta("files", files);
+    dirInfo.setMeta("dirs", dirs);
+    return { size, files, dirs };
+  }
+*/
