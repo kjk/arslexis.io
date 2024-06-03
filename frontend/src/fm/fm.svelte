@@ -7,7 +7,7 @@
   import { recent } from "./fmstore";
   import { verifyHandlePermission, supportsFileSystem } from "../fileutil";
   import { logFmEvent } from "../events";
-  import { len } from "../util";
+  import { fmtSize, len } from "../util";
   import { readFileSysDirRecur, calcDirSizes } from "../fs";
 
   /** @typedef {import("../fs").FsEntry} FsEntry */
@@ -37,7 +37,7 @@
     initialSelectionIdx = 0;
   }
 
-  let progress = "";
+  let progressHTML = "";
 
   let hasFileSystemSupport = supportsFileSystem();
 
@@ -71,7 +71,7 @@
     await verifyHandlePermission(dirHandle, false);
     fs = null;
     dirPath = [];
-    progress = "Reading directory entries...";
+    progressHTML = "<div>Reading directory entries...</div>";
 
     /**
      * @param {ReadFilesCbArgs} a
@@ -87,9 +87,10 @@
           return false;
         }
       }
-      let msg = `<div>Reading <b>${a.dirName}</b> ${a.fileCount} files, ${a.dirCount} dirs</div>`;
+      let sizeStr = fmtSize(a.totalSize);
+      let msg = `<div class="flex"><div>Reading <b>${a.dirName}</b></div><div class="flex-grow"></div><div>${a.fileCount} files, ${a.dirCount} dirs, ${sizeStr}</div></div>`;
       // console.log(msg);
-      progress = msg;
+      progressHTML = msg;
       return true;
     }
 
@@ -105,7 +106,7 @@
       dirRoot = root;
       let selectedIdx = 0;
       dirPath = [[root, selectedIdx]];
-      progress = "";
+      progressHTML = "";
       fs = fsTemp;
       fsStack = [];
     }
@@ -269,6 +270,6 @@
 
 <div class="mt-4" />
 
-<Progress2 msg={progress} />
+<Progress2 msgHTML={progressHTML} />
 
 <Messages />
