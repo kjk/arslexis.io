@@ -1,6 +1,3 @@
-<script context="module">
-</script>
-
 <script>
   import TopNav from "../TopNav.svelte";
   import Folder, {
@@ -9,7 +6,7 @@
     setExcluded,
   } from "./Folder.svelte";
   import Messages from "../Messages.svelte";
-  import Progress, { progress } from "../Progress.svelte";
+  import Progress2 from "../Progress2.svelte";
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
   import { recent } from "./wcstore";
   import {
@@ -27,7 +24,7 @@
   /** @type {FsEntry} */
   let dirRoot = null;
 
-  $progress = "";
+  let progressHTML = "";
 
   let hasFileSystemSupport = supportsFileSystem();
 
@@ -80,7 +77,7 @@
   function shouldSkipEntry(entry, dir) {
     // use it to show progress
     if (entry.kind === "directory") {
-      $progress = `Reading ${dir}`;
+      progressHTML = `<div>Reading ${dir}</div>`;
     }
     return false;
   }
@@ -91,14 +88,14 @@
   async function openDirectory(dirHandle) {
     await verifyHandlePermission(dirHandle, false);
     dirRoot = null;
-    $progress = "Reading directory entries...";
+    progressHTML = "<div>Reading directory entries...</div>";
     let di;
     try {
       di = await readDirRecur(dirHandle, shouldSkipEntry, "");
     } catch (e) {
       console.log("error reading dir", e);
       // can fail if e.g. saved directory was deleted
-      $progress = "";
+      progressHTML = "";
       return;
     }
     logWcEvent("openDir");
@@ -106,10 +103,10 @@
     calcDirSizes(di);
     dirRoot = di;
     await calcLineCounts(di, (dirInfo) => {
-      $progress = `Calculating line counts ${dirInfo.path}`;
+      progressHTML = `<div>Calculating line counts ${dirInfo.path}</div>`;
     });
     dirRoot = di;
-    $progress = "";
+    progressHTML = "";
   }
 
   /**
@@ -244,6 +241,6 @@
   <div class="mt-4" />
 {/if}
 
-<Progress />
+<Progress2 msgHTML={progressHTML} />
 
 <Messages />
