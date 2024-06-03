@@ -122,6 +122,7 @@
     // console.log("finished calcDIrSizes");
     dirRoot = dirRoot;
   }
+
   /**
    * @param {FsEntry} dirEntry
    */
@@ -211,7 +212,13 @@
   {/if}
 
   {#if fs}
+    {@const isUpEnabled = len(dirPath) > 1}
     <div class="flex font-bold font-mono text-sm ml-3">
+      <button
+        disabled={!isUpEnabled}
+        class="hover:bg-gray-200 disabled:hover:bg-white disabled:text-gray-300 px-[4px] mr-0.5"
+        on:click={handleGoUp}>▲</button
+      >
       {#each dirPath as e, idx}
         {@const isLast = len(e) === idx + 1}
         <div class="ml-1">{fs.entryName(e[0])}</div>
