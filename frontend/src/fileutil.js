@@ -404,7 +404,6 @@ export async function readDir(
 export async function readDirRecurFiles(dirHandle, dir = dirHandle.name) {
   const dirs = [];
   const files = [];
-  // @ts-ignore
   for await (const entry of dirHandle.values()) {
     const path = dir == "" ? entry.name : `${dir}/${entry.name}`;
     if (entry.kind === "file") {

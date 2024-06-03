@@ -1,1 +1,47 @@
-This is a scratch note.
+----- metadata representation experiment
+// represents arbitrary metadata as an array
+// each entry takes 2 slots in the array: name and value
+/** @typedef {any[]} MetaDataArray */
+
+/**
+ * @param {MetaDataArray} m
+ * @returns {number}
+ */
+export function metaCount(m) {
+  return len(m) / 2;
+}
+
+/**
+ * @param {MetaDataArray} m
+ * @param {string} key
+ * @returns {any}
+ */
+export function metaGet(m, key) {
+  let n = len(m);
+  for (let idx = 0; idx < n; idx += 2) {
+    if (m[idx] === key) {
+      return m[idx + 1];
+    }
+  }
+  return undefined;
+}
+
+/**
+ * @param {MetaDataArray} m
+ * @param {number} i
+ * @returns {string}
+ */
+export function metaKey(m, i) {
+  return m[i * 2];
+}
+
+/**
+ * @param {MetaDataArray} m
+ * @param {number} i
+ * @returns {string}
+ */
+export function metaValue(m, i) {
+  return m[i * 2 + 1];
+}
+
+--------------------
