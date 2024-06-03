@@ -12,6 +12,7 @@
 
   /** @typedef {import("../fs").FsEntry} FsEntry */
   /** @typedef {import("../fs").FileSysDir} FileSysDir */
+  /** @typedef {import("../fs").ReadFilesCbArgs} ReadFilesCbArgs */
 
   /** @type {FileSysDir} */
   let fs = null;
@@ -71,17 +72,22 @@
     fs = null;
     dirPath = [];
     progress = "Reading directory entries...";
-    function cbProgress(fs, dirName, nFiles, nDirs, finished) {
+
+    /**
+     * @param {ReadFilesCbArgs} a
+     * @returns {boolean}
+     */
+    function cbProgress(a) {
       // interrupt scans in progress if we started a new one
-      if (!fsStack.includes(fs)) {
-        fsStack.push(fs);
+      if (!fsStack.includes(a.fs)) {
+        fsStack.push(a.fs);
       } else {
         let lastIdx = len(fsStack) - 1;
-        if (fs !== fsStack[lastIdx]) {
+        if (a.fs !== fsStack[lastIdx]) {
           return false;
         }
       }
-      let msg = `Reading ${dirName}, so far: ${nFiles} files, ${nDirs} dirs`;
+      let msg = `<div>Reading <b>${a.dirName}</b> ${a.fileCount} files, ${a.dirCount} dirs</div>`;
       // console.log(msg);
       progress = msg;
       return true;

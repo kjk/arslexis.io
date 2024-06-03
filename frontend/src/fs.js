@@ -325,12 +325,18 @@ export class FileSysDir {
 }
 
 /**
+ * @typedef {Object} ReadFilesCbArgs
+ * @property {FileSysDir} fs
+ * @property {string} dirName
+ * @property {number} fileCount
+ * @property {number} dirCount
+ * @property {number} totalSize
+ * @property {boolean} finished
+ */
+
+/**
  * @callback readFileSysDirCallback
- * @param {FileSysDir} fs
- * @param {string} dirName
- * @param {number} nFiles
- * @param {number} nDirs
- * @param {boolean} finished
+ * @param {ReadFilesCbArgs} args
  * @returns {boolean}
  */
 
@@ -347,11 +353,21 @@ export async function readFileSysDirRecur(dirHandle, progress) {
   let dirsToVisit = [entry];
   let nDirs = 0;
   let nFiles = 0;
+  let totalSize = 0;
   while (len(dirsToVisit) > 0) {
     let parent = dirsToVisit.shift();
     dirHandle = fs.handles[parent];
     if (nDirs % 10 == 0) {
-      let cont = progress(fs, dirHandle.name, nFiles, nDirs, false);
+      /** @type {ReadFilesCbArgs} */
+      let arg = {
+        fs,
+        dirName: dirHandle.name,
+        fileCount: nFiles,
+        dirCount: nDirs,
+        totalSize,
+        finished: false,
+      };
+      let cont = progress(arg);
       if (!cont) {
         return fs;
       }
@@ -385,6 +401,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
         info[idx + kSizeIdx] = f.size;
         info[idx + kModTimeIdx] = f.lastModified;
         nFiles++;
+        totalSize += f.size;
         continue;
       }
       // should not be anything else
