@@ -1,9 +1,9 @@
 import "../base.css";
 
-import wc from "./fm.svelte";
+import fm from "./fm.svelte";
 
 const args = {
   target: document.getElementById("app"),
 };
-const app = new wc(args);
+const app = new fm(args);
 console.log("app:", app);

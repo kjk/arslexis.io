@@ -31,6 +31,10 @@ const binaryExts = [
   ".afm",
 ];
 
+/**
+ * @param {string} path
+ * @returns {boolean}
+ */
 export function isBinary(path) {
   // if (path.includes(".git/")) {
   //   return true;
@@ -359,6 +363,7 @@ export async function readDirRecur(
       let e = await FsEntry.fromHandle(handle, dirHandle, path);
       entries.push(e);
     } else if (handle.kind === "directory") {
+      // @ts-ignore
       let e = await readDirRecur(handle, skipEntryFn, path);
       e.path = path;
       entries.push(e);
@@ -407,9 +412,12 @@ export async function readDirRecurFiles(dirHandle, dir = dirHandle.name) {
   for await (const entry of dirHandle.values()) {
     const path = dir == "" ? entry.name : `${dir}/${entry.name}`;
     if (entry.kind === "file") {
+      let fh = /** @type {FileSystemFileHandle} */ (entry);
       files.push(
-        entry.getFile().then((file) => {
+        fh.getFile().then((file) => {
+          // @ts-ignore
           file.directoryHandle = dirHandle;
+          // @ts-ignore
           file.handle = entry;
           return Object.defineProperty(file, "webkitRelativePath", {
             configurable: true,
@@ -419,26 +427,11 @@ export async function readDirRecurFiles(dirHandle, dir = dirHandle.name) {
         })
       );
     } else if (entry.kind === "directory") {
-      dirs.push(readDirRecurFiles(entry, path));
+      let dh = /** @type {FileSystemDirectoryHandle} */ (entry);
+      dirs.push(readDirRecurFiles(dh, path));
     }
   }
   return [...(await Promise.all(dirs)).flat(), ...(await Promise.all(files))];
-}
-
-/**
- *
- * @param {FsEntry} dir
- * @param {Function} fn
- */
-export function forEachFsEntry(dir, fn) {
-  let entries = dir.dirEntries;
-  for (let e of entries) {
-    let skip = fn(e);
-    if (!skip && e.isDir) {
-      forEachFsEntry(e, fn);
-    }
-  }
-  fn(dir);
 }
 
 /**

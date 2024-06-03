@@ -5,9 +5,7 @@ and being able to represent various kinds of filesystem (disk, s3 etc.).
 FileSystem entries are represented by an opaque handle (a number).
 */
 
-import { len, sleep, throwIf } from "./util";
-
-import { tick } from "svelte";
+import { len, throwIf } from "./util";
 
 export const kFileSysInvalidEntry = -1;
 
@@ -28,35 +26,17 @@ export const kFileSysInvalidEntry = -1;
  * @property { (FsEntry) => number[] } entryFiles
  * @property { (FsEntry) => number } entryDirCount
  * @property { (FsEntry) => number } entryFileCount
- * @property { (FsEntry) => number } entryMetaCount
- * @property { (FsEntry, string) => any } entryMetaValueByKey
- * @property { (FsEntry, number) => string } entryMetaKey
- * @property { (FsEntry, number) => any } entryMetaValue
+ * @property { (FsEntry) => any[] } entryMetaAll // returns all metadata
+ * @property { (FsEntry, string, any) => any } entrySetMeta
+ * @property { (FsEntry, string) => any } entryMeta
  */
 
 // index withing multiNumInfo flat array
 const kParentIdx = 0;
 const kSizeIdx = 1;
 const kModTimeIdx = 2;
-// const kFirstMetaIdx = 3;
+const kFirstMetaIdx = 3;
 const kMultiNumPropsCount = 4;
-
-/**
- * @param {FileSys} fs
- * @param {FsEntry} e
- * @returns {FsEntry[]}
- */
-export function entryPath(fs, e) {
-  let res = [e];
-  while (true) {
-    e = fs.entryParent(e);
-    if (e == kFileSysInvalidEntry) {
-      res.reverse();
-      return res;
-    }
-    res.push(e);
-  }
-}
 
 /**
  * Efficient implementation of storing info about direcotry
@@ -98,7 +78,7 @@ export class FileSysDir {
    * @param {string} key
    * @returns {number}
    */
-  internMetaKey(key) {
+  _internMetaKey(key) {
     let a = this.metaKeys;
     let n = len(a);
     for (let i = 0; i < n; i++) {
@@ -108,6 +88,64 @@ export class FileSysDir {
     }
     this.metaKeys.push(key);
     return n; // index of the newly appended key
+  }
+
+  /**
+   * @param {FsEntry} e
+   * @returns {any[]}
+   */
+  entryMetaAll(e) {
+    return null;
+  }
+
+  /**
+   * @param {FsEntry} e
+   * @param {string} key
+   * @param {any} val
+   */
+  entrySetMeta(e, key, val) {
+    let valIdx = len(this.metaValues);
+    this.metaValues.push(val);
+    let keyIdx = this._internMetaKey(key);
+    let mi = this.metaIndex;
+    let metaIdx = len(mi);
+    mi.push(keyIdx, valIdx, -1);
+
+    let currIdx = this.multiNumInfo[e * kMultiNumPropsCount + kFirstMetaIdx];
+    if (currIdx === -1) {
+      this.multiNumInfo[e * kMultiNumPropsCount + kFirstMetaIdx] = metaIdx;
+      return;
+    }
+    while (true) {
+      let idx = currIdx * 3;
+      let nextIdx = mi[idx + 2];
+      if (nextIdx !== -1) {
+        mi[idx + 2] = idx;
+        return;
+      }
+      currIdx = nextIdx;
+    }
+  }
+
+  /**
+   * @param {FsEntry} e
+   * @param {string} key
+   * @returns {any}
+   */
+  entryMeta(e, key) {
+    let currIdx = this.multiNumInfo[e * kMultiNumPropsCount + kFirstMetaIdx];
+    let keyIdx = this._internMetaKey(key);
+    let mi = this.metaIndex;
+    while (currIdx !== -1) {
+      let idx = currIdx * 3;
+      let keyIdx2 = mi[idx];
+      if (keyIdx2 === keyIdx) {
+        let valIdx = mi[idx + 1];
+        return this.metaValues[valIdx];
+      }
+      currIdx = mi[idx + 2];
+    }
+    return undefined;
   }
 
   /**
@@ -196,6 +234,30 @@ export class FileSysDir {
 
   /**
    * @param {FsEntry} e
+   * @returns {Promise<FileSystemFileHandle>}
+   */
+  async entryFileHandle(e) {
+    let isDir = this.entryIsDir(e);
+    throwIf(isDir);
+    let name = this.entryName(e);
+    let parent = this.entryParent(e);
+    let dh = this.handles[parent];
+    dh.getFileHandle(name);
+    return await dh.getFileHandle(name);
+  }
+
+  /**
+   * @param {FsEntry} e
+   * @returns {FileSystemDirectoryHandle}
+   */
+  entryDirHandle(e) {
+    let isDir = this.entryIsDir(e);
+    throwIf(isDir);
+    return this.handles[e];
+  }
+
+  /**
+   * @param {FsEntry} e
    * @param {boolean} forDirs
    * @returns {number}
    */
@@ -271,41 +333,6 @@ export class FileSysDir {
   }
 
   /**
-   * @param {FsEntry} e
-   * @returns {number}
-   */
-  entryMetaCount(e) {
-    return 0;
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @param {string} key
-   * @returns {any}
-   */
-  entryMetaValueByKey(e, key) {
-    return undefined;
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @param {number} i
-   * @returns {string}
-   */
-  entryMetaKey(e, i) {
-    return null;
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @param {number} i
-   * @returns {any}
-   */
-  entryMetaValue(e, i) {
-    return undefined;
-  }
-
-  /**
    * @param {FsEntry} parent
    * @param {string} name
    * @param {FileSystemDirectoryHandle} handle
@@ -371,8 +398,6 @@ export async function readFileSysDirRecur(dirHandle, progress) {
       if (!cont) {
         return fs;
       }
-      // await tick();
-      // await sleep(10);
     }
     let children = [];
     // for await (const [name, handle] of dirHandle)
@@ -442,28 +467,33 @@ export function calcDirSizes(fs) {
   calcDirSizeRecur(fs, root);
 }
 
-/*
-  export function calcDirSizes(dirInfo) {
-    let size = 0;
-    let files = 0;
-    let dirs = 0;
-    let entries = dirInfo.dirEntries;
-    for (let e of entries) {
-      if (e.isDir) {
-        dirs++;
-        let sizes = calcDirSizes(e);
-        size += sizes.size;
-        files += sizes.files;
-        dirs += sizes.dirs;
-      } else {
-        files++;
-        size += e.size;
-      }
-    }
-    dirInfo.size = size;
-    dirInfo.setMeta("size", size);
-    dirInfo.setMeta("files", files);
-    dirInfo.setMeta("dirs", dirs);
-    return { size, files, dirs };
+/**
+ * @param {FileSys} fs
+ * @param {FsEntry} e
+ * @returns {FsEntry[]}
+ */
+export function entryPath(fs, e) {
+  let res = [];
+  while (e !== kFileSysInvalidEntry) {
+    res.push(e);
+    e = fs.entryParent(e);
   }
-*/
+  res.reverse();
+  return res;
+}
+
+/**
+ * @param {FileSys} fs
+ * @param {FsEntry} e
+ * @returns {string}
+ */
+export function entryFullPath(fs, e) {
+  let parts = [];
+  while (e !== kFileSysInvalidEntry) {
+    let name = fs.entryName(e);
+    parts.push(name);
+    e = fs.entryParent(e);
+  }
+  parts.reverse();
+  return parts.join("/");
+}

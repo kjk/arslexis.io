@@ -1,69 +1,79 @@
 <script context="module">
   import { strCompareNoCase } from "../strutil";
   import { verifyHandlePermission, isBinary, lineCount } from "../fileutil";
-  /** @typedef {import("../fileutil").FsEntry} FsEntry */
+
+  /** @typedef {import("../fs").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FileSysDir} FileSysDir */
+  /** @typedef {import("../fs").FileSys} FileSys */
 
   /**
+   * @param {FileSysDir} fs
    * @param {FsEntry} e
    * @returns {number}
    */
-  export function getLineCount(e) {
-    return e.getMeta("linecount") || 0;
+  export function getLineCount(fs, e) {
+    return fs.entryMeta(e, "linecount") || 0;
   }
 
   /**
+   * @param {FileSysDir} fs
    * @param {FsEntry} e
    * @param {number} n
    */
-  export function setLineCount(e, n) {
-    e.setMeta("linecount", n);
+  export function setLineCount(fs, e, n) {
+    fs.entrySetMeta(e, "linecount", n);
   }
 
   /**
+   * @param {FileSysDir} fs
    * @param {FsEntry} e
    * @returns {boolean}
    */
-  export function isExcluded(e) {
-    return e.getMeta("excluded");
+  export function isExcluded(fs, e) {
+    return fs.entryMeta(e, "excluded") || false;
   }
 
   /**
+   * @param {FileSysDir} fs
    * @param {FsEntry} e
    * @param {boolean} excluded
    */
-  export function setExcluded(e, excluded) {
-    e.setMeta("excluded", excluded);
+  export function setExcluded(fs, e, excluded) {
+    fs.entrySetMeta(e, "excluded", excluded);
   }
 
   /**
+   * @param {FileSysDir} fs
    * @param {FsEntry} e
    * @returns {boolean}
    */
-  export function isExpanded(e) {
-    return e.getMeta("expanded");
+  export function isExpanded(fs, e) {
+    return fs.entryMeta(e, "expanded") || false;
   }
 
   /**
+   * @param {FileSysDir} fs
    * @param {FsEntry} e
    * @param {boolean} expanded
    */
-  export function setExpanded(e, expanded) {
-    e.setMeta("expanded", expanded);
+  export function setExpanded(fs, e, expanded) {
+    fs.entrySetMeta(e, "expanded", expanded);
   }
 
   /**
+   * @param {FileSys} fs
    * @param {FsEntry[]} entries
    */
-  export function sortEntries(entries) {
+  export function sortEntries(fs, entries) {
     /**
      * @param {FsEntry} e1
      * @param {FsEntry} e2
      */
     function sortFn(e1, e2) {
-      let e1Dir = e1.isDir;
-      let e2Dir = e2.isDir;
-      let name1 = e1.name;
-      let name2 = e2.name;
+      let e1Dir = fs.entryIsDir(e1);
+      let e2Dir = fs.entryIsDir(e2);
+      let name1 = fs.entryName(e1);
+      let name2 = fs.entryName(e1);
       if (e1Dir && e2Dir) {
         return strCompareNoCase(name1, name2);
       }
@@ -76,18 +86,20 @@
   }
 
   /**
-   * @param {FsEntry} dirInfo
+   * @param {FileSysDir} fs
+   * @param {FsEntry} e
    */
-  export function calcDirSizes(dirInfo) {
+  export function calcDirSizes(fs, e) {
     let size = 0;
     let files = 0;
     let dirs = 0;
-    let entries = dirInfo.dirEntries;
+    let entries = fs.entryChildren(e);
     for (let e of entries) {
-      let excluded = isExcluded(e);
-      if (e.isDir) {
+      let excluded = isExcluded(fs, e);
+      let isDir = fs.entryIsDir(e);
+      if (isDir) {
         dirs++;
-        let sizes = calcDirSizes(e);
+        let sizes = calcDirSizes(fs, e);
         if (excluded) {
           continue;
         }
@@ -99,51 +111,55 @@
           continue;
         }
         files++;
-        size += e.size;
+        size += fs.entrySize(e);
       }
     }
-    dirInfo.size = size;
-    dirInfo.setMeta("size", size);
-    dirInfo.setMeta("files", files);
-    dirInfo.setMeta("dirs", dirs);
+
+    fs.setEntrySize(e, size);
+    fs.entrySetMeta(e, "size", size);
+    fs.entrySetMeta(e, "files", files);
+    fs.entrySetMeta(e, "dirs", dirs);
     return { size, files, dirs };
   }
 
   /**
-   * @param {FsEntry} dirInfo
+   * @param {FileSysDir} fs
+   * @param {FsEntry} e
    * @param {Function} onDir
    * @returns {Promise<number>}
    */
-  export async function calcLineCounts(dirInfo, onDir) {
+  export async function calcLineCounts(fs, e, onDir) {
     let total = 0;
-    let a = dirInfo.dirEntries;
+    let a = fs.entryChildren(e);
     if (onDir) {
-      onDir(dirInfo);
+      onDir(e);
     }
     for (let e of a) {
-      let excluded = isExcluded(e);
+      let excluded = isExcluded(fs, e);
       if (excluded) {
         // TODO: for files this can be slow if we exclude and then include
         // back, because we'll have to re-read the file
         // we could have another meta prop: cachedLineCount
-        setLineCount(e, 0);
+        setLineCount(fs, e, 0);
         continue;
       }
-      let path = e.path;
-      if (e.isDir) {
-        total += await calcLineCounts(e, onDir);
+      let path = entryFullPath(fs, e);
+      let isDir = fs.entryIsDir(e);
+      if (isDir) {
+        total += await calcLineCounts(fs, e, onDir);
       } else {
-        let lc = getLineCount(e);
+        let lc = getLineCount(fs, e);
         // don't re-calculate lineCount if did it in the past
         if (!isBinary(path) && lc == 0) {
-          let file = await e.getFile();
+          let fh = await fs.entryFileHandle(e);
+          let file = await fh.getFile();
           lc = await lineCount(file);
         }
         total += lc;
-        setLineCount(e, lc);
+        setLineCount(fs, e, lc);
       }
     }
-    setLineCount(dirInfo, total);
+    setLineCount(fs, e, total);
     return total;
   }
 </script>
@@ -154,9 +170,12 @@
   import { showInfoMessage } from "../Messages.svelte";
   import { onMount } from "svelte";
   import { logWcEvent } from "../events";
+  import { entryFullPath, entryPath } from "../fs";
 
+  /** @type {FileSysDir} */
+  export let fs;
   /** @type {FsEntry} */
-  export let dirInfo;
+  export let dirRoot;
   export let indent;
   /** @type {Function} */
   export let recalc;
@@ -167,17 +186,18 @@
     // SUBTLE: important to not re-order dirInfo.dirEntries because
     // they could be used in calcLineCount()
     // we use and sort a copy
+    let c = fs.entryChildren(dirRoot);
     /** @type {FsEntry[]} */
-    entries = [].concat(dirInfo.dirEntries);
-    sortEntries(entries);
+    entries = [].concat(c);
+    sortEntries(fs, entries);
   });
 
   /**
    * @param {FsEntry} e
    */
   function toggleExpand(e) {
-    let expanded = isExpanded(e);
-    setExpanded(e, !expanded);
+    let expanded = isExpanded(fs, e);
+    setExpanded(fs, e, !expanded);
     entries = entries;
   }
 
@@ -224,7 +244,7 @@
   }
 
   async function doExclude(e, exclude) {
-    setExcluded(e, exclude);
+    setExcluded(fs, e, exclude);
     await recalc();
   }
 </script>
@@ -232,14 +252,14 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#each entries as e, idx}
   {@const meta = e.meta}
-  {@const excluded = isExcluded(e)}
+  {@const excluded = isExcluded(fs, e)}
   {#if e.isDir}
     <tr
       on:click={() => toggleExpand(e)}
       class="hover:bg-gray-200 hover:cursor-pointer pl-8"
     >
       <td class="ind-{indent} font-semibold">
-        {#if isExpanded(e)}
+        {#if isExpanded(fs, e)}
           ▼
         {:else}
           ▶
@@ -251,7 +271,7 @@
       </td>
       <td class="pl-2 text-right">{fmtNum(meta.dirs)}</td>
       <td class="pl-2 text-right">{fmtNum(meta.files)}</td>
-      <td class="pl-2 text-right">{fmtNum(getLineCount(e))}</td>
+      <td class="pl-2 text-right">{fmtNum(getLineCount(fs, e))}</td>
       <td class="text-center bg-white"
         ><button
           on:click|stopPropagation={() => deleteDirOrFile(idx)}
@@ -274,21 +294,21 @@
         >
       {/if}
     </tr>
-    {#if isExpanded(e)}
+    {#if isExpanded(fs, e)}
       <svelte:self {recalc} dirInfo={e} indent={indent + 1} />
     {/if}
   {/if}
 {/each}
 
 {#each entries as e, idx (idx)}
-  {@const excluded = isExcluded(e)}
+  {@const excluded = isExcluded(fs, e)}
   {#if !e.isDir}
     <tr class="hover:bg-gray-200 even:bg-gray-50">
       <td class="ind-{indent + 1}">{e.name} </td>
       <td class="pl-2 text-right whitespace-nowrap">{fmtSize(e.size)} </td>
       <td class="pl-2 text-right" />
       <td class="pl-2 text-right" />
-      <td class="pl-2 text-right">{fmtNum(getLineCount(e))}</td>
+      <td class="pl-2 text-right">{fmtNum(getLineCount(fs, e))}</td>
       <td class="text-center bg-white"
         ><button
           on:click={() => deleteDirOrFile(idx)}

@@ -1,28 +1,24 @@
 <script>
   import TopNav from "../TopNav.svelte";
-  import Folder, {
-    calcDirSizes,
-    calcLineCounts,
-    setExcluded,
-  } from "./Folder.svelte";
+  import Folder, { calcLineCounts, setExcluded } from "./Folder.svelte";
   import Messages from "../Messages.svelte";
   import Progress2 from "../Progress2.svelte";
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
   import { recent } from "./wcstore";
-  import {
-    verifyHandlePermission,
-    supportsFileSystem,
-    readDirRecur,
-    forEachFsEntry,
-  } from "../fileutil";
+  import { verifyHandlePermission, supportsFileSystem } from "../fileutil";
   import { fmtNum, fmtSize, len } from "../util";
   import { logWcEvent } from "../events";
+  import { readFileSysDirRecur, calcDirSizes } from "../fs";
 
-  /** @typedef {import("./wcstore").RecentEntry} RecentEntry */
-  /** @typedef {import("../fileutil").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FileSysDir} FileSysDir */
+  /** @typedef {import("../fs").ReadFilesCbArgs} ReadFilesCbArgs */
+
+  /** @type {FileSysDir} */
+  let fs = null;
 
   /** @type {FsEntry} */
-  let dirRoot = null;
+  let dirRoot = -1;
 
   let progressHTML = "";
 
@@ -32,20 +28,37 @@
   let defaultExcludeFiles = ["package-lock.json", "yarn.lock"];
 
   /**
-   * @param {FsEntry} entry
+   * @param {FsEntry} e
    */
-  function shouldExclude(entry) {
-    let name = entry.name.toLowerCase();
+  function shouldExclude(fs, e) {
+    let name = fs.entryName(e).toLowerCase();
     let exclude;
-    if (entry.isDir) {
+    let isDir = fs.entryIsDir(e);
+    if (isDir) {
       exclude = defaultExcludeDirs.includes(name);
     } else {
       exclude = defaultExcludeFiles.includes(name);
     }
     if (exclude) {
-      setExcluded(entry, exclude);
+      setExcluded(fs, e, exclude);
     }
     return exclude;
+  }
+
+  /**
+   * @param {FileSysDir} fs
+   * @param {Function} fn
+   */
+  export function forEachFsEntry(fs, e, fn) {
+    let entries = fs.entryChildren(e);
+    for (let e of entries) {
+      let skip = fn(fs, e);
+      let isDir = fs.entryIsDir(e);
+      if (!skip && isDir) {
+        forEachFsEntry(fs, e, fn);
+      }
+    }
+    fn(fs, e);
   }
 
   /**
@@ -70,28 +83,41 @@
     $recent = $recent;
   }
 
-  /**
-   * @param {string} dir
-   * @returns {boolean}
-   */
-  function shouldSkipEntry(entry, dir) {
-    // use it to show progress
-    if (entry.kind === "directory") {
-      progressHTML = `<div>Reading ${dir}</div>`;
-    }
-    return false;
-  }
+  let fsStack = [];
 
   /**
    * @param {FileSystemDirectoryHandle} dirHandle
    */
   async function openDirectory(dirHandle) {
     await verifyHandlePermission(dirHandle, false);
-    dirRoot = null;
+    fs = null;
+    dirRoot = -1;
     progressHTML = "<div>Reading directory entries...</div>";
-    let di;
+    let fsTemp;
+
+    /**
+     * @param {ReadFilesCbArgs} a
+     * @returns {boolean}
+     */
+    function cbProgress(a) {
+      // interrupt scans in progress if we started a new one
+      if (!fsStack.includes(a.fs)) {
+        fsStack.push(a.fs);
+      } else {
+        let lastIdx = len(fsStack) - 1;
+        if (a.fs !== fsStack[lastIdx]) {
+          return false;
+        }
+      }
+      let sizeStr = fmtSize(a.totalSize);
+      let msg = `<div class="flex"><div>Reading <b>${a.dirName}</b></div><div class="flex-grow"></div><div>${a.fileCount} files, ${a.dirCount} dirs, ${sizeStr}</div></div>`;
+      // console.log(msg);
+      progressHTML = msg;
+      return true;
+    }
+
     try {
-      di = await readDirRecur(dirHandle, shouldSkipEntry, "");
+      fsTemp = await readFileSysDirRecur(dirHandle, cbProgress);
     } catch (e) {
       console.log("error reading dir", e);
       // can fail if e.g. saved directory was deleted
@@ -99,14 +125,17 @@
       return;
     }
     logWcEvent("openDir");
-    forEachFsEntry(di, shouldExclude);
-    calcDirSizes(di);
-    dirRoot = di;
-    await calcLineCounts(di, (dirInfo) => {
-      progressHTML = `<div>Calculating line counts ${dirInfo.path}</div>`;
+    forEachFsEntry(fsTemp, fsTemp.rootEntry, shouldExclude);
+    calcDirSizes(fsTemp);
+    fs = fsTemp;
+    dirRoot = fsTemp.rootEntry();
+    await calcLineCounts(fsTemp, dirRoot, (e) => {
+      let name = fsTemp.entryName(e);
+      progressHTML = `<div>Calculating line counts ${name}</div>`;
     });
-    dirRoot = di;
     progressHTML = "";
+    dirRoot = dirRoot;
+    fsStack = [];
   }
 
   /**
@@ -137,9 +166,9 @@
   }
 
   async function recalc() {
-    calcDirSizes(dirRoot);
+    calcDirSizes(fs);
     // console.log("finished calcDIrSizes");
-    await calcLineCounts(dirRoot, null);
+    await calcLineCounts(fs, dirRoot, null);
     // console.log("fnished calcLineCounts");
     dirRoot = dirRoot;
   }
@@ -163,7 +192,7 @@
   </div>
 
   {#if len($recent) > 0}
-    {#if !dirRoot}
+    {#if !fs}
       <div class="ml-4 mt-2 mb-2">
         <div>Recently opened:</div>
         <table class="table-auto ml-4">
@@ -198,11 +227,15 @@
   {/if}
 
   <div class="mx-4 mt-2 text-sm font-mono">
-    {#if dirRoot}
-      {@const meta = dirRoot.meta}
+    {#if fs}
       {@const e = dirRoot}
+      {@const metaDirs = fs.entryMeta(e, "dirs") || 0}
+      {@const metaFiles = fs.entryMeta(e, "files") || 0}
+      {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
+      {@const name = fs.entryName(e)}
+      {@const size = fs.entrySize(e)}
       {#key dirRoot}
-        <div class="font-bold font-mono mt-2">{e.name}/</div>
+        <div class="font-bold font-mono mt-2">{name}/</div>
         <table class="relative table-auto">
           <thead>
             <tr class="relative even:bg-gray-50">
@@ -221,18 +254,18 @@
             <tr class="bg-gray-100">
               <td class="text-left">totals:</td>
               <td class="pl-2 text-right whitespace-nowrap">
-                {fmtSize(e.size)}
+                {fmtSize(size)}
               </td>
-              <td class="pl-2 text-right">{fmtNum(meta.dirs)}</td>
-              <td class="pl-2 text-right">{fmtNum(meta.files)}</td>
-              <td class="pl-2 text-right">{fmtNum(meta.linecount || 0)}</td>
+              <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
+              <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
+              <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
               <!-- delete -->
               <td class="bg-white" />
               <!-- exclude / include -->
               <td class="bg-white" />
             </tr>
 
-            <Folder {recalc} dirInfo={dirRoot} indent={0} />
+            <Folder {fs} {recalc} {dirRoot} indent={0} />
           </tbody>
         </table>
       {/key}

@@ -1,5 +1,6 @@
-import wc from "./wc.svelte";
 import "../base.css";
+
+import wc from "./wc.svelte";
 
 const args = {
   target: document.getElementById("app"),

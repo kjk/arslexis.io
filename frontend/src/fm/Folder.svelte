@@ -1,5 +1,4 @@
 <script context="module">
-  import { FsEntryUpDir } from "../fileutil";
   import { strCompareNoCase } from "../strutil";
   /** @typedef {import("../fs").FsEntry} FsEntry */
   /** @typedef {import("../fs").FileSys} FileSys */
@@ -10,7 +9,7 @@
    * @returns {boolean}
    */
   export function isExpanded(fs, e) {
-    return fs.entryMetaValueByKey(e, "expanded");
+    return fs.entryMeta(e, "expanded") || false;
   }
 
   /**
@@ -19,7 +18,7 @@
    * @param {boolean} expanded
    */
   export function setExpanded(fs, e, expanded) {
-    // e.setMeta("expanded", expanded);
+    fs.entrySetMeta(e, "expanded", expanded);
   }
 
   /**
