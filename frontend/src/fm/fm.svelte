@@ -31,11 +31,10 @@
     if (n > 0) {
       let entrySel = dirPath[n - 1];
       dirRoot = entrySel[0];
-      initialSelectionIdx = entrySel[1];
       return;
     }
     dirRoot = null;
-    initialSelectionIdx = -1;
+    initialSelectionIdx = 0;
   }
 
   $progress = "";
@@ -132,16 +131,21 @@
     //   handleGoUp();
     //   return;
     // }
+    // remember current directory and current selection
     dirPath.push([dirEntry, idx]);
+    initialSelectionIdx = 0;
     dirPath = dirPath;
   }
 
   function handleGoUp() {
     let n = len(dirPath);
-    if (n > 1) {
-      dirPath.pop();
-      dirPath = dirPath;
+    if (n < 2) {
+      // don't go beyond root directory
+      return;
     }
+    let a = dirPath.pop();
+    initialSelectionIdx = a[1]; // restore selection for popped directory
+    dirPath = dirPath;
   }
 </script>
 
@@ -209,9 +213,12 @@
 
   {#if fs}
     <div class="flex font-bold font-mono text-sm ml-3">
-      {#each dirPath as e}
+      {#each dirPath as e, idx}
+        {@const isLast = len(e) === idx + 1}
         <div class="ml-1">{fs.entryName(e[0])}</div>
-        <div class="ml-1">/</div>
+        {#if !isLast}
+          <div class="ml-1">/</div>
+        {/if}
       {/each}
     </div>
     {#key dirRoot}
