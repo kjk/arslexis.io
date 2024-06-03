@@ -700,3 +700,12 @@ export async function sha1(str) {
     .map((v) => v.toString(16).padStart(2, "0"))
     .join("");
 }
+
+/**
+ *
+ * @param {number} waitInMilliseconds
+ * @returns {Promise}
+ */
+export function sleep(waitInMilliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, waitInMilliseconds));
+}

@@ -310,7 +310,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
   while (len(dirsToVisit) > 0) {
     let parent = dirsToVisit.shift();
     dirHandle = fs.handles[parent];
-    await progress(fs, dirHandle.name, nFiles, nDirs, false);
+    progress(fs, dirHandle.name, nFiles, nDirs, false);
     let children = [];
     // for await (const [name, handle] of dirHandle)
     for await (const fshandle of dirHandle.values()) {
@@ -344,7 +344,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
     }
     fs.children[parent] = children;
   }
-  // await progress(fs, "", nFiles, nDirs, true);
+  // progress(fs, "", nFiles, nDirs, true);
   return fs;
 }
 

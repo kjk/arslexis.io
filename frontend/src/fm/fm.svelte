@@ -7,7 +7,7 @@
   import { recent } from "./fmstore";
   import { verifyHandlePermission, supportsFileSystem } from "../fileutil";
   import { logFmEvent } from "../events";
-  import { len } from "../util";
+  import { len, sleep } from "../util";
   import { readFileSysDirRecur, calcDirSizes } from "../fs";
   import { tick } from "svelte";
 
@@ -69,32 +69,27 @@
    */
   async function openDirectory(dirHandle) {
     await verifyHandlePermission(dirHandle, false);
+    fs = null;
     dirPath = [];
     $progress = "Reading directory entries...";
-    async function cbProgress(fs, dirName, nFiles, nDirs, finished) {
+    function cbProgress(fs, dirName, nFiles, nDirs, finished) {
       let msg = `Reading ${dirName}, so far: ${nFiles} files, ${nDirs} dirs`;
       // console.log(msg);
       $progress = msg;
-      await tick();
     }
-    let fsTemp;
-    try {
-      fsTemp = await readFileSysDirRecur(dirHandle, cbProgress);
-    } catch (e) {
-      console.log("error reading dir", e);
-      // can fail if e.g. saved directory was deleted
+
+    function finish(fsTemp) {
+      logFmEvent("openDir");
+      calcDirSizes(fsTemp);
+      // TODO: handle no files
+      let root = fsTemp.rootEntry();
+      let selectedIdx = 0;
+      dirRoot = root;
+      dirPath = [[root, selectedIdx]];
       $progress = "";
-      return;
+      fs = fsTemp;
     }
-    logFmEvent("openDir");
-    calcDirSizes(fsTemp);
-    // TODO: handle no files
-    let root = fsTemp.rootEntry();
-    let selectedIdx = 0;
-    dirRoot = root;
-    dirPath = [[root, selectedIdx]];
-    $progress = "";
-    fs = fsTemp;
+    readFileSysDirRecur(dirHandle, cbProgress).then(finish);
   }
 
   /**
