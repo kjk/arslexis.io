@@ -7,6 +7,8 @@ FileSystem entries are represented by an opaque handle (a number).
 
 import { len, throwIf } from "./util";
 
+import { strCompareNoCase } from "./strutil";
+
 export const kFileSysInvalidEntry = -1;
 
 /** @typedef {number} FsEntry */
@@ -134,6 +136,7 @@ export class FileSysDir {
    */
   entryMeta(e, key) {
     let currIdx = this.multiNumInfo[e * kMultiNumPropsCount + kFirstMetaIdx];
+    throwIf(currIdx === undefined);
     let keyIdx = this._internMetaKey(key);
     let mi = this.metaIndex;
     while (currIdx !== -1) {
@@ -144,6 +147,7 @@ export class FileSysDir {
         return this.metaValues[valIdx];
       }
       currIdx = mi[idx + 2];
+      throwIf(currIdx === undefined);
     }
     return undefined;
   }
@@ -495,4 +499,29 @@ export function entryFullPath(fs, e) {
   }
   parts.reverse();
   return parts.join("/");
+}
+
+/**
+ * @param {FileSys} fs
+ * @param {FsEntry[]} entries
+ */
+export function sortEntries(fs, entries) {
+  /**
+   * @param {FsEntry} e1
+   * @param {FsEntry} e2
+   */
+  function sortFn(e1, e2) {
+    let e1Dir = fs.entryIsDir(e1);
+    let e2Dir = fs.entryIsDir(e2);
+    let name1 = fs.entryName(e1);
+    let name2 = fs.entryName(e1);
+    if (e1Dir && e2Dir) {
+      return strCompareNoCase(name1, name2);
+    }
+    if (e1Dir || e2Dir) {
+      return e1Dir ? -1 : 1;
+    }
+    return strCompareNoCase(name1, name2);
+  }
+  entries.sort(sortFn);
 }

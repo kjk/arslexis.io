@@ -61,31 +61,6 @@
   }
 
   /**
-   * @param {FileSys} fs
-   * @param {FsEntry[]} entries
-   */
-  export function sortEntries(fs, entries) {
-    /**
-     * @param {FsEntry} e1
-     * @param {FsEntry} e2
-     */
-    function sortFn(e1, e2) {
-      let e1Dir = fs.entryIsDir(e1);
-      let e2Dir = fs.entryIsDir(e2);
-      let name1 = fs.entryName(e1);
-      let name2 = fs.entryName(e1);
-      if (e1Dir && e2Dir) {
-        return strCompareNoCase(name1, name2);
-      }
-      if (e1Dir || e2Dir) {
-        return e1Dir ? -1 : 1;
-      }
-      return strCompareNoCase(name1, name2);
-    }
-    entries.sort(sortFn);
-  }
-
-  /**
    * @param {FileSysDir} fs
    * @param {FsEntry} e
    */
@@ -124,43 +99,61 @@
 
   /**
    * @param {FileSysDir} fs
-   * @param {FsEntry} e
    * @param {Function} onDir
-   * @returns {Promise<number>}
+   * @returns {Promise}
    */
-  export async function calcLineCounts(fs, e, onDir) {
-    let total = 0;
-    let a = fs.entryChildren(e);
-    if (onDir) {
-      onDir(e);
-    }
-    for (let e of a) {
-      let excluded = isExcluded(fs, e);
-      if (excluded) {
-        // TODO: for files this can be slow if we exclude and then include
-        // back, because we'll have to re-read the file
-        // we could have another meta prop: cachedLineCount
-        setLineCount(fs, e, 0);
-        continue;
+  export async function calcLineCounts(fs, onDir) {
+    let root = fs.rootEntry();
+    let dirsToVisit = [root];
+
+    while (len(dirsToVisit) > 0) {
+      let dirEntry = dirsToVisit.shift();
+      let a = fs.entryChildren(dirEntry);
+      if (onDir) {
+        onDir(dirEntry);
       }
-      let path = entryFullPath(fs, e);
-      let isDir = fs.entryIsDir(e);
-      if (isDir) {
-        total += await calcLineCounts(fs, e, onDir);
-      } else {
-        let lc = getLineCount(fs, e);
-        // don't re-calculate lineCount if did it in the past
-        if (!isBinary(path) && lc == 0) {
-          let fh = await fs.entryFileHandle(e);
-          let file = await fh.getFile();
-          lc = await lineCount(file);
+      let total = 0;
+      for (let e of a) {
+        let excluded = isExcluded(fs, e);
+        if (excluded) {
+          // TODO: for files this can be slow if we exclude and then include
+          // back, because we'll have to re-read the file
+          // we could have another meta prop: cachedLineCount
+          setLineCount(fs, e, 0);
+          continue;
         }
-        total += lc;
+        let isDir = fs.entryIsDir(e);
+        if (isDir) {
+          dirsToVisit.push(e);
+          continue;
+        }
+        let name = fs.entryName(e);
+        let path = entryFullPath(fs, e);
+        console.log("calcLineCount:", path);
+        if (isBinary(name)) {
+          setLineCount(fs, e, 0);
+          continue;
+        }
+        let lc = getLineCount(fs, e);
+        if (lc > 0) {
+          // don't re-calculate lineCount if did it in the past
+          console.log(`already have lc of ${lc} on ${path}`, lc, path);
+          continue;
+        }
+        console.log("before fs.entryFileHandle for e:", e);
+        let fh = await fs.entryFileHandle(e);
+        console.log("before fh.getFile() for e:", e);
+        let file = await fh.getFile();
+        lc = await lineCount(file);
+        console.log(`file ${path} has ${lc} lines`);
         setLineCount(fs, e, lc);
+        total += lc;
       }
+      // this is not recursive, just line counts of immediate
+      // children
+      setLineCount(fs, dirEntry, total);
     }
-    setLineCount(fs, e, total);
-    return total;
+    console.log("calcLineCounts: finished");
   }
 </script>
 
@@ -170,7 +163,7 @@
   import { showInfoMessage } from "../Messages.svelte";
   import { onMount } from "svelte";
   import { logWcEvent } from "../events";
-  import { entryFullPath, entryPath } from "../fs";
+  import { entryFullPath, sortEntries } from "../fs";
 
   /** @type {FileSysDir} */
   export let fs;
@@ -195,7 +188,7 @@
   /**
    * @param {FsEntry} e
    */
-  function toggleExpand(e) {
+  function toggleExpand(fs, e) {
     let expanded = isExpanded(fs, e);
     setExpanded(fs, e, !expanded);
     entries = entries;
@@ -208,9 +201,10 @@
 
   async function handleDelete() {
     let e = entries[toDeleteIdx];
-    let name = e.name;
+    let name = fs.entryName(e);
+    let isDir = fs.entryIsDir(e);
     let opts;
-    if (e.isDir) {
+    if (isDir) {
       opts = {
         recursive: true,
       };
@@ -228,16 +222,17 @@
     showingConfirmDelete = false;
     toDeleteIdx = -1;
 
-    let evt = e.isDir ? "deleteFolder" : "deleteFile";
+    let evt = isDir ? "deleteFolder" : "deleteFile";
     logWcEvent(evt);
   }
 
   function deleteDirOrFile(idx) {
     let e = entries[idx];
     // console.log("deleteDirOrFile: idx:", idx, "e:", e);
-    let name = e.name;
+    let name = fs.entryName(e);
     toDeleteIdx = idx;
-    let what = e.isDir ? "directory" : "file";
+    let isDir = fs.entryIsDir(e);
+    let what = isDir ? "directory" : "file";
     confirmDeleteTitle = `Delete ${what} ${name}?`;
     confirmDeleteMessage = `Delete ${what} <b>${name}<b>?`;
     showingConfirmDelete = true;
@@ -251,11 +246,16 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#each entries as e, idx}
-  {@const meta = e.meta}
+  {@const metaDirs = fs.entryMeta(e, "dirs") || 0}
+  {@const metaFiles = fs.entryMeta(e, "files") || 0}
+  {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
+  {@const name = fs.entryName(e)}
+  {@const size = fs.entrySize(e)}
+  {@const isDir = fs.entryIsDir(e)}
   {@const excluded = isExcluded(fs, e)}
-  {#if e.isDir}
+  {#if isDir}
     <tr
-      on:click={() => toggleExpand(e)}
+      on:click={() => toggleExpand(fs, e)}
       class="hover:bg-gray-200 hover:cursor-pointer pl-8"
     >
       <td class="ind-{indent} font-semibold">
@@ -264,13 +264,13 @@
         {:else}
           ▶
         {/if}
-        {e.name}
+        {name}
       </td>
       <td class="pl-2 text-right whitespace-nowrap">
-        {fmtSize(e.size)}
+        {fmtSize(size)}
       </td>
-      <td class="pl-2 text-right">{fmtNum(meta.dirs)}</td>
-      <td class="pl-2 text-right">{fmtNum(meta.files)}</td>
+      <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
+      <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
       <td class="pl-2 text-right">{fmtNum(getLineCount(fs, e))}</td>
       <td class="text-center bg-white"
         ><button
@@ -301,11 +301,14 @@
 {/each}
 
 {#each entries as e, idx (idx)}
+  {@const name = fs.entryName(e)}
+  {@const size = fs.entrySize(e)}
+  {@const isDir = fs.entryIsDir(e)}
   {@const excluded = isExcluded(fs, e)}
-  {#if !e.isDir}
+  {#if !isDir}
     <tr class="hover:bg-gray-200 even:bg-gray-50">
-      <td class="ind-{indent + 1}">{e.name} </td>
-      <td class="pl-2 text-right whitespace-nowrap">{fmtSize(e.size)} </td>
+      <td class="ind-{indent + 1}">{name} </td>
+      <td class="pl-2 text-right whitespace-nowrap">{fmtSize(size)} </td>
       <td class="pl-2 text-right" />
       <td class="pl-2 text-right" />
       <td class="pl-2 text-right">{fmtNum(getLineCount(fs, e))}</td>

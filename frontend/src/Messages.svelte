@@ -56,16 +56,31 @@
     showError("errr", 10000);
   });
 
-  window.addEventListener("unhandledrejection", function (ev) {
-    // TODO: more
-    showError("unhandled rejection", 10000);
-  });
+  if (false) {
+    window.addEventListener("unhandledrejection", function (ev) {
+      // TODO: more
+      showError("unhandled rejection", 10000);
+    });
+  }
 
   // @ts-ignore
   window.showMessage = showInfoMessage;
   // @ts-ignore
   window.showError = showErrorMessage;
 </script>
+
+<div class="flex flex-col justify-around fixed left-0 right-0 bottom-2 z-50">
+  {#each $infoMessages as msg}
+    <div class="msg info-msg mt-2 py-2 px-4 self-center">{msg[0]}</div>
+  {/each}
+
+  {#each $errorMessages as msg}
+    <div class="msg err-msg mt-2 py-2 px-4 flex self-center">
+      <div class="font-bold text-red-500">{msg[0]}</div>
+      <!-- <div class="ml-4 text-black cursor-pointer hover:text-gray-600">close</div> -->
+    </div>
+  {/each}
+</div>
 
 <style>
   .msg {
@@ -85,16 +100,3 @@
     border-left: 6px solid saddlebrown;
   }
 </style>
-
-<div class="flex flex-col justify-around fixed left-0 right-0 bottom-2 z-50">
-  {#each $infoMessages as msg}
-    <div class="msg info-msg mt-2 py-2 px-4 self-center">{msg[0]}</div>
-  {/each}
-
-  {#each $errorMessages as msg}
-  <div class="msg err-msg mt-2 py-2 px-4 flex self-center">
-    <div class="font-bold text-red-500">{msg[0]}</div>
-    <!-- <div class="ml-4 text-black cursor-pointer hover:text-gray-600">close</div> -->
-  </div>
-  {/each}
-</div>

@@ -129,9 +129,10 @@
     forEachFsEntry(fsTemp, fsTemp.rootEntry(), shouldExclude);
     calcDirSizes(fsTemp);
     fs = fsTemp;
-    dirRoot = fsTemp.rootEntry();
-    await calcLineCounts(fsTemp, dirRoot, (e) => {
-      let name = fsTemp.entryName(e);
+    dirRoot = fs.rootEntry();
+    await calcLineCounts(fs, (dirEntry) => {
+      let name = fs.entryName(dirEntry);
+      console.log("calcLineCountsCb:", dirEntry, name);
       progressHTML = `<div>Calculating line counts ${name}</div>`;
     });
     progressHTML = "";
@@ -169,7 +170,7 @@
   async function recalc() {
     calcDirSizes(fs);
     // console.log("finished calcDIrSizes");
-    await calcLineCounts(fs, dirRoot, null);
+    await calcLineCounts(fs, null);
     // console.log("fnished calcLineCounts");
     dirRoot = dirRoot;
   }

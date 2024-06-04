@@ -1,5 +1,5 @@
 <script context="module">
-  import { strCompareNoCase } from "../strutil";
+  import { sortEntries } from "../fs";
   /** @typedef {import("../fs").FsEntry} FsEntry */
   /** @typedef {import("../fs").FileSys} FileSys */
 
@@ -19,31 +19,6 @@
    */
   export function setExpanded(fs, e, expanded) {
     fs.entrySetMeta(e, "expanded", expanded);
-  }
-
-  /**
-   * @param {FileSys} fs
-   * @param {FsEntry[]} entries
-   */
-  export function sortEntries(fs, entries) {
-    /**
-     * @param {FsEntry} e1
-     * @param {FsEntry} e2
-     */
-    function sortFn(e1, e2) {
-      let e1Dir = fs.entryIsDir(e1);
-      let e2Dir = fs.entryIsDir(e2);
-      let name1 = fs.entryName(e1);
-      let name2 = fs.entryName(e1);
-      if (e1Dir && e2Dir) {
-        return strCompareNoCase(name1, name2);
-      }
-      if (e1Dir || e2Dir) {
-        return e1Dir ? -1 : 1;
-      }
-      return strCompareNoCase(name1, name2);
-    }
-    entries.sort(sortFn);
   }
 </script>
 

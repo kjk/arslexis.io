@@ -1,8 +1,9 @@
 import "./base.css";
 
-import App from "./Main.svelte";
+import Main from "./Main.svelte";
 
 const args = {
   target: document.getElementById("app"),
 };
-export const app = new App(args);
+const app = new Main(args);
+export default app;
