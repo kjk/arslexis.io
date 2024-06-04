@@ -20,6 +20,7 @@ export default defineConfig({
         test: resolve("src", "test.html"),
         unzip: resolve("src", "unzip", "index.html"),
         wc: resolve("src", "wc", "index.html"),
+        fm: resolve("src", "fm", "index.html"),
         image_resize_optimize: resolve(
           "src",
           "image-resize-optimize",
