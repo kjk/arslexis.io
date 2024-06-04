@@ -13,12 +13,7 @@
   import { verifyHandlePermission, supportsFileSystem } from "../fileutil";
   import { fmtNum, fmtSize, len, throwIf } from "../util";
   import { logWcEvent } from "../events";
-  import {
-    readFileSysDirRecur,
-    calcDirSizes,
-    fsVisitDirs,
-    forEachParent,
-  } from "../fs";
+  import { readFileSysDirRecur, fsVisitDirs } from "../fs";
   import { includesStringNoCase } from "../strutil";
 
   /** @typedef {import("../fs").FsEntry} FsEntry */
@@ -72,7 +67,8 @@
     await updateFilesLineCount(fs, null);
     calcTotals(fs);
     // console.log("fnished calcLineCounts");
-    dirRoot = dirRoot;
+    // dirRoot = dirRoot;
+    fs = fs;
   }
 
   /**
@@ -150,9 +146,10 @@
       progressHTML = `<div>Calculating line counts in dir <b>${name}</b></div>`;
     }
     await updateFilesLineCount(fs, onDir);
-    calcTotals(fsTemp);
+    calcTotals(fs);
     progressHTML = "";
-    dirRoot = dirRoot;
+    fs = fs;
+    // dirRoot = dirRoot;
   }
 
   /**
@@ -242,52 +239,53 @@
   </div>
 {/if}
 
-{#key dirRoot}
-  <div class="mx-4 mt-2 text-sm font-mono">
-    {#if fs}
-      {@const e = dirRoot}
-      {@const metaDirs = fs.entryMeta(e, "dirs") || 0}
-      {@const metaFiles = fs.entryMeta(e, "files") || 0}
-      {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
-      {@const name = fs.entryName(e)}
-      {@const size = fs.entrySize(e)}
-      <div class="font-bold font-mono mt-2">{name}/</div>
-      <table class="relative table-auto">
-        <thead>
-          <tr class="relative even:bg-gray-50">
-            <th class="sticky top-0 bg-white">name</th>
-            <th class="sticky top-0 bg-white px-1">size</th>
-            <th class="sticky top-0 bg-white px-1">dirs</th>
-            <th class="sticky top-0 bg-white px-1">files</th>
-            <th class="sticky top-0 bg-white px-1">lines</th>
-            <!-- delete -->
-            <th class="sticky top-0 px-1 bg-white" />
-            <!-- exclude / include -->
-            <th class="sticky top-0 px-1 bg-white" />
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="bg-gray-100">
-            <td class="text-left">totals:</td>
-            <td class="pl-2 text-right whitespace-nowrap">
-              {fmtSize(size)}
-            </td>
-            <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
-            <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
-            <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
-            <!-- delete -->
-            <td class="bg-white" />
-            <!-- exclude / include -->
-            <td class="bg-white" />
-          </tr>
+{#key fs}
+  {#if fs}
+    <div class="mx-4 mt-2 text-sm font-mono">
+      {#if dirRoot !== -1}
+        {@const e = dirRoot}
+        {@const size = fs.entryMeta(e, "size") || 0}
+        {@const metaDirs = fs.entryMeta(e, "dirs") || 0}
+        {@const metaFiles = fs.entryMeta(e, "files") || 0}
+        {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
+        {@const name = fs.entryName(e)}
+        <div class="font-bold font-mono mt-2">{name}/</div>
+        <table class="relative table-auto">
+          <thead>
+            <tr class="relative even:bg-gray-50">
+              <th class="sticky top-0 bg-white">name</th>
+              <th class="sticky top-0 bg-white px-1">size</th>
+              <th class="sticky top-0 bg-white px-1">dirs</th>
+              <th class="sticky top-0 bg-white px-1">files</th>
+              <th class="sticky top-0 bg-white px-1">lines</th>
+              <!-- delete -->
+              <th class="sticky top-0 px-1 bg-white" />
+              <!-- exclude / include -->
+              <th class="sticky top-0 px-1 bg-white" />
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="bg-gray-100">
+              <td class="text-left">totals:</td>
+              <td class="pl-2 text-right whitespace-nowrap">
+                {fmtSize(size)}
+              </td>
+              <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
+              <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
+              <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
+              <!-- delete -->
+              <td class="bg-white" />
+              <!-- exclude / include -->
+              <td class="bg-white" />
+            </tr>
 
-          <Folder {fs} {recalc} {dirRoot} indent={0} />
-        </tbody>
-      </table>
-    {/if}
-  </div>
+            <Folder {fs} {recalc} {dirRoot} indent={0} />
+          </tbody>
+        </table>
+      {/if}
+    </div>
+  {/if}
 {/key}
-
 <div class="mt-4" />
 
 <Progress2 msgHTML={progressHTML} />

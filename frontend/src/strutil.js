@@ -10,6 +10,9 @@ export function strCompareNoCase(s1, s2) {
   return s1.localeCompare(s2, undefined, { sensitivity: "accent" });
 }
 
+export function strEqNoCase(s1, s2) {
+  return strCompareNoCase(s1, s2) === 0;
+}
 /**
  * @param {string[]} a
  * @param {string} s
@@ -17,7 +20,7 @@ export function strCompareNoCase(s1, s2) {
  */
 export function includesStringNoCase(a, s) {
   for (let s2 of a) {
-    if (strCompareNoCase(s, s2)) {
+    if (strEqNoCase(s, s2)) {
       return true;
     }
   }

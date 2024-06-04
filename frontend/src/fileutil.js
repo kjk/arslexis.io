@@ -44,14 +44,14 @@ export function isBinary(path) {
 }
 
 /**
- * @param {Blob} blog
+ * @param {Blob} blob
  * @returns {Promise<number>}
  */
-export async function lineCount(blog) {
-  if (blog.size === 0) {
+export async function lineCount(blob) {
+  if (blob.size === 0) {
     return 0;
   }
-  let ab = await blog.arrayBuffer();
+  let ab = await blob.arrayBuffer();
   let a = new Uint8Array(ab);
   let nLines = 0;
   // if last character is not newline, we must add +1 to line count

@@ -111,30 +111,45 @@ export class FileSysDir {
    * @param {any} val
    */
   entrySetMeta(e, key, val) {
+    let keyIdx = this.internMetaKey(key);
+    // if exists, replace value
+    let idx = e * kMultiNumPropsCount + kFirstMetaIdx;
+    let currIdx = this.multiNumInfo[idx];
+    throwIf(currIdx === undefined);
+    let mi = this.metaIndex;
+    while (currIdx !== -1) {
+      let currKeyIdx = mi[currIdx + 0];
+      if (currKeyIdx === keyIdx) {
+        let valIdx = mi[currIdx + 1];
+        this.metaValues[valIdx] = val;
+        return;
+      }
+      currIdx = mi[currIdx + 2]; // idx of next node in linked list
+    }
+
+    // append new value
     let valIdx = len(this.metaValues);
     this.metaValues.push(val);
-    let keyIdx = this.internMetaKey(key);
-    let mi = this.metaIndex;
     // this represents a linked list node that consists of 3 values:
     // key   : interned string as number
     // value : as index into metaValues array
     // next  : pointer to next node as index into metaIndex; -1 if last node
-    let valMetaIdx = len(mi);
+    let metaIdx = len(mi);
     // -1 is index of the next meta value for this entry
     // -1 means this is the last value
     // those indexes form a linked list
     mi.push(keyIdx, valIdx, -1);
-    // chain
-    let idx = e * kMultiNumPropsCount + kFirstMetaIdx;
-    let currIdx = this.multiNumInfo[idx];
+
+    // make new value (metaIdx) first node in linked list
+    idx = e * kMultiNumPropsCount + kFirstMetaIdx;
+    currIdx = this.multiNumInfo[idx];
     throwIf(currIdx === undefined);
     if (currIdx === -1) {
-      this.multiNumInfo[idx] = valMetaIdx;
+      this.multiNumInfo[idx] = metaIdx;
       return;
     }
-    // make new value first node in linked list
-    mi[2] = currIdx; // set node.next to current first node
-    this.multiNumInfo[idx] = valMetaIdx; // make this first node
+    mi[metaIdx + 2] = currIdx; // set node.next to current first node
+    this.multiNumInfo[idx] = metaIdx; // make this first node
   }
 
   /**

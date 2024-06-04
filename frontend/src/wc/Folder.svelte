@@ -62,7 +62,15 @@
   export function calcTotals(fs) {
     function updateMetaCount(e, key, n) {
       let curr = fs.entryMeta(e, key);
+      throwIf(curr === undefined);
       fs.entrySetMeta(e, key, curr + n);
+    }
+    function resetTotalsOnDir(fs, de) {
+      let allKeys = ["size", "files", "dirs", "linecount"];
+      for (let key of allKeys) {
+        fs.entrySetMeta(de, key, 0);
+      }
+      return true;
     }
     /**
      * @param {FileSys} fs
@@ -71,9 +79,7 @@
      */
     function calc(fs, de) {
       if (isExcluded(fs, de)) {
-        fs.entrySetMeta(de, "size", 0);
-        fs.entrySetMeta(de, "files", 0);
-        fs.entrySetMeta(de, "dirs", 0);
+        resetTotalsOnDir(fs, de);
         return false; // skip processing sub-directories
       }
 
@@ -93,19 +99,13 @@
       fs.entrySetMeta(de, "size", sumFileSizes);
       fs.entrySetMeta(de, "files", nFiles);
       fs.entrySetMeta(de, "dirs", nDirs);
+      fs.entrySetMeta(de, "linecount", nLines);
       forEachParent(fs, de, (fs, pe) => {
         updateMetaCount(pe, "size", sumFileSizes);
         updateMetaCount(pe, "files", nFiles);
         updateMetaCount(pe, "dirs", nDirs);
         updateMetaCount(pe, "linecount", nLines);
       });
-      return true;
-    }
-    function resetTotalsOnDir(fs, de) {
-      let allKeys = ["size", "files", "dirs", "linecount"];
-      for (let key of allKeys) {
-        fs.entrySetMeta(de, key, 0);
-      }
       return true;
     }
     fsVisitDirs(fs, resetTotalsOnDir);
@@ -169,7 +169,7 @@
 
 <script>
   import DialogConfirm from "../DialogConfirm.svelte";
-  import { fmtNum, fmtSize } from "../util";
+  import { fmtNum, fmtSize, throwIf } from "../util";
   import { showInfoMessage } from "../Messages.svelte";
   import { onMount } from "svelte";
   import { logWcEvent } from "../events";
@@ -261,11 +261,11 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 {#each entries as e, idx}
+  {@const name = fs.entryName(e)}
+  {@const size = fs.entryMeta(e, "size") || 0}
   {@const metaDirs = fs.entryMeta(e, "dirs") || 0}
   {@const metaFiles = fs.entryMeta(e, "files") || 0}
   {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
-  {@const name = fs.entryName(e)}
-  {@const size = fs.entryMeta(e, "size") || 0}
   {@const isDir = fs.entryIsDir(e)}
   {@const excluded = isExcluded(fs, e)}
   {#if isDir}
