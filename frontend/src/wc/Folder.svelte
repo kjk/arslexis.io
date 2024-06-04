@@ -188,6 +188,7 @@
   /** @type {Function} */
   export let recalc;
 
+  /** @type {FsEntry[]} */
   let entries = [];
 
   onMount(() => {
@@ -226,7 +227,9 @@
     }
 
     // re-ask for write permissions
-    let dirHandle = e.parentDirHandle;
+    let parent = fs.entryParent(e);
+    throwIf(!fs.entryIsDir(parent));
+    let dirHandle = fs.handles[parent];
     await verifyHandlePermission(dirHandle, true);
     dirHandle.removeEntry(name, opts);
 
