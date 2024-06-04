@@ -194,21 +194,9 @@
     {/if}
   </TopNav>
 
-  {#if hasFileSystemSupport}
-    {#if !fs}
-      <div class="flex items-baseline mx-4 mt-2 mb-2">
-        <button
-          class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
-          on:click={openFolder}>Open folder</button
-        >
-        <div class="ml-2">from your computer to browse it.</div>
-      </div>
-    {/if}
-  {:else}
-    <ShowSupportsFileSystem />
-  {/if}
+  <ShowSupportsFileSystem />
 
-  {#if !fs}
+  {#if hasFileSystemSupport && !fs}
     {#if len($recent) > 0}
       <div class="ml-4 mt-2 mb-2">
         <div>Recently opened:</div>
@@ -233,6 +221,13 @@
         </table>
       </div>
     {/if}
+    <div class="flex items-baseline mx-4 mt-2 mb-2">
+      <button
+        class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
+        on:click={openFolder}>Open folder</button
+      >
+      <div class="ml-2">from your computer to browse it.</div>
+    </div>
   {/if}
 
   {#if fs}
@@ -244,7 +239,7 @@
         on:click={handleGoUp}>▲</button
       >
       {#each dirPath as e, idx}
-        {@const isLast = len(e) === idx + 1}
+        {@const isLast = len(dirPath) === idx + 1}
         <div class="ml-1">{fs.entryName(e[0])}</div>
         {#if !isLast}
           <div class="ml-1">/</div>

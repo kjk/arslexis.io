@@ -178,11 +178,52 @@
 
 <TopNav>
   <span class="text-purple-800"><tt>wc</tt> in the browser</span>
+  {#if fs}
+    <button
+      class="border ml-2 text-sm border-gray-500 px-2 py-0.5 hover:bg-gray-100"
+      on:click={openFolder}>Open another folder</button
+    >
+    {#if len($recent) > 0}
+      <div class="flex ml-4 text-sm">
+        <div>recent:</div>
+        {#each $recent as e}
+          <button
+            class="ml-2 underline"
+            on:click={() => openRecentDir(e.dirHandle)}>{e.name}</button
+          >{/each}
+      </div>
+    {/if}
+  {/if}
 </TopNav>
 
 <ShowSupportsFileSystem />
 
-{#if hasFileSystemSupport}
+{#if hasFileSystemSupport && !fs}
+  {#if len($recent) > 0}
+    <div class="ml-4 mt-2 mb-2">
+      <div>Recently opened:</div>
+      <table class="table-auto ml-4">
+        {#each $recent as e, idx}
+          <tr>
+            <td class="px-1">{e.name}</td>
+            <td class="px-1"
+              ><button
+                class="underline hover:cursor-pointer"
+                on:click={() => openRecentDir(e.dirHandle)}>open</button
+              ></td
+            >
+            <td class="px-1">
+              <button
+                class="underline hover:cursor-pointer"
+                on:click={() => removeFromRecent(idx)}>remove</button
+              >
+            </td>
+          </tr>
+        {/each}
+      </table>
+    </div>
+  {/if}
+
   <div class="flex items-baseline mx-4 mt-2 mb-2">
     <button
       class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
@@ -192,41 +233,6 @@
       from your computer to calculate file sizes etc., like <tt>wc</tt>.
     </div>
   </div>
-
-  {#if len($recent) > 0}
-    {#if !fs}
-      <div class="ml-4 mt-2 mb-2">
-        <div>Recently opened:</div>
-        <table class="table-auto ml-4">
-          {#each $recent as e, idx}
-            <tr>
-              <td class="px-1">{e.name}</td>
-              <td class="px-1"
-                ><button
-                  class="underline hover:cursor-pointer"
-                  on:click={() => openRecentDir(e.dirHandle)}>open</button
-                ></td
-              >
-              <td class="px-1">
-                <button
-                  class="underline hover:cursor-pointer"
-                  on:click={() => removeFromRecent(idx)}>remove</button
-                >
-              </td>
-            </tr>
-          {/each}
-        </table>
-      </div>
-    {:else}
-      <div class="flex ml-4 mt-2 mb-2 text-sm">
-        <div>Recently opened:</div>
-        {#each $recent as e}
-          <button class="ml-2" on:click={() => openRecentDir(e.dirHandle)}
-            >{e.name}</button
-          >{/each}
-      </div>
-    {/if}
-  {/if}
 
   <div class="mx-4 mt-2 text-sm font-mono">
     {#if fs}
