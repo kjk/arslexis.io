@@ -26,7 +26,7 @@
   let initialSelectionIdx = 0;
 
   function calcDirRoot(dirPath) {
-    console.log("calcDirRoot:", dirPath);
+    // console.log("calcDirRoot:", dirPath);
     let n = len(dirPath);
     if (n > 0) {
       let entrySel = dirPath[n - 1];
@@ -171,6 +171,29 @@
     initialSelectionIdx = a[1]; // restore selection for popped directory
     dirPath = dirPath;
   }
+
+  /**
+   * @param {FsEntry} de
+   */
+  function goToDir(de) {
+    console.log("goToDir:", de);
+    if (de === dirRoot) {
+      console.log("goToDir: same directory");
+      return;
+    }
+    let n = len(dirPath) - 1;
+    let selIdx = 0;
+    for (let i = n; i >= 0; i--) {
+      let el = dirPath[i];
+      if (el[0] === de) {
+        break;
+      }
+      dirPath.pop();
+      selIdx = el[1];
+    }
+    dirPath = dirPath;
+    initialSelectionIdx = selIdx;
+  }
 </script>
 
 <div class="h-screen fixed inset-0 flex flex-col overflow-y-hidden">
@@ -240,7 +263,9 @@
       >
       {#each dirPath as e, idx}
         {@const isLast = len(dirPath) === idx + 1}
-        <div class="ml-1">{fs.entryName(e[0])}</div>
+        <button on:click={() => goToDir(e[0])} class="ml-1 underline"
+          >{fs.entryName(e[0])}</button
+        >
         {#if !isLast}
           <div class="ml-1">/</div>
         {/if}

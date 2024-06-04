@@ -54,7 +54,7 @@
    * @param {FsEntry} dirRoot
    */
   function calcEntries(dirRoot) {
-    console.log("calcEntries");
+    // console.log("calcEntries");
     // SUBTLE: important to not re-order  because
     // they could be used in calcLineCount()
     // we use and sort a copy
