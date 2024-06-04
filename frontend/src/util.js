@@ -709,3 +709,21 @@ export async function sha1(str) {
 export function sleep(waitInMilliseconds) {
   return new Promise((resolve) => setTimeout(resolve, waitInMilliseconds));
 }
+
+/**
+ * for small sets of strings, inter a string by conerting it to
+ * a unique number
+ * @param {string[]} a
+ * @param {string} s
+ * @returns {number}
+ */
+export function internStringArray(a, s) {
+  let n = len(a);
+  for (let i = 0; i < n; i++) {
+    if (a[i] === s) {
+      return i;
+    }
+  }
+  a.push(s);
+  return n; // index of the newly appended key
+}

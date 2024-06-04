@@ -5,7 +5,7 @@ and being able to represent various kinds of filesystem (disk, s3 etc.).
 FileSystem entries are represented by an opaque handle (a number).
 */
 
-import { len, throwIf } from "./util";
+import { internStringArray, len, throwIf } from "./util";
 
 import { strCompareNoCase } from "./strutil";
 
@@ -81,15 +81,7 @@ export class FileSysDir {
    * @returns {number}
    */
   _internMetaKey(key) {
-    let a = this.metaKeys;
-    let n = len(a);
-    for (let i = 0; i < n; i++) {
-      if (a[i] === key) {
-        return i;
-      }
-    }
-    this.metaKeys.push(key);
-    return n; // index of the newly appended key
+    return internStringArray(this.metaKeys, key);
   }
 
   /**
@@ -110,44 +102,55 @@ export class FileSysDir {
     this.metaValues.push(val);
     let keyIdx = this._internMetaKey(key);
     let mi = this.metaIndex;
-    let metaIdx = len(mi);
+    // this represents a linked list node that consists of 3 values:
+    // key   : interned string as number
+    // value : as index into metaValues array
+    // next  : pointer to next node as index into metaIndex; -1 if last node
+    let valMetaIdx = len(mi);
+    // -1 is index of the next meta value for this entry
+    // -1 means this is the last value
+    // those indexes form a linked list
     mi.push(keyIdx, valIdx, -1);
-
-    let currIdx = this.multiNumInfo[e * kMultiNumPropsCount + kFirstMetaIdx];
+    // chain
+    let idx = e * kMultiNumPropsCount + kFirstMetaIdx;
+    let currIdx = this.multiNumInfo[idx];
+    throwIf(currIdx === undefined);
     if (currIdx === -1) {
-      this.multiNumInfo[e * kMultiNumPropsCount + kFirstMetaIdx] = metaIdx;
+      this.multiNumInfo[idx] = valMetaIdx;
       return;
     }
-    while (true) {
-      let idx = currIdx * 3;
-      let nextIdx = mi[idx + 2];
-      if (nextIdx !== -1) {
-        mi[idx + 2] = idx;
-        return;
-      }
-      currIdx = nextIdx;
-    }
+    // make new value first node in linked list
+    mi[2] = currIdx; // set node.next to current first node
+    this.multiNumInfo[idx] = valMetaIdx; // make this first node
   }
 
   /**
    * @param {FsEntry} e
    * @param {string} key
-   * @returns {any}
+   * @returns {any} returns undefined if value not present
    */
   entryMeta(e, key) {
-    let currIdx = this.multiNumInfo[e * kMultiNumPropsCount + kFirstMetaIdx];
-    throwIf(currIdx === undefined);
+    let idx = e * kMultiNumPropsCount + kFirstMetaIdx;
+    // metaIdx is an index within metaIndex
+    let metaIdx = this.multiNumInfo[idx];
+    if (metaIdx === -1) {
+      return undefined;
+    }
+    throwIf(metaIdx === undefined);
     let keyIdx = this._internMetaKey(key);
     let mi = this.metaIndex;
-    while (currIdx !== -1) {
-      let idx = currIdx * 3;
-      let keyIdx2 = mi[idx];
+    // each element of metaIndex is 3 items:
+    // keyIdx
+    // valIdx
+    // next     : linked list, index for next node in metaIndex, -1 if last
+    while (metaIdx !== -1) {
+      let keyIdx2 = mi[metaIdx];
       if (keyIdx2 === keyIdx) {
-        let valIdx = mi[idx + 1];
+        let valIdx = mi[metaIdx + 1];
         return this.metaValues[valIdx];
       }
-      currIdx = mi[idx + 2];
-      throwIf(currIdx === undefined);
+      metaIdx = mi[metaIdx + 2]; // index of next node
+      throwIf(metaIdx === undefined);
     }
     return undefined;
   }

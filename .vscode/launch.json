@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "configurations": [
 		{
-			"type": "chrome",
+			"type": "msedge",
 			"request": "launch",
-			"name": "Launch Chrome",
-			"url": "http://127.0.0.1:9301/wc",
+			"name": "Launch Edge",
+			"url": "http://127.0.0.1:9301/wc/",
 			"webRoot": "${workspaceFolder}/frontend/src"
 		},
     {
