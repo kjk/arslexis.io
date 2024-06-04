@@ -1,16 +1,28 @@
 <script>
   import TopNav from "../TopNav.svelte";
-  import Folder, { calcLineCounts, setExcluded } from "./Folder.svelte";
+  import Folder, {
+    updateFilesLineCount,
+    calcTotals,
+    isExcluded,
+    setExcluded,
+  } from "./Folder.svelte";
   import Messages from "../Messages.svelte";
   import Progress2 from "../Progress2.svelte";
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
   import { recent } from "./wcstore";
   import { verifyHandlePermission, supportsFileSystem } from "../fileutil";
-  import { fmtNum, fmtSize, len } from "../util";
+  import { fmtNum, fmtSize, len, throwIf } from "../util";
   import { logWcEvent } from "../events";
-  import { readFileSysDirRecur, calcDirSizes } from "../fs";
+  import {
+    readFileSysDirRecur,
+    calcDirSizes,
+    fsVisitDirs,
+    forEachParent,
+  } from "../fs";
+  import { includesStringNoCase } from "../strutil";
 
   /** @typedef {import("../fs").FsEntry} FsEntry */
+  /** @typedef {import("../fs").FileSys} FileSys */
   /** @typedef {import("../fs").FileSysDir} FileSysDir */
   /** @typedef {import("../fs").ReadFilesCbArgs} ReadFilesCbArgs */
 
@@ -24,42 +36,43 @@
 
   let hasFileSystemSupport = supportsFileSystem();
 
-  let defaultExcludeDirs = [".git", "node_modules", "dist"];
-  let defaultExcludeFiles = ["package-lock.json", "yarn.lock"];
+  const defaultExcludeDirs = [".git", "node_modules", "dist"];
+  const defaultExcludeFiles = ["package-lock.json", "yarn.lock", "bun.lockb"];
 
-  /**
-   * @param {FsEntry} e
-   */
-  function shouldExclude(fs, e) {
-    let name = fs.entryName(e).toLowerCase();
-    let exclude;
-    let isDir = fs.entryIsDir(e);
-    if (isDir) {
-      exclude = defaultExcludeDirs.includes(name);
-    } else {
-      exclude = defaultExcludeFiles.includes(name);
+  function markDefaultExcluded(fs) {
+    /**
+     * @param {FileSys} fs
+     * @param {FsEntry} de : directory entry
+     * @returns {boolean}
+     */
+    function mark(fs, de) {
+      let name = fs.entryName(de);
+      let isExcluded = includesStringNoCase(defaultExcludeDirs, name);
+      setExcluded(fs, de, isExcluded);
+      if (isExcluded) {
+        return false; // skip traversing sub-directories
+      }
+      for (let c of fs.entryChildren(de)) {
+        if (fs.entryIsDir(c)) {
+          continue;
+        }
+        name = fs.entryName(c);
+        isExcluded = includesStringNoCase(defaultExcludeFiles, name);
+        setExcluded(fs, de, isExcluded);
+      }
+      return true;
     }
-    if (exclude) {
-      setExcluded(fs, e, exclude);
-    }
-    return exclude;
+    fsVisitDirs(fs, mark);
   }
 
-  /**
-   * @param {FileSysDir} fs
-   * @param {FsEntry} e
-   * @param {Function} fn
-   */
-  export function forEachFsEntry(fs, e, fn) {
-    let entries = fs.entryChildren(e);
-    for (let e of entries) {
-      let skip = fn(fs, e);
-      let isDir = fs.entryIsDir(e);
-      if (!skip && isDir) {
-        forEachFsEntry(fs, e, fn);
-      }
-    }
-    fn(fs, e);
+  // called when user includes / excludes stuff
+  // we need to update totals
+  async function recalc() {
+    // console.log("finished calcDIrSizes");
+    await updateFilesLineCount(fs, null);
+    calcTotals(fs);
+    // console.log("fnished calcLineCounts");
+    dirRoot = dirRoot;
   }
 
   /**
@@ -90,6 +103,7 @@
    * @param {FileSystemDirectoryHandle} dirHandle
    */
   async function openDirectory(dirHandle) {
+    console.log("openDirectory:", dirHandle);
     await verifyHandlePermission(dirHandle, false);
     fs = null;
     dirRoot = -1;
@@ -125,19 +139,20 @@
       progressHTML = "";
       return;
     }
+    fsStack = [];
     logWcEvent("openDir");
-    forEachFsEntry(fsTemp, fsTemp.rootEntry(), shouldExclude);
-    calcDirSizes(fsTemp);
+    markDefaultExcluded(fsTemp);
+    dirRoot = fsTemp.rootEntry();
     fs = fsTemp;
-    dirRoot = fs.rootEntry();
-    await calcLineCounts(fs, (dirEntry) => {
-      let name = fs.entryName(dirEntry);
-      console.log("calcLineCountsCb:", dirEntry, name);
-      progressHTML = `<div>Calculating line counts ${name}</div>`;
-    });
+    function onDir(de) {
+      let name = fs.entryName(de);
+      console.log("calcLineCountsCb:", de, name);
+      progressHTML = `<div>Calculating line counts in dir <b>${name}</b></div>`;
+    }
+    await updateFilesLineCount(fs, onDir);
+    calcTotals(fsTemp);
     progressHTML = "";
     dirRoot = dirRoot;
-    fsStack = [];
   }
 
   /**
@@ -165,14 +180,6 @@
     }
     addToRecent(dirHandle);
     openDirectory(dirHandle);
-  }
-
-  async function recalc() {
-    calcDirSizes(fs);
-    // console.log("finished calcDIrSizes");
-    await calcLineCounts(fs, null);
-    // console.log("fnished calcLineCounts");
-    dirRoot = dirRoot;
   }
 </script>
 
@@ -233,7 +240,9 @@
       from your computer to calculate file sizes etc., like <tt>wc</tt>.
     </div>
   </div>
+{/if}
 
+{#key dirRoot}
   <div class="mx-4 mt-2 text-sm font-mono">
     {#if fs}
       {@const e = dirRoot}
@@ -242,45 +251,44 @@
       {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
       {@const name = fs.entryName(e)}
       {@const size = fs.entrySize(e)}
-      {#key dirRoot}
-        <div class="font-bold font-mono mt-2">{name}/</div>
-        <table class="relative table-auto">
-          <thead>
-            <tr class="relative even:bg-gray-50">
-              <th class="sticky top-0 bg-white">name</th>
-              <th class="sticky top-0 bg-white px-1">size</th>
-              <th class="sticky top-0 bg-white px-1">dirs</th>
-              <th class="sticky top-0 bg-white px-1">files</th>
-              <th class="sticky top-0 bg-white px-1">lines</th>
-              <!-- delete -->
-              <th class="sticky top-0 px-1 bg-white" />
-              <!-- exclude / include -->
-              <th class="sticky top-0 px-1 bg-white" />
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="bg-gray-100">
-              <td class="text-left">totals:</td>
-              <td class="pl-2 text-right whitespace-nowrap">
-                {fmtSize(size)}
-              </td>
-              <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
-              <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
-              <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
-              <!-- delete -->
-              <td class="bg-white" />
-              <!-- exclude / include -->
-              <td class="bg-white" />
-            </tr>
+      <div class="font-bold font-mono mt-2">{name}/</div>
+      <table class="relative table-auto">
+        <thead>
+          <tr class="relative even:bg-gray-50">
+            <th class="sticky top-0 bg-white">name</th>
+            <th class="sticky top-0 bg-white px-1">size</th>
+            <th class="sticky top-0 bg-white px-1">dirs</th>
+            <th class="sticky top-0 bg-white px-1">files</th>
+            <th class="sticky top-0 bg-white px-1">lines</th>
+            <!-- delete -->
+            <th class="sticky top-0 px-1 bg-white" />
+            <!-- exclude / include -->
+            <th class="sticky top-0 px-1 bg-white" />
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="bg-gray-100">
+            <td class="text-left">totals:</td>
+            <td class="pl-2 text-right whitespace-nowrap">
+              {fmtSize(size)}
+            </td>
+            <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
+            <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
+            <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
+            <!-- delete -->
+            <td class="bg-white" />
+            <!-- exclude / include -->
+            <td class="bg-white" />
+          </tr>
 
-            <Folder {fs} {recalc} {dirRoot} indent={0} />
-          </tbody>
-        </table>
-      {/key}
+          <Folder {fs} {recalc} {dirRoot} indent={0} />
+        </tbody>
+      </table>
     {/if}
   </div>
-  <div class="mt-4" />
-{/if}
+{/key}
+
+<div class="mt-4" />
 
 <Progress2 msgHTML={progressHTML} />
 

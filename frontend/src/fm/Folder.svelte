@@ -49,7 +49,7 @@
    */
   function calcEntries(dirRoot) {
     console.log("calcEntries");
-    // SUBTLE: important to not re-order dirInfo.dirEntries because
+    // SUBTLE: important to not re-order  because
     // they could be used in calcLineCount()
     // we use and sort a copy
     let c = fs.entryChildren(dirRoot);

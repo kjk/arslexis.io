@@ -1,5 +1,6 @@
-import { Base64 } from "js-base64";
 import { len, throwIf } from "./util";
+
+import { Base64 } from "js-base64";
 
 /**
  * @param {string} s1
@@ -7,6 +8,20 @@ import { len, throwIf } from "./util";
  */
 export function strCompareNoCase(s1, s2) {
   return s1.localeCompare(s2, undefined, { sensitivity: "accent" });
+}
+
+/**
+ * @param {string[]} a
+ * @param {string} s
+ * @returns {boolean}
+ */
+export function includesStringNoCase(a, s) {
+  for (let s2 of a) {
+    if (strCompareNoCase(s, s2)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 const wsRx = /\s{2,}/g;

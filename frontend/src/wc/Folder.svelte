@@ -1,13 +1,12 @@
 <script context="module">
-  import { strCompareNoCase } from "../strutil";
   import { verifyHandlePermission, isBinary, lineCount } from "../fileutil";
 
   /** @typedef {import("../fs").FsEntry} FsEntry */
-  /** @typedef {import("../fs").FileSysDir} FileSysDir */
   /** @typedef {import("../fs").FileSys} FileSys */
+  /** @typedef {import("../fs").FileSysDir} FileSysDir */
 
   /**
-   * @param {FileSysDir} fs
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @returns {number}
    */
@@ -16,7 +15,7 @@
   }
 
   /**
-   * @param {FileSysDir} fs
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @param {number} n
    */
@@ -25,7 +24,7 @@
   }
 
   /**
-   * @param {FileSysDir} fs
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @returns {boolean}
    */
@@ -34,7 +33,7 @@
   }
 
   /**
-   * @param {FileSysDir} fs
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @param {boolean} excluded
    */
@@ -43,7 +42,7 @@
   }
 
   /**
-   * @param {FileSysDir} fs
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @returns {boolean}
    */
@@ -52,7 +51,7 @@
   }
 
   /**
-   * @param {FileSysDir} fs
+   * @param {FileSys} fs
    * @param {FsEntry} e
    * @param {boolean} expanded
    */
@@ -60,113 +59,126 @@
     fs.entrySetMeta(e, "expanded", expanded);
   }
 
-  /**
-   * @param {FileSysDir} fs
-   * @param {FsEntry} e
-   */
-  export function calcDirSizes(fs, e) {
-    let size = 0;
-    let files = 0;
-    let dirs = 0;
-    let entries = fs.entryChildren(e);
-    for (let e of entries) {
-      let excluded = isExcluded(fs, e);
-      let isDir = fs.entryIsDir(e);
-      if (isDir) {
-        dirs++;
-        let sizes = calcDirSizes(fs, e);
-        if (excluded) {
-          continue;
-        }
-        size += sizes.size;
-        files += sizes.files;
-        dirs += sizes.dirs;
-      } else {
-        if (excluded) {
-          continue;
-        }
-        files++;
-        size += fs.entrySize(e);
-      }
+  export function calcTotals(fs) {
+    function updateMetaCount(e, key, n) {
+      let curr = fs.entryMeta(e, key);
+      fs.entrySetMeta(e, key, curr + n);
     }
+    /**
+     * @param {FileSys} fs
+     * @param {FsEntry} de : directory entry
+     * @returns {boolean}
+     */
+    function calc(fs, de) {
+      if (isExcluded(fs, de)) {
+        fs.entrySetMeta(de, "size", 0);
+        fs.entrySetMeta(de, "files", 0);
+        fs.entrySetMeta(de, "dirs", 0);
+        return false; // skip processing sub-directories
+      }
 
-    fs.setEntrySize(e, size);
-    fs.entrySetMeta(e, "size", size);
-    fs.entrySetMeta(e, "files", files);
-    fs.entrySetMeta(e, "dirs", dirs);
-    return { size, files, dirs };
+      let sumFileSizes = 0;
+      let nFiles = 0;
+      let nDirs = 0;
+      let nLines = 0;
+      for (let ce of fs.entryChildren(de)) {
+        if (fs.entryIsDir(ce)) {
+          nDirs++;
+          continue;
+        }
+        nFiles++;
+        sumFileSizes += fs.entrySize(ce);
+        nLines += getLineCount(fs, ce);
+      }
+      fs.entrySetMeta(de, "size", sumFileSizes);
+      fs.entrySetMeta(de, "files", nFiles);
+      fs.entrySetMeta(de, "dirs", nDirs);
+      forEachParent(fs, de, (fs, pe) => {
+        updateMetaCount(pe, "size", sumFileSizes);
+        updateMetaCount(pe, "files", nFiles);
+        updateMetaCount(pe, "dirs", nDirs);
+        updateMetaCount(pe, "linecount", nLines);
+      });
+      return true;
+    }
+    function resetTotalsOnDir(fs, de) {
+      let allKeys = ["size", "files", "dirs", "linecount"];
+      for (let key of allKeys) {
+        fs.entrySetMeta(de, key, 0);
+      }
+      return true;
+    }
+    fsVisitDirs(fs, resetTotalsOnDir);
+    fsVisitDirs(fs, calc);
   }
 
   /**
    * @param {FileSysDir} fs
-   * @param {Function} onDir
+   * @param {(FsEntry) => void} onDir
    * @returns {Promise}
    */
-  export async function calcLineCounts(fs, onDir) {
-    let root = fs.rootEntry();
-    let dirsToVisit = [root];
-
-    while (len(dirsToVisit) > 0) {
-      let dirEntry = dirsToVisit.shift();
-      throwIf(!fs.entryIsDir(dirEntry));
-      let children = fs.entryChildren(dirEntry);
-      throwIf(children === null);
-      if (onDir) {
-        onDir(dirEntry);
+  export async function updateFilesLineCount(fs, onDir) {
+    let filesToProcess = [];
+    function buildFilesToProcess(fs, de) {
+      if (isExcluded(fs, de)) {
+        return false;
       }
-      console.log("new dir:", dirEntry, fs.entryName(dirEntry));
-      let total = 0;
-      for (let e of children) {
-        let excluded = isExcluded(fs, e);
-        if (excluded) {
-          // TODO: for files this can be slow if we exclude and then include
-          // back, because we'll have to re-read the file
-          // we could have another meta prop: cachedLineCount
-          setLineCount(fs, e, 0);
+      for (let ce of fs.entryChildren(de)) {
+        if (fs.entryIsDir(ce)) {
           continue;
         }
-        let isDir = fs.entryIsDir(e);
-        if (isDir) {
-          dirsToVisit.push(e);
+        let name = fs.entryName(ce);
+        let skip = isExcluded(fs, ce) || isBinary(name);
+        if (skip) {
+          setLineCount(fs, ce, 0);
           continue;
         }
-        let name = fs.entryName(e);
-        let path = entryFullPath(fs, e);
-        console.log("calcLineCount:", e, name, path);
-        if (isBinary(name)) {
-          setLineCount(fs, e, 0);
-          continue;
-        }
-        let lc = getLineCount(fs, e);
+        let lc = getLineCount(fs, ce);
         if (lc > 0) {
-          // don't re-calculate lineCount if did it in the past
-          console.log(`already have lc of ${lc} on ${path}`, lc, path);
+          // already calculated line count
           continue;
         }
-        console.log("before fs.entryFileHandle for e:", e);
-        let fh = await fs.entryFileHandle(e);
-        console.log("before fh.getFile() for e:", e);
-        let file = await fh.getFile();
-        lc = await lineCount(file);
-        console.log(`file ${path} has ${lc} lines`);
-        setLineCount(fs, e, lc);
-        total += lc;
+        filesToProcess.push(ce);
       }
-      // this is not recursive, just line counts of immediate
-      // children
-      setLineCount(fs, dirEntry, total);
+      return true;
     }
-    console.log("calcLineCounts: finished");
+    fsVisitDirs(fs, buildFilesToProcess);
+    let currDir = -1;
+    for (let e of filesToProcess) {
+      if (onDir) {
+        let de = fs.entryParent(e);
+        if (de !== currDir) {
+          currDir = de;
+          onDir(currDir);
+        }
+      }
+
+      let name = fs.entryName(e);
+      let path = entryFullPath(fs, e);
+      console.log("calcLineCount", e, name, path);
+      let fh = await fs.entryFileHandle(e);
+      console.log("before fh.getFile() for e:", e);
+      let file = await fh.getFile();
+      let lc = await lineCount(file);
+      console.log(`file ${path} has ${lc} lines`);
+      setLineCount(fs, e, lc);
+    }
+    console.log("updateFilesLineCount: finished");
   }
 </script>
 
 <script>
   import DialogConfirm from "../DialogConfirm.svelte";
-  import { fmtNum, fmtSize, len, throwIf } from "../util";
+  import { fmtNum, fmtSize } from "../util";
   import { showInfoMessage } from "../Messages.svelte";
   import { onMount } from "svelte";
   import { logWcEvent } from "../events";
-  import { entryFullPath, sortEntries } from "../fs";
+  import {
+    entryFullPath,
+    forEachParent,
+    fsVisitDirs,
+    sortEntries,
+  } from "../fs";
 
   /** @type {FileSysDir} */
   export let fs;
@@ -179,7 +191,7 @@
   let entries = [];
 
   onMount(() => {
-    // SUBTLE: important to not re-order dirInfo.dirEntries because
+    // SUBTLE: important to not re-order dirRoot entries because
     // they could be used in calcLineCount()
     // we use and sort a copy
     let c = fs.entryChildren(dirRoot);
@@ -253,7 +265,7 @@
   {@const metaFiles = fs.entryMeta(e, "files") || 0}
   {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
   {@const name = fs.entryName(e)}
-  {@const size = fs.entrySize(e)}
+  {@const size = fs.entryMeta(e, "size") || 0}
   {@const isDir = fs.entryIsDir(e)}
   {@const excluded = isExcluded(fs, e)}
   {#if isDir}
@@ -274,7 +286,7 @@
       </td>
       <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
       <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
-      <td class="pl-2 text-right">{fmtNum(getLineCount(fs, e))}</td>
+      <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
       <td class="text-center bg-white"
         ><button
           on:click|stopPropagation={() => deleteDirOrFile(idx)}
@@ -298,7 +310,7 @@
       {/if}
     </tr>
     {#if isExpanded(fs, e)}
-      <svelte:self {recalc} dirInfo={e} indent={indent + 1} />
+      <svelte:self {fs} {recalc} dirRoot={e} indent={indent + 1} />
     {/if}
   {/if}
 {/each}

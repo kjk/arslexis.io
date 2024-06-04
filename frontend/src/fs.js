@@ -17,20 +17,24 @@ export const kFileSysInvalidEntry = -1;
 /**
  * @typedef {Object} FileSys
  * @property { () => FsEntry } rootEntry
+ * @property { () => number } entriesCount
  * @property { (FsEntry) => FsEntry } entryParent
  * @property { (FsEntry) => boolean } entryIsDir
  * @property { (FsEntry) => string } entryName
  * @property { (FsEntry) => number } entrySize
+ * @property { (FsEntry, number) => void } setEntrySize
  * @property { (FsEntry) => number } entryCreateTime
  * @property { (FsEntry) => number } entryModTime
  * @property { (FsEntry) => number[] } entryChildren
- * @property { (FsEntry) => number[] } entryDirs
- * @property { (FsEntry) => number[] } entryFiles
  * @property { (FsEntry) => number } entryDirCount
  * @property { (FsEntry) => number } entryFileCount
  * @property { (FsEntry) => any[] } entryMetaAll // returns all metadata
  * @property { (FsEntry, string, any) => any } entrySetMeta
  * @property { (FsEntry, string) => any } entryMeta
+ * @property { (string) => number } internMetaKey
+ * perf: when doing entryMeta frequently, save internMetaKey cost
+ * by doing it once and using entryMetaByKeyIdx
+ * @property { (FsEntry, number) => any } entryMetaByKeyIdx
  */
 
 // index withing multiNumInfo flat array
@@ -80,8 +84,17 @@ export class FileSysDir {
    * @param {string} key
    * @returns {number}
    */
-  _internMetaKey(key) {
+  internMetaKey(key) {
     return internStringArray(this.metaKeys, key);
+  }
+
+  /**
+   * @returns {number}
+   */
+  entriesCount() {
+    let n = len(this.multiNumInfo);
+    throwIf(n % kMultiNumPropsCount !== 0);
+    return n / kMultiNumPropsCount;
   }
 
   /**
@@ -100,7 +113,7 @@ export class FileSysDir {
   entrySetMeta(e, key, val) {
     let valIdx = len(this.metaValues);
     this.metaValues.push(val);
-    let keyIdx = this._internMetaKey(key);
+    let keyIdx = this.internMetaKey(key);
     let mi = this.metaIndex;
     // this represents a linked list node that consists of 3 values:
     // key   : interned string as number
@@ -126,10 +139,10 @@ export class FileSysDir {
 
   /**
    * @param {FsEntry} e
-   * @param {string} key
+   * @param {number} keyIdx
    * @returns {any} returns undefined if value not present
    */
-  entryMeta(e, key) {
+  entryMetaByKeyIdx(e, keyIdx) {
     let idx = e * kMultiNumPropsCount + kFirstMetaIdx;
     // metaIdx is an index within metaIndex
     let metaIdx = this.multiNumInfo[idx];
@@ -137,7 +150,6 @@ export class FileSysDir {
       return undefined;
     }
     throwIf(metaIdx === undefined);
-    let keyIdx = this._internMetaKey(key);
     let mi = this.metaIndex;
     // each element of metaIndex is 3 items:
     // keyIdx
@@ -153,6 +165,15 @@ export class FileSysDir {
       throwIf(metaIdx === undefined);
     }
     return undefined;
+  }
+  /**
+   * @param {FsEntry} e
+   * @param {string} key
+   * @returns {any} returns undefined if value not present
+   */
+  entryMeta(e, key) {
+    let keyIdx = this.internMetaKey(key);
+    return this.entryMetaByKeyIdx(e, keyIdx);
   }
 
   /**
@@ -236,7 +257,9 @@ export class FileSysDir {
    * @returns {number[]}
    */
   entryChildren(e) {
-    return this.children[e];
+    let res = this.children[e];
+    throwIf(res === null); // not a directory
+    return res;
   }
 
   /**
@@ -264,11 +287,12 @@ export class FileSysDir {
 
   /**
    * @param {FsEntry} e
-   * @param {boolean} forDirs
+   * @param {boolean} forDirs if true, returns count of directores, otherwise files
    * @returns {number}
    */
   _entryCountChildren(e, forDirs) {
     let c = this.children[e];
+    throwIf(c === null, `e ${e} is not a directory`); // not a directory
     let n = 0;
     for (let ec of c) {
       let isDir = this.entryIsDir(ec);
@@ -280,6 +304,7 @@ export class FileSysDir {
   }
 
   /**
+   * return number of directories in a directory entry
    * @param {FsEntry} e
    * @returns {number}
    */
@@ -288,54 +313,12 @@ export class FileSysDir {
   }
 
   /**
+   * return number of files in a directory entry
    * @param {FsEntry} e
    * @returns {number}
    */
   entryFileCount(e) {
     return this._entryCountChildren(e, false);
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @param {boolean} forDirs
-   * @returns {FsEntry[]}
-   */
-  _entryChildrenSubset(e, forDirs) {
-    let n = this._entryCountChildren(e, forDirs);
-    if (n === 0) {
-      return [];
-    }
-    // perf: pre-allocate the array
-    // TODO(perf): alternatively, ensure that dirs are always first
-    // so we can just find the index of first file entry and
-    // return subarrays
-    /** @type {FsEntry[]} */
-    let res = Array(n);
-    let i = 0;
-    let c = this.children[e];
-    for (let ec of c) {
-      let isDir = this.entryIsDir(ec);
-      if (isDir === forDirs) {
-        res[i++] = ec;
-      }
-    }
-    return res;
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @returns {FsEntry[]}
-   */
-  entryDirs(e) {
-    return this._entryChildrenSubset(e, true);
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @returns {FsEntry[]}
-   */
-  entryFiles(e) {
-    return this._entryChildrenSubset(e, false);
   }
 
   /**
@@ -489,6 +472,21 @@ export function entryPath(fs, e) {
 }
 
 /**
+ * call fn on each parent of e
+ * @param {FileSys} fs
+ * @param {FsEntry} e
+ * @param {(FileSys, FsEntry) => void} fn
+ */
+export function forEachParent(fs, e, fn) {
+  while (e != kFileSysInvalidEntry) {
+    e = fs.entryParent(e);
+    if (e !== kFileSysInvalidEntry) {
+      fn(fs, e);
+    }
+  }
+}
+
+/**
  * @param {FileSys} fs
  * @param {FsEntry} e
  * @returns {string}
@@ -528,3 +526,131 @@ export function sortEntries(fs, entries) {
   }
   entries.sort(sortFn);
 }
+
+/**
+ * call fn for each directory, starting with root and then
+ * sub-directories recursively
+ * fn return shouldContinue => if false, we won't visit subdirectories
+ * @param { FileSys } fs
+ * @param { (FileSys, FsEntry) => boolean } fn
+ */
+export function fsVisitDirs(fs, fn) {
+  if (fs.entriesCount() === 0) {
+    return;
+  }
+  let dirsToVisit = [fs.rootEntry()];
+  while (len(dirsToVisit) > 0) {
+    let dirEntry = dirsToVisit.shift();
+    throwIf(dirEntry === -1);
+    let cont = fn(fs, dirEntry);
+    if (!cont) {
+      // skip visiting sub-directories
+      continue;
+    }
+    let children = fs.entryChildren(dirEntry);
+    for (let e of children) {
+      if (fs.entryIsDir(e)) {
+        dirsToVisit.push(e);
+      }
+    }
+  }
+}
+
+/**
+ * traverse all directories and files starting from root
+ * call fn on each file and directory in a depth-first traversal
+ * @param {FileSys} fs
+ * @param {(FileSys, FsEntry) => boolean} fn
+ */
+// export function fsVisit(fs, fn) {
+//   if (fs.entriesCount() === 0) {
+//     return;
+//   }
+//   let dirsToVisit = [fs.rootEntry()];
+//   while (len(dirsToVisit) > 0) {
+//     let dirEntry = dirsToVisit.shift();
+//     let cont = fn(fs, dirEntry);
+//     if (cont) {
+//       continue;
+//     }
+//     let children = fs.entryChildren(dirEntry);
+//     for (let e of children) {
+//       fn(fs, e);
+//       let isDir = fs.entryIsDir(e);
+//       if (isDir) {
+//         dirsToVisit.push(e);
+//       }
+//     }
+//   }
+// }
+
+/**
+ * traverse all directories and files starting from root
+ * call fn on each file and directory in a depth-first traversal
+ * @param {FileSys} fs
+ * @param {(FileSys, FsEntry) => boolean} fn
+ */
+export function fsVisit(fs, fn) {
+  function fnVisit(fs, de) {
+    let cont = fn(fs, de);
+    if (!cont) {
+      return false;
+    }
+    let children = fs.entryChildren(de);
+    for (let e of children) {
+      if (!fs.entryIsDir(e)) {
+        fn(fs, e);
+      }
+    }
+    return true;
+  }
+  fsVisitDirs(fs, fnVisit);
+}
+
+/**
+ * key is a name of a number meta value that must be set on file entries
+ * we propagate this upwards:
+ * - parent directory gets a sum of file meta values and sum of all sub-directories
+ * @param {FileSys} fs
+ * @param {string} key
+ */
+export function fsPropagateNumberMeta(fs, key) {
+  let keyIdx = fs.internMetaKey(key);
+  let nEntries = fs.entriesCount();
+  // clear totals on directories to 0
+  for (let de = 0; de < nEntries; de++) {
+    if (fs.entryIsDir(de)) {
+      fs.entrySetMeta(de, key, 0);
+    }
+  }
+
+  for (let de = 0; de < nEntries; de++) {
+    if (!fs.entryIsDir(de)) {
+      continue;
+    }
+    let children = fs.entryChildren(de);
+    let total = 0;
+    for (let ce of children) {
+      let isDir = fs.entryIsDir(ce);
+      if (isDir) {
+        continue;
+      }
+      let v = fs.entryMetaByKeyIdx(keyIdx);
+      throwIf(v === undefined); // must be set
+      total += v;
+    }
+    // propage to parent directories
+    let e = de;
+    while (e !== kFileSysInvalidEntry) {
+      let curr = fs.entryMetaByKeyIdx(e, keyIdx);
+      fs.entrySetMeta(e, curr + total);
+      e = fs.entryParent(e);
+    }
+  }
+}
+
+/**
+ * @callback FnFsEntryWithChildren
+ * @param {FsEntry} e
+ * @param {FsEntry[]} children
+ */
