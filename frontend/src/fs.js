@@ -42,7 +42,7 @@ const kParentIdx = 0;
 const kSizeIdx = 1;
 const kModTimeIdx = 2;
 const kFirstMetaIdx = 3;
-const kMultiNumPropsCount = 4;
+const kEntryInfoCount = 4;
 
 /**
  * Efficient implementation of storing info about direcotry
@@ -53,8 +53,10 @@ export class FileSysDir {
   names = [];
   /** @type {FileSystemDirectoryHandle[]} */
   handles = [];
+
+  // for every entry we have kEntryInfoCount numbers
   /** @type {number[]} */
-  multiNumInfo = [];
+  entryInfo = [];
 
   // this array interns keys used for meta values
   // it should be very short, because there shouldn't be
@@ -92,9 +94,9 @@ export class FileSysDir {
    * @returns {number}
    */
   entriesCount() {
-    let n = len(this.multiNumInfo);
-    throwIf(n % kMultiNumPropsCount !== 0);
-    return n / kMultiNumPropsCount;
+    let n = len(this.entryInfo);
+    throwIf(n % kEntryInfoCount !== 0);
+    return n / kEntryInfoCount;
   }
 
   /**
@@ -113,8 +115,8 @@ export class FileSysDir {
   entrySetMeta(e, key, val) {
     let keyIdx = this.internMetaKey(key);
     // if exists, replace value
-    let idx = e * kMultiNumPropsCount + kFirstMetaIdx;
-    let currIdx = this.multiNumInfo[idx];
+    let idx = e * kEntryInfoCount + kFirstMetaIdx;
+    let currIdx = this.entryInfo[idx];
     throwIf(currIdx === undefined);
     let mi = this.metaIndex;
     while (currIdx !== -1) {
@@ -141,15 +143,15 @@ export class FileSysDir {
     mi.push(keyIdx, valIdx, -1);
 
     // make new value (metaIdx) first node in linked list
-    idx = e * kMultiNumPropsCount + kFirstMetaIdx;
-    currIdx = this.multiNumInfo[idx];
+    idx = e * kEntryInfoCount + kFirstMetaIdx;
+    currIdx = this.entryInfo[idx];
     throwIf(currIdx === undefined);
     if (currIdx === -1) {
-      this.multiNumInfo[idx] = metaIdx;
+      this.entryInfo[idx] = metaIdx;
       return;
     }
     mi[metaIdx + 2] = currIdx; // set node.next to current first node
-    this.multiNumInfo[idx] = metaIdx; // make this first node
+    this.entryInfo[idx] = metaIdx; // make this first node
   }
 
   /**
@@ -158,9 +160,9 @@ export class FileSysDir {
    * @returns {any} returns undefined if value not present
    */
   entryMetaByKeyIdx(e, keyIdx) {
-    let idx = e * kMultiNumPropsCount + kFirstMetaIdx;
+    let idx = e * kEntryInfoCount + kFirstMetaIdx;
     // metaIdx is an index within metaIndex
-    let metaIdx = this.multiNumInfo[idx];
+    let metaIdx = this.entryInfo[idx];
     if (metaIdx === -1) {
       return undefined;
     }
@@ -209,8 +211,8 @@ export class FileSysDir {
     if (e == 0) {
       return kFileSysInvalidEntry;
     }
-    let idx = e * kMultiNumPropsCount + kParentIdx;
-    return this.multiNumInfo[idx];
+    let idx = e * kEntryInfoCount + kParentIdx;
+    return this.entryInfo[idx];
   }
 
   /**
@@ -226,8 +228,8 @@ export class FileSysDir {
    * @returns {number}
    */
   entrySize(e) {
-    let idx = e * kMultiNumPropsCount + kSizeIdx;
-    return this.multiNumInfo[idx];
+    let idx = e * kEntryInfoCount + kSizeIdx;
+    return this.entryInfo[idx];
   }
 
   /**
@@ -235,8 +237,8 @@ export class FileSysDir {
    * @param {number} size
    */
   setEntrySize(e, size) {
-    let idx = e * kMultiNumPropsCount + kSizeIdx;
-    this.multiNumInfo[idx] = size;
+    let idx = e * kEntryInfoCount + kSizeIdx;
+    this.entryInfo[idx] = size;
   }
 
   /**
@@ -254,8 +256,8 @@ export class FileSysDir {
    */
   entryCreateTime(e) {
     // browser API doesn't provide creation time so we re-use mod time
-    let idx = e * kMultiNumPropsCount + kModTimeIdx;
-    return this.multiNumInfo[idx];
+    let idx = e * kEntryInfoCount + kModTimeIdx;
+    return this.entryInfo[idx];
   }
 
   /**
@@ -263,8 +265,8 @@ export class FileSysDir {
    * @returns {number}
    */
   entryModTime(e) {
-    let idx = e * kMultiNumPropsCount + kModTimeIdx;
-    return this.multiNumInfo[idx];
+    let idx = e * kEntryInfoCount + kModTimeIdx;
+    return this.entryInfo[idx];
   }
 
   /**
@@ -347,10 +349,10 @@ export class FileSysDir {
     this.names.push(name);
     this.handles.push(handle);
     this.children.push(null);
-    let oldSize = len(this.multiNumInfo);
-    this.multiNumInfo.push(parent, -1, -1, -1);
-    let newSize = len(this.multiNumInfo);
-    throwIf(newSize != oldSize + kMultiNumPropsCount);
+    let oldSize = len(this.entryInfo);
+    this.entryInfo.push(parent, -1, -1, -1);
+    let newSize = len(this.entryInfo);
+    throwIf(newSize != oldSize + kEntryInfoCount);
     return e;
   }
 }
@@ -425,8 +427,8 @@ export async function readFileSysDirRecur(dirHandle, progress) {
       if (isFile) {
         // @ts-ignore
         let f = /** @type { File } */ (await fshandle.getFile());
-        let info = fs.multiNumInfo;
-        let idx = echild * kMultiNumPropsCount;
+        let info = fs.entryInfo;
+        let idx = echild * kEntryInfoCount;
         info[idx + kSizeIdx] = f.size;
         info[idx + kModTimeIdx] = f.lastModified;
         nFiles++;
