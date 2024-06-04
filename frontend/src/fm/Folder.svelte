@@ -40,6 +40,12 @@
   export let onGoUp;
   export let initialSelectionIdx = 0;
 
+  let selectedIdx = 0;
+  /** @type {HTMLElement} */
+  let tbodyEl;
+  /** @type {HTMLElement} */
+  let noFilesEl;
+
   /** @type {FsEntry[]} */
   let entries = [];
   $: calcEntries(dirRoot);
@@ -64,6 +70,10 @@
     if (len(entries) > 0) {
       tick().then(() => {
         setSelected(initialSelectionIdx);
+      });
+    } else {
+      tick().then(() => {
+        noFilesEl.focus();
       });
     }
   }
@@ -185,11 +195,6 @@
     }
   }
 
-  let selectedIdx = 0;
-
-  /** @type {HTMLElement} */
-  let tbodyEl;
-
   /**
    * @param {number} idx
    */
@@ -213,6 +218,14 @@
   on:keydown={handleKeyDown}
 >
   <tbody bind:this={tbodyEl}>
+    {#if len(entries) == 0}
+      <tr
+        bind:this={noFilesEl}
+        tabindex="0"
+        class="hover:bg-gray-200 hover:cursor-pointer border"
+      >
+        <td class="text-center py-10">No files</td>
+      </tr>{/if}
     {#each entries as e, idx}
       {#if fs.entryIsDir(e)}
         <tr
