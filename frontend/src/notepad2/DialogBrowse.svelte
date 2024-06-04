@@ -1,5 +1,5 @@
 <script context="module">
-  /** @typedef {import("../fileutil").FsEntry} FsEntry */
+  /** @typedef {import("../fileutil-old").FsEntry} FsEntry */
   /** @typedef {import("./np2store").FavEntry} FavEntry*/
   /**
    * @typedef { Object } Entry
@@ -30,11 +30,9 @@
   } from "./FsFile";
   import {
     openDirPicker,
-    readDir,
     supportsFileSystem,
     verifyHandlePermission,
   } from "../fileutil";
-  import { sortEntries } from "../wc/Folder.svelte";
   import {
     fsFileFromFavEntry,
     favorites,
@@ -43,6 +41,7 @@
   } from "./np2store";
   import { arrayRemove, len, throwIf } from "../util";
   import { tooltip } from "../actions/tooltip";
+  import { readDir } from "../fileutil-old";
 
   export let open = false;
   /** @type {Function} */
@@ -171,7 +170,7 @@
     };
     let a = [e2];
     let fsEntries = fsEntry.dirEntries;
-    sortEntries(fsEntries);
+    // sortEntries(fsEntries);
     for (const fse of fsEntries) {
       if (fse.isDir) {
         e2 = {

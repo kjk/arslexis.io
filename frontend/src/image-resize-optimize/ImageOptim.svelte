@@ -1,14 +1,11 @@
 <script>
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
-  import {
-    getFileExt,
-    supportsFileSystem,
-    readDirRecurFiles,
-  } from "../fileutil";
+  import { getFileExt, supportsFileSystem } from "../fileutil";
   import { sniffFileType } from "../sniffFileType";
   import { fmtSize, len } from "../util";
   import TopNav from "../TopNav.svelte";
   import { strCompareNoCase } from "../strutil";
+  import { readDirRecurFiles } from "../fileutil-old";
 
   let dirName = "";
 
