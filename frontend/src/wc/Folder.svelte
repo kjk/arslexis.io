@@ -108,12 +108,15 @@
 
     while (len(dirsToVisit) > 0) {
       let dirEntry = dirsToVisit.shift();
-      let a = fs.entryChildren(dirEntry);
+      throwIf(!fs.entryIsDir(dirEntry));
+      let children = fs.entryChildren(dirEntry);
+      throwIf(children === null);
       if (onDir) {
         onDir(dirEntry);
       }
+      console.log("new dir:", dirEntry, fs.entryName(dirEntry));
       let total = 0;
-      for (let e of a) {
+      for (let e of children) {
         let excluded = isExcluded(fs, e);
         if (excluded) {
           // TODO: for files this can be slow if we exclude and then include
@@ -129,7 +132,7 @@
         }
         let name = fs.entryName(e);
         let path = entryFullPath(fs, e);
-        console.log("calcLineCount:", path);
+        console.log("calcLineCount:", e, name, path);
         if (isBinary(name)) {
           setLineCount(fs, e, 0);
           continue;
@@ -159,7 +162,7 @@
 
 <script>
   import DialogConfirm from "../DialogConfirm.svelte";
-  import { fmtNum, fmtSize, len } from "../util";
+  import { fmtNum, fmtSize, len, throwIf } from "../util";
   import { showInfoMessage } from "../Messages.svelte";
   import { onMount } from "svelte";
   import { logWcEvent } from "../events";

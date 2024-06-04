@@ -173,7 +173,7 @@ export class FileSysDir {
     if (e == 0) {
       return kFileSysInvalidEntry;
     }
-    let idx = kMultiNumPropsCount * 4 + kParentIdx;
+    let idx = e * kMultiNumPropsCount + kParentIdx;
     return this.multiNumInfo[idx];
   }
 
@@ -190,7 +190,7 @@ export class FileSysDir {
    * @returns {number}
    */
   entrySize(e) {
-    let idx = kMultiNumPropsCount * e + kSizeIdx;
+    let idx = e * kMultiNumPropsCount + kSizeIdx;
     return this.multiNumInfo[idx];
   }
 
@@ -199,7 +199,7 @@ export class FileSysDir {
    * @param {number} size
    */
   setEntrySize(e, size) {
-    let idx = kMultiNumPropsCount * e + kSizeIdx;
+    let idx = e * kMultiNumPropsCount + kSizeIdx;
     this.multiNumInfo[idx] = size;
   }
 
@@ -218,7 +218,7 @@ export class FileSysDir {
    */
   entryCreateTime(e) {
     // browser API doesn't provide creation time so we re-use mod time
-    let idx = kMultiNumPropsCount * e + kModTimeIdx;
+    let idx = e * kMultiNumPropsCount + kModTimeIdx;
     return this.multiNumInfo[idx];
   }
 
@@ -227,7 +227,7 @@ export class FileSysDir {
    * @returns {number}
    */
   entryModTime(e) {
-    let idx = kMultiNumPropsCount * e + kModTimeIdx;
+    let idx = e * kMultiNumPropsCount + kModTimeIdx;
     return this.multiNumInfo[idx];
   }
 
