@@ -13,13 +13,13 @@
   <div id="app"></div>
 
   <script type="module">
-    import Notepad2 from './Notepad2.svelte'
+    import { mount } from "svelte";
+    import App from './Notepad2.svelte'
     import '../base.css'
-
-    const app = new Notepad2({
-      target: document.getElementById('app'),
-      props: {}
-    });
+    const args = {
+      target: document.getElementById("app"),
+    };
+    const app = mount(App, args);
   </script>
 </body>
 

@@ -13,15 +13,13 @@
   <div id="app"></div>
 
   <script type="module">
-    import GistEditor from './GistEditor.svelte'
+    import { mount } from "svelte";
+    import App from './GistEditor.svelte'
     import './gisteditor.css'
-
-    // const q = new URLSearchParams(window.location.search);
-    // const gistid = q.get("id");
     const args = {
-      target: document.getElementById('app'),
+      target: document.getElementById("app"),
     };
-    const app = new GistEditor(args)
+    const app = mount(App, args);
   </script>
 </body>
 

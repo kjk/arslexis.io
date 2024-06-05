@@ -224,23 +224,25 @@
       <div class="ml-4 mt-2 mb-2">
         <div>Recently opened:</div>
         <table class="table-auto ml-4">
-          {#each $recent as e, idx}
-            <tr>
-              <td class="px-1">{e.name}</td>
-              <td class="px-1"
-                ><button
-                  class="underline hover:cursor-pointer"
-                  on:click={() => openRecentDir(e.dirHandle)}>open</button
-                ></td
-              >
-              <td class="px-1">
-                <button
-                  class="underline hover:cursor-pointer"
-                  on:click={() => removeFromRecent(idx)}>remove</button
+          <tbody>
+            {#each $recent as e, idx}
+              <tr>
+                <td class="px-1">{e.name}</td>
+                <td class="px-1"
+                  ><button
+                    class="underline hover:cursor-pointer"
+                    on:click={() => openRecentDir(e.dirHandle)}>open</button
+                  ></td
                 >
-              </td>
-            </tr>
-          {/each}
+                <td class="px-1">
+                  <button
+                    class="underline hover:cursor-pointer"
+                    on:click={() => removeFromRecent(idx)}>remove</button
+                  >
+                </td>
+              </tr>
+            {/each}
+          </tbody>
         </table>
       </div>
     {/if}

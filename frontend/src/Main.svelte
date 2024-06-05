@@ -104,49 +104,51 @@
   </div>
 
   <table class="table-auto mx-8 mt-2 striped-tr">
-    <tr>
-      <td class="text-left align-top"
-        ><a class="underline whitespace-nowrap" href="https://edna.arslexis.io"
-          >Edna</a
+    <tbody>
+      <tr>
+        <td class="text-left align-top"
+          ><a
+            class="underline whitespace-nowrap"
+            href="https://edna.arslexis.io">Edna</a
+          >
+        </td>
+        <td class="pl-4 align-top"
+          >a scratchpad / note taker for developers and race car drivers</td
         >
-      </td>
-      <td class="pl-4 align-top"
-        >a scratchpad / note taker for developers and race car drivers</td
-      >
-    </tr>
+      </tr>
 
-    <tr>
-      <td class="text-left align-top">
-        <a class="underline whitespace-nowrap" href="/gisteditor/"
-          >Gist Editor</a
+      <tr>
+        <td class="text-left align-top">
+          <a class="underline whitespace-nowrap" href="/gisteditor/"
+            >Gist Editor</a
+          >
+        </td>
+        <td class="pl-4 align-top"
+          >GitHub Gist editor and a notepad for notes and code snippets stored
+          locally in the browser</td
         >
-      </td>
-      <td class="pl-4 align-top"
-        >GitHub Gist editor and a notepad for notes and code snippets stored
-        locally in the browser</td
-      >
-    </tr>
+      </tr>
 
-    <tr>
-      <td class="text-left align-top"
-        ><a class="underline whitespace-nowrap" href="/notepad2/">notepad2</a>
-      </td>
-      <td class="pl-4 align-top"
-        >like a Windows <a
-          class="underline whitespace-nowrap"
-          target="_blank"
-          href="https://github.com/zufuliu/notepad2">notepad2</a
+      <tr>
+        <td class="text-left align-top"
+          ><a class="underline whitespace-nowrap" href="/notepad2/">notepad2</a>
+        </td>
+        <td class="pl-4 align-top"
+          >like a Windows <a
+            class="underline whitespace-nowrap"
+            target="_blank"
+            href="https://github.com/zufuliu/notepad2">notepad2</a
+          >
+          text editor but in the browser</td
         >
-        text editor but in the browser</td
-      >
-    </tr>
+      </tr>
 
-    <tr>
-      <td><a class="underline" href="/goplayground/">Go Playground</a></td>
-      <td class="pl-4 align-top">a better Go Playground</td>
-    </tr>
+      <tr>
+        <td><a class="underline" href="/goplayground/">Go Playground</a></td>
+        <td class="pl-4 align-top">a better Go Playground</td>
+      </tr>
 
-    <!--
+      <!--
     <tr>
       <td class="text-left align-top">
         <a class="underline whitespace-nowrap" href="/calc/">calc</a>
@@ -157,26 +159,27 @@
     </tr>
     -->
 
-    <tr>
-      <td class="text-left align-top">
-        <a class="underline whitespace-nowrap" href="/unzip/">unzip</a>
-      </td>
-      <td class="pl-4 align-top">unzip a file in the browser</td>
-    </tr>
+      <tr>
+        <td class="text-left align-top">
+          <a class="underline whitespace-nowrap" href="/unzip/">unzip</a>
+        </td>
+        <td class="pl-4 align-top">unzip a file in the browser</td>
+      </tr>
 
-    <tr>
-      <td class="text-left align-top">
-        <a class="underline whitespace-nowrap" href="/wc/">wc</a>
-      </td>
-      <td class="pl-4 align-top">like <tt>wc</tt>, but in the browser</td>
-    </tr>
+      <tr>
+        <td class="text-left align-top">
+          <a class="underline whitespace-nowrap" href="/wc/">wc</a>
+        </td>
+        <td class="pl-4 align-top">like <tt>wc</tt>, but in the browser</td>
+      </tr>
 
-    <tr>
-      <td class="text-left align-top">
-        <a class="underline whitespace-nowrap" href="/fm/">File Manager</a>
-      </td>
-      <td class="pl-4 align-top">file manager, but in the browser</td>
-    </tr>
+      <tr>
+        <td class="text-left align-top">
+          <a class="underline whitespace-nowrap" href="/fm/">File Manager</a>
+        </td>
+        <td class="pl-4 align-top">file manager, but in the browser</td>
+      </tr>
+    </tbody>
   </table>
 
   {#if isLocal()}
@@ -187,28 +190,30 @@
     </div>
 
     <table class="table-auto mx-8 mt-2">
-      <tr>
-        <td class="text-left align-top">
-          <a class="underline whitespace-nowrap" href="/reader/">reader</a>
-        </td>
-        <td class="pl-4 align-top">Comic Book (.cbz, .cbr) reader</td>
-      </tr>
+      <tbody>
+        <tr>
+          <td class="text-left align-top">
+            <a class="underline whitespace-nowrap" href="/reader/">reader</a>
+          </td>
+          <td class="pl-4 align-top">Comic Book (.cbz, .cbr) reader</td>
+        </tr>
 
-      <tr>
-        <td
-          ><a class="underline" href="/image-resize-optimize/"
-            >image resize and optimize</a
-          ></td
-        >
-        <td class="pl-4 align-top"
-          >optimize and resize multiple images at once</td
-        >
-      </tr>
+        <tr>
+          <td
+            ><a class="underline" href="/image-resize-optimize/"
+              >image resize and optimize</a
+            ></td
+          >
+          <td class="pl-4 align-top"
+            >optimize and resize multiple images at once</td
+          >
+        </tr>
 
-      <tr>
-        <td><a class="underline" href="/qrscanner/">qrscanner</a></td>
-        <td class="pl-4 align-top">qrscanner</td>
-      </tr>
+        <tr>
+          <td><a class="underline" href="/qrscanner/">qrscanner</a></td>
+          <td class="pl-4 align-top">qrscanner</td>
+        </tr>
+      </tbody>
     </table>
   {/if}
 

@@ -1,9 +1,10 @@
 import "../base.css";
 
-import wc from "./wc.svelte";
+import App from "./wc.svelte";
+import { mount } from "svelte";
 
 const args = {
   target: document.getElementById("app"),
 };
-const app = new wc(args);
-console.log("app:", app);
+const app = mount(App, args);
+export default app;
