@@ -262,61 +262,63 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-{#each entries as e, idx}
-  {@const name = fs.entryName(e)}
-  {@const size = fs.entryMeta(e, "size") || 0}
-  {@const metaDirs = fs.entryMeta(e, "dirs") || 0}
-  {@const metaFiles = fs.entryMeta(e, "files") || 0}
-  {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
-  {@const isDir = fs.entryIsDir(e)}
-  {@const excluded = isExcluded(fs, e)}
-  {#if isDir}
-    <tr
-      on:click={() => toggleExpand(fs, e)}
-      class="hover:bg-gray-200 hover:cursor-pointer pl-8"
-    >
-      <td class="ind-{indent} font-semibold">
-        {#if isExpanded(fs, e)}
-          ▼
-        {:else}
-          ▶
-        {/if}
-        {name}
-      </td>
-      <td class="pl-2 text-right whitespace-nowrap">
-        {fmtSize(size)}
-      </td>
-      <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
-      <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
-      <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
-      <td class="text-center bg-white"
-        ><button
-          on:click|stopPropagation={() => deleteDirOrFile(idx)}
-          class="hover:underline px-4 hover:text-red-600">delete</button
-        ></td
+{#key entries}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  {#each entries as e, idx}
+    {@const name = fs.entryName(e)}
+    {@const size = fs.entryMeta(e, "size") || 0}
+    {@const metaDirs = fs.entryMeta(e, "dirs") || 0}
+    {@const metaFiles = fs.entryMeta(e, "files") || 0}
+    {@const metaLineCount = fs.entryMeta(e, "linecount") || 0}
+    {@const isDir = fs.entryIsDir(e)}
+    {@const excluded = isExcluded(fs, e)}
+    {#if isDir}
+      <tr
+        on:click={() => toggleExpand(fs, e)}
+        class="hover:bg-gray-200 hover:cursor-pointer pl-8"
       >
-      {#if excluded}
+        <td class="ind-{indent} font-semibold">
+          {#if isExpanded(fs, e)}
+            ▼
+          {:else}
+            ▶
+          {/if}
+          {name}
+        </td>
+        <td class="pl-2 text-right whitespace-nowrap">
+          {fmtSize(size)}
+        </td>
+        <td class="pl-2 text-right">{fmtNum(metaDirs)}</td>
+        <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
+        <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
         <td class="text-center bg-white"
           ><button
-            on:click|stopPropagation={() => doExclude(e, false)}
-            class="hover:underline px-4 text-blue-600">include</button
+            on:click|stopPropagation={() => deleteDirOrFile(idx)}
+            class="hover:underline px-4 hover:text-red-600">delete</button
           ></td
         >
-      {:else}
-        <td class="text-center bg-white"
-          ><button
-            on:click|stopPropagation={() => doExclude(e, true)}
-            class="hover:underline px-4">exclude</button
-          ></td
-        >
+        {#if excluded}
+          <td class="text-center bg-white"
+            ><button
+              on:click|stopPropagation={() => doExclude(e, false)}
+              class="hover:underline px-4 text-blue-600">include</button
+            ></td
+          >
+        {:else}
+          <td class="text-center bg-white"
+            ><button
+              on:click|stopPropagation={() => doExclude(e, true)}
+              class="hover:underline px-4">exclude</button
+            ></td
+          >
+        {/if}
+      </tr>
+      {#if isExpanded(fs, e)}
+        <svelte:self {fs} {recalc} dirRoot={e} indent={indent + 1} />
       {/if}
-    </tr>
-    {#if isExpanded(fs, e)}
-      <svelte:self {fs} {recalc} dirRoot={e} indent={indent + 1} />
     {/if}
-  {/if}
-{/each}
+  {/each}
+{/key}
 
 {#each entries as e, idx (idx)}
   {@const name = fs.entryName(e)}
