@@ -1,5 +1,5 @@
 <script>
-  export let msgHTML = "";
+  let { msgHTML = "" } = $props();
 </script>
 
 {#if msgHTML !== ""}
