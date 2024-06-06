@@ -1,26 +1,40 @@
 <script>
   // menu based on https://play.tailwindcss.com/0xQBSdXxsK
   import Menu, { fixMenuName } from "./Menu.svelte";
-  import { onMount, createEventDispatcher } from "svelte";
   import { len, splitMax } from "./util";
   import { parseShortcut } from "./keys";
 
   let debugKeys = false;
 
-  const dispatch = createEventDispatcher();
-
+  /*
   export let menuBar; // definition of the menubar
   export let noMenuCommands = null; // for commands that have shortcuts but no menu
-  /** @type {Function} */
   export let filterFn = null;
   export let hidden = false;
   // function called when menu has been opened
   // allows the owner to modify the menu by changing DOM
-  /** @type {Function} */
   export let menuDidOpenFn = null;
+*/
+
+  /** @type { {
+    menuBar: any,
+    noMenuCommands: any,
+    filterFn: Function,
+    hidden: boolean,
+    menuDidOpenFn: Function,
+    onmenucmd: (cmd: string, ev: Event) => void,
+} } */
+  let {
+    menuBar,
+    noMenuCommands = null,
+    filterFn = null,
+    hidden = false,
+    menuDidOpenFn = null,
+    onmenucmd,
+  } = $props();
 
   /** @type {HTMLElement} */
-  let menuBarElement = null;
+  let menuBarElement = $state(null);
 
   /** @type {import("./keys").Shortcut[]} */
   let keyboardShortcuts = [];
@@ -153,11 +167,11 @@
         console.log("handleKeyDown:", ks);
       }
       // handler is responsible for stopping propagation of the event
-      dispatch("menucmd", { ev: ev, cmd: ks.cmdId });
+      onmenucmd(ks.cmdId, ev);
     }
   }
 
-  onMount(() => {
+  $effect(() => {
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
@@ -174,17 +188,16 @@
       {#each menuBar as mi}
         {@const title = mi[0]}
         {@const menu = mi[1]}
-        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
         <div class="parent relative" tabindex="-1" role="menubar">
           <button
             class="rounded-md px-3 py-1 hover:bg-black/5 menu-trigger"
-            on:mouseover={handleMouseOver}
-            on:focus={handleFocus}>{fixMenuName(title)}</button
+            onmouseover={handleMouseOver}
+            onfocus={handleFocus}>{fixMenuName(title)}</button
           >
           <div
             class="child invisible absolute top-0 transform opacity-0 transition-all duration-100"
           >
-            <Menu {filterFn} on:menucmd {menu} />
+            <Menu nest={1} {filterFn} {onmenucmd} {menu} />
           </div>
         </div>
       {/each}

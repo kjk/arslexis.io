@@ -18,21 +18,22 @@
 </script>
 
 <script>
-  import { createEventDispatcher } from "svelte";
   import { parseShortcut, serializeShortuct } from "./keys.js";
   import { len, splitMax } from "./util.js";
 
-  const dispatch = createEventDispatcher();
-
   // based on https://play.tailwindcss.com/0xQBSdXxsK
-  export let menu; // array of menu items
 
-  // menu nesting needed to style child based on parent
+  /** @type {{
+   menu: any[],   // array of menu items
+   nest: number,
+   filterFn: Function,
+   onmenucmd: (cmd: string, ev: Event) => void,
+}}*/
+  let { menu, nest = 1, filterFn, onmenucmd } = $props();
+
+  // nest: menu nesting needed to style child based on parent
   // see menu-parent1, menu-parent2, menu-parent3,
   // menu-child1, menu-child2, menu-child3 global classes
-  export let nest = 1;
-
-  export let filterFn;
 
   function sanitizeShortcut(txt) {
     const s = parseShortcut(txt);
@@ -125,15 +126,16 @@
       console.log("Menu.svelte: menuClicked: no data-menu-id on:", el);
       return;
     }
-    dispatch("menucmd", { cmd: cmdId });
+    onmenucmd(cmdId, null);
   }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events a11y-interactive-supports-focus -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
   role="menu"
+  tabindex="-1"
   class="mt-1 rounded-md border border-neutral-50 bg-white py-1 shadow-lg"
-  on:click={handleClicked}
+  onclick={handleClicked}
 >
   {#each menu as mi}
     {@const isDiv = mi === menuSep || mi[0] === menuSep}
@@ -147,13 +149,14 @@
       {#if isDiv}
         <div class="border-y border-gray-200 mt-1 mb-1"></div>
       {:else if isSubmenu}
-        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <!-- svelte-ignore a11y_mouse_events_have_key_events -->
         <div
           role="menuitem"
+          tabindex="-1"
           class="menu-parent{nest} relative my-1"
-          on:mouseleave={handleMouseLeave}
-          on:mouseover={handleMouseOver}
-          on:mouseenter={handleMouseEnter}
+          onmouseleave={handleMouseLeave}
+          onmouseover={handleMouseOver}
+          onmouseenter={handleMouseEnter}
         >
           <button
             class="flex w-full items-center justify-between pl-3 pr-2 py-0.5"
@@ -184,13 +187,14 @@
           </div>
         </div>
       {:else}
-        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <!-- svelte-ignore a11y_mouse_events_have_key_events -->
         <div
           role="menuitem"
+          tabindex="-1"
           data-cmd-id={cmdId}
           class="min-w-[18em] flex items-center justify-between px-3 py-1 whitespace-nowrap"
-          on:mouseleave={handleMouseLeave}
-          on:mouseover={handleMouseOver}
+          onmouseleave={handleMouseLeave}
+          onmouseover={handleMouseOver}
         >
           <span class="flex items-center">
             <svg

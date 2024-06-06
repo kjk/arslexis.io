@@ -1,16 +1,5 @@
 <script>
   import Spinners from "./Spinners.svelte";
-  import MenuBar from "./MenuBar.svelte";
-  import { mainMenuBar } from "./notepad2/menu-notepad2.js";
-
-  function handleMenuCmd(cmd) {
-    // console.log("handleMenuCmd:", cmd.detail);
-    let el = document.activeElement;
-    if (el) {
-      // console.log("active element:", el);
-      /** @type {HTMLElement}*/ (el).blur();
-    }
-  }
 </script>
 
 <div class="mb-4">
@@ -51,10 +40,4 @@
 
   <div>Spinners classic-fadein</div>
   <Spinners kind="classic-fadein" />
-</details>
-
-<details open>
-  <summary>Menu test</summary>
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <MenuBar menuBar={mainMenuBar} on:menucmd={handleMenuCmd} />
 </details>

@@ -1072,12 +1072,7 @@
     const cmdId = await dialog;
     console.log("cmdViewScheme:", cmdId);
     if (cmdId) {
-      const arg = {
-        detail: {
-          cmd: cmdId,
-        },
-      };
-      handleMenuCmd(arg);
+      handleMenuCmd(cmdId, null);
     }
   }
 
@@ -1101,9 +1096,7 @@
   // this can be invoked via keyboard shortcut of via menu
   // if via keyboard, arg.detail.ev is set
   // TODO: if via menu, we need to be smart about closeMen() vs. closeMenuAndFocusEditor()
-  async function handleMenuCmd(arg) {
-    const cmdId = arg.detail.cmd;
-    const ev = arg.detail.ev;
+  async function handleMenuCmd(cmdId, ev) {
     let s = "";
     let stopPropagation = true;
     const fromMenu = !ev;
@@ -1904,11 +1897,12 @@
         </svg></a
       >
       <MenuBar
+        hidden={false}
         filterFn={filterMenuItem}
         menuDidOpenFn={handleMenuDidOpen}
         menuBar={m.mainMenuBar}
         noMenuCommands={m.noMenuCommands}
-        on:menucmd={handleMenuCmd}
+        onmenucmd={handleMenuCmd}
       />
       <div
         class="truncate border-l border-gray-500 font-semibold text-gray-900 pl-2"
@@ -1947,7 +1941,7 @@
         menuDidOpenFn={handleMenuDidOpen}
         menuBar={m.mainMenuBar}
         noMenuCommands={m.noMenuCommands}
-        on:menucmd={handleMenuCmd}
+        onmenucmd={handleMenuCmd}
       />
       <div class="absolute flex top-[2px] right-[4px] text-sm">
         <div class="py-0.5 truncate font-semibold text-gray-900 border-l">
