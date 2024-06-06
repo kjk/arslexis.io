@@ -26,32 +26,39 @@
   import { fmtNum, fmtSize, len } from "../util";
   import { tick } from "svelte";
 
-  /** @type {FileSys}*/
-  export let fs;
-  /** @type {FsEntry} */
-  export let dirRoot;
-  export let isRoot = false;
-  export let indent;
-  /** @type {Function} */
-  export let recalc;
-  /** @type {Function} */
-  export let onSelected;
-  /** @type {Function} */
-  export let onGoUp;
-  export let initialSelectionIdx = 0;
+  /** @type { {
+   fs: FileSys,
+   dirRoot: FsEntry,
+   isRoot: boolean,
+   indent: number,
+   recalc: Function,
+   onSelected: Function,
+   onGoUp: Function,
+   initialSelectionIdx: number,
+  }}*/
+  let {
+    fs,
+    dirRoot,
+    isRoot = false,
+    indent,
+    recalc,
+    onSelected,
+    onGoUp,
+    initialSelectionIdx = 0,
+  } = $props();
 
-  let selectedIdx = 0;
+  let selectedIdx = $state(0);
   /** @type {HTMLElement} */
   let tbodyEl;
   /** @type {HTMLElement} */
-  let noFilesEl;
+  let noFilesEl = $state(null);
 
   /** @type {FsEntry[]} */
-  let entries = [];
-  $: calcEntries(dirRoot);
+  let entries = $derived(calcEntries(dirRoot));
 
   /**
    * @param {FsEntry} dirRoot
+   * @return {FsEntry[]}
    */
   function calcEntries(dirRoot) {
     // console.log("calcEntries");
@@ -60,14 +67,14 @@
     // we use and sort a copy
     let c = fs.entryChildren(dirRoot);
     /** @type {FsEntry[]} */
-    entries = [].concat(c);
-    sortEntries(fs, entries);
+    let res = [].concat(c);
+    sortEntries(fs, res);
     if (!isRoot) {
       // TODO: restore ".."
       // let e = new FsEntryUpDir();
       // entries.unshift(e);
     }
-    if (len(entries) > 0) {
+    if (len(res) > 0) {
       tick().then(() => {
         setSelected(initialSelectionIdx);
       });
@@ -76,6 +83,7 @@
         noFilesEl.focus();
       });
     }
+    return res;
   }
 
   /**
@@ -84,7 +92,7 @@
   function toggleExpand(e) {
     let expanded = isExpanded(fs, e);
     setExpanded(fs, e, !expanded);
-    entries = entries;
+    // entries = entries;
   }
 
   /**
@@ -210,12 +218,12 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <table
   class="font-mono text-sm mt-[2px] w-full"
-  on:click={handleClicked}
-  on:dblclick={handleDoubleClicked}
-  on:keydown={handleKeyDown}
+  onclick={handleClicked}
+  ondblclick={handleDoubleClicked}
+  onkeydown={handleKeyDown}
 >
   <tbody bind:this={tbodyEl}>
     {#if len(entries) == 0}
