@@ -5,7 +5,7 @@
   }
 </script>
 
-<div class="flex items-center justify-between mx-4 mt-2 fixed top-0 right-0">
+<div class="flex items-center justify-between mx-4 mt-2 fixed top-full right-0">
   <div class="flex">
     <a
       class="px-1 py-1 mr-1 hover:underline text-xs"
