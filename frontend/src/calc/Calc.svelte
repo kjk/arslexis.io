@@ -113,7 +113,7 @@ speed in mps
       bind:this={textarea}
       class="grow px-4 py-1 border-none text-sm focus-visible:outline-none"
       placeholder="expression"
-    />
+    ></textarea>
     <div
       class="min-w-[20%] bg-slate-50 px-4 py-1 text-sm flex flex-col items-start"
     >

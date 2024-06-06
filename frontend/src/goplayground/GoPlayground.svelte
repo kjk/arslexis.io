@@ -342,7 +342,7 @@ func main() {
     >
   </TopNav>
   <div class="text-sm overflow-auto">
-    <div class="codemirror-wrapper flex-grow" bind:this={editorElement} />
+    <div class="codemirror-wrapper flex-grow" bind:this={editorElement}></div>
   </div>
 </div>
 
@@ -366,7 +366,7 @@ func main() {
   >
     <div class="flex bg-gray-50 border-b mb-1 pb-1 pt-1">
       <div class="font-bold">Output</div>
-      <div class="grow" />
+      <div class="grow"></div>
       <button
         on:click={clearOutput}
         class="hover:bg-gray-400 text-xs hover:text-white text-gray-600 mr-1"

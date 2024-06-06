@@ -329,8 +329,8 @@
     <tr class="hover:bg-gray-200 even:bg-gray-50">
       <td class="ind-{indent + 1}">{name} </td>
       <td class="pl-2 text-right whitespace-nowrap">{fmtSize(size)} </td>
-      <td class="pl-2 text-right" />
-      <td class="pl-2 text-right" />
+      <td class="pl-2 text-right"></td>
+      <td class="pl-2 text-right"></td>
       <td class="pl-2 text-right">{fmtNum(getLineCount(fs, e))}</td>
       <td class="text-center bg-white"
         ><button

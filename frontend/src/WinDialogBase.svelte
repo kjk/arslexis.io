@@ -78,7 +78,7 @@
     <div
       tabindex="0"
       role="dialog"
-      class="absolute w-fit min-w-[360px] shadow-xl shadow-md bg-white flex flex-col text-black text-sm"
+      class="absolute w-fit min-w-[360px] shadow-md bg-white flex flex-col text-black text-sm"
       bind:this={modal}
       use:draggable={{ handle: dragHandle }}
       use:positionModal
@@ -104,7 +104,7 @@
 
       <!-- buttons -->
       {#if noButtons}
-        <div />
+        <div></div>
       {:else}
         <div class="bg-gray-100 px-2 py-2">
           <slot name="bottom" />

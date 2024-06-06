@@ -163,7 +163,7 @@
       private
     </div>
     <CreateGists />
-    <div class="min-w31" />
+    <div class="min-w31"></div>
   </div>
 
   {#if true && totalGistsCount > 0}
@@ -195,7 +195,7 @@
         {/each}
       {/if}
     {/if}
-    <div class="mt-4 mb-8 border-b text-gray-500" />
+    <div class="mt-4 mb-8 border-b text-gray-500"></div>
   </div>
 </div>
 

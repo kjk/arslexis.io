@@ -40,7 +40,7 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
     role="dialog"
-    class="absolute w-fit min-w-[360px] shadow-xl shadow-md bg-white flex flex-col text-black text-xs"
+    class="absolute w-fit min-w-[360px] shadow-md bg-white flex flex-col text-black text-xs"
     use:draggable={{ handle: dragHandle }}
     use:positionModal
   >
@@ -141,7 +141,7 @@
             >Select All</button
           >
         </div>
-        <div class="grow min-h-[1rem]" />
+        <div class="grow min-h-[1rem]"></div>
         <button class="underline self-start">Save Position</button>
         <button class="underline self-start">Reset Position</button>
       </div>

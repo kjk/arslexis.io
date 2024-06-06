@@ -14,7 +14,7 @@
     <div class="mr-2">/</div>
     <slot />
   </div>
-  <div class="grow" />
+  <div class="grow"></div>
   <a
     class="px-1 py-1 mr-1 hover:underline text-xs"
     href="https://github.com/kjk/tools.arslexis.io/discussions"

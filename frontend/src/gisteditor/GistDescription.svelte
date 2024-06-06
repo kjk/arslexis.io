@@ -73,7 +73,7 @@
       {gistType}
     </div>
   {/if}
-  <div class="flex-grow" />
+  <div class="flex-grow"></div>
 {:else}
   <!-- svelte-ignore a11y-autofocus -->
   <input

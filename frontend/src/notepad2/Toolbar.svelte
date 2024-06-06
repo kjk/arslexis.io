@@ -189,7 +189,7 @@
   <div class="flex pl-1">
     {#each toolbarButtonsOrder as idx}
       {#if idx === 0}
-        <div class="w-[4px]" />
+        <div class="w-[4px]"></div>
       {:else}
         {@const info = tbIconsInfo[idx - 1]}
         {@const cmdId = info[0]}
@@ -212,5 +212,5 @@
     {/each}
   </div>
 {:else}
-  <div class="w-0 h-0" />
+  <div class="w-0 h-0"></div>
 {/if}

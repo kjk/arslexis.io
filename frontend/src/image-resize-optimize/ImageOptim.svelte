@@ -182,5 +182,5 @@
       </table>
     {/if}
   {/if}
-  <div class="mt-4" />
+  <div class="mt-4"></div>
 </div>

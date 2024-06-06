@@ -1915,7 +1915,7 @@
       >
         {shownFileName}
       </div>
-      <div class="grow" />
+      <div class="grow"></div>
       <a
         class="px-1 py-1 mr-1 hover:underline text-xs"
         href="https://github.com/kjk/tools.arslexis.io/discussions"
@@ -1972,7 +1972,7 @@
     <div
       class="codemirror-wrapper overflow-auto flex-grow bg-transparent"
       bind:this={editorElement}
-    />
+    ></div>
   </div>
 
   {#if settings.showStatusBar}
@@ -1980,14 +1980,14 @@
       <div>Ln {statusLn1} / {statusLn2}</div>
       <div>Col {statusCol1} / {statusCol2}</div>
       <div>Sel {statusSel} Sel Ln {statusSelLn}</div>
-      <div class="grow" />
+      <div class="grow"></div>
       <div>{statusLang}</div>
       <div>{statusEncoding}</div>
       <div>{lineSeparatorStatus}</div>
       <div>{notepad2Size(statusSize)}</div>
     </div>
   {:else}
-    <div />
+    <div></div>
   {/if}
 </main>
 

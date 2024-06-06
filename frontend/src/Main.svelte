@@ -243,7 +243,7 @@
       target="_blank">contact me</a
     >
   </div>
-  <div class="grow" />
+  <div class="grow"></div>
   <hr class="mt-4" />
   <div class="text-center my-2">
     Made by&nbsp;<a

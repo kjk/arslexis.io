@@ -472,7 +472,7 @@
       on:click={btnRemoveClicked}>{removeTitle}</button
     >
 
-    <div class="grow" />
+    <div class="grow"></div>
 
     <!-- <button
       disabled={btnOpenDisabled}

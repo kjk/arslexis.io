@@ -182,14 +182,14 @@
             on:focus={handleFocus}>{fixMenuName(title)}</button
           >
           <div
-            class="child invisible absolute top-0 top-full transform opacity-0 transition-all duration-100"
+            class="child invisible absolute top-0 transform opacity-0 transition-all duration-100"
           >
             <Menu {filterFn} on:menucmd {menu} />
           </div>
         </div>
       {/each}
     </div>
-    <div class="grow" />
+    <div class="grow"></div>
     <!-- <div class="mr-4">on the right</div> -->
   </div>
 {/if}

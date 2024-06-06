@@ -260,9 +260,9 @@
               <th class="sticky top-0 bg-white px-1">files</th>
               <th class="sticky top-0 bg-white px-1">lines</th>
               <!-- delete -->
-              <th class="sticky top-0 px-1 bg-white" />
+              <th class="sticky top-0 px-1 bg-white"></th>
               <!-- exclude / include -->
-              <th class="sticky top-0 px-1 bg-white" />
+              <th class="sticky top-0 px-1 bg-white"></th>
             </tr>
           </thead>
           <tbody>
@@ -275,9 +275,9 @@
               <td class="pl-2 text-right">{fmtNum(metaFiles)}</td>
               <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
               <!-- delete -->
-              <td class="bg-white" />
+              <td class="bg-white"></td>
               <!-- exclude / include -->
-              <td class="bg-white" />
+              <td class="bg-white"></td>
             </tr>
 
             <Folder {fs} {recalc} {dirRoot} indent={0} />
@@ -287,7 +287,7 @@
     </div>
   {/if}
 {/key}
-<div class="mt-4" />
+<div class="mt-4"></div>
 
 <Progress2 msgHTML={progressHTML} />
 

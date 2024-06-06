@@ -12,19 +12,18 @@
 </script>
 
 {#if kind == "rotate"}
-  <div class="ball-clip-rotate" {style} />
+  <div class="ball-clip-rotate" {style}></div>
 {:else if kind == "3dot"}
   <div>
     <span class="inline-flex items-center gap-px">
-      <span
-        class="animate-blink mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      <span class="animate-blink mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
+      ></span>
       <span
         class="animate-blink animation-delay-200 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
       <span
         class="animate-blink animation-delay-[400ms] mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
     </span>
   </div>
 {:else if kind == "spin"}
@@ -70,13 +69,14 @@
       disabled
     >
       <span class="inline-flex items-center gap-px">
-        <span class="animate-blink mx-px h-1.5 w-1.5 rounded-full bg-white" />
+        <span class="animate-blink mx-px h-1.5 w-1.5 rounded-full bg-white"
+        ></span>
         <span
           class="animate-blink animation-delay-150 mx-px h-1.5 w-1.5 rounded-full bg-white"
-        />
+        ></span>
         <span
           class="animate-blink animation-delay-300 mx-px h-1.5 w-1.5 rounded-full bg-white"
-        />
+        ></span>
       </span>
     </button>
   </div>
@@ -131,7 +131,7 @@
   <div>
     <span
       class="relative inset-0 inline-flex h-6 w-6 animate-spin items-center justify-center rounded-full border-2 border-gray-300 after:absolute after:h-8 after:w-8 after:rounded-full after:border-2 after:border-y-indigo-500 after:border-x-transparent"
-    />
+    ></span>
   </div>
 {:else if kind == "scale/pulse"}
   <!-- scale / pulse -->
@@ -139,55 +139,56 @@
     <span class="relative isolate inline-flex items-center justify-center">
       <span
         class="animate-scale absolute z-0 h-8 w-8 rounded-full bg-indigo-400/60"
-      />
+      ></span>
       <span
         class="animate-scale animation-delay-1000 absolute z-10 h-8 w-8 rounded-full bg-indigo-400/60"
-      />
+      ></span>
     </span>
   </div>
 {:else if kind == "grid-fade"}
   <!-- grid fade -->
   <div class="flex">
     <span class="grid grid-cols-3 grid-rows-3 gap-px">
-      <span class="animate-fade mx-px h-1.5 w-1.5 rounded-full bg-indigo-600" />
+      <span class="animate-fade mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
+      ></span>
       <span
         class="animate-fade animation-delay-300 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
       <span
         class="animate-fade animation-delay-700 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
 
       <span
         class="animate-fade animation-delay-100 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
       <span
         class="animate-fade animation-delay-500 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
       <span
         class="animate-fade animation-delay-300 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
       <span
         class="animate-fade animation-delay-700 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
       <span
         class="animate-fade animation-delay-500 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
       <span
         class="animate-fade animation-delay-200 mx-px h-1.5 w-1.5 rounded-full bg-indigo-600"
-      />
+      ></span>
     </span>
   </div>
 {:else if kind == "perspective"}
   <!-- perspective -->
   <div>
-    <span class="animate-perspective inline-flex h-6 w-6 bg-indigo-500" />
+    <span class="animate-perspective inline-flex h-6 w-6 bg-indigo-500"></span>
   </div>
 {:else if kind == "classic-spin"}
   <!--classic spin -->
   <div>
     <span
       class="inline-flex h-6 w-6 animate-spin rounded-full border-4 border-dotted border-indigo-600"
-    />
+    ></span>
   </div>
 {:else if kind == "classic-fadein"}
   <!-- Classic fadeIn -->
@@ -195,23 +196,23 @@
     <div
       class="[&>span]:before:animate-fadeIn relative h-6 w-6 [&>span]:absolute [&>span]:inset-0 [&>span]:inline-flex [&>span]:h-full [&>span]:w-full [&>span]:before:h-1 [&>span]:before:w-1 [&>span]:before:rounded-full [&>span]:before:bg-indigo-600"
     >
-      <span class="" />
-      <span class="before:!animation-delay-[-1.1s] rotate-[30deg]" />
-      <span class="before:!animation-delay-[-1s] rotate-[60deg]" />
-      <span class="before:!animation-delay-[-0.9s] rotate-[90deg]" />
-      <span class="before:!animation-delay-[-0.8s] rotate-[120deg]" />
-      <span class="before:!animation-delay-[-0.7s] rotate-[150deg]" />
-      <span class="before:!animation-delay-[-0.6s] rotate-[180deg]" />
-      <span class="before:!animation-delay-[-0.5s] rotate-[210deg]" />
-      <span class="before:!animation-delay-[-0.4s] rotate-[240deg]" />
-      <span class="before:!animation-delay-[-0.3s] rotate-[270deg]" />
-      <span class="before:!animation-delay-[-0.2s] rotate-[300deg]" />
-      <span class="before:!animation-delay-[-0.1s] rotate-[330deg]" />
+      <span class=""></span>
+      <span class="before:!animation-delay-[-1.1s] rotate-[30deg]"></span>
+      <span class="before:!animation-delay-[-1s] rotate-[60deg]"></span>
+      <span class="before:!animation-delay-[-0.9s] rotate-[90deg]"></span>
+      <span class="before:!animation-delay-[-0.8s] rotate-[120deg]"></span>
+      <span class="before:!animation-delay-[-0.7s] rotate-[150deg]"></span>
+      <span class="before:!animation-delay-[-0.6s] rotate-[180deg]"></span>
+      <span class="before:!animation-delay-[-0.5s] rotate-[210deg]"></span>
+      <span class="before:!animation-delay-[-0.4s] rotate-[240deg]"></span>
+      <span class="before:!animation-delay-[-0.3s] rotate-[270deg]"></span>
+      <span class="before:!animation-delay-[-0.2s] rotate-[300deg]"></span>
+      <span class="before:!animation-delay-[-0.1s] rotate-[330deg]"></span>
     </div>
   </div>
 {:else}
   <!-- this is the default if kind is incorrect -->
-  <div class="ball-clip-rotate" {style} />
+  <div class="ball-clip-rotate" {style}></div>
 {/if}
 
 <style>

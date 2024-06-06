@@ -259,10 +259,10 @@
   function createEditorView() {
     throwIf(!editorElement);
 
-    function handleEditorChange(tr) {
+    async function handleEditorChange(tr) {
       if (isMarkdown) {
         const s = tr.state.doc.toString();
-        secondPaneHTML = marked.parse(s);
+        secondPaneHTML = await marked.parse(s);
       }
 
       selectedFile.state = tr.state;
@@ -390,7 +390,7 @@
         doublePane = true;
         isMarkdown = true;
         const s = file.state.doc.toString();
-        secondPaneHTML = marked.parse(s);
+        secondPaneHTML = await marked.parse(s);
         break;
       default:
         doublePane = false;
@@ -977,7 +977,7 @@
       class:halfwidth={doublePane}
       class="codemirror-wrapper text-sm overflow-auto flex-grow bg-transparent"
       bind:this={editorElement}
-    />
+    ></div>
 
     {#if doublePane}
       <div class="second-pane md-preview w-1/2 bg-gray-50 h-full">

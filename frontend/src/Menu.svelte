@@ -145,7 +145,7 @@
     {@const shouldFilter = filterFn && filterFn(mi)}
     {#if !shouldFilter}
       {#if isDiv}
-        <div class="border-y border-gray-200 mt-1 mb-1" />
+        <div class="border-y border-gray-200 mt-1 mb-1"></div>
       {:else if isSubmenu}
         <!-- svelte-ignore a11y-mouse-events-have-key-events -->
         <div
@@ -159,7 +159,7 @@
             class="flex w-full items-center justify-between pl-3 pr-2 py-0.5"
           >
             <span class="flex">
-              <span class="w-4 h-4" />
+              <span class="w-4 h-4"></span>
               <span class="ml-2">{text}</span>
             </span>
             <svg
