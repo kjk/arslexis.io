@@ -15,26 +15,27 @@
   /** @typedef {import("../fs").ReadFilesCbArgs} ReadFilesCbArgs */
 
   /** @type {FileSysDir} */
-  let fs = null;
+  let fs = $state(null);
 
   /** @type {any[][]} */
-  let dirPath = [];
+  let dirPath = $state([]);
 
   /** @type {FsEntry} */
-  let dirRoot = -1;
-  $: calcDirRoot(dirPath);
-  let initialSelectionIdx = 0;
+  let dirRoot = $derived(calcDirRoot(dirPath));
+  let initialSelectionIdx = $state(0);
 
   function calcDirRoot(dirPath) {
+    if (len(dirPath) == 0) {
+      return -1;
+    }
     // console.log("calcDirRoot:", dirPath);
     let n = len(dirPath);
     if (n > 0) {
       let entrySel = dirPath[n - 1];
-      dirRoot = entrySel[0];
-      return;
+      return entrySel[0];
     }
-    dirRoot = null;
     initialSelectionIdx = 0;
+    return -1;
   }
 
   let progressHTML = "";
@@ -103,9 +104,7 @@
       calcDirSizes(fsTemp);
       // TODO: handle no files
       let root = fsTemp.rootEntry();
-      dirRoot = root;
-      let selectedIdx = 0;
-      dirPath = [[root, selectedIdx]];
+      dirPath = [[root, 0]];
       progressHTML = "";
       fs = fsTemp;
       fsStack = [];
@@ -143,7 +142,7 @@
   async function recalc() {
     calcDirSizes(fs);
     // console.log("finished calcDIrSizes");
-    dirRoot = dirRoot;
+    fs = fs;
   }
 
   /**
@@ -202,7 +201,7 @@
     {#if fs}
       <button
         class="border ml-2 text-sm border-gray-500 px-2 py-0.5 hover:bg-gray-100"
-        on:click={openFolder}>Open another folder</button
+        onclick={openFolder}>Open another folder</button
       >
       {#if len($recent) > 0}
         <div class="flex ml-4 text-sm">
@@ -210,7 +209,7 @@
           {#each $recent as e}
             <button
               class="ml-2 underline"
-              on:click={() => openRecentDir(e.dirHandle)}>{e.name}</button
+              onclick={() => openRecentDir(e.dirHandle)}>{e.name}</button
             >{/each}
         </div>
       {/if}
@@ -231,13 +230,13 @@
                 <td class="px-1"
                   ><button
                     class="underline hover:cursor-pointer"
-                    on:click={() => openRecentDir(e.dirHandle)}>open</button
+                    onclick={() => openRecentDir(e.dirHandle)}>open</button
                   ></td
                 >
                 <td class="px-1">
                   <button
                     class="underline hover:cursor-pointer"
-                    on:click={() => removeFromRecent(idx)}>remove</button
+                    onclick={() => removeFromRecent(idx)}>remove</button
                   >
                 </td>
               </tr>
@@ -249,7 +248,7 @@
     <div class="flex items-baseline mx-4 mt-2 mb-2">
       <button
         class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
-        on:click={openFolder}>Open folder</button
+        onclick={openFolder}>Open folder</button
       >
       <div class="ml-2">from your computer to browse it.</div>
     </div>
@@ -261,11 +260,11 @@
       <button
         disabled={!isUpEnabled}
         class="hover:bg-gray-200 disabled:hover:bg-white disabled:text-gray-300 px-[4px] mr-0.5"
-        on:click={handleGoUp}>▲</button
+        onclick={handleGoUp}>▲</button
       >
       {#each dirPath as e, idx}
         {@const isLast = len(dirPath) === idx + 1}
-        <button on:click={() => goToDir(e[0])} class="ml-1 underline"
+        <button onclick={() => goToDir(e[0])} class="ml-1 underline"
           >{fs.entryName(e[0])}</button
         >
         {#if !isLast}
@@ -273,7 +272,7 @@
         {/if}
       {/each}
     </div>
-    {#key dirRoot}
+    {#key fs}
       <div class="overflow-y-scroll h-min-0 h-full ml-2">
         <Folder
           {initialSelectionIdx}
