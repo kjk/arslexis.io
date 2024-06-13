@@ -168,7 +168,7 @@
   } from "./np2store";
   import Messages, { showError } from "../Messages.svelte";
   import DialogSelectScheme from "./DialogSelectScheme.svelte";
-  import { logEventRaw, logNpEvent } from "../events";
+  import { logNpEvent } from "../events";
 
   let toolbarFuncs;
 

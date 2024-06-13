@@ -1,8 +1,8 @@
-import { showMessage, clearMessage, showError } from "./Messages.svelte";
+import { clearMessage, showError, showMessage } from "./Messages.svelte";
 
 import { getGitHubToken } from "./github_login";
+import { logGistEvent } from "./events.js";
 import { startTimer } from "./util.js";
-import { logEvent } from "./events.js";
 
 export function addHeader(opts, key, val) {
   opts.headers = opts.headers || {};
@@ -187,7 +187,7 @@ export async function getGistsForUser(userID) {
   const ev = {
     user: userID,
   };
-  logEvent("getGistsForUser", elapsedFn(), ev)
+  logGistEvent("getGistsForUser", elapsedFn(), ev)
   console.log(`getGistsForUser: '${userID} ${len(gists)} in ${elapsedFn()} ms`);
   return checkForError(gists);
 }
@@ -213,7 +213,7 @@ export async function updateGist(gistId, data) {
   const meta = {
     gistId: gistId,
   };
-  logEvent("updateGist", elapsedFn(), meta);
+  logGistEvent("updateGist", elapsedFn(), meta);
   return checkForError(gist);
 }
 
@@ -226,7 +226,7 @@ export async function createGist(gist) {
   console.log("createGist:", gist);
   showMessage(`creating a new gist`, 10000);
   const res = await apiPost(`/gists`, gist);
-  logEvent("createGist", elapsedFn());
+  logGistEvent("createGist", elapsedFn());
   return checkForError(res);
 }
 
@@ -244,6 +244,6 @@ export async function deleteGist(gistId) {
   const meta = {
     gistId: gistId,
   };
-  logEvent("deleteGist", elapsedFn(), meta);
+  logGistEvent("deleteGist", elapsedFn(), meta);
   return ok;
 }

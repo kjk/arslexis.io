@@ -1,5 +1,3 @@
-import { httpPostJSON } from "./httputil";
-
 export let disableEvents = false;
 
 /**
@@ -28,21 +26,26 @@ export function logEventRaw(o) {
     });
 }
 
-export function logEvent(name, durMs = 0, meta = {}) {
+export function logGistEvent(name, durMs = 0, o = {}) {
   if (durMs > 0) {
-    meta.dur = durMs.toFixed(0);
+    o.dur = durMs.toFixed(0);
   }
-  meta["name"] = name;
-  logEventRaw(meta);
+  logEventRaw({
+    app: "gist",
+    name: name,
+    ...o,
+  });
 }
 
-export function logNpEvent(name, durMs = 0, meta = {}) {
+export function logNpEvent(name, durMs = 0, o = {}) {
   if (durMs > 0) {
-    meta.dur = durMs.toFixed(0);
+    o.dur = durMs.toFixed(0);
   }
-  meta["app"] = "notepad2";
-  meta["name"] = name;
-  logEventRaw(meta);
+  logEventRaw({
+    app: "notepad2",
+    name: name,
+    ...o,
+  });
 }
 
 export function logWcEvent(name, o = {}) {

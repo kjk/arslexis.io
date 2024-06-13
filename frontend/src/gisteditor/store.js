@@ -11,7 +11,7 @@ import { len, startTimer } from "../util.js";
 // @ts-ignore
 import Dexie from "https://esm.sh/dexie@3.2.3";
 import { getLoggedUser } from "../github_login.js";
-import { logEvent } from "../events.js";
+import { logGistEvent } from "../events.js";
 import { writable } from "svelte/store";
 
 // localStorage key for gists
@@ -239,7 +239,7 @@ export async function getGistsForLoggedUser() {
     fromCache: v.fromCache,
     user: getLoggedUser(),
   };
-  logEvent("getGistsForLoggedUser", elapsedFn(), meta);
+  logGistEvent("getGistsForLoggedUser", elapsedFn(), meta);
   console.log(`getGistsForLoggedUser: ${len(gists)} in ${elapsedFn()} ms`);
   return v;
 }
@@ -445,7 +445,7 @@ export async function downloadGist(gistId) {
   const meta = {
     gistId: gistId,
   };
-  logEvent("downloadGist", elapsedFn(), meta);
+  logGistEvent("downloadGist", elapsedFn(), meta);
   return checkForError(gist);
 }
 

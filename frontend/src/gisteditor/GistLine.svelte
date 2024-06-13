@@ -3,7 +3,7 @@
   import { positionnode } from "../actions/positionnode.js";
   import * as githubapi from "../githubapi.js";
   import { deleteLocalGist, refreshGistsForLoggedUser } from "./store.js";
-  import { logEvent } from "../events.js";
+  import { logGistEvent } from "../events.js";
   import { removeDescriptionAd } from "../util.js";
 
   export let gist = {
@@ -35,7 +35,7 @@
   async function deleteLocal() {
     // not logged directly in deleteLocalGist because
     // deleteLocalGist is also called when saving local to github
-    logEvent("deleteLocalGist");
+    logGistEvent("deleteLocalGist");
     await deleteLocalGist(gist.id);
     // window.goToURL("/home", "Home");
   }

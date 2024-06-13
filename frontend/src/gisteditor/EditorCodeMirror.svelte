@@ -52,7 +52,7 @@
     refreshGistsForLoggedUser,
   } from "./store.js";
   import { ghtoken, getLoggedUser } from "../github_login.js";
-  import { logEvent } from "../events.js";
+  import { logGistEvent } from "../events.js";
   import { goToGistById, goGistEditorHome } from "./router.js";
   import Messages from "../Messages.svelte";
 
@@ -722,7 +722,7 @@
   async function deleteLocal() {
     // not logged directly in deleteLocalGist because
     // deleteLocalGist is also called when saving local to github
-    logEvent("deleteLocalGist");
+    logGistEvent("deleteLocalGist");
     await deleteLocalGist(gist.id);
     location.href = "./";
   }
