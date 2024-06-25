@@ -1,6 +1,7 @@
+<svelte:options runes={true} />
+
 <script>
-  export let gistid = "";
-  export let isLocal = false;
+  let { gistid = "", isLocal = false } = $props();
 
   let gistURL = "https://gist.github.com/" + gistid;
 </script>
