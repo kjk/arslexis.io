@@ -1,8 +1,10 @@
+<svelte:options runes={true} />
+
 <script>
   import Overlay from "../Overlay.svelte";
   import { tooltip } from "../actions/tooltip.js";
 
-  let showingMenu = false;
+  let showingMenu = $state(false);
 
   function showMenu() {
     showingMenu = !showingMenu;
