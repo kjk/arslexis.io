@@ -133,6 +133,7 @@
       searchTerm = "";
     }
   }
+
   setOnGitHubLogin(doOnGitHubLogin);
 </script>
 

@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import Overlay from "../Overlay.svelte";
   import { positionnode } from "../actions/positionnode.js";
@@ -6,7 +8,7 @@
   import { logGistEvent } from "../events.js";
   import { removeDescriptionAd } from "../util.js";
 
-  export let gist = {
+  let defGist = {
     files: {},
     id: "",
     description: "",
@@ -14,11 +16,13 @@
     isLocalGist: false,
   };
 
+  let { gist = defGist } = $props();
+
   let files = Object.keys(gist.files);
   let filesString = files.join(", ");
-  let gistType = "";
-  let showingMenu = false;
-  let menuElement;
+  let gistType = $state("");
+  let showingMenu = $state(false);
+  let menuElement = $state(undefined);
   let isDeletable = true;
 
   if (!gist.public) {
@@ -28,7 +32,9 @@
     gistType = "local";
   }
 
-  function showMenu() {
+  function showMenu(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
     showingMenu = true;
   }
 
@@ -40,7 +46,9 @@
     // window.goToURL("/home", "Home");
   }
 
-  async function deleteGist() {
+  async function deleteGist(ev) {
+    ev.preventDefaults();
+    ev.stopPropagation();
     if (gist.isLocalGist) {
       deleteLocal();
       return;
@@ -55,6 +63,8 @@
   }
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div data-gist-id={gist.id}>
   <div class="flex text-black truncate ml-2 mr-2 flex-grow">
     {removeDescriptionAd(gist.description || "<untitled>")}
@@ -67,12 +77,10 @@
     {/if}
   </div>
   <div class="truncate whitespace-pre pr-4 text-gray-500">{filesString}</div>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="self-center text-gray-400 hover:bg-gray-200 px-2 py-1"
     bind:this={menuElement}
-    on:click|preventDefault|stopPropagation={showMenu}
+    onclick={showMenu}
   >
     <svg viewBox="0 0 13 3" style="width: 15px; height: 13px;">
       <g>
@@ -96,11 +104,7 @@
       >
         {#if isDeletable}
           <div>
-            <a
-              href="/dummy"
-              style="color: red"
-              on:click|preventDefault|stopPropagation={deleteGist}
-            >
+            <a href="/dummy" style="color: red" onclick={deleteGist}>
               Delete
             </a>
           </div>
