@@ -27,7 +27,7 @@
       </li>
     </ul>
   </div>
-  <div class="flex justify-end mt-2">
+  <!-- <div class="flex justify-end mt-2">
     <a
       class="btn abtn"
       href="https://tools.arslexis.io/docs/gist-editor"
@@ -36,7 +36,7 @@
     >
       Learn more
     </a>
-  </div>
+  </div> -->
 </div>
 
 <style>

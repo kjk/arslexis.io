@@ -23,12 +23,12 @@
     </div>
     <div class="mt-1">Trying to be as close to the original as possible.</div>
     <div class="mt-1">You can:</div>
-    <a
+    <!-- <a
       class="ml-2 underline focus-within:outline"
       rel="noreferrer"
       target="_blank"
       href="https://tools.arslexis.io/docs/notepad2">read documentation</a
-    >
+    > -->
     <a
       class="ml-2 underline focus-within:outline"
       rel="noreferrer"
@@ -63,7 +63,7 @@
         class="underline focus-within:outline"
         target="_blank"
         rel="noreferrer"
-        href="https://codemirror.net/">Svelte</a
+        href="https://svelte.dev/">Svelte</a
       > framework
     </div>
     <div class="ml-2">

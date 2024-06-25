@@ -24,27 +24,20 @@
     <span class="text-purple-800">Gist</span>
     <span class="text-yellow-800 ml-2">Editor</span>
   </div>
-  <div class="ml-8">
-    <a
-      class="px-3 py-1 hover:bg-gray-100"
-      href="https://tools.arslexis.io/docs/gist-editor"
-      on:click|preventDefault={() => (showingAbout = !showingAbout)}
-      target="_blank"
-      rel="noreferrer"
-    >
-      About
-    </a>
-  </div>
-  <div>
-    <a
-      class="px-3 py-1 hover:bg-gray-100"
-      href="https://tools.arslexis.io/docs/gist-editor"
-      target="_blank"
-      rel="noreferrer"
-    >
-      Documentation
-    </a>
-  </div>
+  <button
+    class="ml-8 px-3 py-1 hover:bg-gray-100"
+    on:click|preventDefault={() => (showingAbout = !showingAbout)}
+  >
+    About
+  </button>
+  <!-- <a
+    class="px-3 py-1 hover:bg-gray-100"
+    href="https://tools.arslexis.io/docs/gist-editor"
+    target="_blank"
+    rel="noreferrer"
+  >
+    Documentation
+  </a> -->
   <!--
 <div>
   <a

@@ -1,9 +1,12 @@
-import Editor from "./EditorCodeMirror.svelte";
 import "./gisteditor.css";
+
+import { downloadGist, getLocalGist, storeLocalGist } from "./store.js";
 import { getLangExtFromLangName, getSampleContentForLang } from "./langs.js";
-import { storeLocalGist, getLocalGist, downloadGist } from "./store.js";
+
+import Editor from "./EditorCodeMirror.svelte";
 import { goToNoGist } from "./router.js";
 import { len } from "../util.js";
+import { mount } from "svelte";
 
 /**
  * @param {string} id
@@ -81,8 +84,7 @@ function startApp(gist) {
     props: props,
   };
   // TODO: why error? seems to work
-  // @ts-ignore
-  new Editor(args);
+  mount(Editor, args);
 }
 
 async function createNewGist(lang) {

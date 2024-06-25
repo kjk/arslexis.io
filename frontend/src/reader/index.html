@@ -13,15 +13,13 @@
   <div id="app"></div>
 
   <script type="module">
+    import { mount } from "svelte";
     import "../base.css";
-
     import Unzip from "./ComicBookReader.svelte";
-
     const args = {
       target: document.getElementById("app"),
     };
-    const app = new Unzip(args);
-    console.log(app);
+    mount(Unzip, args);
 
   </script>
 </body>

@@ -13,13 +13,14 @@
   <div id="app"></div>
 
   <script type="module">
+    import { mount } from "svelte";
     import ImageOptim from './ImageOptim.svelte'
     import '../base.css'
 
     const args = {
       target: document.getElementById('app'),
     };
-    const app = new ImageOptim(args)
+    mount(ImageOptim, args);
   </script>
 </body>
 

@@ -16,7 +16,7 @@
         <span class="text-yellow-800 ml-2">Editor</span>
       </a>
     </div>
-    <div class="ml-4">
+    <!-- <div class="ml-4">
       <a
         class="abtn"
         href="https://tools.arslexis.io/docs/gist-editor"
@@ -35,7 +35,7 @@
       >
         Documentation
       </a>
-    </div>
+    </div> -->
     <!--
     <div class="ml-4">
       <a class="abtn" href="https://reddit.com/r/CodeEvalApp/" target="_blank">

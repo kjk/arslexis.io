@@ -1220,7 +1220,7 @@ export const IDM_HELP_SOURCE_CODE = "IDM_HELP_SOURCE_CODE";
 export const IDM_HELP_DISCUSS = "IDM_HELP_DISCUSS";
 
 const menuHelp = [
-  ["Project &Home / Docs", IDM_HELP_PROJECT_HOME],
+  // ["Project &Home / Docs", IDM_HELP_PROJECT_HOME],
   // ["Latest &Release", IDM_HELP_LATEST_RELEASE],
   // ["Latest &Build", IDM_HELP_LATEST_BUILD],
   ["Feedback and Discussion", IDM_HELP_DISCUSS],

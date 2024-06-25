@@ -13,16 +13,18 @@
   <div id="app"></div>
 
   <script type="module">
+    import { mount } from "svelte";
     import NoGist from './NoGist.svelte'
     import './gisteditor.css'
     const q = new URLSearchParams(window.location.search);
     const gistid = q.get("id");
-    const app = new NoGist({
+    const args = {
       target: document.getElementById('app'),
       props: {
         gistid: gistid,
       }
-    })
+    };
+    const app = mount(NoGist, args)
   </script>
 </body>
 
