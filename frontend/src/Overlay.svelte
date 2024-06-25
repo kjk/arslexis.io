@@ -5,6 +5,7 @@
 
   export let open = false;
   export let closeOnEsc = true;
+  export let noFocus = false;
 
   let overlay = null;
 
@@ -58,7 +59,7 @@
 {#if open}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-static-element-interactions -->
   <div
-    tabindex="0"
+    tabindex="-1"
     use:focus
     class="fixed inset-0 z-50 flex bg-gray-600 bg-opacity-40 text-black"
     bind:this={overlay}

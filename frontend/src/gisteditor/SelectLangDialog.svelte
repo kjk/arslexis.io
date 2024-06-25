@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import { onMount } from "svelte";
   import Overlay from "../Overlay.svelte";
@@ -6,14 +8,16 @@
   import { scrollintoview } from "../actions/scrollintoview.js";
   import * as keys from "../keys.js";
   import { goToCreateNewGist } from "./router.js";
-  import { focus } from "../actions/focus";
+  import { delayedFocus } from "../actions/focus";
 
-  export let open = false;
+  /** @type {{
+   open: boolean,
+  }}*/
+  let { open = $bindable(false) } = $props();
 
   let allLangs = getLangNames();
-  let shownLangs = allLangs;
-  let searchTerm = "";
-  let selectedIdx = 0;
+  let searchTerm = $state("");
+  let selectedIdx = $state(0);
   let ignoreNextMouseEnter = false;
 
   function getMatchingLangs(s) {
@@ -31,19 +35,15 @@
     return a;
   }
 
-  function updateMatchingLangs(searchTerm) {
-    // current selection is invalidated after changing the list
-    // in that case reset selection to first item
-    // TODO: could be smarter about which item to select (i.e. if
-    // previously selected is in the new list, preserve it)
-    const nPrev = len(shownLangs);
-    shownLangs = getMatchingLangs(searchTerm);
-    if (nPrev !== len(shownLangs)) {
+  let shownLangs = $derived.by(() => {
+    return getMatchingLangs(searchTerm);
+  });
+
+  $effect(() => {
+    if (selectedIdx >= len(shownLangs)) {
       selectedIdx = 0;
     }
-  }
-
-  $: updateMatchingLangs(searchTerm);
+  });
 
   /**
    * @param {KeyboardEvent} ev
@@ -76,6 +76,9 @@
     ignoreNextMouseEnter = true;
   }
 
+  /**
+   * @param {number} idx
+   */
   function mouseEnter(idx) {
     if (ignoreNextMouseEnter) {
       ignoreNextMouseEnter = false;
@@ -84,13 +87,16 @@
     selectedIdx = idx;
   }
 
-  onMount(() => {
+  $effect(() => {
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   });
 
+  /**
+   * @param {string} lang
+   */
   function selectLang(lang) {
     goToCreateNewGist(lang);
   }
@@ -99,34 +105,32 @@
 {#if open}
   <Overlay bind:open>
     <div class="dialog fixed flex flex-col bg-white border shadow-md">
-      <!-- svelte-ignore a11y-autofocus -->
-
       <input
         class="outline-none border mx-3 mb-2 mt-3 px-2 py-1 text-sm"
         bind:value={searchTerm}
-        use:focus
+        use:delayedFocus
         autocomplete="off"
       />
 
       <div class="overflow-y-auto my-2">
         {#each shownLangs as lang, idx}
           {#if idx === selectedIdx}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div
               class="cursor-pointer px-3 py-1 bg-gray-100"
               use:scrollintoview
-              on:click={() => selectLang(lang)}
+              onclick={() => selectLang(lang)}
             >
               {lang}
             </div>
           {:else}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div
               class="cursor-pointer px-3 py-1"
-              on:click={() => selectLang(lang)}
-              on:mouseenter={() => mouseEnter(idx)}
+              onclick={() => selectLang(lang)}
+              onmouseenter={() => mouseEnter(idx)}
             >
               {lang}
             </div>

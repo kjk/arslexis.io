@@ -11,7 +11,10 @@ export function goToGistById(id) {
   location.href = uri;
 }
 
-// will trigger edit.html / edit.js
+/**
+ * will trigger edit.html / edit.js
+ * @param {string} lang
+ */
 export function goToCreateNewGist(lang) {
   const uri = "./edit?new=" + encodeURIComponent(lang);
   location.href = uri;
