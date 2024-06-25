@@ -245,7 +245,7 @@ How deploying to hetzner works:
 - run on hetzner
 */
 func deployToHetzner() {
-	deleteOldBuilds()
+	clean()
 	exeName := buildForProd(true)
 	panicIf(!u.FileExists(exeName), "file '%s' doesn't exist", exeName)
 	emptyFrontEndBuildDir()
