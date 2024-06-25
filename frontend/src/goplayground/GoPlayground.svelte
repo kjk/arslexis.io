@@ -328,17 +328,17 @@ func main() {
       </div>
     </div>
     <button
-      on:click={run}
+      onclick={run}
       class="shadow-md text-sm text-gray-700 ml-4 px-2 border hover:bg-gray-200"
       >Run <cmd>{runShortcut}</cmd></button
     >
     <button
-      on:click={format}
+      onclick={format}
       class="shadow-md text-sm text-gray-700 ml-4 px-2 border hover:bg-gray-200"
       >Format <cmd>{formatShortcut}</cmd></button
     >
     <button
-      on:click={share}
+      onclick={share}
       class="shadow-md text-sm text-gray-700 ml-4 px-2 border hover:bg-gray-200"
       >Share</button
     >
@@ -370,7 +370,7 @@ func main() {
       <div class="font-bold">Output</div>
       <div class="grow"></div>
       <button
-        on:click={clearOutput}
+        onclick={clearOutput}
         class="hover:bg-gray-400 text-xs hover:text-white text-gray-600 mr-1"
         >close</button
       >
