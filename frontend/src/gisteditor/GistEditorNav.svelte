@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import SvgHome from "../svg/SvgHome.svelte";
   import Login from "./Login.svelte";
@@ -6,9 +8,13 @@
   import { positionModal } from "../actions/positionnode";
 
   /** @type {Function} */
-  export let onNewGist;
 
-  let showingAbout = false;
+  /** @type {{
+    onNewGist: Function,
+  }} */
+  let { onNewGist } = $props();
+
+  let showingAbout = $state(false);
 
   // <div class="about-dialog fixed flex flex-col bg-white border shadow-md" />
 </script>
@@ -26,7 +32,7 @@
   </div>
   <button
     class="ml-8 px-3 py-1 hover:bg-gray-100"
-    on:click|preventDefault={() => (showingAbout = !showingAbout)}
+    onclick={() => (showingAbout = !showingAbout)}
   >
     About
   </button>
