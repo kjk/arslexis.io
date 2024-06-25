@@ -1,16 +1,23 @@
+<svelte:options runes={true} />
+
 <script>
   import { len, removeDescriptionAd } from "../util.js";
   import { tooltip } from "../actions/tooltip.js";
 
-  export let gist = {};
+  /** @typedef { import("./EditorCodeMirror.svelte").Gist } Gist */
+  /**
+   @type {{
+    gist: Gist,
+    descriptionChanged: (s: string) => void,
+   }}
+   */
+  let { gist, descriptionChanged = (s) => {} } = $props();
 
-  // function to call when description changes
-  export let descriptionChanged = function (s) {};
+  let description = $state(removeDescriptionAd(gist.description));
 
-  let description = removeDescriptionAd(gist.description);
-  let editingDescription = null;
+  let editingDescription = $state(null);
 
-  let gistType = "";
+  let gistType = $state("");
   if (!gist.public) {
     gistType = "private";
   }
@@ -54,14 +61,14 @@
   }
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 {#if editingDescription === null}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
     role="button"
     tabindex=""
     class="truncate"
     use:tooltip={"Click to edit description"}
-    on:click={startEditDescription}
+    onclick={startEditDescription}
     class:no-description={!description}
   >
     {description || "no description"}
@@ -75,15 +82,15 @@
   {/if}
   <div class="flex-grow"></div>
 {:else}
-  <!-- svelte-ignore a11y-autofocus -->
+  <!-- svelte-ignore a11y_autofocus -->
   <input
     class="flex-grow outline-none w-full border border-gray-400"
     autofocus
     spellcheck={false}
     bind:value={editingDescription}
-    on:focus={selectDescriptionInput}
-    on:blur={closeDescriptionEdit}
-    on:keydown={descriptionEditKeyDown}
+    onfocus={selectDescriptionInput}
+    onblur={closeDescriptionEdit}
+    onkeydown={descriptionEditKeyDown}
   />
 {/if}
 
