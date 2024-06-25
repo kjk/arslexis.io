@@ -56,7 +56,7 @@
 </script>
 
 <div data-gist-id={gist.id}>
-  <div class="flex text-black truncate ml-2 flex-grow">
+  <div class="flex text-black truncate ml-2 mr-2 flex-grow">
     {removeDescriptionAd(gist.description || "<untitled>")}
     {#if gistType}
       <div

@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   // import SvgReddit from "../svg/SvgReddit.svelte";
   import Messages from "../Messages.svelte";
@@ -21,20 +23,36 @@
   } from "../github_login.js";
   import { goToGistById } from "./router";
 
-  let totalGistsCount = 0;
-  let localGistsCount = 0;
-  let secretGistsCount = 0;
-  let showingSelectLang = false;
-  let searchTerm = "";
-  let filteredGists = [];
+  let showingSelectLang = $state(false);
+  let searchTerm = $state("");
 
-  $: totalGistsCount = len($gistsSummary) + len($localGists);
-  $: localGistsCount = len($localGists);
-  $: secretGistsCount = calcSecretGists($gistsSummary);
-  $: $localGists, $gistsSummary, filterResults(searchTerm);
+  let totalGistsCount = $derived.by(() => {
+    return len($gistsSummary) + len($localGists);
+  });
+  let localGistsCount = $derived(len($localGists));
+
+  /**
+   * @param {any[]} gists
+   * @returns {number}
+   */
+  function calcSecretGists(gists) {
+    let n = 0;
+    for (let g of gists) {
+      if (!g.public) {
+        n++;
+      }
+    }
+    return n;
+  }
+
+  let secretGistsCount = $derived.by(() => {
+    return calcSecretGists($gistsSummary);
+  });
+
+  // $: $localGists, $gistsSummary, filterResults(searchTerm);
   // $: console.log("updated gists, size:", len($gistsSummary));
 
-  $: filterResults(searchTerm);
+  let filteredGists = $derived(filterResults(searchTerm));
 
   /**
    *
@@ -75,21 +93,7 @@
         res.push(gist);
       }
     }
-    filteredGists = res;
-  }
-
-  /**
-   * @param {any[]} gists
-   * @returns {number}
-   */
-  function calcSecretGists(gists) {
-    let n = 0;
-    for (let g of gists) {
-      if (!g.public) {
-        n++;
-      }
-    }
-    return n;
+    return res;
   }
 
   function onNewGist() {
@@ -143,7 +147,7 @@
 
   {#if !$githubUserInfo && len($localGists) > 0}
     <div class="mt-4 mb-4 self-center">
-      <button class="btn create-gist" on:click|preventDefault={openLoginWindow}>
+      <button class="btn create-gist" onclick={openLoginWindow}>
         Log in with GitHub
       </button>
       to manage your
@@ -171,15 +175,15 @@
       class="center border-2 border-gray-300 mt-2 px-2 py-0.5 text-xs self-center"
       bind:value={searchTerm}
       autocomplete="off"
-      on:keydown={handleInputKeyDown}
+      onkeydown={handleInputKeyDown}
     />
   {/if}
 
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="overflow-x-hidden gist-line-wrapper mt-2 text-sm"
-    on:click={goToGist}
+    onclick={goToGist}
   >
     {#each filteredGists as gist (gist.id)}
       <GistLine {gist} />
