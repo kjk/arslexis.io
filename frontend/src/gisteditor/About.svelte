@@ -40,7 +40,7 @@
 </div>
 
 <style>
-  .abtn {
+  /* .abtn {
     color: rgb(48, 45, 45);
     padding: 4px 12px;
   }
@@ -51,14 +51,13 @@
     margin-left: 1em;
     padding: 4px 0.75em;
     border: 1px solid rgba(27, 31, 35, 0.15);
-    /* needed for safari */
     background-color: white;
     font-size: 100%;
     cursor: pointer;
   }
   .btn:hover {
     background-color: #f3f3f3;
-  }
+  } */
   li {
     list-style: square;
   }

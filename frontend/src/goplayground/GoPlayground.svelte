@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   /** @typedef { import("@codemirror/state").Extension} Extension */
 
@@ -26,9 +28,11 @@ func main() {
   let editorElement = null;
   /** @type {EditorView} */
   let editorView = null;
-  let outputMsg = "";
-  let statusMsg = "";
-  let errorMsg = "";
+
+  let outputMsg = $state("");
+  let statusMsg = $state("");
+  let errorMsg = $state("");
+  let flashMsg = $state("");
 
   let runShortcut = browser.mac ? "⌘+↵" : "Ctrl+↵";
   let formatShortcut = browser.mac ? "⌘+S" : "Ctrl+S";
@@ -68,8 +72,6 @@ func main() {
   let lineWrapping = true;
   let placeholder = "";
   let editable = true;
-
-  let flashMsg = "";
 
   /**
    * @param {string} s
