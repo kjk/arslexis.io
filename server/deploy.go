@@ -21,7 +21,7 @@ var (
 	domain            = "tools.arslexis.io"
 	httpPort          = 9301
 	frontEndBuildDir  = filepath.Join("server", "dist")
-	wantedProdSecrets = []string{"AXIOM_TOKEN", "PIRSCH_SECRET", "GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
+	wantedProdSecrets = []string{"GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
 )
 
 // stuff that is derived from the above

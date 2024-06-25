@@ -85,7 +85,9 @@ func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
 		return
 	}
 	logf("logged in as GitHub user: %s\n", *user.Login)
-	m := map[string]string{}
+	m := map[string]any{
+		"name": "github_login",
+	}
 	if user.Login != nil {
 		m["user"] = *user.Login
 	}
@@ -95,7 +97,7 @@ func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
 	if user.Name != nil {
 		m["name"] = *user.Name
 	}
-	pirschSendEvent(r, "github_login", 0, m)
+	logtastic.LogEvent(r, m)
 }
 
 // /auth/ghlogin
@@ -226,10 +228,6 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 			}
 			logtastic.LogHit(r, m.Code, m.Written, m.Duration)
 			logHTTPReq(r, m.Code, m.Written, m.Duration)
-			if m.Code == 200 {
-				pirschSendHit(r)
-			}
-			axiomLogHTTPReq(ctx(), r, m.Code, int(m.Written), m.Duration)
 		}()
 	})
 
