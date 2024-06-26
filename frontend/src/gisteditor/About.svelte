@@ -21,7 +21,7 @@
       </li>
       <li>
         GitHub gist manager, if you
-        <a class="underline" href="/" on:click|preventDefault={openLoginWindow}>
+        <a class="underline" href="/" onclick={openLoginWindow}>
           log in with GitHub
         </a>
       </li>

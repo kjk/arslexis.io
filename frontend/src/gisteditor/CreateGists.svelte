@@ -1,10 +1,12 @@
+<svelte:options runes={true} />
+
 <script>
   import SvgDots from "../svg/SvgDots.svelte";
   import SelectLangDialog from "./SelectLangDialog.svelte";
   import { tooltip } from "../actions/tooltip.js";
   import { goToCreateNewGist } from "./router.js";
 
-  let showSelectLang = false;
+  let showSelectLang = $state(false);
   let dotsStyle = `
   width: 15px;
   height: 13px;
@@ -31,21 +33,21 @@
   <div class="whitespace-nowrap">New gist:</div>
   <button
     class="btn"
-    on:click={createNewTextGist}
+    onclick={createNewTextGist}
     use:tooltip={"Create new text gist"}
   >
     Text
   </button>
   <button
     class="btn"
-    on:click={createNewMdGist}
+    onclick={createNewMdGist}
     use:tooltip={"Create new markdown gist"}
   >
     Markdown
   </button>
   <button
     class="btn"
-    on:click={createNewGoGist}
+    onclick={createNewGoGist}
     use:tooltip={"Create new Go gist"}
   >
     Go
@@ -54,11 +56,11 @@
   <!-- a hack to hide the tooltip when we are showing lang selector -->
   <!-- maybe won't be needed if we add overlay -->
   {#if showSelectLang}
-    <button class="btn" on:click={onMoreClick}>
+    <button class="btn" onclick={onMoreClick}>
       <SvgDots style={dotsStyle} />
     </button>
   {:else}
-    <button class="btn" on:click={onMoreClick} use:tooltip={"Create new gist"}>
+    <button class="btn" onclick={onMoreClick} use:tooltip={"Create new gist"}>
       <SvgDots style={dotsStyle} />
     </button>
   {/if}

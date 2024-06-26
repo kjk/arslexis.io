@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import { Fcal } from "fcal";
   import { len } from "../util";
@@ -28,16 +30,14 @@ speed in mps
 456 as hex
 `;
 
-  let expression = defaultExpression;
-  let results = [];
-
-  $: main(expression);
+  let expression = $state(defaultExpression);
+  let results = $derived(calcResults(expression));
 
   function isComment(s) {
     return s.startsWith("#");
   }
 
-  function main(input) {
+  function calcResults(input) {
     console.log("main: ", input);
     let fcalEngine = new Fcal();
     let values = input.split("\n");
@@ -61,7 +61,7 @@ speed in mps
       }
     }
     console.log("res:", res);
-    results = res;
+    return res;
   }
 
   /** @type {HTMLTextAreaElement} */
@@ -90,7 +90,7 @@ speed in mps
       </div>
     </div>
     <button
-      on:click={clear}
+      onclick={clear}
       class="shadow-md text-sm text-gray-700 ml-4 px-4 border hover:bg-gray-200"
       >clear</button
     >
@@ -102,7 +102,7 @@ speed in mps
     <div>This is a notepad-like calculator</div>
     <div class="grow" />
     <button
-      on:click={clear}
+      onclick={clear}
       class="border border-slate-400 px-4 py-0.5 text-xs bg-white hover:bg-slate-50"
       >clear</button
     >

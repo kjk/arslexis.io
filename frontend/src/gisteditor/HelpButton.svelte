@@ -6,7 +6,8 @@
 
   let showingMenu = $state(false);
 
-  function showMenu() {
+  function showMenu(ev) {
+    ev.preventDefault();
     showingMenu = !showingMenu;
   }
   function hideMenu() {
@@ -21,7 +22,7 @@
       <div class="dropdown-content shadow-md adjust">
         <div>
           <a
-            on:click={hideMenu}
+            onclick={hideMenu}
             href="https://tools.arslexis.io/docs/gist-editor"
             target="_blank"
             rel="noreferrer"
@@ -31,7 +32,7 @@
         </div>
         <div>
           <a
-            on:click={hideMenu}
+            onclick={hideMenu}
             href="https://tools.arslexis.io/docs/gist-editor"
             target="_blank"
             rel="noreferrer"
@@ -42,7 +43,7 @@
         <!--
       <div>
         <a
-          on:click={hideMenu}
+          onclick={hideMenu}
           href="https://reddit.com/r/CodeEvalApp/"
           target="_blank">
           Support
@@ -55,7 +56,7 @@
     <button
       class="help"
       use:tooltip={{ text: "Help, feedback", position: "top" }}
-      on:click|preventDefault={showMenu}
+      onclick={showMenu}
     >
       ?
     </button>

@@ -96,7 +96,10 @@ export async function setToken(token) {
 
 window.addEventListener("storage", handleStorageChanged);
 
-export function openLoginWindow() {
+export function openLoginWindow(ev) {
+  if (ev) {
+    ev.preventDefault();
+  }
   const uri = window.location.origin + "/auth/ghlogin";
   popup(uri, "GitHub Login", 600, 400);
 }
@@ -146,7 +149,7 @@ export async function refreshGitHubTokenIfNeeded() {
       return;
     }
     console.log(
-      `refreshGitHubTokenIfNeeded: failed with ${rsp.status} ${rsp.statusText}`
+      `refreshGitHubTokenIfNeeded: failed with ${rsp.status} ${rsp.statusText}`,
     );
   } catch (ex) {
     showError(`GET ${uri} failed with '${ex}`);
