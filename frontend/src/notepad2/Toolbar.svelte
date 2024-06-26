@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import { onMount } from "svelte";
   import { tooltip } from "../actions/tooltip";
@@ -31,13 +33,20 @@
   } from "./menu-notepad2";
   import { len, throwIf } from "../util";
 
-  export let show = false;
-  /** @typw {Function} */
-  export let isMenuEnabled;
-  export let handleMenuCmd;
-  export let wordWrap;
+  /** @type {{
+   show: boolean,
+   isMenuEnabled: (cmdId: string) => boolean,
+   handleMenuCmd: (cmdId: string) => void,
+   wordWrap: boolean,
+  }}*/
+  let {
+    show = $bindable(false),
+    isMenuEnabled,
+    handleMenuCmd,
+    wordWrap = $bindable(),
+  } = $props();
 
-  let isToolbarReady = false;
+  let isToolbarReady = $state(false);
 
   async function setToolbarEnabledState() {
     if (!isToolbarReady) {
@@ -63,17 +72,20 @@
     }
   }
 
-  $: redrawToolbar(wordWrap);
-
   // Notepad2.c. DefaultToolbarButtons
-  let toolbarButtonsOrder = [
+  let defOrder = [
     22, 3, 0, 1, 2, 0, 4, 18, 19, 0, 5, 6, 0, 7, 8, 9, 20, 0, 10, 11, 0, 12, 0,
     24, 0, 15,
   ];
+  let toolbarButtonsOrder = $state(defOrder);
 
   function redrawToolbar(ignore) {
+    // TODO: this is meant to trigger re-display, but probably should use {#key}
     toolbarButtonsOrder = toolbarButtonsOrder;
   }
+  $effect(() => {
+    redrawToolbar(wordWrap);
+  });
 
   // order of icons in toolbar bitmap
   // el[0] is id of the command sent by the icon
@@ -196,8 +208,8 @@
         {@const txt = info[1]}
         {@const dataURL = info[2]}
         {@const disabled = !info[3]}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <img
           src={dataURL}
           alt={txt}
@@ -206,7 +218,7 @@
           height={iconDy}
           class:disabled
           class="{hilightClass(info)} mt-1 px-1 py-1 hover:bg-blue-100"
-          on:click={() => handleMenuCmd(cmdId)}
+          onclick={() => handleMenuCmd(cmdId)}
         />
       {/if}
     {/each}

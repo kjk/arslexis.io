@@ -170,8 +170,6 @@
   import DialogSelectScheme from "./DialogSelectScheme.svelte";
   import { logNpEvent } from "../events";
 
-  let toolbarFuncs;
-
   /** @type {HTMLElement} */
   let editorElement = null;
   /** @type {EditorView} */
@@ -215,8 +213,8 @@
   }
 
   async function setToolbarEnabledState() {
-    if (toolbarFuncs) {
-      toolbarFuncs.setToolbarEnabledState();
+    if (toolbar) {
+      toolbar.funcs.setToolbarEnabledState();
     }
   }
 
@@ -300,7 +298,7 @@
     let v = editorView;
     let s = v.state.sliceDoc(
       v.state.selection.main.from,
-      v.state.selection.main.to
+      v.state.selection.main.to,
     );
     return s;
   }
@@ -1629,7 +1627,7 @@
       case m.IDM_HELP_FEATURE_REQUEST:
         window.open(
           "https://github.com/kjk/tools.arslexis.io/labels/notepad2",
-          "_blank"
+          "_blank",
         );
         break;
       case m.IDM_HELP_SOURCE_CODE:
@@ -1638,7 +1636,7 @@
       case m.IDM_HELP_DISCUSS:
         window.open(
           "https://github.com/kjk/tools.arslexis.io/discussions/categories/notepad2",
-          "_blank"
+          "_blank",
         );
         break;
       default:
@@ -1879,6 +1877,8 @@
     editorView = null;
     // document.removeEventListener("keydown", onKeyDown);
   });
+
+  let toolbar;
 </script>
 
 <svelte:body on:drop={handleDrop} />
@@ -1956,7 +1956,7 @@
   </div>
 
   <Toolbar
-    bind:funcs={toolbarFuncs}
+    bind:this={toolbar}
     bind:show={settings.showToolbar}
     bind:wordWrap={settings.wordWrap}
     {isMenuEnabled}

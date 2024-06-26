@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   // menu based on https://play.tailwindcss.com/0xQBSdXxsK
   import Menu, { fixMenuName } from "./Menu.svelte";
