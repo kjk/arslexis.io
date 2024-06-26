@@ -1,6 +1,8 @@
+<svelte:options runes={true} />
+
 <script>
   import FileDrop from "../FileDrop.svelte";
-  import { fmtNum, fmtSize, len } from "../util";
+  import { fmtNum, fmtSize, len, log } from "../util";
   import * as zip from "@zip.js/zip.js";
   import TopNav from "../TopNav.svelte";
   import { logUnzipEvent } from "../events";
@@ -11,7 +13,7 @@
   /** @typedef {import("../util").FileWithPath} FileWithPath */
 
   /** @type {FileWithPath[]}*/
-  let files = [];
+  let files = $state([]);
 
   /* @type {HTMLElement} */
   let hiddenLink;
@@ -21,8 +23,14 @@
     let zr = new zip.ZipReader(br);
     let opts = {};
     let res = await zr.getEntries(opts);
-    // console.log("getZipEntries:", res);
-    return res;
+    let filesOnly = [];
+    for (let e of res) {
+      if (!e.directory) {
+        filesOnly.push(e);
+      }
+    }
+    // console.log("getZipEntries:", filesOnly);
+    return filesOnly;
   }
 
   function rerenderFiles() {
@@ -119,7 +127,7 @@
   <div class="flex justify-center">
     <button
       class="border-2 px-4 py-2 hover:bg-gray-100"
-      on:click={() => (files = [])}>Select another file to unzip</button
+      onclick={() => (files = [])}>Select another file to unzip</button
     >
   </div>
 {:else}
@@ -156,7 +164,7 @@
                 <div class="table-cell pr-4">{e.decompressProgress}%</div>
               {:else}
                 <button
-                  on:click={() => download(fi, e)}
+                  onclick={() => download(fi, e)}
                   class="truncate table-cell pr-4 underline text-blue-500"
                   >{e.filename}</button
                 >
