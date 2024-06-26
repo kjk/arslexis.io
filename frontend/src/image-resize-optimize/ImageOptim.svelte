@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
   import { getFileExt, supportsFileSystem } from "../fileutil";
@@ -7,7 +9,7 @@
   import { strCompareNoCase } from "../strutil";
   import { readDirRecurFiles } from "../fileutil-old";
 
-  let dirName = "";
+  let dirName = $state("");
 
   /**
    * @typedef {Object} FileInfo
@@ -16,11 +18,12 @@
    * @property {Object} meta
    */
   /** @type {FileInfo[]} */
-  let files = [];
+  let files = $state([]);
 
   let hasFileSystemSupport = supportsFileSystem();
 
   async function handleClick() {
+    /** @type {FileSystemDirectoryHandle} */
     let dirHandle;
     try {
       // @ts-ignore
@@ -31,17 +34,18 @@
     dirName = dirHandle.name;
     let entries = await readDirRecurFiles(dirHandle, "");
     let id = 1;
-    files = entries.map((f) => {
-      return { id: id++, file: f, meta: undefined };
-    });
-
-    for (let fi of files) {
-      let meta = await sniffFileType(fi.file);
-      if (meta) {
-        fi.meta = meta;
+    let res = [];
+    // console.log("entries:", entries);
+    for (let f of entries) {
+      let meta = await sniffFileType(f);
+      if (!meta) {
+        continue;
       }
+      let o = { id: id++, file: f, meta: meta };
+      res.push(o);
+      console.log(o);
     }
-    files = files;
+    files = res;
   }
 
   /**
@@ -121,39 +125,39 @@
   {#if hasFileSystemSupport}
     <div>Optimize and resize multiple image files on your computer</div>
     <div>
-      <button class="underline" on:click={handleClick}
+      <button class="underline" onclick={handleClick}
         >Select folder with images</button
       > from your computer.
     </div>
     {#if len(files) > 0}
       <div class="mt-2">
-        <b>{dirName}/</b> directory with {len(files)} files
+        <b>{dirName}/</b> directory with {len(files)} image files
       </div>
       <table class="relative table-auto text-xs">
         <thead>
           <tr>
             <th
-              on:click={sortName}
+              onclick={sortName}
               class="sticky top-0 bg-white hover:bg-gray-100 cursor-pointer text-center"
               >name</th
             >
-            <th
+            <!-- <th
               class="sticky top-0 bg-white hover:bg-gray-100 cursor-pointer text-center"
               >ext</th
-            >
+            > -->
             <th
-              on:click={sortSize}
+              onclick={sortSize}
               class="sticky top-0 bg-white hover:bg-gray-100 cursor-pointer text-center"
               >size</th
             >
             <th
-              class="sticky top-0 bg-white hover:bg-gray-100 cursor-pointer text-center"
-              >type</th
-            >
-            <th
-              on:click={sortImageSize}
+              onclick={sortImageSize}
               class="sticky top-0 bg-white hover:bg-gray-100 cursor-pointer text-center"
               >image size</th
+            >
+            <th
+              class="sticky top-0 bg-white hover:bg-gray-100 cursor-pointer text-center"
+              >type</th
             >
           </tr>
         </thead>
@@ -161,20 +165,20 @@
           {#each files as fi (fi.id)}
             <tr
               class="hover:bg-gray-50 hover:cursor-pointer"
-              on:click={() => fileClicked(fi.file)}
+              onclick={() => fileClicked(fi.file)}
             >
               <td class="">{fi.file.webkitRelativePath}</td>
-              <td class="px-4 text-right">
+              <!-- <td class="px-4 text-right">
                 {getFileExt(fi.file.name)}
-              </td>
+              </td> -->
               <td class="px-4 text-right">
                 {fmtSize(fi.file.size)}
               </td>
               <td class="px-4 text-right">
-                {getFileType(fi)}
+                {getImageSize(fi)}
               </td>
               <td class="px-4 text-right">
-                {getImageSize(fi)}
+                {getFileType(fi)}
               </td>
             </tr>
           {/each}
