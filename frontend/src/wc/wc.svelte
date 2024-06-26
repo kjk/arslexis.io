@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import TopNav from "../TopNav.svelte";
   import Folder, {
@@ -21,12 +23,12 @@
   /** @typedef {import("../fs").ReadFilesCbArgs} ReadFilesCbArgs */
 
   /** @type {FileSysDir} */
-  let fs = null;
+  let fs = $state(null);
 
   /** @type {FsEntry} */
-  let dirRoot = -1;
+  let dirRoot = $state(-1);
 
-  let progressHTML = "";
+  let progressHTML = $state("");
 
   let hasFileSystemSupport = supportsFileSystem();
 
@@ -184,7 +186,7 @@
   {#if fs}
     <button
       class="border ml-2 text-sm border-gray-500 px-2 py-0.5 hover:bg-gray-100"
-      on:click={openFolder}>Open another folder</button
+      onclick={openFolder}>Open another folder</button
     >
     {#if len($recent) > 0}
       <div class="flex ml-4 text-sm">
@@ -192,7 +194,7 @@
         {#each $recent as e}
           <button
             class="ml-2 underline"
-            on:click={() => openRecentDir(e.dirHandle)}>{e.name}</button
+            onclick={() => openRecentDir(e.dirHandle)}>{e.name}</button
           >{/each}
       </div>
     {/if}
@@ -213,13 +215,13 @@
               <td class="px-1"
                 ><button
                   class="underline hover:cursor-pointer"
-                  on:click={() => openRecentDir(e.dirHandle)}>open</button
+                  onclick={() => openRecentDir(e.dirHandle)}>open</button
                 ></td
               >
               <td class="px-1">
                 <button
                   class="underline hover:cursor-pointer"
-                  on:click={() => removeFromRecent(idx)}>remove</button
+                  onclick={() => removeFromRecent(idx)}>remove</button
                 >
               </td>
             </tr>
@@ -232,7 +234,7 @@
   <div class="flex items-baseline mx-4 mt-2 mb-2">
     <button
       class="border border-gray-500 px-2 py-0.5 hover:bg-gray-100"
-      on:click={openFolder}>Open folder</button
+      onclick={openFolder}>Open folder</button
     >
     <div class="ml-2">
       from your computer to calculate file sizes etc., like <tt>wc</tt>.
