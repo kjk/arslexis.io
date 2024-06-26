@@ -103,11 +103,7 @@
         style={"display: flex; font-size: 9.5pt"}
       >
         {#if isDeletable}
-          <div>
-            <a href="/dummy" style="color: red" onclick={deleteGist}>
-              Delete
-            </a>
-          </div>
+          <button class="!text-red-600" onclick={deleteGist}>Delete</button>
         {/if}
       </div>
     </Overlay>

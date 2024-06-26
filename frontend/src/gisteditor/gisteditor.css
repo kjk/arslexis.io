@@ -7,12 +7,14 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
 
-    /* font size as in stack overflow */
-    font-size: 12pt;
+  /* font size as in stack overflow */
+  font-size: 12pt;
 
-    color: #333;
+  color: #333;
 
   /* TODO: do I need this ? 
     https://stackoverflow.com/questions/21209223/remove-bounce-on-scroll-in-browser-issue-with-positionfixed-div
@@ -46,35 +48,14 @@ body {
 }
 
 .dropdown-content {
-  display: none;
-  flex-direction: column;
-
-  padding: 8px 0;
-  white-space: nowrap;
-  position: absolute;
-  line-height: 1.2em;
-  min-width: 180px;
-  /* border: 1px solid lightgray; */
-  z-index: 50;
-
-  background-color: white;
-  border: 1px solid lightgray;
-  border-radius: 4px;
+  @apply hidden;
+  @apply absolute flex-col py-2 px-0 whitespace-nowrap min-w-44 z-50 bg-white text-sm text-gray-500;
+  @apply border border-gray-300 rounded-md;
 }
 
-.dropdown-content div {
-  display: flex;
-}
-
-.dropdown-content div a {
-  color: grey;
-  /* background-color: yellow; */
-  padding: 4px 16px;
-  flex-grow: 1;
-}
-
-.dropdown-content div a:hover {
-  background-color: #ededed;
+.dropdown-content button,
+.dropdown-content a {
+  @apply px-3 py-1.5  hover:bg-gray-100 whitespace-nowrap w-full text-left;
 }
 
 svg {
@@ -83,5 +64,3 @@ svg {
   flex-shrink: 0;
   backface-visibility: hidden;
 }
-
-

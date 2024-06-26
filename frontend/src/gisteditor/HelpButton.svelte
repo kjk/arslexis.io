@@ -19,36 +19,30 @@
   {#if showingMenu}
     <div class="help nohover">?</div>
     <Overlay bind:open={showingMenu}>
-      <div class="dropdown-content shadow-md adjust">
-        <div>
-          <a
-            onclick={hideMenu}
-            href="https://tools.arslexis.io/docs/gist-editor"
-            target="_blank"
-            rel="noreferrer"
-          >
-            About
-          </a>
-        </div>
-        <div>
-          <a
-            onclick={hideMenu}
-            href="https://tools.arslexis.io/docs/gist-editor"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      <div class="dropdown-content adjust">
+        <a
+          onclick={hideMenu}
+          href="https://tools.arslexis.io/docs/gist-editor"
+          target="_blank"
+          rel="noreferrer"
+        >
+          About
+        </a>
+        <a
+          onclick={hideMenu}
+          href="https://tools.arslexis.io/docs/gist-editor"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Documentation
+        </a>
         <!--
-      <div>
         <a
           onclick={hideMenu}
           href="https://reddit.com/r/CodeEvalApp/"
           target="_blank">
           Support
         </a>
-      </div>
       -->
       </div>
     </Overlay>

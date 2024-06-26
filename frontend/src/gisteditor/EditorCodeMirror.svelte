@@ -303,7 +303,7 @@
         tabSize,
         lineWrapping,
         placeholder,
-        editable
+        editable,
       ),
       lineNumbers(),
       ...getTheme(theme, styles),
@@ -452,7 +452,7 @@
   function addFile(
     initialName = "main.txt",
     content = "",
-    isTemporary = false
+    isTemporary = false,
   ) {
     const name = makeNameUnique(initialName, null);
     currFileID++;
@@ -926,46 +926,27 @@
           style={"display: flex; font-size: 9.5pt"}
         >
           {#if !gist.isLocalGist}
-            <div>
-              <a
-                href="https://gist.github.com/{gist.id}"
-                target="_blank"
-                rel="noreferrer"
-              >
-                See on gist.github.com
-              </a>
-            </div>
-          {/if}
-          {#each fileSpecificMenus as menuItem}
-            <div>
-              {#if menuItem[1].startsWith("javascript:")}
-                <a href={menuItem[1]}>{menuItem[0]}</a>
-              {:else}
-                <a href={menuItem[1]} target="_blank" rel="noreferrer">
-                  {menuItem[0]}
-                </a>
-              {/if}
-            </div>
-          {/each}
-          <!-- <div>
             <a
-              href="https://tools.arslexis.io/docs/gist-editor"
+              href="https://gist.github.com/{gist.id}"
               target="_blank"
               rel="noreferrer"
             >
-              CodeEval docs
+              See on gist.github.com
             </a>
-          </div> -->
-          {#if isDeletable}
-            <div>
-              <a
-                href="/dummy"
-                style="color: red"
-                on:click|preventDefault={deleteGist}
-              >
-                Delete
+          {/if}
+          {#each fileSpecificMenus as menuItem}
+            {#if menuItem[1].startsWith("javascript:")}
+              <a href={menuItem[1]}>{menuItem[0]}</a>
+            {:else}
+              <a href={menuItem[1]} target="_blank" rel="noreferrer">
+                {menuItem[0]}
               </a>
-            </div>
+            {/if}
+          {/each}
+          {#if isDeletable}
+            <button class="text-red-500" on:click|preventDefault={deleteGist}>
+              Delete
+            </button>
           {/if}
         </div>
       </Overlay>

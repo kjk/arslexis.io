@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import SvgTwitter from "../svg/SvgTwitter.svelte";
   import SvgArrowDown from "../svg/SvgArrowDown.svelte";
@@ -7,10 +9,18 @@
   import { githubUserInfo, openLoginWindow, logout } from "../github_login.js";
   import { goGistEditorHome } from "./router.js";
 
-  export let gistid = "";
-  export let onGoHome = null; // function
-  export let onNewGist = null; // function
-  export let showTwitter = false;
+  /** @type {{
+   gistid: string,
+   onGoHome: () => void,
+   onNewGist: () => void,
+   showTwitter: boolean,
+  }}*/
+  let {
+    gistid = "",
+    onGoHome = null,
+    onNewGist = null,
+    showTwitter = false,
+  } = $props();
 
   const loc = window.location.pathname;
   let isHome = loc === "/gisteditor/";
@@ -66,40 +76,30 @@
         <SvgArrowDown style="width: 8px; height: 8px" />
       </div>
 
-      <div class="dropdown-content shadow" style="top: 100%; right: 0px;">
+      <div
+        class="dropdown-content flex flex-col items-start shadow top-full right-0"
+      >
         {#if !isHome}
-          <div>
-            <a href="./" on:click|preventDefault={goHome}>Home</a>
-          </div>
+          <button onclick={goHome}>Home</button>
         {/if}
 
         {#if onNewGist}
-          <div>
-            <a href="/dummy/" on:click|preventDefault={onNewGist}>New gist</a>
-          </div>
+          <button onclick={onNewGist}>New gist</button>
         {/if}
         {#if gistid === ""}
-          <div>
-            <a href="/dummy" on:click|preventDefault={refreshGists}>
-              Sync with GitHub gists
-            </a>
-          </div>
+          <button onclick={refreshGists}>Sync with GitHub gists</button>
         {/if}
-        <div>
-          <a href="/dummy" on:click|preventDefault={doLogout}>Log out</a>
-        </div>
+        <button onclick={doLogout}>Log out</button>
       </div>
     </div>
   {:else}
     <div class="flex flex-row justify-end items-center">
-      <a
-        class="px-3 py-1 text-gray-500 hover:bg-gray-100 whitespace-nowrap"
-        href="/"
-        on:click|preventDefault={openLoginWindow}
+      <button
+        onclick={openLoginWindow}
         use:tooltip={"Log in to manage your gists"}
       >
         Log in with GitHub
-      </a>
+      </button>
     </div>
   {/if}
 </div>
