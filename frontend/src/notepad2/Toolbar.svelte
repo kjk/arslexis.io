@@ -206,7 +206,7 @@
           height={iconDy}
           class:disabled
           class="{hilightClass(info)} mt-1 px-1 py-1 hover:bg-blue-100"
-          on:click={() => handleMenuCmd({ detail: { cmd: cmdId } })}
+          on:click={() => handleMenuCmd(cmdId)}
         />
       {/if}
     {/each}

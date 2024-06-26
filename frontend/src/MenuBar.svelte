@@ -195,7 +195,7 @@
             onfocus={handleFocus}>{fixMenuName(title)}</button
           >
           <div
-            class="child invisible absolute top-0 transform opacity-0 transition-all duration-100"
+            class="child invisible absolute top-4 transform opacity-0 transition-all duration-100"
           >
             <Menu nest={1} {filterFn} {onmenucmd} {menu} />
           </div>
