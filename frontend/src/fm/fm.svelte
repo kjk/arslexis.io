@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script>
   import TopNav from "../TopNav.svelte";
   import Folder from "./Folder.svelte";
@@ -38,7 +40,7 @@
     return -1;
   }
 
-  let progressHTML = "";
+  let progressHTML = $state("");
 
   let hasFileSystemSupport = supportsFileSystem();
 
@@ -273,7 +275,7 @@
       {/each}
     </div>
     {#key fs}
-      <div class="overflow-y-scroll h-min-0 h-full ml-2">
+      <div class="overflow-y-scroll h-min-0 h-full ml-2 pr-2">
         <Folder
           {initialSelectionIdx}
           {recalc}

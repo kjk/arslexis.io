@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script context="module">
   import { sortEntries } from "../fs";
   /** @typedef {import("../fs").FsEntry} FsEntry */
@@ -23,7 +25,7 @@
 </script>
 
 <script>
-  import { fmtNum, fmtSize, len } from "../util";
+  import { fmtNum, fmtSize, len, throwIf } from "../util";
   import { tick } from "svelte";
 
   /** @type { {
@@ -99,19 +101,33 @@
    * @param {FsEntry} e
    * @returns {string}
    */
+  function fmtDirs(e) {
+    let isDir = fs.entryIsDir(e);
+    throwIf(!isDir);
+    let nDirs = fs.entryDirCount(e);
+    return "D: " + fmtNum(nDirs);
+  }
+
+  /**
+   * @param {FsEntry} e
+   * @returns {string}
+   */
+  function fmtFiles(e) {
+    let isDir = fs.entryIsDir(e);
+    throwIf(!isDir);
+    let nFiles = fs.entryFileCount(e);
+    return "F: " + fmtNum(nFiles);
+  }
+
+  /**
+   * @param {FsEntry} e
+   * @returns {string}
+   */
   function fmtEntrySize(e) {
     let size = fs.entrySize(e);
     // console.log("e:", e, "size:", size);
     let s = fmtSize(size);
-    let isDir = fs.entryIsDir(e);
-    if (!isDir) {
-      return s;
-    }
-    let nDirs = fs.entryDirCount(e);
-    let nFiles = fs.entryFileCount(e);
-    let s2 = "D: " + fmtNum(nDirs);
-    s2 += " F: " + fmtNum(nFiles);
-    return s2 + " " + s;
+    return s;
   }
 
   /**
@@ -220,7 +236,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <table
-  class="font-mono text-sm mt-[2px] w-full"
+  class="font-mono text-sm mt-[2px] w-full table-auto border-collapse"
   onclick={handleClicked}
   ondblclick={handleDoubleClicked}
   onkeydown={handleKeyDown}
@@ -239,7 +255,7 @@
         <tr
           data-idx={idx}
           tabindex="0"
-          class="hover:bg-gray-200 hover:cursor-pointer"
+          class="hover:bg-gray-200 hover:cursor-pointer w-full"
         >
           <td class="ind-{indent} font-semibold">
             {#if isExpanded(fs, e)}
@@ -249,7 +265,13 @@
             {/if}
             {fs.entryName(e)}
           </td>
-          <td class="pl-2 text-right whitespace-nowrap">
+          <td class="pl-2 text-right whitespace-nowrap w-auto">
+            {fmtDirs(e)}
+          </td>
+          <td class="pl-2 text-right whitespace-nowrap w-auto">
+            {fmtFiles(e)}
+          </td>
+          <td class="pl-2 text-right whitespace-nowrap w-auto">
             {fmtEntrySize(e)}
           </td>
         </tr>
@@ -267,7 +289,9 @@
           class="hover:bg-gray-200 even:bg-gray-50"
         >
           <td class="ind-{indent + 1}">{fs.entryName(e)} </td>
-          <td class="pl-2 text-right whitespace-nowrap">{fmtEntrySize(e)} </td>
+          <td colspan="3" class="pl-2 text-right whitespace-nowrap"
+            >{fmtEntrySize(e)}
+          </td>
         </tr>
       {/if}
     {/each}
