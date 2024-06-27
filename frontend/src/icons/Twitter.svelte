@@ -1,6 +1,6 @@
 <svg
   xmlns="http://www.w3.org/2000/svg"
-  class="icon icon-tabler icon-tabler-brand-twitter"
+  class="icon"
   width="1em"
   height="1em"
   viewBox="0 0 24 24"

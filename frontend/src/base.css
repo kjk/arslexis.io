@@ -9,13 +9,13 @@
 body {
   /* https://bitsofco.de/the-new-system-font-stack/ */
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
-  "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-  "Helvetica Neue", sans-serif;
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
 
-    /* font size as in stack overflow */
-    font-size: 12pt;
+  /* font size as in stack overflow */
+  font-size: 12pt;
 
-    color: #333;
+  color: #333;
 
   /* TODO: do I need this ?
     https://stackoverflow.com/questions/21209223/remove-bounce-on-scroll-in-browser-issue-with-positionfixed-div
@@ -29,3 +29,23 @@ body {
   flex-shrink: 0;
   backface-visibility: hidden;
 } */
+
+.gradient-bg {
+  background: linear-gradient(
+    to right,
+    hsl(199, 100%, 99%),
+    hsl(195, 100%, 95%)
+  );
+}
+
+.gradient-bg-2 {
+  background: linear-gradient(
+    to right,
+    hsl(199, 100%, 95%),
+    hsl(195, 100%, 90%)
+  );
+}
+
+.gradient-bg-3 {
+  background: linear-gradient(to right, #d1e9ff, #a8d8ff);
+}
