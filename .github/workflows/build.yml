@@ -16,9 +16,11 @@ jobs:
         with:
           node-version: 18
 
+      - name Install bun
+        uses: oven-sh/setup-bun@v1
+
       - name: Check out source code
         uses: actions/checkout@v4
-        uses: oven-sh/setup-bun@v1
 
       - name: Build
         run: cd frontend && bun install && bun run build
