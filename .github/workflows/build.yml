@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 18
 
-      - name Install bun
+      - name: Install bun
         uses: oven-sh/setup-bun@v1
 
       - name: Check out source code
