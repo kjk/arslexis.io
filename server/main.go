@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -126,6 +127,7 @@ func main() {
 		flgBuildLocalProd bool
 		flgUpdateGoDeps   bool
 		flgClean          bool
+		flgTest           bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
@@ -136,6 +138,7 @@ func main() {
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.BoolVar(&flgUpdateGoDeps, "update-go-deps", false, "update go dependencies")
 		flag.BoolVar(&flgClean, "clean", false, "clean build")
+		flag.BoolVar(&flgTest, "test", false, "run go and js tests")
 		flag.Parse()
 	}
 
@@ -159,6 +162,19 @@ func main() {
 		defer measureDuration()()
 		buildForProdLocal()
 		emptyFrontEndBuildDir()
+		return
+	}
+
+	if flgTest {
+		{
+			cmd := exec.Command("bun", "test")
+			cmd.Dir = "frontend"
+			must(runLogged(cmd))
+		}
+		{
+			cmd := exec.Command("go", "test", "./server")
+			must(runLogged(cmd))
+		}
 		return
 	}
 

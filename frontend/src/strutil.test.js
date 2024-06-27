@@ -1,4 +1,4 @@
-import { describe, it } from "vitest";
+import { describe, test as it } from "bun:test";
 import { streq } from "./testhelpers";
 
 import {

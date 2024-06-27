@@ -1,7 +1,7 @@
 {
   "name": "tools.arslexis.io",
   "license": "UNLICENSED",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -10,13 +10,11 @@
     "dev": "vite dev --host --strictPort=true --clearScreen=false",
     "build": "vite build",
     "serve": "vite preview",
-    "test": "vitest run",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:serve": "vitepress serve docs"
+    "test": "bun test"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^4.0.0-next.3",
+    "@types/bun": "^1.1.6",
     "autoprefixer": "^10.4.19",
     "ist": "^1.1.7",
     "postcss": "^8.4.38",
@@ -27,9 +25,7 @@
     "source-map-js": "^1.2.0",
     "svelte": "^5.0.0-next.165",
     "tailwindcss": "^3.4.4",
-    "vite": "^5.3.1",
-    "vitepress": "1.0.0-rc.44",
-    "vitest": "^1.6.0"
+    "vite": "^5.3.1"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.16.3",
@@ -69,10 +65,8 @@
     "dayjs": "^1.11.11",
     "fcal": "^0.4.3",
     "idb": "^8.0.0",
-    "javascript-natural-sort": "^0.7.1",
     "js-base64": "^3.7.7",
     "marked": "^12.0.2",
-    "preact-feather": "^4.2.1",
     "protobufjs": "^7.3.2",
     "qr-scanner": "^1.4.2",
     "yaml": "^2.4.5"

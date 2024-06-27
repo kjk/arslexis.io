@@ -1,5 +1,5 @@
 // import { EditorState } from "@codemirror/state";
-import { describe, it } from "vitest";
+import { describe, test as it } from "bun:test";
 import ist from "ist";
 import { streq } from "./testhelpers";
 import { runCmd, mkState, runCmd2 } from "./cmtesthelper";
@@ -205,7 +205,7 @@ foo
 
 asd
 foo>`,
-      "<asd\n>"
+      "<asd\n>",
     );
   });
 

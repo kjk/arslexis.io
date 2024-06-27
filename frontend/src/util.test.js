@@ -1,7 +1,7 @@
-import { assert, it } from "vitest";
+import { expect, test } from "bun:test";
 
 import { stripExt } from "./util";
 
-it("stripExt", () => {
-  assert.equal(stripExt("foo.txt"), "foo");
+test("stripExt", () => {
+  expect(stripExt("foo.txt")).toBe("foo");
 });
