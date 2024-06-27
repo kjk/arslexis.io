@@ -49,3 +49,8 @@ body {
 .gradient-bg-3 {
   background: linear-gradient(to right, #d1e9ff, #a8d8ff);
 }
+
+.icon-link {
+  @apply hover:ring-blue-700 hover:ring-2 hover:rounded-lg;
+  /* @apply hover:bg-gray-100; */
+}

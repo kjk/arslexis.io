@@ -13,7 +13,7 @@
 <div class="flex items-center justify-between mx-4 mt-2 fixed right-0">
   <div class="flex">
     <a
-      class="px-1 py-1 mr-1 hover:bg-gray-100"
+      class="px-1 py-1 mr-1 icon-link"
       href="https://github.com/kjk/tools.arslexis.io"
       target="_blank"
       rel="noreferrer"
@@ -21,7 +21,7 @@
       <GitHub></GitHub>
     </a>
     <a
-      class="px-1 py-1 mr-2 hover:bg-gray-100"
+      class="px-1 py-1 mr-2 icon-link"
       href="https://twitter.com/kjk"
       target="_blank"
       rel="noreferrer"
@@ -29,7 +29,7 @@
       <Twitter></Twitter>
     </a>
     <a
-      class="mr-1 hover:bg-gray-100"
+      class="mr-1"
       href="https://blog.kowalczyk.info"
       target="_blank"
       rel="noreferrer"
