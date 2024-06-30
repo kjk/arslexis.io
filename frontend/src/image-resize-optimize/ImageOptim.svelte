@@ -2,7 +2,7 @@
 
 <script>
   import ShowSupportsFileSystem from "../ShowSupportsFileSystem.svelte";
-  import { getFileExt, supportsFileSystem } from "../fileutil";
+  import { supportsFileSystem } from "../fileutil";
   import { sniffFileType } from "../sniffFileType";
   import { fmtSize, len } from "../util";
   import TopNav from "../TopNav.svelte";
@@ -117,7 +117,7 @@
 </script>
 
 <TopNav>
-  <span class="text-purple-800">Resize and optimize multiple image files</span>
+  <span class="text-purple-800">Optimize multiple image files</span>
 </TopNav>
 
 <div class="mx-4 mt-2">
@@ -126,7 +126,7 @@
     <div>Optimize and resize multiple image files on your computer</div>
     <div>
       <button class="underline" onclick={handleClick}
-        >Select folder with images</button
+        >Open folder with images</button
       > from your computer.
     </div>
     {#if len(files) > 0}

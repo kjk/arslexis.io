@@ -95,7 +95,7 @@
       "/gisteditor/",
       "GitHub Gist editor and a notepad for notes and code snippets stored locally in the browser",
     )}
-    {@render row(
+    <!-- {@render row(
       "notepad2",
       "/notepad2/",
       `like a Windows <a
@@ -104,7 +104,7 @@
           href="https://github.com/zufuliu/notepad2">notepad2</a
         >
         text editor but in the browser`,
-    )}
+    )} -->
     {@render row("Go Playground", "/goplayground/", "a better Go Playground")}
     <!-- {@render row(
       "calc",
@@ -133,9 +133,9 @@
       <tbody>
         {@render row("reader", "/reader/", "Comic Book (.cbz, .cbr) reader")}
         {@render row(
-          "image resize and optimize",
+          "image optimize",
           "/image-resize-optimize/",
-          "optimize and resize multiple images at once",
+          "optimize multiple images at once",
         )}
         {@render row("qrscanner", "/qrscanner/", "qrscanner")}
       </tbody>
