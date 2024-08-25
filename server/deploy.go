@@ -17,8 +17,8 @@ import (
 
 // variables to customize
 var (
-	projectName       = "onlinetool"
-	domain            = "tools.arslexis.io"
+	projectName       = "arslexis.io"
+	domain            = "arslexis.io"
 	httpPort          = 9301
 	frontEndBuildDir  = filepath.Join("server", "dist")
 	wantedProdSecrets = []string{"GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
