@@ -66,14 +66,14 @@
     </div>
   </div>
 
-  <div class="text-center">
-    Software by <a class="text-gray-600" href="https://arslexis.io">ArsLexis</a>
-  </div>
+  <!-- <div class="text-center font-bold">Our software</div> -->
 
   {#snippet row(name, url, desc)}
     <tr>
       <td class="text-left align-top"
-        ><a class="font-semibold whitespace-nowrap" href={url}>{name}</a>
+        ><a class="font-semibold whitespace-nowrap" href={url} target="_blank"
+          >{name}</a
+        >
       </td>
       <td class="pl-4 align-top">{@html desc}</td>
     </tr>
@@ -83,7 +83,7 @@
     {@render row(
       "Edna",
       "https://edna.arslexis.io",
-      "a note taker / scratchpad for developers and power users",
+      "a note taking app for developers and power users",
     )}
     {@render row(
       "SumatraPDF",
