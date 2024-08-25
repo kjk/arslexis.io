@@ -17,7 +17,7 @@ import (
 
 // variables to customize
 var (
-	projectName       = "arslexis.io"
+	projectName       = "arslexis_io"
 	domain            = "arslexis.io"
 	httpPort          = 9301
 	frontEndBuildDir  = filepath.Join("server", "dist")
