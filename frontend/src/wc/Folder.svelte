@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   import { verifyHandlePermission, isBinary, lineCount } from "../fileutil";
 
   /** @typedef {import("../fs").FsEntry} FsEntry */

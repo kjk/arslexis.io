@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   import { tick } from "svelte";
 
   /**
@@ -20,7 +20,7 @@
         }
         if (targetEl === null) {
           throw new Error(
-            `No element found matching css selector: "${target}"`
+            `No element found matching css selector: "${target}"`,
           );
         }
       } else if (target instanceof HTMLElement) {
@@ -29,7 +29,7 @@
         throw new TypeError(
           `Unknown portal target type: ${
             target === null ? "null" : typeof target
-          }. Allowed types: string (CSS selector) or HTMLElement.`
+          }. Allowed types: string (CSS selector) or HTMLElement.`,
         );
       }
       targetEl.appendChild(el);

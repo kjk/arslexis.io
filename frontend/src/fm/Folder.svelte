@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script context="module">
+<script module>
   import { sortEntries } from "../fs";
   /** @typedef {import("../fs").FsEntry} FsEntry */
   /** @typedef {import("../fs").FileSys} FileSys */

@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   /** @typedef {import("./np2store").FavEntry} FavEntry */
 </script>
 

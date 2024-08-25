@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
 </script>
 
 <script>
@@ -42,7 +42,7 @@
       (result) => {
         console.log(result);
       },
-      opts
+      opts,
     );
     scanner.start();
   });

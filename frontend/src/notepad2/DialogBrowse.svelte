@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   /** @typedef {import("../fileutil-old").FsEntry} FsEntry */
   /** @typedef {import("./np2store").FavEntry} FavEntry*/
   /**

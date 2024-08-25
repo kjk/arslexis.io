@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   export function gtooltip(node, html) {
     let tooltip = document.getElementById("global_tooltip");
 

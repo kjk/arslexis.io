@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   import { Archive } from "../libarchive/libarchive.js";
 
   /** @typedef {import("../libarchive/compressed-file").CompressedFile} CompressedFile */

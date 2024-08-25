@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   /** @typedef { import("@codemirror/view").KeyBinding} KeyBinding */
   /** @typedef { import("@codemirror/state").Extension} Extension */
   /** @typedef { import("@codemirror/state").Transaction} Transaction */

@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   import { writable, get } from "svelte/store";
   let msgId = 1;
   export const infoMessages = writable([]);
