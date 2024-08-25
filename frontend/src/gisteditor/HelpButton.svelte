@@ -22,7 +22,7 @@
       <div class="dropdown-content adjust">
         <a
           onclick={hideMenu}
-          href="https://tools.arslexis.io/docs/gist-editor"
+          href="https://arslexis.io/docs/gist-editor"
           target="_blank"
           rel="noreferrer"
         >
@@ -30,7 +30,7 @@
         </a>
         <a
           onclick={hideMenu}
-          href="https://tools.arslexis.io/docs/gist-editor"
+          href="https://arslexis.io/docs/gist-editor"
           target="_blank"
           rel="noreferrer"
         >

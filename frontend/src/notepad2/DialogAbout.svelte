@@ -27,7 +27,7 @@
       class="ml-2 underline focus-within:outline"
       rel="noreferrer"
       target="_blank"
-      href="https://tools.arslexis.io/docs/notepad2">read documentation</a
+      href="https://arslexis.io/docs/notepad2">read documentation</a
     > -->
     <a
       class="ml-2 underline focus-within:outline"

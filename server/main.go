@@ -14,7 +14,7 @@ import (
 var (
 	// for github login when running on localhost
 	secretGitHubLocal = ""
-	// for github login when running on tools.arslexis.io
+	// for github login when running on arslexis.io
 	secretGitHubToolsArslexis = ""
 
 	dataDirCached string
@@ -144,7 +144,7 @@ func main() {
 
 	if GitCommitHash != "" {
 		uriBase := "https://github.com/kjk/tools.arslexis.io/commit/"
-		logf("tools.arslexis.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
+		logf("arslexis.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
 	}
 
 	if flgUpdateGoDeps {

@@ -1621,7 +1621,7 @@
         clearClipboard();
         break;
       case m.IDM_HELP_PROJECT_HOME:
-        window.open("https://tools.arslexis.io/docs/notepad2", "_blank");
+        window.open("https://arslexis.io/docs/notepad2", "_blank");
         break;
       case m.IDM_HELP_REPORT_ISSUE:
       case m.IDM_HELP_FEATURE_REQUEST:

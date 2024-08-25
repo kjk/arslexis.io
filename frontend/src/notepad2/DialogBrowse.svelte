@@ -488,7 +488,7 @@
       target="_blank"
       rel="noreferrer"
       class="text-blue-700 underline mr-2"
-      href="https://tools.arslexis.io/docs/notepad2-browse-files"
+      href="https://arslexis.io/docs/notepad2-browse-files"
     >
       help</a
     > -->

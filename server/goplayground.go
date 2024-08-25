@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const userAgent = "http://tools.arslexis.io/goplayground/"
+const userAgent = "http://arslexis.io/goplayground/"
 
 // maxSnippetSize value taken from
 // https://github.com/golang/playground/blob/master/app/goplay/share.go

@@ -20,7 +20,7 @@
     <!-- <div class="ml-4">
       <a
         class="abtn"
-        href="https://tools.arslexis.io/docs/gist-editor"
+        href="https://arslexis.io/docs/gist-editor"
         target="_blank"
         rel="noreferrer"
       >
@@ -30,7 +30,7 @@
     <div class="ml-4">
       <a
         class="abtn"
-        href="https://tools.arslexis.io/docs/gist-editor"
+        href="https://arslexis.io/docs/gist-editor"
         target="_blank"
         rel="noreferrer"
       >

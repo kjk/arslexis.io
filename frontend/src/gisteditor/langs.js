@@ -154,9 +154,7 @@ const docsForLang = {
 export function docsForFile(fileName) {
   fileName = fileName.toLowerCase();
   if (fileName === "codeeval.yml") {
-    return [
-      ["codeeval.yml syntax", "https://tools.arslexis.io/docs/gist-editor"],
-    ];
+    return [["codeeval.yml syntax", "https://arslexis.io/docs/gist-editor"]];
   }
   const li = getLangInfoFromFileName(fileName);
   if (!li) {

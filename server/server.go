@@ -63,11 +63,11 @@ func getGithubConfig(r *http.Request) *oauth2.Config {
 			githubConfig.ClientID = "77ba1cbe7c0eff7c462b"
 			githubConfig.ClientSecret = secretGitHubLocal
 			logf("getGithubConfig: using localhost config\n")
-		} else if strings.Contains(host, "tools.arslexis.io") {
-			// https://github.com/settings/applications/2495749 : tools.arslexis.io
+		} else if strings.Contains(host, "arslexis.io") {
+			// https://github.com/settings/applications/2495749 : arslexis.io
 			githubConfig.ClientID = "ff6bcecdb5df037a208d"
 			githubConfig.ClientSecret = secretGitHubToolsArslexis
-			logf("getGithubConfig: using tools.arslexis.io config\n")
+			logf("getGithubConfig: using arslexis.io config\n")
 		} else {
 			panicIf(true, "unsupported host: %s", host)
 		}
