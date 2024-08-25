@@ -21,7 +21,7 @@ bun.lockb
 
 yarn-error.log
 .DS_Store
-onlinetool-*
+arslexis_io-*
 node_modules
 dist/
 server/secrets.env
