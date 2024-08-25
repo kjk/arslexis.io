@@ -1,4 +1,8 @@
+<svelte:options runes={true} />
+
 <script module>
+  import { onMount } from "svelte";
+
   /** @typedef { import("@codemirror/state").Extension} Extension */
 
   /**
@@ -30,7 +34,6 @@
 </script>
 
 <script>
-  import { onMount } from "svelte";
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState } from "@codemirror/state";
   import { marked } from "marked";
@@ -69,24 +72,31 @@
 
   import { genNextUniqueFileName } from "../fileutil";
 
-  export let basic = true;
-  export let theme = undefined;
-  export let useTab = true;
-  export let tabSize = 2;
-  export let styles = undefined;
-  export let lineWrapping = false;
-  export let editable = true;
-  export let placeholder = undefined;
-
   /** @type {Gist} */
-  export let gist = {
+  let defaultGist = {
     files: {},
     public: false,
     isLocalGist: false,
     description: "",
   };
 
-  let isLoggedIn = !!$ghtoken;
+  let {
+    basic = true,
+    theme = undefined,
+    useTab = true,
+    tabSize = 2,
+    styles = undefined,
+    lineWrapping = false,
+    editable = true,
+    placeholder = undefined,
+    gist = defaultGist,
+  } = $props();
+
+  let isLoggedIn = $derived.by(() => {
+    return !!$ghtoken;
+  });
+
+  // let isLoggedIn = !!$ghtoken;
   let description = gist.description;
 
   /** @type {HTMLElement} */
@@ -95,53 +105,53 @@
   let editorView = null;
 
   /** @type {GistFile[]} */
-  let files = [];
-  /** @type {GistFile} */
-  let selectedFile = null;
-  let isFormattable = false;
-  let isGistChanged = false;
+  let files = $state([]);
+  let selectedFileIdx = $state(-1);
+  let isFormattable = $state(false);
+  let isGistChanged = $state(false);
   /** @type {GistFile[]} */
-  let deletedFiles = [];
-  let savePending = false;
+  let deletedFiles = $state([]);
+  let savePending = $state(false);
   // let cursorPosDuringSave = null;
-  let showSelectLang = false;
-  let showingMenu = false;
-  let doublePane = false;
+  let showSelectLang = $state(false);
+  let showingMenu = $state(false);
+  let doublePane = $state(false);
 
   // file tab being edited
   /** @type {GistFile} */
-  let editing = null;
-  let editingOrignalName = "";
+  let editing = $state(null);
+  let editingOrignalName = $state("");
   /** @type {HTMLElement} */
-  let menuElement = null;
+  let menuElement = $state(null);
 
-  /** @type {string[][]}*/
-  let fileSpecificMenus = [];
-  let isDeletable = false;
-  let resultStdOut = "";
-  let resultStdErr = "";
+  // /** @type {string[][]}*/
+  // let fileSpecificMenus = $state([]);
+  // let isDeletable = $state(false);
+  let resultStdOut = $state("");
+  let resultStdErr = $state("");
 
-  let secondPaneHTML = "";
-  let isMarkdown = false;
+  let secondPaneHTML = $state("");
+  let isMarkdown = $state(false);
 
   // used to generate unique file.fid
-  let currFileID = 0;
+  let currFileID = $state(0);
 
   let dotsStyle = `width: 15px;
   height: 13px;
 `;
 
-  if (gist.isLocalGist) {
-    isDeletable = true;
-  }
+  // if (gist.isLocalGist) {
+  //   isDeletable = true;
+  // }
 
-  $: {
-    isLoggedIn = !!$ghtoken;
-    // console.log("ghtoken:", $ghtoken, "isLoggedIn:", isLoggedIn);
-  }
+  let fileSpecificMenus = $derived.by(() => {
+    let selectedFile = files[selectedFileIdx];
+    return buildFileSpecificMenus(selectedFile);
+  });
 
-  $: fileSpecificMenus = buildFileSpecificMenus(selectedFile);
-  $: isDeletable = calcIsDeletable(gist, isLoggedIn);
+  let isDeletable = $derived.by(() => {
+    return calcIsDeletable(gist, isLoggedIn);
+  });
 
   /**
    * @param {string} s
@@ -265,6 +275,7 @@
         secondPaneHTML = await marked.parse(s);
       }
 
+      let selectedFile = files[selectedFileIdx];
       selectedFile.state = tr.state;
       calcIsGistChanged();
 
@@ -337,7 +348,7 @@
     }
 
     files = tmp; // trigger re-render
-    selectTab(files[0]);
+    selectTab(0);
 
     return () => {
       editorView = null;
@@ -366,9 +377,10 @@
   }
 
   /**
-   * @param {GistFile} file
+   * @param {number} idx
    */
-  async function selectTab(file) {
+  async function selectTab(idx) {
+    let file = files[idx];
     // TODO: when file is renamed, we need to change lang
     // in extentions. Not sure where to put that
     if (!file.initialState) {
@@ -376,7 +388,7 @@
       file.state = file.initialState;
     }
     editorView.setState(file.state);
-    selectedFile = file;
+    selectedFileIdx = idx;
 
     // this might be called after renaming a file in current tab
     // so re-calculate things that might depend
@@ -402,12 +414,13 @@
   }
 
   /**
-   * @param {GistFile} file
+   * @param {number} idx
    */
-  function onTabClick(file) {
+  function onTabClick(idx) {
+    let file = files[idx];
     // clicking on selected tab switches to file name editing mode
     // otherwise selects a tab
-    if (file === selectedFile) {
+    if (idx === selectedFileIdx) {
       // temporary files are not editable
       if (file.isTemporary) {
         return;
@@ -416,7 +429,7 @@
       editingOrignalName = file.filename;
       return;
     }
-    selectTab(file);
+    selectTab(idx);
   }
 
   /**
@@ -435,17 +448,17 @@
   function removeFileAtIdx(idx) {
     const removed = files[idx];
     files.splice(idx, 1);
-    let toSelect = null;
+    let toSelectIdx = 9;
     const n = files.length;
     if (n > 0) {
       if (idx > 0 && idx >= n) {
         idx -= 1;
       }
-      toSelect = files[idx];
+      toSelectIdx = idx;
     }
     maybeRememberDeleted(removed);
     calcIsGistChanged();
-    selectTab(toSelect);
+    selectTab(toSelectIdx);
   }
 
   // name, content, isTemporary are all optional
@@ -471,7 +484,7 @@
     };
     files.push(f);
     calcIsGistChanged();
-    selectTab(f);
+    selectTab(len(files) - 1);
     return f;
   }
 
@@ -497,6 +510,7 @@
   function selectInput(event) {
     setTimeout(() => {
       const el = event.target;
+      let selectedFile = files[selectedFileIdx];
       const s = selectedFile.filename;
       const idx = s.lastIndexOf(".");
       let end = s.length;
@@ -525,7 +539,7 @@
       newFiles[f.filename] = f;
     }
     gist.files = newFiles;
-    await selectTab(selectedFile);
+    await selectTab(selectedFileIdx);
     calcIsGistChanged();
     // focus the editor, but wait a beat (so key events aren't misdirected)
     focusEditorView(editorView);
@@ -614,7 +628,11 @@
         continue;
       }
       // create a copy with only the data we want to save
-      const content = f.state.doc.toString();
+      //const content = f.state.doc.toString();
+      let content = f.content;
+      if (f.state) {
+        content = f.state.doc.toString();
+      }
       const newFile = {
         filename: f.filename,
         content: content,
@@ -768,15 +786,13 @@
   <div
     class="output-wrap absolute z-40 overflow-auto bg-white shadow bottom-16 right-8"
   >
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div
+    <button
       class="close-btn top-2 px-2 py-1 right-2 cursor-pointer z-40 absolute
       text-xs hover:bg-yellow-200"
-      on:click={clearOutput}
+      onclick={clearOutput}
     >
       close
-    </div>
+    </button>
 
     {#if resultStdErr}
       <div class="flex flex-col p-2">
@@ -798,7 +814,14 @@
   style="grid-template-rows: auto auto 1fr;"
 >
   <div class="flex items-baseline text-sm px-4 mb-1 gap-x-2">
-    <a href="/" class="hover:bg-gray-100" on:click|preventDefault={goHome}>
+    <a
+      href="/"
+      class="hover:bg-gray-100"
+      onclick={(ev) => {
+        ev.preventDefault();
+        goHome();
+      }}
+    >
       Home
     </a>
     <div class="text-gray-400">/</div>
@@ -808,25 +831,22 @@
 
   <div class="flex items-center text-sm pt-2 px-4">
     {#each files as file, idx (file.fid)}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-interactive-supports-focus -->
-      <div
-        role="button"
+      <button
         class="tab select-none"
-        on:click={() => onTabClick(file)}
-        on:dblclick={(e) => e.stopPropagation()}
-        class:active={file === selectedFile}
+        onclick={() => onTabClick(idx)}
+        ondblclick={(e) => e.stopPropagation()}
+        class:active={idx === selectedFileIdx}
       >
-        {#if file === editing}
-          <!-- svelte-ignore a11y-autofocus -->
+        {#if file == editing}
+          <!-- svelte-ignore a11y_autofocus -->
           <input
             class="w-full border-none outline-none bg-transparent"
             autofocus
             spellcheck={false}
             bind:value={editing.filename}
-            on:focus={selectInput}
-            on:blur={finishFileRenaming}
-            on:keydown={tabEditKeyDown}
+            onfocus={selectInput}
+            onblur={finishFileRenaming}
+            onkeydown={tabEditKeyDown}
           />
         {:else}
           <span>{file.filename}</span>
@@ -837,29 +857,30 @@
             &bull;
           </span>
           {#if files.length > 1}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span
               class="close"
-              on:click|stopPropagation={(e) => removeFileAtIdx(idx)}
+              onclick={(e) => {
+                e.stopPropagation();
+                removeFileAtIdx(idx);
+              }}
             >
               <SvgAdd style={"display: inline-block; height: 8px"} />
             </span>
           {/if}
         {/if}
-      </div>
+      </button>
     {/each}
 
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div
+    <button
       class="tab tab-plus select-none font-bold"
       style="color: gray;"
-      on:click={() => addFile("main.txt", "")}
+      onclick={() => addFile("main.txt", "")}
       use:tooltip={"Add a file"}
     >
       +
-    </div>
+    </button>
 
     {#if gist.isLocalGist}
       <div class="tab-action">
@@ -867,7 +888,10 @@
           href="/dummy"
           class:inactive={!isGistChanged || savePending}
           use:tooltip={getSaveTooltip()}
-          on:click|preventDefault={saveLocalGist}
+          onclick={(ev) => {
+            ev.preventDefault();
+            saveLocalGist();
+          }}
         >
           save
         </a>
@@ -875,7 +899,13 @@
 
       {#if isLoggedIn}
         <div class="tab-action" use:tooltip={"Save to gist.github.com"}>
-          <a href="/dummy" on:click|preventDefault={saveLocalToGithub}>
+          <a
+            href="/dummy"
+            onclick={(ev) => {
+              ev.preventDefault();
+              saveLocalToGithub();
+            }}
+          >
             save as gist
           </a>
         </div>
@@ -885,7 +915,10 @@
         <a
           href="/dummy"
           class:inactive={!isGistChanged || savePending}
-          on:click|preventDefault={saveGist}
+          onclick={(ev) => {
+            ev.preventDefault();
+            saveGist();
+          }}
         >
           save gist
         </a>
@@ -894,28 +927,32 @@
 
     {#if isFormattable}
       <div class="tab-action" use:tooltip={"Format file"}>
-        <a href="/dummy" on:click|preventDefault={format}>format</a>
+        <a
+          href="/dummy"
+          onclick={(ev) => {
+            ev.preventDefault();
+            format();
+          }}>format</a
+        >
       </div>
     {/if}
 
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div
+    <button
       class="menu hover:bg-gray-100 px-2 py-1"
       bind:this={menuElement}
-      on:click={showMenu}
+      onclick={showMenu}
     >
       <SvgDots style={dotsStyle} />
-    </div>
+    </button>
 
     {#if showingMenu}
       <Overlay bind:open={showingMenu}>
         <!-- TOD: why need to use style and adding flex to class breaks things?-->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
           class="dropdown-content"
-          on:click={() => {
+          onclick={() => {
             showingMenu = false;
           }}
           use:positionnode={{
@@ -944,7 +981,13 @@
             {/if}
           {/each}
           {#if isDeletable}
-            <button class="text-red-500" on:click|preventDefault={deleteGist}>
+            <button
+              class="text-red-500"
+              onclick={(ev) => {
+                ev.preventDefault();
+                deleteGist();
+              }}
+            >
               Delete
             </button>
           {/if}

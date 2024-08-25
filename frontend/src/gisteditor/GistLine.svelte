@@ -47,7 +47,7 @@
   }
 
   async function deleteGist(ev) {
-    ev.preventDefaults();
+    ev.preventDefault();
     ev.stopPropagation();
     if (gist.isLocalGist) {
       deleteLocal();
