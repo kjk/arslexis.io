@@ -6,10 +6,9 @@
   import HelpButton from "./HelpButton.svelte";
   import GistEditorNav from "./GistEditorNav.svelte";
   import GistLine from "./GistLine.svelte";
-  import CreateGists from "./CreateGists.svelte";
   import About from "./About.svelte";
   import SelectLangDialog from "./SelectLangDialog.svelte";
-  // import { tooltip } from "../actions/tooltip.js";
+  import { tooltip } from "../actions/tooltip.js";
   import {
     gistsSummary,
     localGists,
@@ -21,7 +20,7 @@
     githubUserInfo,
     setOnGitHubLogin,
   } from "../github_login.js";
-  import { goToGistById } from "./router";
+  import { goToCreateNewGist, goToGistById } from "./router";
   import { focus } from "../actions/focus";
 
   let showingSelectLang = $state(false);
@@ -126,6 +125,10 @@
     refreshGistsForLoggedUser(true);
   }
 
+  function createNewTextGist() {
+    goToCreateNewGist("text");
+  }
+
   /**
    * @param {KeyboardEvent} ev
    */
@@ -159,11 +162,16 @@
     </div>
   {/if}
 
-  <CreateGists />
-  {#if true && totalGistsCount > 0}
-    <div class="relative bg-slate-200 w-[95vw] mx-auto flex mt-2">
+  <!-- <CreateGists /> -->
+  <div class="flex flex-row w-[95vw] mx-auto mt-2">
+    <button
+      class="mr-4 border border-gray-400 px-2 py-1 hover:bg-gray-100 self-center"
+      onclick={createNewTextGist}
+      use:tooltip={"Create new text gist"}>New Gist</button
+    >
+    <div class="flex-1 relative bg-slate-200 flex">
       <input
-        class="w-full border-2 border-gray-300 px-2 py-0.5"
+        class="w-full border border-gray-400 px-2 py-0.5"
         use:focus
         bind:value={searchTerm}
         autocomplete="off"
@@ -180,7 +188,7 @@
         private
       </div>
     </div>
-  {/if}
+  </div>
 
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->

@@ -10,10 +10,10 @@
   import { goGistEditorHome } from "./router.js";
 
   /** @type {{
-   gistid: string,
-   onGoHome: () => void,
-   onNewGist: () => void,
-   showTwitter: boolean,
+   gistid?: string,
+   onGoHome?: () => void,
+   onNewGist?: () => void,
+   showTwitter?: boolean,
   }}*/
   let {
     gistid = "",
