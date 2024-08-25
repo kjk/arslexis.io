@@ -22,6 +22,7 @@
     setOnGitHubLogin,
   } from "../github_login.js";
   import { goToGistById } from "./router";
+  import { focus } from "../actions/focus";
 
   let showingSelectLang = $state(false);
   let searchTerm = $state("");
@@ -158,26 +159,27 @@
     </div>
   {/if}
 
-  <div class="center flex flex-row items-center">
-    <div class="text-sm text-gray-400 min-w31">
-      {totalGistsCount}
-      {inflect("gist", totalGistsCount)},
-      {localGistsCount}
-      local,
-      {secretGistsCount}
-      private
-    </div>
-    <CreateGists />
-    <div class="min-w31"></div>
-  </div>
-
+  <CreateGists />
   {#if true && totalGistsCount > 0}
-    <input
-      class="center border-2 border-gray-300 mt-2 px-2 py-0.5 text-xs self-center"
-      bind:value={searchTerm}
-      autocomplete="off"
-      onkeydown={handleInputKeyDown}
-    />
+    <div class="relative bg-slate-200 w-[95vw] mx-auto flex mt-2">
+      <input
+        class="w-full border-2 border-gray-300 px-2 py-0.5"
+        use:focus
+        bind:value={searchTerm}
+        autocomplete="off"
+        onkeydown={handleInputKeyDown}
+      />
+      <div
+        class="italic text-xs text-gray-400 whitespace-nowrap absolute self-center right-2"
+      >
+        {totalGistsCount}
+        {inflect("gist", totalGistsCount)},
+        {localGistsCount}
+        local,
+        {secretGistsCount}
+        private
+      </div>
+    </div>
   {/if}
 
   <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -212,10 +214,6 @@
 <HelpButton />
 
 <style>
-  .min-w31 {
-    min-width: 31%;
-  }
-
   .btn {
     margin-left: 1em;
     padding: 4px 0.75em;
@@ -248,8 +246,5 @@
     /* tailwind: bg-gray-100 */
     --tw-bg-opacity: 1;
     background-color: rgba(243, 244, 246, var(--tw-bg-opacity));
-  }
-  input {
-    width: 840px !important;
   }
 </style>
