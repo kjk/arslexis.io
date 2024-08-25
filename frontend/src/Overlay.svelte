@@ -5,7 +5,6 @@
 
   export let open = false;
   export let closeOnEsc = true;
-  export let noFocus = false;
 
   let overlay = null;
 
