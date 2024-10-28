@@ -67,9 +67,9 @@
     // console.log("finished calcDIrSizes");
     await updateFilesLineCount(fs, null);
     calcTotals(fs);
-    // console.log("fnished calcLineCounts");
-    // dirRoot = dirRoot;
+    dirRoot = dirRoot;
     fs = fs;
+    console.log("fnished recalc");
   }
 
   /**
