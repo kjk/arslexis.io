@@ -14,15 +14,15 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-frontend/node_modules/
+node_modules/
+
 package-lock.json
 yarn.lock
 bun.lockb
-
 yarn-error.log
 .DS_Store
+
 arslexis_io-*
-node_modules
 dist/
 server/secrets.env
 data/
