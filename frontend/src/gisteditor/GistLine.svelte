@@ -66,7 +66,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div data-gist-id={gist.id}>
-  <div class="flex text-black truncate ml-2 mr-2 flex-grow">
+  <div class="flex text-black truncate ml-2 mr-2 grow">
     {removeDescriptionAd(gist.description || "<untitled>")}
     {#if gistType}
       <div
@@ -94,7 +94,7 @@
   {#if showingMenu}
     <Overlay bind:open={showingMenu}>
       <div
-        class="dropdown-content shadow"
+        class="dropdown-content shadow-xs"
         use:positionnode={{
           node: menuElement,
           position: "bottom-right",
@@ -103,7 +103,7 @@
         style={"display: flex; font-size: 9.5pt"}
       >
         {#if isDeletable}
-          <button class="!text-red-600" onclick={deleteGist}>Delete</button>
+          <button class="text-red-600!" onclick={deleteGist}>Delete</button>
         {/if}
       </div>
     </Overlay>

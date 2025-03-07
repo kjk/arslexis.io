@@ -91,7 +91,7 @@
         }
       }
       let sizeStr = fmtSize(a.totalSize);
-      let msg = `<div class="flex"><div>Reading <b>${a.dirName}</b></div><div class="flex-grow"></div><div>${a.fileCount} files, ${a.dirCount} dirs, ${sizeStr}</div></div>`;
+      let msg = `<div class="flex"><div>Reading <b>${a.dirName}</b></div><div class="grow"></div><div>${a.fileCount} files, ${a.dirCount} dirs, ${sizeStr}</div></div>`;
       // console.log(msg);
       progressHTML = msg;
       return true;

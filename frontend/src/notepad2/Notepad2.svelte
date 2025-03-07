@@ -1884,7 +1884,7 @@
 <svelte:body on:drop={handleDrop} />
 
 <main class="fixed inset-0 grid">
-  <div class="flex flex-nowrap items-center shadow text-xs z-10">
+  <div class="flex flex-nowrap items-center shadow-xs text-xs z-10">
     {#if settings.showMenu}
       <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
         ><svg
@@ -1964,7 +1964,7 @@
   />
   <div class="min-h-0 overflow-hidden">
     <div
-      class="codemirror-wrapper overflow-auto flex-grow bg-transparent"
+      class="codemirror-wrapper overflow-auto grow bg-transparent"
       bind:this={editorElement}
     ></div>
   </div>

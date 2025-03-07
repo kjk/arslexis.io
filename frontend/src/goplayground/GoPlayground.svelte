@@ -344,7 +344,7 @@ func main() {
     >
   </TopNav>
   <div class="text-sm overflow-auto">
-    <div class="codemirror-wrapper flex-grow" bind:this={editorElement}></div>
+    <div class="codemirror-wrapper grow" bind:this={editorElement}></div>
   </div>
 </div>
 

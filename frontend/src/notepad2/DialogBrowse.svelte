@@ -438,7 +438,7 @@
       <input
         type="text"
         disabled={newFileDisabled}
-        class="px-2 py-0.5 border-gray-300 border-b outline-none grow"
+        class="px-2 py-0.5 border-gray-300 border-b outline-hidden grow"
         spellcheck="false"
         placeholder="Enter file name..."
         autocomplete="off"
@@ -461,14 +461,14 @@
     {#if supportsFileSystem()}
       <button
         disabled={btnAddFolderDisabled}
-        class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+        class="btn-dlg px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded-xs min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
         use:tooltip={"Add folder from computer"}
         on:click={btnOpenFolderClicked}>Add Folder</button
       >
     {/if}
     <button
       disabled={btnRemoveDisabled}
-      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded-xs min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
       on:click={btnRemoveClicked}>{removeTitle}</button
     >
 
@@ -476,11 +476,11 @@
 
     <!-- <button
       disabled={btnOpenDisabled}
-      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
+      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded-xs min-w-[5rem] bg-white hover:border-blue-500 disabled:text-gray-200 disabled:border-0 disabled:bg-white"
       on:click={btnOpenClicked}>Open</button
     > -->
     <!-- <button
-      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded min-w-[5rem] bg-white hover:border-blue-500"
+      class="btn-dlg ml-4 px-4 py-0.5 hover:bg-blue-50 border border-gray-400 rounded-xs min-w-[5rem] bg-white hover:border-blue-500"
       use:focus
       on:click={close}>Close</button
     > -->

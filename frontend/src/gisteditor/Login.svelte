@@ -77,7 +77,7 @@
       </div>
 
       <div
-        class="dropdown-content flex flex-col items-start shadow top-full right-0"
+        class="dropdown-content flex flex-col items-start shadow-xs top-full right-0"
       >
         {#if !isHome}
           <button onclick={goHome}>Home</button>

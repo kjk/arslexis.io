@@ -80,11 +80,11 @@
       {gistType}
     </div>
   {/if}
-  <div class="flex-grow"></div>
+  <div class="grow"></div>
 {:else}
   <!-- svelte-ignore a11y_autofocus -->
   <input
-    class="flex-grow outline-none w-full border border-gray-400"
+    class="grow outline-hidden w-full border border-gray-400"
     autofocus
     spellcheck={false}
     bind:value={editingDescription}

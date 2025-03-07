@@ -47,14 +47,14 @@
 <div class="min-h-screen flex flex-col">
   <div class="flex flex-col items-center pt-2 pb-4">
     <div
-      class="text-6xl font-bold outlined-text !outline-blue-700"
+      class="text-6xl font-bold outlined-text outline-blue-700!"
       style="font-family: 'Cooper Black', 'Arial Rounded MT Bold', 'Futura', 'Roboto', sans-serif;"
     >
       <a
         href="https://arslexis.io"
         target="_blank"
         title="ArsLexis Website"
-        class="!no-underline !text-white">ArsLexis</a
+        class="no-underline! text-white!">ArsLexis</a
       >
     </div>
     <!-- <img src={logo} alt="ArsLexis Logo" width="220" /> -->
@@ -171,6 +171,7 @@
 </div>
 
 <style>
+  @reference "./base.css";
   a {
     @apply underline underline-offset-2;
     @apply text-blue-700;

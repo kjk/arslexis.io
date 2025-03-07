@@ -299,6 +299,8 @@
 </table>
 
 <style>
+  @reference "../base.css";
+
   /*
   TODO: hacky because there can be more indentation levels
   */

@@ -105,7 +105,7 @@
   <Overlay bind:open>
     <div class="dialog fixed flex flex-col bg-white border shadow-md">
       <input
-        class="outline-none border mx-3 mb-2 mt-3 px-2 py-1 text-sm"
+        class="outline-hidden border mx-3 mb-2 mt-3 px-2 py-1 text-sm"
         bind:value={searchTerm}
         use:delayedFocus
         autocomplete="off"

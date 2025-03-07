@@ -784,7 +784,7 @@
 
 {#if resultStdErr || resultStdOut}
   <div
-    class="output-wrap absolute z-40 overflow-auto bg-white shadow bottom-16 right-8"
+    class="output-wrap absolute z-40 overflow-auto bg-white shadow-xs bottom-16 right-8"
   >
     <button
       class="close-btn top-2 px-2 py-1 right-2 cursor-pointer z-40 absolute
@@ -840,7 +840,7 @@
         {#if file == editing}
           <!-- svelte-ignore a11y_autofocus -->
           <input
-            class="w-full border-none outline-none bg-transparent"
+            class="w-full border-none outline-hidden bg-transparent"
             autofocus
             spellcheck={false}
             bind:value={editing.filename}
@@ -999,7 +999,7 @@
   <div class="flex overflow-hidden">
     <div
       class:halfwidth={doublePane}
-      class="codemirror-wrapper text-sm overflow-auto flex-grow bg-transparent"
+      class="codemirror-wrapper text-sm overflow-auto grow bg-transparent"
       bind:this={editorElement}
     ></div>
 

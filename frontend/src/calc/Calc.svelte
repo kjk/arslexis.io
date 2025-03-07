@@ -111,7 +111,7 @@ speed in mps
     <textarea
       bind:value={expression}
       bind:this={textarea}
-      class="grow px-4 py-1 border-none text-sm focus-visible:outline-none"
+      class="grow px-4 py-1 border-none text-sm focus-visible:outline-hidden"
       placeholder="expression"
     ></textarea>
     <div
