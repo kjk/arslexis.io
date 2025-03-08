@@ -22,6 +22,8 @@
   /** @typedef {import("../fs").FileSysDir} FileSysDir */
   /** @typedef {import("../fs").ReadFilesCbArgs} ReadFilesCbArgs */
 
+  let forceRepaint = $state(0);
+
   /** @type {FileSysDir} */
   let fs = $state(null);
 
@@ -67,9 +69,8 @@
     // console.log("finished calcDIrSizes");
     await updateFilesLineCount(fs, null);
     calcTotals(fs);
-    dirRoot = dirRoot;
-    fs = fs;
-    console.log("fnished recalc");
+    forceRepaint++;
+    console.log("finished recalc");
   }
 
   /**
@@ -148,9 +149,8 @@
     }
     await updateFilesLineCount(fs, onDir);
     calcTotals(fs);
+    forceRepaint++;
     progressHTML = "";
-    fs = fs;
-    // dirRoot = dirRoot;
   }
 
   /**
@@ -242,7 +242,7 @@
   </div>
 {/if}
 
-{#key fs}
+{#key forceRepaint}
   {#if fs}
     <div class="mx-4 mt-2 text-sm font-mono">
       {#if dirRoot !== -1}

@@ -1,3 +1,5 @@
+<svelte:options runes={true} />
+
 <script module>
   import { verifyHandlePermission, isBinary, lineCount } from "../fileutil";
 
@@ -171,7 +173,7 @@
   import DialogConfirm from "../DialogConfirm.svelte";
   import { fmtNum, fmtSize, throwIf } from "../util";
   import { showInfoMessage } from "../Messages.svelte";
-  import { onMount } from "svelte";
+  import Folder from "./Folder.svelte";
   import { logWcEvent } from "../events";
   import {
     entryFullPath,
@@ -179,19 +181,23 @@
     fsVisitDirs,
     sortEntries,
   } from "../fs";
+  import { onMount } from "svelte";
 
-  /** @type {FileSysDir} */
-  export let fs;
-  /** @type {FsEntry} */
-  export let dirRoot;
-  export let indent;
-  /** @type {Function} */
-  export let recalc;
+  /** @type {{
+   fs: FileSysDir,
+   dirRoot: FsEntry,
+   indent: number,
+   recalc: Function,
+  }}*/
+  let { fs, dirRoot, indent, recalc } = $props();
 
   /** @type {FsEntry[]} */
-  let entries = [];
+  let entries = $state([]);
+
+  let forceRepaint = $state(0);
 
   onMount(() => {
+    console.log("Folder mount");
     // SUBTLE: important to not re-order dirRoot entries because
     // they could be used in calcLineCount()
     // we use and sort a copy
@@ -207,13 +213,13 @@
   function toggleExpand(fs, e) {
     let expanded = isExpanded(fs, e);
     setExpanded(fs, e, !expanded);
-    entries = entries;
+    forceRepaint++;
   }
 
-  let showingConfirmDelete = false;
+  let showingConfirmDelete = $state(false);
   let toDeleteIdx;
-  let confirmDeleteTitle = "";
-  let confirmDeleteMessage = "";
+  let confirmDeleteTitle = $state("");
+  let confirmDeleteMessage = $state("");
 
   async function handleDelete() {
     let e = entries[toDeleteIdx];
@@ -262,8 +268,7 @@
   }
 </script>
 
-{#key entries}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
+{#key forceRepaint}
   {#each entries as e, idx}
     {@const name = fs.entryName(e)}
     {@const size = fs.entryMeta(e, "size") || 0}
@@ -274,7 +279,7 @@
     {@const excluded = isExcluded(fs, e)}
     {#if isDir}
       <tr
-        on:click={() => toggleExpand(fs, e)}
+        onclick={() => toggleExpand(fs, e)}
         class="hover:bg-gray-200 hover:cursor-pointer pl-8"
       >
         <td class="ind-{indent} font-semibold">
@@ -293,28 +298,37 @@
         <td class="pl-2 text-right">{fmtNum(metaLineCount)}</td>
         <td class="text-center bg-white"
           ><button
-            on:click|stopPropagation={() => deleteDirOrFile(idx)}
+            onclick={(ev) => {
+              ev.stopPropagation();
+              deleteDirOrFile(idx);
+            }}
             class="hover:underline px-4 hover:text-red-600">delete</button
           ></td
         >
         {#if excluded}
           <td class="text-center bg-white"
             ><button
-              on:click|stopPropagation={() => doExclude(e, false)}
+              onclick={(ev) => {
+                ev.stopPropagation();
+                doExclude(e, false);
+              }}
               class="hover:underline px-4 text-blue-600">include</button
             ></td
           >
         {:else}
           <td class="text-center bg-white"
             ><button
-              on:click|stopPropagation={() => doExclude(e, true)}
+              onclick={(ev) => {
+                ev.stopPropagation();
+                doExclude(e, true);
+              }}
               class="hover:underline px-4">exclude</button
             ></td
           >
         {/if}
       </tr>
       {#if isExpanded(fs, e)}
-        <svelte:self {fs} {recalc} dirRoot={e} indent={indent + 1} />
+        <Folder {fs} {recalc} dirRoot={e} indent={indent + 1} />
       {/if}
     {/if}
   {/each}
@@ -334,21 +348,27 @@
       <td class="pl-2 text-right">{fmtNum(getLineCount(fs, e))}</td>
       <td class="text-center bg-white"
         ><button
-          on:click={() => deleteDirOrFile(idx)}
+          onclick={() => deleteDirOrFile(idx)}
           class="hover:underline px-4 hover:text-red-600">delete</button
         ></td
       >
       {#if excluded}
         <td class="text-center bg-white"
           ><button
-            on:click|stopPropagation={() => doExclude(e, false)}
+            onclick={(ev) => {
+              ev.stopPropagation();
+              doExclude(e, false);
+            }}
             class="hover:underline px-4 text-blue-600">include</button
           ></td
         >
       {:else}
         <td class="text-center bg-white"
           ><button
-            on:click|stopPropagation={() => doExclude(e, true)}
+            onclick={(ev) => {
+              ev.stopPropagation();
+              doExclude(e, true);
+            }}
             class="hover:underline px-4">exclude</button
           ></td
         >
