@@ -25,18 +25,19 @@
 </script>
 
 <script>
+  import Folder from "./Folder.svelte";
   import { fmtNum, fmtSize, len, throwIf } from "../util";
   import { tick } from "svelte";
 
   /** @type { {
    fs: FileSys,
    dirRoot: FsEntry,
-   isRoot: boolean,
+   isRoot?: boolean,
    indent: number,
    recalc: Function,
    onSelected: Function,
    onGoUp: Function,
-   initialSelectionIdx: number,
+   initialSelectionIdx?: number,
   }}*/
   let {
     fs,
@@ -57,6 +58,8 @@
 
   /** @type {FsEntry[]} */
   let entries = $derived(calcEntries(dirRoot));
+
+  let forceRender = $state(0);
 
   /**
    * @param {FsEntry} dirRoot
@@ -92,9 +95,10 @@
    * @param {FsEntry} e
    */
   function toggleExpand(e) {
+    console.log("toggleExpand", e);
     let expanded = isExpanded(fs, e);
     setExpanded(fs, e, !expanded);
-    // entries = entries;
+    forceRender++;
   }
 
   /**
@@ -234,6 +238,44 @@
   }
 </script>
 
+{#snippet emptyState()}
+  {#if len(entries) == 0}
+    <tr
+      bind:this={noFilesEl}
+      tabindex="0"
+      class="hover:bg-gray-200 hover:cursor-pointer border"
+    >
+      <td class="text-center py-10">No files</td>
+    </tr>
+  {/if}
+{/snippet}
+
+{#snippet dir(fs, e, idx)}
+  <tr
+    data-idx={idx}
+    tabindex="0"
+    class="hover:bg-gray-200 hover:cursor-pointer w-full"
+  >
+    <td class="ind-{indent} font-semibold" onclick={() => toggleExpand(e)}>
+      {#if isExpanded(fs, e)}
+        ▼
+      {:else}
+        ▶
+      {/if}
+      {fs.entryName(e)}
+    </td>
+    <td class="pl-2 text-right whitespace-nowrap w-auto">
+      {fmtDirs(e)}
+    </td>
+    <td class="pl-2 text-right whitespace-nowrap w-auto">
+      {fmtFiles(e)}
+    </td>
+    <td class="pl-2 text-right whitespace-nowrap w-auto">
+      {fmtEntrySize(e)}
+    </td>
+  </tr>
+{/snippet}
+
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <table
   class="font-mono text-sm mt-[2px] w-full table-auto border-collapse"
@@ -242,65 +284,43 @@
   onkeydown={handleKeyDown}
 >
   <tbody bind:this={tbodyEl}>
-    {#if len(entries) == 0}
-      <tr
-        bind:this={noFilesEl}
-        tabindex="0"
-        class="hover:bg-gray-200 hover:cursor-pointer border"
-      >
-        <td class="text-center py-10">No files</td>
-      </tr>{/if}
-    {#each entries as e, idx}
-      {#if fs.entryIsDir(e)}
-        <tr
-          data-idx={idx}
-          tabindex="0"
-          class="hover:bg-gray-200 hover:cursor-pointer w-full"
-        >
-          <td class="ind-{indent} font-semibold">
-            {#if isExpanded(fs, e)}
-              ▼
-            {:else}
-              ▶
-            {/if}
-            {fs.entryName(e)}
-          </td>
-          <td class="pl-2 text-right whitespace-nowrap w-auto">
-            {fmtDirs(e)}
-          </td>
-          <td class="pl-2 text-right whitespace-nowrap w-auto">
-            {fmtFiles(e)}
-          </td>
-          <td class="pl-2 text-right whitespace-nowrap w-auto">
-            {fmtEntrySize(e)}
-          </td>
-        </tr>
-        {#if isExpanded(fs, e)}
-          <svelte:self {recalc} dirRoot={e} indent={indent + 1} />
+    {#key forceRender}
+      {@render emptyState()}
+      {#each entries as e, idx}
+        {#if fs.entryIsDir(e)}
+          {@render dir(fs, e, idx)}
+          {#if isExpanded(fs, e)}
+            <Folder
+              {fs}
+              dirRoot={e}
+              indent={indent + 1}
+              {recalc}
+              {onSelected}
+              {onGoUp}
+            />
+          {/if}
         {/if}
-      {/if}
-    {/each}
+      {/each}
 
-    {#each entries as e, idx (idx)}
-      {#if !fs.entryIsDir(e)}
-        <tr
-          data-idx={idx}
-          tabindex="0"
-          class="hover:bg-gray-200 even:bg-gray-50"
-        >
-          <td class="ind-{indent + 1}">{fs.entryName(e)} </td>
-          <td colspan="3" class="pl-2 text-right whitespace-nowrap"
-            >{fmtEntrySize(e)}
-          </td>
-        </tr>
-      {/if}
-    {/each}
+      {#each entries as e, idx (idx)}
+        {#if !fs.entryIsDir(e)}
+          <tr
+            data-idx={idx}
+            tabindex="0"
+            class="hover:bg-gray-200 even:bg-gray-50"
+          >
+            <td class="ind-{indent + 1}">{fs.entryName(e)} </td>
+            <td colspan="3" class="pl-2 text-right whitespace-nowrap"
+              >{fmtEntrySize(e)}
+            </td>
+          </tr>
+        {/if}
+      {/each}
+    {/key}
   </tbody>
 </table>
 
 <style>
-  @reference "../base.css";
-
   /*
   TODO: hacky because there can be more indentation levels
   */
@@ -357,6 +377,6 @@
   }
 
   tr:focus {
-    @apply bg-blue-100;
+    background-color: var(--color-blue-100); /* bg-blue-100 */
   }
 </style>
