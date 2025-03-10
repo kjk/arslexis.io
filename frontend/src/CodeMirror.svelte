@@ -49,7 +49,7 @@
       placeholder,
       editable,
       readonly,
-      lang
+      lang,
     ),
     ...get_theme(theme, styles),
     ...extensions,
@@ -131,7 +131,7 @@
     placeholder,
     editable,
     readonly,
-    lang
+    lang,
   ) {
     const extensions = [
       indentUnit.of(" ".repeat(tabSize)),
@@ -156,7 +156,7 @@
   }
 </script>
 
-<div class="codemirror-wrapper {classes}" bind:this={element} />
+<div class="codemirror-wrapper {classes}" bind:this={element}></div>
 
 <style>
   .codemirror-wrapper :global(.cm-focused) {

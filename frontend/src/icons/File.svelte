@@ -1,5 +1,6 @@
 <script>
-  export let size = 16;
+  /** @type {{size?: string, [key: string]: any}} */
+  let { size = "16", ...rest } = $props();
 </script>
 
 <!--
@@ -29,6 +30,7 @@
   height={size}
   preserveAspectRatio="xMidYMid meet"
   viewBox="0 0 1024 1024"
+  {...rest}
   ><rect
     x="0"
     y="0"

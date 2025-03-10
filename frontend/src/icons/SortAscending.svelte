@@ -1,14 +1,6 @@
 <script>
-  export let size = 16;
-
-  export let title = undefined;
-
-  $: labelled = $$props["aria-label"] || $$props["aria-labelledby"] || title;
-  $: attributes = {
-    "aria-hidden": labelled ? undefined : true,
-    role: labelled ? "img" : undefined,
-    focusable: Number($$props["tabindex"]) === 0 ? "true" : undefined
-  };
+  /** @type {{size?: string, title?: any, [key: string]: any}} */
+  let { size = "16", title = undefined, ...rest } = $props();
 </script>
 
 <svg
@@ -18,8 +10,10 @@
   preserveAspectRatio="xMidYMid meet"
   width={size}
   height={size}
-  {...attributes}
-  {...$$restProps}>
+  {...rest}
+>
   {#if title}<title>{title}</title>{/if}
-  <path d="M18 22L19.414 20.586 23 24.172 23 4 25 4 25 24.172 28.586 20.586 30 22 24 28 18 22zM2 18H16V20H2zM6 12H16V14H6zM10 6H16V8H10z"></path>
+  <path
+    d="M18 22L19.414 20.586 23 24.172 23 4 25 4 25 24.172 28.586 20.586 30 22 24 28 18 22zM2 18H16V20H2zM6 12H16V14H6zM10 6H16V8H10z"
+  ></path>
 </svg>
