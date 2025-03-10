@@ -5,10 +5,11 @@ import { KV, makeIndexedDBStore } from "../dbutil";
 const db = new KV("fmstore", "keyval");
 
 /**
- * @typedef {Object} RecentEntry
- * @property {string} name
- * @property {FileSystemDirectoryHandle} dirHandle
- */
+ @typedef {{
+    name: string,
+    dirHandle: FileSystemDirectoryHandle
+  }} RecentEntry
+*/
 
 /** @type {import("svelte/store").Writable<RecentEntry[]>} */
 export let recent = makeIndexedDBStore(db, "recent", [], false);

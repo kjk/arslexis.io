@@ -13,31 +13,31 @@ export const kFileSysInvalidEntry = -1;
 
 /** @typedef {number} FsEntry */
 
-// Note: FileSystem is a type in js stdlib
+// Note: named FileSys because FileSystem is a type in js stdlib
 /**
- * @typedef {Object} FileSys
- * @property { () => FsEntry } rootEntry
- * @property { () => number } entriesCount
- * @property { (FsEntry) => FsEntry } entryParent
- * @property { (FsEntry) => boolean } entryIsDir
- * @property { (FsEntry) => string } entryName
- * @property { (FsEntry) => number } entrySize
- * @property { (FsEntry, number) => void } setEntrySize
- * @property { (FsEntry) => number } entryCreateTime
- * @property { (FsEntry) => number } entryModTime
- * @property { (FsEntry) => number[] } entryChildren
- * @property { (FsEntry) => number } entryDirCount
- * @property { (FsEntry) => number } entryFileCount
- * @property { (FsEntry) => any[] } entryMetaAll // returns all metadata
- * @property { (FsEntry, string, any) => any } entrySetMeta
- * @property { (FsEntry, string) => any } entryMeta
- * @property { (string) => number } internMetaKey
- * perf: when doing entryMeta frequently, save internMetaKey cost
- * by doing it once and using entryMetaByKeyIdx
- * @property { (FsEntry, number) => any } entryMetaByKeyIdx
+ @typedef {{
+    rootEntry: () => FsEntry,
+    entriesCount: () => number,
+    entryParent: (FsEntry) => FsEntry,
+    entryIsDir: (FsEntry) => boolean,
+    entryName: (FsEntry) => string,
+    entrySize: (FsEntry) => number,
+    entryCreateTime: (FsEntry) => number,
+    entryModTime: (FsEntry) => number,
+    entryChildren: (FsEntry) => number[],
+    entryDirCount: (FsEntry) => number,
+    entryFileCount: (FsEntry) => number,
+    entrySetMeta: (FsEntry, string, any) => any,
+    entryMeta: (FsEntry, string) => any,
+    // perf: cache for use in entryMetaByKeyIdx
+    internMetaKey: (string) => number,
+    // perf: when doing entryMeta frequently, save internMetaKey cost
+    // by doing it once and using entryMetaByKeyIdx
+    entryMetaByKeyIdx: (FsEntry, number) => any,
+  }} FileSys
  */
 
-// index withing multiNumInfo flat array
+// index withing entryInfo flat array
 const kParentIdx = 0;
 const kSizeIdx = 1;
 const kModTimeIdx = 2;
@@ -54,7 +54,7 @@ export class FileSysDir {
   /** @type {FileSystemDirectoryHandle[]} */
   handles = [];
 
-  // for every entry we have kEntryInfoCount numbers
+  // each entry is represented by kEntryInfoCount numbers
   /** @type {number[]} */
   entryInfo = [];
 
@@ -64,7 +64,7 @@ export class FileSysDir {
   /** @type {string[]} */
   metaKeys = [];
 
-  // multiNumInfo[kMultiNumPropsCount] is an idx into metaIndex
+  // entryInfo[kFirstMetaIdx] is an idx into metaIndex
   // first element is interned key returned by internMetaKey(key)
   // second element is index into metaValues
   // third is idx into metaIndex and implements linked list of meta values
@@ -97,14 +97,6 @@ export class FileSysDir {
     let n = len(this.entryInfo);
     throwIf(n % kEntryInfoCount !== 0);
     return n / kEntryInfoCount;
-  }
-
-  /**
-   * @param {FsEntry} e
-   * @returns {any[]}
-   */
-  entryMetaAll(e) {
-    return null;
   }
 
   /**
@@ -211,8 +203,8 @@ export class FileSysDir {
     if (e == 0) {
       return kFileSysInvalidEntry;
     }
-    let idx = e * kEntryInfoCount + kParentIdx;
-    return this.entryInfo[idx];
+    let idx = e * kEntryInfoCount;
+    return this.entryInfo[idx + kParentIdx];
   }
 
   /**
@@ -228,8 +220,8 @@ export class FileSysDir {
    * @returns {number}
    */
   entrySize(e) {
-    let idx = e * kEntryInfoCount + kSizeIdx;
-    return this.entryInfo[idx];
+    let idx = e * kEntryInfoCount;
+    return this.entryInfo[idx + kSizeIdx];
   }
 
   /**
@@ -237,8 +229,8 @@ export class FileSysDir {
    * @param {number} size
    */
   setEntrySize(e, size) {
-    let idx = e * kEntryInfoCount + kSizeIdx;
-    this.entryInfo[idx] = size;
+    let idx = e * kEntryInfoCount;
+    this.entryInfo[idx + kSizeIdx] = size;
   }
 
   /**
@@ -256,8 +248,8 @@ export class FileSysDir {
    */
   entryCreateTime(e) {
     // browser API doesn't provide creation time so we re-use mod time
-    let idx = e * kEntryInfoCount + kModTimeIdx;
-    return this.entryInfo[idx];
+    let idx = e * kEntryInfoCount;
+    return this.entryInfo[idx + kModTimeIdx];
   }
 
   /**
@@ -265,8 +257,8 @@ export class FileSysDir {
    * @returns {number}
    */
   entryModTime(e) {
-    let idx = e * kEntryInfoCount + kModTimeIdx;
-    return this.entryInfo[idx];
+    let idx = e * kEntryInfoCount;
+    return this.entryInfo[idx + kModTimeIdx];
   }
 
   /**
@@ -407,6 +399,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
     }
     let children = [];
     // for await (const [name, handle] of dirHandle)
+    // @ts-ignore
     for await (const fshandle of dirHandle.values()) {
       name = fshandle.name;
       let isDir = fshandle.kind === "directory";
