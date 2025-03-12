@@ -22,6 +22,7 @@ export default defineConfig({
         unzip: resolve("src", "unzip", "index.html"),
         wc: resolve("src", "wc", "index.html"),
         fm: resolve("src", "fm", "index.html"),
+        bookmarks: resolve("src", "bookmarks", "index.html"),
         image_resize_optimize: resolve(
           "src",
           "image-resize-optimize",

@@ -68,12 +68,16 @@
 
   <!-- <div class="text-center font-bold">Our software</div> -->
 
-  {#snippet row(name, url, desc)}
+  {#snippet row(name, url, desc, blank = true)}
     <tr>
-      <td class="text-left align-top"
-        ><a class="font-semibold whitespace-nowrap" href={url} target="_blank"
-          >{name}</a
-        >
+      <td class="text-left align-top">
+        {#if blank}
+          <a class="font-semibold whitespace-nowrap" href={url} target="_blank"
+            >{name}</a
+          >
+        {:else}
+          <a class="font-semibold whitespace-nowrap" href={url}>{name}</a>
+        {/if}
       </td>
       <td class="pl-4 align-top">{@html desc}</td>
     </tr>
@@ -119,18 +123,17 @@
   <table class="table-auto mx-8 mt-2 striped-tr">
     <tbody>
       {@render tbody()}
-    </tbody>
-  </table>
-
-  {#if isLocal()}
-    <div id="in-progress" class="mt-4 text-center">
-      Tools in progress <span class="text-red-500"
-        >i.e. not fully implemented</span
-      >:
-    </div>
-
-    <table class="table-auto mx-8 mt-2">
-      <tbody>
+      {#if isLocal()}
+        <tr>
+          <td colspan="2">
+            <div id="in-progress" class="mt-4 text-center">
+              Tools in progress <span class="text-red-500"
+                >i.e. not fully implemented</span
+              >:
+            </div>
+          </td>
+        </tr>
+        {@render row("bookmarks", "/bookmarks/", "bookmark manager", false)}
         {@render row("reader", "/reader/", "Comic Book (.cbz, .cbr) reader")}
         {@render row(
           "image optimize",
@@ -138,9 +141,13 @@
           "optimize multiple images at once",
         )}
         {@render row("qrscanner", "/qrscanner/", "qrscanner")}
-      </tbody>
-    </table>
-  {/if}
+      {/if}
+    </tbody>
+  </table>
+
+  <table class="table-auto mx-8 mt-2">
+    <tbody> </tbody>
+  </table>
 
   <div class="mt-8 mx-8 flex gap-2">
     <div>Have feedback?</div>
