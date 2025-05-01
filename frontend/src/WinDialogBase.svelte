@@ -70,7 +70,7 @@
 {#if open}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-static-element-interactions -->
   <div
-    class="fixed inset-0 z-40 bg-gray-600 bg-opacity-40"
+    class="fixed inset-0 z-40 bg-gray-600/40"
     bind:this={overlay}
     on:click={handleClick}
     on:keydown={handleKeyDown}
@@ -95,7 +95,7 @@
           class="btn-dlg hover:bg-blue-200 mr-2 text-gray-700"
           on:click={close}
         >
-          <Close size={20} />
+          <Close size="20" />
         </button>
       </div>
 

@@ -60,7 +60,7 @@
   <div
     tabindex="-1"
     use:focus
-    class="fixed inset-0 z-50 flex bg-gray-600 bg-opacity-40 text-black"
+    class="fixed inset-0 z-50 flex bg-gray-600/40 text-black"
     bind:this={overlay}
     on:click={handleClick}
     on:keydown={handleKeyDown}
