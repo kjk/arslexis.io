@@ -120,6 +120,7 @@
     xhtmlUnEscapeChars,
     escapeCChars,
     unescapeCChars,
+    stringToUtf8Blob,
   } from "../strutil";
   import { findUnicodeStrByMenuID } from "./unicodeChars";
   import {
@@ -584,8 +585,7 @@
    */
   function getCurrentContent() {
     const s = editorView.state.doc.toString();
-    const d = new TextEncoder().encode(s);
-    const blob = new Blob([d.buffer]);
+    const blob = stringToUtf8Blob(s);
     return blob;
   }
 
@@ -676,8 +676,7 @@
     console.log("saveFile:", fileIn);
     initialState = editorView.state;
     const content = initialState.doc.toString();
-    const d = new TextEncoder().encode(content);
-    const blob = new Blob([d.buffer]);
+    const blob = stringToUtf8Blob(content);
     writeFile(fileIn, blob);
     isDirty = false;
     file = fileIn;
@@ -1594,6 +1593,7 @@
       case m.IDM_EDIT_FIND:
       case m.IDT_EDIT_REPLACE:
       case m.IDM_EDIT_REPLACE:
+        // @ts-ignore
         openSearchPanel(editorView);
         noEditorFocus = true;
         break;

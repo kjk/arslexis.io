@@ -521,3 +521,12 @@ export function xhtmlUnEscapeChars(s, forXml = false) {
 export function xhtmlUnEscapeCharsForXML(s) {
   return escapeByTable(s, xmlEscapes, -1, true);
 }
+
+/**
+ *
+ * @param {string} str
+ * @returns {Blob}
+ */
+export function stringToUtf8Blob(str) {
+  return new Blob([str], { type: "text/plain; charset=utf-8" });
+}
