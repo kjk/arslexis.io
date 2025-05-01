@@ -1886,7 +1886,11 @@
 <main class="fixed inset-0 grid">
   <div class="flex flex-nowrap items-center shadow-xs text-xs z-10">
     {#if settings.showMenu}
-      <a href="/" class="ml-1 px-1 hover:bg-black/5" use:tooltip={"all tools"}
+      <a
+        href="/"
+        aria-label="home"
+        class="ml-1 px-1 hover:bg-black/5"
+        use:tooltip={"all tools"}
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           width="1em"

@@ -20,13 +20,14 @@
 <script>
   import { parseShortcut, serializeShortuct } from "./keys.js";
   import { len, splitMax } from "./util.js";
+  import Menu from "./Menu.svelte";
 
   // based on https://play.tailwindcss.com/0xQBSdXxsK
 
   /** @type {{
    menu: any[],   // array of menu items
    nest: number,
-   filterFn: Function,
+   filterFn?: Function,
    onmenucmd: (cmd: string, ev: Event) => void,
 }}*/
   let { menu, nest = 1, filterFn, onmenucmd } = $props();
@@ -183,7 +184,7 @@
           <div
             class="menu-child{nest} invisible absolute top-0 left-full transform opacity-0 transition-all duration-300"
           >
-            <svelte:self menu={submenu} nest={nest + 1} />
+            <Menu menu={submenu} nest={nest + 1} {filterFn} {onmenucmd} />
           </div>
         </div>
       {:else}
@@ -233,25 +234,25 @@
   }
 
   :global(
-      .menu-parent1:hover .menu-child1,
-      .menu-parent1:focus-within .menu-child1
-    ) {
+    .menu-parent1:hover .menu-child1,
+    .menu-parent1:focus-within .menu-child1
+  ) {
     opacity: 100%;
     visibility: visible;
   }
 
   :global(
-      .menu-parent2:hover .menu-child2,
-      .menu-parent2:focus-within .menu-child2
-    ) {
+    .menu-parent2:hover .menu-child2,
+    .menu-parent2:focus-within .menu-child2
+  ) {
     opacity: 100%;
     visibility: visible;
   }
 
   :global(
-      .menu-parent3:hover .menu-child3,
-      .menu-parent3:focus-within .menu-child3
-    ) {
+    .menu-parent3:hover .menu-child3,
+    .menu-parent3:focus-within .menu-child3
+  ) {
     opacity: 100%;
     visibility: visible;
   }
