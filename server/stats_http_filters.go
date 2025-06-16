@@ -1,4 +1,4 @@
-package main
+package server
 
 // those are different for each server
 

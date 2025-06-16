@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -302,7 +302,7 @@ func countFilesInFS(fsys fs.ReadDirFS) int {
 }
 
 func checkHasEmbeddedFiles() {
-	nEmbedded := countFilesInFS(wwwFS)
+	nEmbedded := countFilesInFS(WwwFS)
 	if nEmbedded < 5 {
 		logf("not enough embedded files ('%d')\n", nEmbedded)
 		os.Exit(1)

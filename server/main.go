@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"flag"
@@ -120,7 +120,7 @@ func isDev() bool {
 	return flgRunDev
 }
 
-func main() {
+func Main() {
 	var (
 		flgDeployHetzner  bool
 		flgSetupAndRun    bool

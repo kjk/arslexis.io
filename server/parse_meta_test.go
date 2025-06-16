@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 var (
 	s = `// :run go run main.go -echo echo-arg additional arg
 // :collection Essential Go
-package main
+package server
 
 import (
 	"flag"
