@@ -377,7 +377,7 @@ func testRunServerProd() {
 	logf("testRunServerProd\n")
 	emptyFrontEndBuildDir()
 	exeName := buildForProdLocal()
-	cmd := exec.Command(exeName, "-run-prod")
+	cmd := exec.Command("./"+exeName, "-run-prod")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()

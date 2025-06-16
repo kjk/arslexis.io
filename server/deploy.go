@@ -230,7 +230,7 @@ func buildForProdLocal() string {
 	deleteOldBuilds()
 	exeName := buildForProd(false)
 	exeSize := u.FormatSize(u.FileSize(exeName))
-	logf("created:\n%s %s\n", exeName, exeSize)
+	logf("created:%sof size  %s\n", exeName, exeSize)
 	return exeName
 }
 
