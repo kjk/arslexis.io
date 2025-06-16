@@ -111,9 +111,6 @@ var (
 	flgRunDev bool
 	// compiled assets embedded in the binary
 	flgRunProd bool
-	// compiled assets served from dist directory
-	// mostly for testing that the assets are correctly built
-	flgRunProdLocal bool
 )
 
 func isDev() bool {
@@ -122,22 +119,19 @@ func isDev() bool {
 
 func Main() {
 	var (
-		flgDeployHetzner  bool
-		flgSetupAndRun    bool
-		flgBuildLocalProd bool
-		flgUpdateGoDeps   bool
-		flgClean          bool
-		flgTest           bool
+		flgDeployHetzner bool
+		flgSetupAndRun   bool
+		flgUpdateGoDeps  bool
+		flgTest          bool
+		flgTestRunProd   bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
-		flag.BoolVar(&flgRunProdLocal, "run-local-prod", false, "run server in production but locally")
+		flag.BoolVar(&flgTestRunProd, "test-run-prod", false, "build production version, run locally, to test production build")
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
-		flag.BoolVar(&flgBuildLocalProd, "build-local-prod", false, "build for production run locally")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.BoolVar(&flgUpdateGoDeps, "update-go-deps", false, "update go dependencies")
-		flag.BoolVar(&flgClean, "clean", false, "clean build")
 		flag.BoolVar(&flgTest, "test", false, "run go and js tests")
 		flag.Parse()
 	}
@@ -153,15 +147,14 @@ func Main() {
 		return
 	}
 
-	if flgClean {
+	if false {
 		clean()
 		return
 	}
 
-	if flgBuildLocalProd {
+	if false {
 		defer measureDuration()()
 		buildForProdLocal()
-		emptyFrontEndBuildDir()
 		return
 	}
 
@@ -189,11 +182,13 @@ func Main() {
 		return
 	}
 
+	if flgTestRunProd {
+		testRunServerProd()
+		return
+	}
+
 	n := 0
 	if flgRunDev {
-		n++
-	}
-	if flgRunProdLocal {
 		n++
 	}
 	if flgRunProd {
@@ -209,7 +204,7 @@ func Main() {
 
 	logtastic.BuildHash = GitCommitHash
 	logtastic.LogDir = getLogsDirMust()
-	if flgRunProd {
+	if flgRunProd && !isWinOrMac() {
 		logtastic.Server = "l.arslexis.io"
 	} else {
 		logtastic.Server = "127.0.0.1:9327"
@@ -223,11 +218,6 @@ func Main() {
 
 	if flgRunProd {
 		runServerProd()
-		return
-	}
-
-	if flgRunProdLocal {
-		runServerProdLocal()
 		return
 	}
 

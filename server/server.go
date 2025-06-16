@@ -243,17 +243,32 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 	return httpSrv
 }
 
-func maybeOpenBrowserDelayed(httpSrv *http.Server) {
-	if !u.IsWinOrMac() {
-		return
+func waitForServerReadyMust(uri string) {
+	logf("waitForServerReady: waiting for '%s' to be ready\n", uri)
+	for i := 0; i < 10; i++ {
+		resp, err := http.Get(uri)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			logf("waitForServerReady: got response from '%s'\n", uri)
+			resp.Body.Close()
+			return
+		}
+		logf("waitForServerReady: failed to get response from '%s', error: %v\n", uri, err)
+		time.Sleep(time.Second * 1)
 	}
-	// 3 secs to get the server tim to start up
-	time.AfterFunc(time.Second*3, func() {
-		u.OpenBrowser("http://" + httpSrv.Addr)
-	})
+	panicIf(true, "failed to get response from '%s'", uri)
 }
 
-func serverListenAndWait(httpSrv *http.Server) {
+func openBrowserForServer(httpSrv *http.Server) {
+	// wait for go server
+	waitForServerReadyMust("http://" + httpSrv.Addr + "/ping.txt")
+	if flgRunDev {
+		// wait for vite dev server
+		waitForServerReadyMust(proxyURLStr + "/")
+	}
+	u.OpenBrowser("http://" + httpSrv.Addr)
+}
+
+func sererListen(httpSrv *http.Server) func() {
 	logf("serverListenAndWait: listening on '%s', isDev: %v\n", httpSrv.Addr, isDev())
 
 	chServerClosed := make(chan bool, 1)
@@ -271,33 +286,27 @@ func serverListenAndWait(httpSrv *http.Server) {
 		chServerClosed <- true
 	}()
 
-	u.WaitForSigIntOrKill()
-	logf("Got stop signal. Shutting down http server\n")
+	return func() {
+		u.WaitForSigIntOrKill()
+		logf("Got stop signal. Shutting down http server\n")
 
-	_ = httpSrv.Shutdown(ctx())
-	select {
-	case <-chServerClosed:
-		// do nothing
-	case <-time.After(time.Second * 5):
-		// timeout
-		logf("timed out trying to shut down http server")
+		_ = httpSrv.Shutdown(ctx())
+		select {
+		case <-chServerClosed:
+			// do nothing
+		case <-time.After(time.Second * 5):
+			// timeout
+			logf("timed out trying to shut down http server")
+		}
+		logf("stopping logtastic\n")
+		logtastic.Stop()
 	}
-	logf("stopping logtastic\n")
-	logtastic.Stop()
 }
 
 func mkFsysEmbedded() fs.FS {
 	fsys := WwwFS
 	printFS(fsys, "dist")
 	logf("mkFsysEmbedded: serving from embedded FS\n")
-	return fsys
-}
-
-func mkFsysDirDist() fs.FS {
-	dir := "dist"
-	fsys := os.DirFS(dir)
-	printFS(fsys, ".")
-	logf("mkFsysDirDist: serving from dir '%s'\n", dir)
 	return fsys
 }
 
@@ -339,8 +348,9 @@ func runServerDev() {
 	//defer closeHTTPLog()
 
 	logf("runServerDev(): starting on '%s', dev: %v\n", httpSrv.Addr, isDev())
-	maybeOpenBrowserDelayed(httpSrv)
-	serverListenAndWait(httpSrv)
+	waitFn := sererListen(httpSrv)
+	openBrowserForServer(httpSrv)
+	waitFn()
 }
 
 func runServerProd() {
@@ -349,24 +359,32 @@ func runServerProd() {
 	fsys := mkFsysEmbedded()
 	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
-	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
-	serverListenAndWait(httpSrv)
+	testingProd := isWinOrMac()
+	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, testingProd: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, testingProd)
+
+	waitFn := sererListen(httpSrv)
+	if testingProd {
+		openBrowserForServer(httpSrv)
+	}
+	waitFn()
 }
 
-func runServerProdLocal() {
-	var fsys fs.FS
-	if countFilesInFS(WwwFS) > 5 {
-		fsys = mkFsysEmbedded()
-	} else {
-		rebuildFrontend()
-		fsys = mkFsysDirDist()
+func testRunServerProd() {
+	if !isWinOrMac() {
+		logf("testRunServerProd: not running on Windows or Mac, skipping\n")
+		return
 	}
-	GitCommitHash, _ = getGitHashDateMust()
-
-	serveOpts := mkServeFileOptions(fsys)
-	httpSrv := makeHTTPServer(serveOpts, nil)
-	logf("runServerProdLocal(): starting on 'http://%s', dev: %v, prod: %v, prod local: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, flgRunProdLocal)
-	maybeOpenBrowserDelayed(httpSrv)
-	serverListenAndWait(httpSrv)
+	logf("testRunServerProd\n")
 	emptyFrontEndBuildDir()
+	exeName := buildForProdLocal()
+	cmd := exec.Command(exeName, "-run-prod")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	must(err)
+	u.WaitForSigIntOrKill()
+	logf("testRunServerProd: killing cmd\n")
+	err = cmd.Process.Kill()
+	must(err)
+	logf("testRunServerProd: cmd killed\n")
 }
