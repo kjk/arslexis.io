@@ -13,7 +13,7 @@ export default defineConfig({
     // the dir is emptied
     emptyOutDir: false,
     sourcemap: true,
-    outDir: resolve("..", "server", "dist"),
+    outDir: resolve("dist"),
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
       input: {

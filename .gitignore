@@ -23,6 +23,5 @@ yarn-error.log
 .DS_Store
 
 arslexis_io-*
-dist/
 server/secrets.env
 data/
