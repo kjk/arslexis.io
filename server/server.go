@@ -401,8 +401,12 @@ func testRunServerProd() {
 	err := cmd.Start()
 	must(err)
 	u.WaitForSigIntOrKill()
-	logf("testRunServerProd: killing cmd\n")
-	err = cmd.Process.Kill()
-	must(err)
+	if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+		logf("testRunServerProd: cmd already exited\n")
+	} else {
+		logf("testRunServerProd: killing cmd\n")
+		err = cmd.Process.Kill()
+		must(err)
+	}
 	logf("testRunServerProd: cmd killed\n")
 }

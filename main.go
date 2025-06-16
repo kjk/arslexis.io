@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	// go:embed dist/*
+	//go:embed dist/*
 	wwwFS embed.FS
 )
 
