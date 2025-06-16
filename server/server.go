@@ -317,8 +317,6 @@ func startLogtastic() {
 func mkFsysEmbedded() fs.FS {
 	fsys := WwwFS
 	printFS(fsys, "dist")
-	printFS(fsys, ".")
-	printFS(fsys, "/")
 	logf("mkFsysEmbedded: serving from embedded FS\n")
 	return fsys
 }
@@ -336,7 +334,7 @@ func mkServeFileOptions(fsys fs.FS) *hutil.ServeFileOptions {
 		SupportCleanURLS:     true,
 		ForceCleanURLS:       true,
 		FS:                   fsys,
-		DirPrefix:            "./",
+		DirPrefix:            "dist/",
 		LongLivedURLPrefixes: []string{"/assets/"},
 		//ServeCompressed:  true,
 	}
