@@ -306,6 +306,8 @@ func sererListen(httpSrv *http.Server) func() {
 func mkFsysEmbedded() fs.FS {
 	fsys := WwwFS
 	printFS(fsys, "dist")
+	printFS(fsys, ".")
+	printFS(fsys, "/")
 	logf("mkFsysEmbedded: serving from embedded FS\n")
 	return fsys
 }
@@ -354,9 +356,9 @@ func runServerDev() {
 }
 
 func runServerProd() {
+	fsys := mkFsysEmbedded()
 	checkHasEmbeddedFiles()
 
-	fsys := mkFsysEmbedded()
 	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
 	testingProd := isWinOrMac()
