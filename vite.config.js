@@ -101,7 +101,7 @@ export default defineConfig({
     svelte(),
     tailwindcss(),
     visualizer({
-      filename: `../server/dist/bundlestats.html`,
+      filename: `./dist/bundlestats.html`,
       sourcemap: true,
     }),
   ],

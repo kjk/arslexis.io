@@ -111,7 +111,7 @@ var (
 	flgRunDev bool
 	// compiled assets embedded in the binary
 	flgRunProd bool
-	// compiled assets served from server/dist directory
+	// compiled assets served from dist directory
 	// mostly for testing that the assets are correctly built
 	flgRunProdLocal bool
 )
