@@ -303,6 +303,17 @@ func sererListen(httpSrv *http.Server) func() {
 	}
 }
 
+func startLogtastic() {
+	logtastic.BuildHash = GitCommitHash
+	logtastic.LogDir = getLogsDirMust()
+	if flgRunProd && !isWinOrMac() {
+		logtastic.Server = "l.arslexis.io"
+	} else {
+		logtastic.Server = "127.0.0.1:9327"
+	}
+	logf("logtatistic server: %s\n", logtastic.Server)
+}
+
 func mkFsysEmbedded() fs.FS {
 	fsys := WwwFS
 	printFS(fsys, "dist")
@@ -338,6 +349,8 @@ func runServerDev() {
 	must(err)
 	defer closeDev()
 
+	// startLogtastic()
+
 	proxyURL, err := url.Parse(proxyURLStr)
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
@@ -356,12 +369,16 @@ func runServerDev() {
 }
 
 func runServerProd() {
-	fsys := mkFsysEmbedded()
-	checkHasEmbeddedFiles()
+	testingProd := isWinOrMac()
 
+	fsys := mkFsysEmbedded()
+	checkHasEmbeddedFilesMust()
+
+	if !testingProd {
+		startLogtastic()
+	}
 	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
-	testingProd := isWinOrMac()
 	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, testingProd: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, testingProd)
 
 	waitFn := sererListen(httpSrv)

@@ -297,7 +297,7 @@ func countFilesInFS(fsys fs.ReadDirFS) int {
 	return n
 }
 
-func checkHasEmbeddedFiles() {
+func checkHasEmbeddedFilesMust() {
 	nEmbedded := countFilesInFS(WwwFS)
 	if nEmbedded < 5 {
 		logf("not enough embedded files ('%d')\n", nEmbedded)
@@ -307,7 +307,7 @@ func checkHasEmbeddedFiles() {
 
 func setupAndRun() {
 	logf("setupAndRun() for %s\n", projectName)
-	checkHasEmbeddedFiles()
+	checkHasEmbeddedFilesMust()
 
 	if !u.FileExists(deployServerCaddyConfigPath) {
 		logf("%s doesn't exist.\nMust install caddy?\n", deployServerCaddyConfigPath)
