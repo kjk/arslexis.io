@@ -200,7 +200,7 @@ func buildForProd(forLinux bool) string {
 		// TODO: why needs ./server and not just "server"?
 		// it works in arslexis-website
 		ldFlags := "-X main.GitCommitHash=" + hashShort
-		cmd := exec.Command("go", "build", "-o", exeName, "-ldflags", ldFlags, "./server")
+		cmd := exec.Command("go", "build", "-o", exeName, "-ldflags", ldFlags, ".")
 		if forLinux {
 			cmd.Env = os.Environ()
 			cmd.Env = append(cmd.Env, "GOOS=linux", "GOARCH=amd64")

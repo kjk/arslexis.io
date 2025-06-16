@@ -294,9 +294,9 @@ func mkFsysEmbedded() fs.FS {
 }
 
 func mkFsysDirDist() fs.FS {
-	dir := "server"
+	dir := "dist"
 	fsys := os.DirFS(dir)
-	printFS(fsys, "dist")
+	printFS(fsys, ".")
 	logf("mkFsysDirDist: serving from dir '%s'\n", dir)
 	return fsys
 }
@@ -304,7 +304,7 @@ func mkFsysDirDist() fs.FS {
 func mkFsysDirPublic() fs.FS {
 	dir := "public"
 	fsys := os.DirFS(dir)
-	printFS(fsys, "dist")
+	printFS(fsys, ".")
 	logf("mkFsysDirPublic: serving from dir '%s'\n", dir)
 	return fsys
 }
@@ -314,7 +314,7 @@ func mkServeFileOptions(fsys fs.FS) *hutil.ServeFileOptions {
 		SupportCleanURLS:     true,
 		ForceCleanURLS:       true,
 		FS:                   fsys,
-		DirPrefix:            "dist/",
+		DirPrefix:            "./",
 		LongLivedURLPrefixes: []string{"/assets/"},
 		//ServeCompressed:  true,
 	}
