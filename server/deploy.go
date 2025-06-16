@@ -133,8 +133,8 @@ func validateSecrets(m map[string]string, wantedSecrets []string) {
 	}
 }
 
-func createEmptyFile(path string, content string) {
-	logf("createEmptyFile: '%s'\n", path)
+func createFileWithContent(path string, content string) {
+	logf("createFileWithContent: '%s'\n", path)
 	must(os.MkdirAll(filepath.Dir(path), 0755))
 	os.Remove(path)
 	err := os.WriteFile(path, []byte(content), 0644)
@@ -143,7 +143,7 @@ func createEmptyFile(path string, content string) {
 
 func emptyFrontEndBuildDir() {
 	os.RemoveAll(frontEndBuildDir)
-	createEmptyFile(filepath.Join(frontEndBuildDir, "gitkeep.txt"), "don't delete this folder\n")
+	createFileWithContent(filepath.Join(frontEndBuildDir, "gitkeep.txt"), "don't delete this folder\n")
 }
 
 func hasBun() bool {
@@ -185,7 +185,7 @@ func buildForProd(forLinux bool) string {
 		err = os.WriteFile(secretsPath, d, 0644)
 		must(err)
 	}
-	defer createEmptyFile(secretsPath, "")
+	defer createFileWithContent(secretsPath, "")
 
 	rebuildFrontend()
 
