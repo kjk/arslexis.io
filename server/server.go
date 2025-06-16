@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -303,7 +302,7 @@ func mkFsysDirDist() fs.FS {
 }
 
 func mkFsysDirPublic() fs.FS {
-	dir := filepath.Join("frontend", "public")
+	dir := "public"
 	fsys := os.DirFS(dir)
 	printFS(fsys, "dist")
 	logf("mkFsysDirPublic: serving from dir '%s'\n", dir)
@@ -322,19 +321,11 @@ func mkServeFileOptions(fsys fs.FS) *hutil.ServeFileOptions {
 }
 
 func runServerDev() {
-	if hasBun() {
-		cmd := exec.Command("bun", "install")
-		cmd.Dir = "frontend"
-		must(runLogged(cmd))
-		closeDev, err := startLoggedInDir("frontend", "bun", "run", "dev")
-		must(err)
-		defer closeDev()
-	} else {
-		u.RunLoggedInDir("frontend", "yarn")
-		closeDev, err := startLoggedInDir("frontend", "yarn", "dev")
-		must(err)
-		defer closeDev()
-	}
+	cmd := exec.Command("bun", "install")
+	must(runLogged(cmd))
+	closeDev, err := startLoggedInDir(".", "bun", "run", "dev")
+	must(err)
+	defer closeDev()
 
 	proxyURL, err := url.Parse(proxyURLStr)
 	must(err)

@@ -20,7 +20,7 @@ var (
 	projectName       = "arslexis_io"
 	domain            = "arslexis.io"
 	httpPort          = 9301
-	frontEndBuildDir  = filepath.Join("server", "dist")
+	frontEndBuildDir  = "dist"
 	wantedProdSecrets = []string{"GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
 )
 
@@ -155,13 +155,8 @@ func rebuildFrontend() {
 	// assuming this is not deployment: re-build the frontend
 	emptyFrontEndBuildDir()
 	logf("deleted frontend dist dir '%s'\n", frontEndBuildDir)
-	if hasBun() {
-		u.RunLoggedInDirMust("frontend", "bun", "install")
-		u.RunLoggedInDirMust("frontend", "bun", "run", "build")
-	} else if u.IsWindows() {
-		u.RunLoggedInDirMust("frontend", "yarn")
-		u.RunLoggedInDirMust("frontend", "yarn", "build")
-	}
+	u.RunLoggedInDirMust(".", "bun", "install")
+	u.RunLoggedInDirMust(".", "bun", "run", "build")
 }
 
 // get date and hash of current git checkin
@@ -224,10 +219,11 @@ func buildForProd(forLinux bool) string {
 func clean() {
 	emptyFrontEndBuildDir()
 	deleteOldBuilds()
-	os.Remove(path.Join("frontend", "bun.lockb"))
-	os.Remove(path.Join("frontend", "package-lock.json"))
-	os.Remove(path.Join("frontend", "yarn.lock"))
-	os.RemoveAll(path.Join("frontend", "node_modules"))
+	os.Remove("bun.lockb")
+	os.Remove("bun.lock")
+	os.Remove("package-lock.json")
+	os.Remove("yarn.lock")
+	os.RemoveAll("node_modules")
 }
 
 func buildForProdLocal() string {

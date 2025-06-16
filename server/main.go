@@ -168,11 +168,10 @@ func Main() {
 	if flgTest {
 		{
 			cmd := exec.Command("bun", "test")
-			cmd.Dir = "frontend"
 			must(runLogged(cmd))
 		}
 		{
-			cmd := exec.Command("go", "test", "./server")
+			cmd := exec.Command("go", "test", ".")
 			must(runLogged(cmd))
 		}
 		return
