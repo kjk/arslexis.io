@@ -298,7 +298,7 @@ func countFilesInFS(fsys fs.ReadDirFS) int {
 }
 
 func checkHasEmbeddedFilesMust() {
-	nEmbedded := countFilesInFS(WwwFS)
+	nEmbedded := countFilesInFS(DistFS)
 	if nEmbedded < 5 {
 		logf("not enough embedded files ('%d')\n", nEmbedded)
 		os.Exit(1)

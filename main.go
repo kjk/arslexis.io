@@ -7,10 +7,10 @@ import (
 
 var (
 	//go:embed dist/*
-	wwwFS embed.FS
+	distFS embed.FS
 )
 
 func main() {
-	server.WwwFS = wwwFS
+	server.DistFS = distFS
 	server.Main()
 }

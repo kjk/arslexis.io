@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	WwwFS embed.FS
+	DistFS embed.FS
 	//go:embed secrets.env
 	secretsEnv []byte
 )
@@ -315,7 +315,7 @@ func startLogtastic() {
 }
 
 func mkFsysEmbedded() fs.FS {
-	fsys := WwwFS
+	fsys := DistFS
 	printFS(fsys, "dist")
 	logf("mkFsysEmbedded: serving from embedded FS\n")
 	return fsys
