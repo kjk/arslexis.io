@@ -5,6 +5,81 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { visualizer } from "rollup-plugin-visualizer";
 import tailwindcss from "@tailwindcss/vite";
 
+function manualChunks(id) {
+  if (id.includes("codemirror")) {
+    if (id.includes("node_modules/codemirror")) {
+      return "cm";
+    }
+    if (id.includes("@codemirror/lang-javascript")) {
+      return "langjavascript";
+    }
+    if (id.includes("@codemirror/lang-html")) {
+      return "langhtml";
+    }
+    if (id.includes("@codemirror/lang-css")) {
+      return "langcss";
+    }
+    if (id.includes("@codemirror/lang-java")) {
+      return "langjava";
+    }
+    if (id.includes("@codemirror/lang-vue")) {
+      return "langvue";
+    }
+    if (id.includes("@codemirror/lang-markdown")) {
+      return "langmarkdown";
+    }
+    if (id.includes("@codemirror/lang-xml")) {
+      return "langxml";
+    }
+    if (id.includes("@codemirror/lang-json")) {
+      return "langjson";
+    }
+    if (id.includes("@replit/codemirror-lang-svelte")) {
+      return "langsvelte";
+    }
+    if (id.includes("@codemirror/lang-rust")) {
+      return "langrust";
+    }
+    if (id.includes("@codemirror/lang-sql")) {
+      return "langsql";
+    }
+    if (id.includes("@codemirror/lang-python")) {
+      return "langpython";
+    }
+    if (id.includes("@codemirror/lang-php")) {
+      return "langphp";
+    }
+    if (id.includes("@codemirror/lang-cpp")) {
+      return "langcpp";
+    }
+    if (id.includes("@codemirror/legacy-modes")) {
+      return "langlegacy";
+    }
+    if (id.includes("@codemirror/theme-one-dark")) {
+      return "cmlangs";
+    }
+  }
+}
+
+let inputOpts = {
+  main: resolve("src", "index.html"),
+  test: resolve("src", "test.html"),
+  unzip: resolve("src", "unzip", "index.html"),
+  wc: resolve("src", "wc", "index.html"),
+  fm: resolve("src", "fm", "index.html"),
+  bookmarks: resolve("src", "bookmarks", "index.html"),
+  image_resize_optimize: resolve("src", "image-resize-optimize", "index.html"),
+  goplayground: resolve("src", "goplayground", "index.html"),
+  github_success: resolve("src", "github_success.html"),
+  notepad2: resolve("src", "notepad2", "index.html"),
+  calc: resolve("src", "calc", "index.html"),
+  qrscanner: resolve("src", "qrscanner", "index.html"),
+  // gist editor
+  gisteditor: resolve("src", "gisteditor", "index.html"),
+  gistedit: resolve("src", "gisteditor", "edit.html"),
+  nogist: resolve("src", "gisteditor", "nogist.html"),
+};
+
 // https://vitejs.dev/config/
 export default defineConfig({
   root: "./src",
@@ -16,64 +91,10 @@ export default defineConfig({
     outDir: resolve("dist"),
     chunkSizeWarningLimit: 600000,
     rollupOptions: {
-      input: {
-        main: resolve("src", "index.html"),
-        test: resolve("src", "test.html"),
-        unzip: resolve("src", "unzip", "index.html"),
-        wc: resolve("src", "wc", "index.html"),
-        fm: resolve("src", "fm", "index.html"),
-        bookmarks: resolve("src", "bookmarks", "index.html"),
-        image_resize_optimize: resolve(
-          "src",
-          "image-resize-optimize",
-          "index.html",
-        ),
-        goplayground: resolve("src", "goplayground", "index.html"),
-        github_success: resolve("src", "github_success.html"),
-        notepad2: resolve("src", "notepad2", "index.html"),
-        calc: resolve("src", "calc", "index.html"),
-        qrscanner: resolve("src", "qrscanner", "index.html"),
-        // gist editor
-        gisteditor: resolve("src", "gisteditor", "index.html"),
-        gistedit: resolve("src", "gisteditor", "edit.html"),
-        nogist: resolve("src", "gisteditor", "nogist.html"),
-      },
+      input: inputOpts,
 
       output: {
-        manualChunks: {
-          cm: ["codemirror"],
-          langjavascript: ["@codemirror/lang-javascript"],
-          langhtml: ["@codemirror/lang-html"],
-          langcss: ["@codemirror/lang-css"],
-          langjava: ["@codemirror/lang-java"],
-          langvue: ["@codemirror/lang-vue"],
-          langmarkdown: ["@codemirror/lang-markdown"],
-          langxml: ["@codemirror/lang-xml"],
-          langjson: ["@codemirror/lang-json"],
-          langsvelte: ["@replit/codemirror-lang-svelte"],
-
-          langrust: ["@codemirror/lang-rust"],
-          langsql: ["@codemirror/lang-sql"],
-          langpython: ["@codemirror/lang-python"],
-          langphp: ["@codemirror/lang-php"],
-          langcpp: ["@codemirror/lang-cpp"],
-
-          langlegacy: [
-            "@codemirror/legacy-modes/mode/lua",
-            "@codemirror/legacy-modes/mode/go",
-            "@codemirror/legacy-modes/mode/diff",
-            "@codemirror/legacy-modes/mode/css",
-            "@codemirror/legacy-modes/mode/octave",
-            "@codemirror/legacy-modes/mode/shell",
-            "@codemirror/legacy-modes/mode/clike",
-            "@codemirror/legacy-modes/mode/ruby",
-          ],
-          cmlangs: [
-            // "@codemirror/lang-angular",
-            // "@codemirror/lang-wast",
-            "@codemirror/theme-one-dark",
-          ],
-        },
+        manualChunks,
       },
 
       plugins: [

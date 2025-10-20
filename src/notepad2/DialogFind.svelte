@@ -173,7 +173,7 @@
     outline-style: solid;
     outline-width: 2px;
   }
-  :global(.btn-dlg:ocus-within) {
+  :global(.btn-dlg:focus-within) {
     outline-color: blue;
     outline-style: solid;
     outline-width: 2px;

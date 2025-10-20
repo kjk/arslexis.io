@@ -24,7 +24,10 @@
     "source-map-js": "^1.2.1",
     "svelte": "^5.41.1",
     "tailwindcss": "^4.1.15",
-    "vite": "^7.1.11"
+    "rolldown-vite": "^7.1.17"
+  },
+  "overrides": {
+    "vite": "^rolldown-vite@7.1.17"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.6",
