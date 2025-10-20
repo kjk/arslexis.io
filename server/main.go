@@ -123,12 +123,12 @@ func Main() {
 		flgSetupAndRun   bool
 		flgUpdateGoDeps  bool
 		flgTest          bool
-		flgTestRunProd   bool
+		flgRunProdLocal  bool
 	)
 	{
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
-		flag.BoolVar(&flgTestRunProd, "test-run-prod", false, "build production version, run locally, to test production build")
+		flag.BoolVar(&flgRunProdLocal, "run-prod-local", false, "build production version, run locally, to test production build")
 		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
 		flag.BoolVar(&flgUpdateGoDeps, "update-go-deps", false, "update go dependencies")
@@ -182,8 +182,8 @@ func Main() {
 		return
 	}
 
-	if flgTestRunProd {
-		testRunServerProd()
+	if flgRunProdLocal {
+		runServerProdLocal()
 		return
 	}
 

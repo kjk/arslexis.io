@@ -386,12 +386,12 @@ func runServerProd() {
 	waitFn()
 }
 
-func testRunServerProd() {
+func runServerProdLocal() {
 	if !isWinOrMac() {
 		logf("testRunServerProd: not running on Windows or Mac, skipping\n")
 		return
 	}
-	logf("testRunServerProd\n")
+	logf("runServerProdLocal\n")
 	exeName := buildForProdLocal()
 	cmd := exec.Command("./"+exeName, "-run-prod")
 	cmd.Stdout = os.Stdout
@@ -400,11 +400,11 @@ func testRunServerProd() {
 	must(err)
 	u.WaitForSigIntOrKill()
 	if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
-		logf("testRunServerProd: cmd already exited\n")
+		logf("runServerProdLocal: cmd already exited\n")
 	} else {
-		logf("testRunServerProd: killing cmd\n")
+		logf("runServerProdLocal: killing cmd\n")
 		err = cmd.Process.Kill()
 		must(err)
 	}
-	logf("testRunServerProd: cmd killed\n")
+	logf("runServerProdLocal: cmd killed\n")
 }
