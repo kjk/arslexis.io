@@ -197,8 +197,6 @@ func buildForProd(forLinux bool) string {
 
 	// build the binary, for linux if forLinux is true, otherwise for OS arh
 	{
-		// TODO: why needs ./server and not just "server"?
-		// it works in arslexis-website
 		ldFlags := "-X main.GitCommitHash=" + hashShort
 		cmd := exec.Command("go", "build", "-o", exeName, "-ldflags", ldFlags, ".")
 		if forLinux {
