@@ -11,31 +11,29 @@ import { strCompareNoCase } from "./strutil";
 
 export const kFileSysInvalidEntry = -1;
 
-/** @typedef {number} FsEntry */
+type FsEntry = number;
 
 // Note: named FileSys because FileSystem is a type in js stdlib
-/**
- @typedef {{
-    rootEntry: () => FsEntry,
-    entriesCount: () => number,
-    entryParent: (FsEntry) => FsEntry,
-    entryIsDir: (FsEntry) => boolean,
-    entryName: (FsEntry) => string,
-    entrySize: (FsEntry) => number,
-    entryCreateTime: (FsEntry) => number,
-    entryModTime: (FsEntry) => number,
-    entryChildren: (FsEntry) => number[],
-    entryDirCount: (FsEntry) => number,
-    entryFileCount: (FsEntry) => number,
-    entrySetMeta: (FsEntry, string, any) => any,
-    entryMeta: (FsEntry, string) => any,
-    // perf: cache for use in entryMetaByKeyIdx
-    internMetaKey: (string) => number,
-    // perf: when doing entryMeta frequently, save internMetaKey cost
-    // by doing it once and using entryMetaByKeyIdx
-    entryMetaByKeyIdx: (FsEntry, number) => any,
-  }} FileSys
- */
+type FileSys = {
+  rootEntry: () => FsEntry,
+  entriesCount: () => number,
+  entryParent: (FsEntry) => FsEntry,
+  entryIsDir: (FsEntry) => boolean,
+  entryName: (FsEntry) => string,
+  entrySize: (FsEntry) => number,
+  entryCreateTime: (FsEntry) => number,
+  entryModTime: (FsEntry) => number,
+  entryChildren: (FsEntry) => number[],
+  entryDirCount: (FsEntry) => number,
+  entryFileCount: (FsEntry) => number,
+  entrySetMeta: (FsEntry, string, any) => any,
+  entryMeta: (FsEntry, string) => any,
+  // perf: cache for use in entryMetaByKeyIdx
+  internMetaKey: (string) => number,
+  // perf: when doing entryMeta frequently, save internMetaKey cost
+  // by doing entryMetaByKeyIdx
+  entryMetaByKeyIdx: (FsEntry, number) => any,
+};
 
 // index withing entryInfo flat array
 const kParentIdx = 0;
@@ -49,62 +47,43 @@ const kEntryInfoCount = 4;
  * @implements {FileSys}
  */
 export class FileSysDir {
-  /** @type {string[]} */
-  names = [];
-  /** @type {FileSystemDirectoryHandle[]} */
-  handles = [];
+  names: string[] = [];
+  handles: FileSystemDirectoryHandle[] = [];
 
   // each entry is represented by kEntryInfoCount numbers
-  /** @type {number[]} */
-  entryInfo = [];
+  entryInfo: number[] = [];
 
   // this array interns keys used for meta values
   // it should be very short, because there shouldn't be
   // many unique meta values
-  /** @type {string[]} */
-  metaKeys = [];
+  metaKeys: string[] = [];
 
   // entryInfo[kFirstMetaIdx] is an idx into metaIndex
   // first element is interned key returned by internMetaKey(key)
   // second element is index into metaValues
   // third is idx into metaIndex and implements linked list of meta values
   //       if -1, this is the last value
-  /** @type {number[]} */
-  metaIndex = [];
+  metaIndex: number[] = [];
 
-  /** @type {any[]} */
-  metaValues = [];
+  metaValues: any[] = [];
 
   // TODO: optimize as a flat array and keeping info
   // as index / length into the array
   // if value is null, it's directory
   //
-  /** @type {FsEntry[][]} */
-  children = [];
+  children: FsEntry[][] = [];
 
-  /**
-   * @param {string} key
-   * @returns {number}
-   */
-  internMetaKey(key) {
+  internMetaKey(key: string): number {
     return internStringArray(this.metaKeys, key);
   }
 
-  /**
-   * @returns {number}
-   */
-  entriesCount() {
+  entriesCount(): number {
     let n = len(this.entryInfo);
     throwIf(n % kEntryInfoCount !== 0);
     return n / kEntryInfoCount;
   }
 
-  /**
-   * @param {FsEntry} e
-   * @param {string} key
-   * @param {any} val
-   */
-  entrySetMeta(e, key, val) {
+  entrySetMeta(e: FsEntry, key: string, val: any) {
     let keyIdx = this.internMetaKey(key);
     // if exists, replace value
     let idx = e * kEntryInfoCount + kFirstMetaIdx;
@@ -146,12 +125,7 @@ export class FileSysDir {
     this.entryInfo[idx] = metaIdx; // make this first node
   }
 
-  /**
-   * @param {FsEntry} e
-   * @param {number} keyIdx
-   * @returns {any} returns undefined if value not present
-   */
-  entryMetaByKeyIdx(e, keyIdx) {
+  entryMetaByKeyIdx(e: FsEntry, keyIdx: number): any {
     let idx = e * kEntryInfoCount + kFirstMetaIdx;
     // metaIdx is an index within metaIndex
     let metaIdx = this.entryInfo[idx];
@@ -175,31 +149,19 @@ export class FileSysDir {
     }
     return undefined;
   }
-  /**
-   * @param {FsEntry} e
-   * @param {string} key
-   * @returns {any} returns undefined if value not present
-   */
-  entryMeta(e, key) {
+  entryMeta(e: FsEntry, key: string): any {
     let keyIdx = this.internMetaKey(key);
     return this.entryMetaByKeyIdx(e, keyIdx);
   }
 
-  /**
-   * @returns {FsEntry}
-   */
-  rootEntry() {
+  rootEntry(): FsEntry {
     if (len(this.names) === 0) {
       return kFileSysInvalidEntry;
     }
     return 0;
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {FsEntry}
-   */
-  entryParent(e) {
+  entryParent(e: FsEntry): FsEntry {
     if (e == 0) {
       return kFileSysInvalidEntry;
     }
@@ -207,75 +169,43 @@ export class FileSysDir {
     return this.entryInfo[idx + kParentIdx];
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {string}
-   */
-  entryName(e) {
+  entryName(e: FsEntry): string {
     return this.names[e];
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {number}
-   */
-  entrySize(e) {
+  entrySize(e: FsEntry): number {
     let idx = e * kEntryInfoCount;
     return this.entryInfo[idx + kSizeIdx];
   }
 
-  /**
-   * @param {FsEntry} e
-   * @param {number} size
-   */
-  setEntrySize(e, size) {
+  setEntrySize(e: FsEntry, size: number) {
     let idx = e * kEntryInfoCount;
     this.entryInfo[idx + kSizeIdx] = size;
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {boolean}
-   */
-  entryIsDir(e) {
+  entryIsDir(e: FsEntry): boolean {
     let children = this.children[e];
     return children !== null;
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {number}
-   */
-  entryCreateTime(e) {
+  entryCreateTime(e: FsEntry): number {
     // browser API doesn't provide creation time so we re-use mod time
     let idx = e * kEntryInfoCount;
     return this.entryInfo[idx + kModTimeIdx];
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {number}
-   */
-  entryModTime(e) {
+  entryModTime(e: FsEntry): number {
     let idx = e * kEntryInfoCount;
     return this.entryInfo[idx + kModTimeIdx];
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {number[]}
-   */
-  entryChildren(e) {
+  entryChildren(e: FsEntry): number[] {
     let res = this.children[e];
     throwIf(res === null); // not a directory
     return res;
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {Promise<FileSystemFileHandle>}
-   */
-  async entryFileHandle(e) {
+  async entryFileHandle(e: FsEntry): Promise<FileSystemFileHandle> {
     let isDir = this.entryIsDir(e);
     throwIf(isDir);
     let name = this.entryName(e);
@@ -284,22 +214,13 @@ export class FileSysDir {
     return await dh.getFileHandle(name);
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {FileSystemDirectoryHandle}
-   */
-  entryDirHandle(e) {
+  entryDirHandle(e: FsEntry): FileSystemDirectoryHandle {
     let isDir = this.entryIsDir(e);
     throwIf(isDir);
     return this.handles[e];
   }
 
-  /**
-   * @param {FsEntry} e
-   * @param {boolean} forDirs if true, returns count of directores, otherwise files
-   * @returns {number}
-   */
-  _entryCountChildren(e, forDirs) {
+  _entryCountChildren(e: FsEntry, forDirs: boolean): number {
     let c = this.children[e];
     throwIf(c === null, `e ${e} is not a directory`); // not a directory
     let n = 0;
@@ -312,31 +233,15 @@ export class FileSysDir {
     return n;
   }
 
-  /**
-   * return number of directories in a directory entry
-   * @param {FsEntry} e
-   * @returns {number}
-   */
-  entryDirCount(e) {
+  entryDirCount(e: FsEntry): number {
     return this._entryCountChildren(e, true);
   }
 
-  /**
-   * return number of files in a directory entry
-   * @param {FsEntry} e
-   * @returns {number}
-   */
-  entryFileCount(e) {
+  entryFileCount(e: FsEntry): number {
     return this._entryCountChildren(e, false);
   }
 
-  /**
-   * @param {FsEntry} parent
-   * @param {string} name
-   * @param {FileSystemDirectoryHandle} handle
-   * @returns {FsEntry}
-   */
-  allocEntry(parent, name, handle) {
+  allocEntry(parent: FsEntry, name: string, handle: FileSystemDirectoryHandle): FsEntry {
     let e = len(this.names);
     this.names.push(name);
     this.handles.push(handle);
@@ -349,33 +254,22 @@ export class FileSysDir {
   }
 }
 
-/**
- * @typedef {Object} ReadFilesCbArgs
- * @property {FileSysDir} fs
- * @property {string} dirName
- * @property {number} fileCount
- * @property {number} dirCount
- * @property {number} totalSize
- * @property {boolean} finished
- */
+type ReadFilesCbArgs = {
+  fs: FileSysDir;
+  dirName: string;
+  fileCount: number;
+  dirCount: number;
+  totalSize: number;
+  finished: boolean;
+};
 
-/**
- * @callback readFileSysDirCallback
- * @param {ReadFilesCbArgs} args
- * @returns {boolean}
- */
+type readFileSysDirCallback = (args: ReadFilesCbArgs) => boolean;
 
-/**
- * @param {FileSystemDirectoryHandle} dirHandle
- * @param {readFileSysDirCallback} progress
- * @returns {Promise<FileSysDir>}
- */
-export async function readFileSysDirRecur(dirHandle, progress) {
+export async function readFileSysDirRecur(dirHandle: FileSystemDirectoryHandle, progress: readFileSysDirCallback): Promise<FileSysDir> {
   let fs = new FileSysDir();
   let name = dirHandle.name;
   let entry = fs.allocEntry(kFileSysInvalidEntry, name, dirHandle);
-  /** @type {FsEntry[]} */
-  let dirsToVisit = [entry];
+  let dirsToVisit: FsEntry[] = [entry];
   let nDirs = 0;
   let nFiles = 0;
   let totalSize = 0;
@@ -383,8 +277,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
     let parent = dirsToVisit.shift();
     dirHandle = fs.handles[parent];
     if (nDirs % 10 == 0) {
-      /** @type {ReadFilesCbArgs} */
-      let arg = {
+      let arg: ReadFilesCbArgs = {
         fs,
         dirName: dirHandle.name,
         fileCount: nFiles,
@@ -408,7 +301,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
       // we need it to access files
       let h = null;
       if (isDir) {
-        h = /** @type { FileSystemDirectoryHandle } */ (fshandle);
+        h = fshandle as FileSystemDirectoryHandle;
       }
       let echild = fs.allocEntry(parent, name, h);
       children.push(echild);
@@ -419,7 +312,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
       }
       if (isFile) {
         // @ts-ignore
-        let f = /** @type { File } */ (await fshandle.getFile());
+        let f = await fshandle.getFile() as File;
         let info = fs.entryInfo;
         let idx = echild * kEntryInfoCount;
         info[idx + kSizeIdx] = f.size;
@@ -436,12 +329,7 @@ export async function readFileSysDirRecur(dirHandle, progress) {
   return fs;
 }
 
-/**
- * @param {FileSysDir} fs
- * @param {FsEntry} e
- * @returns {number}
- */
-function calcDirSizeRecur(fs, e) {
+function calcDirSizeRecur(fs: FileSysDir, e: FsEntry): number {
   let c = fs.entryChildren(e);
   let size = 0;
   for (let ec of c) {
@@ -458,20 +346,12 @@ function calcDirSizeRecur(fs, e) {
   return size;
 }
 
-/**
- * @param {FileSysDir} fs
- */
-export function calcDirSizes(fs) {
+export function calcDirSizes(fs: FileSysDir) {
   let root = fs.rootEntry();
   calcDirSizeRecur(fs, root);
 }
 
-/**
- * @param {FileSys} fs
- * @param {FsEntry} e
- * @returns {FsEntry[]}
- */
-export function entryPath(fs, e) {
+export function entryPath(fs: FileSys, e: FsEntry): FsEntry[] {
   let res = [];
   while (e !== kFileSysInvalidEntry) {
     res.push(e);
@@ -481,13 +361,7 @@ export function entryPath(fs, e) {
   return res;
 }
 
-/**
- * call fn on each parent of e
- * @param {FileSys} fs
- * @param {FsEntry} e
- * @param {(FileSys, FsEntry) => void} fn
- */
-export function forEachParent(fs, e, fn) {
+export function forEachParent(fs: FileSys, e: FsEntry, fn: (fs: FileSys, e: FsEntry) => void) {
   while (e != kFileSysInvalidEntry) {
     e = fs.entryParent(e);
     if (e !== kFileSysInvalidEntry) {
@@ -496,12 +370,7 @@ export function forEachParent(fs, e, fn) {
   }
 }
 
-/**
- * @param {FileSys} fs
- * @param {FsEntry} e
- * @returns {string}
- */
-export function entryFullPath(fs, e) {
+export function entryFullPath(fs: FileSys, e: FsEntry): string {
   let parts = [];
   while (e !== kFileSysInvalidEntry) {
     let name = fs.entryName(e);
@@ -512,16 +381,8 @@ export function entryFullPath(fs, e) {
   return parts.join("/");
 }
 
-/**
- * @param {FileSys} fs
- * @param {FsEntry[]} entries
- */
-export function sortEntries(fs, entries) {
-  /**
-   * @param {FsEntry} e1
-   * @param {FsEntry} e2
-   */
-  function sortFn(e1, e2) {
+export function sortEntries(fs: FileSys, entries: FsEntry[]) {
+  function sortFn(e1: FsEntry, e2: FsEntry) {
     let e1Dir = fs.entryIsDir(e1);
     let e2Dir = fs.entryIsDir(e2);
     let name1 = fs.entryName(e1);
@@ -537,14 +398,7 @@ export function sortEntries(fs, entries) {
   entries.sort(sortFn);
 }
 
-/**
- * call fn for each directory, starting with root and then
- * sub-directories recursively
- * fn return shouldContinue => if false, we won't visit subdirectories
- * @param { FileSys } fs
- * @param { (FileSys, FsEntry) => boolean } fn
- */
-export function fsVisitDirs(fs, fn) {
+export function fsVisitDirs(fs: FileSys, fn: (fs: FileSys, e: FsEntry) => boolean) {
   if (fs.entriesCount() === 0) {
     return;
   }
@@ -594,13 +448,7 @@ export function fsVisitDirs(fs, fn) {
 //   }
 // }
 
-/**
- * traverse all directories and files starting from root
- * call fn on each file and directory in a depth-first traversal
- * @param {FileSys} fs
- * @param {(FileSys, FsEntry) => boolean} fn
- */
-export function fsVisit(fs, fn) {
+export function fsVisit(fs: FileSys, fn: (fs: FileSys, e: FsEntry) => boolean) {
   function fnVisit(fs, de) {
     let cont = fn(fs, de);
     if (!cont) {
@@ -617,14 +465,7 @@ export function fsVisit(fs, fn) {
   fsVisitDirs(fs, fnVisit);
 }
 
-/**
- * key is a name of a number meta value that must be set on file entries
- * we propagate this upwards:
- * - parent directory gets a sum of file meta values and sum of all sub-directories
- * @param {FileSys} fs
- * @param {string} key
- */
-export function fsPropagateNumberMeta(fs, key) {
+export function fsPropagateNumberMeta(fs: FileSys, key: string) {
   let keyIdx = fs.internMetaKey(key);
   let nEntries = fs.entriesCount();
   // clear totals on directories to 0
@@ -659,8 +500,4 @@ export function fsPropagateNumberMeta(fs, key) {
   }
 }
 
-/**
- * @callback FnFsEntryWithChildren
- * @param {FsEntry} e
- * @param {FsEntry[]} children
- */
+type FnFsEntryWithChildren = (e: FsEntry, children: FsEntry[]) => void;
