@@ -15,22 +15,16 @@ import { throwIf } from "./util";
 
 let editorView;
 
-export function setConfigEditorView(ev) {
+export function setConfigEditorView(ev: EditorView) {
   editorView = ev;
 }
 
 const readOnlyCompartment = new Compartment();
-/**
- * @param {boolean} readOnly
- */
-export function makeReadOnly(readOnly) {
+export function makeReadOnly(readOnly: boolean) {
   const v = EditorState.readOnly.of(readOnly);
   return readOnlyCompartment.of(v);
 }
-/**
- * @param {boolean} readOnly
- */
-export function updateReadOnly(readOnly) {
+export function updateReadOnly(readOnly: boolean) {
   if (!editorView) return;
   const v = EditorState.readOnly.of(readOnly);
   editorView.dispatch({
@@ -39,11 +33,11 @@ export function updateReadOnly(readOnly) {
 }
 
 const wordWrapCompartment = new Compartment();
-export function makeWordWrap(wordWrap) {
+export function makeWordWrap(wordWrap: boolean) {
   const v = wordWrap ? EditorView.lineWrapping : [];
   return wordWrapCompartment.of(v);
 }
-export function updateWordWrap(wordWrap) {
+export function updateWordWrap(wordWrap: boolean) {
   if (!editorView) return;
   const v = wordWrap ? EditorView.lineWrapping : [];
   editorView.dispatch({
@@ -52,11 +46,11 @@ export function updateWordWrap(wordWrap) {
 }
 
 let lineNumbersCompartment = new Compartment();
-export function makeLineNumbers(showLineNumbers) {
+export function makeLineNumbers(showLineNumbers: boolean) {
   const v = showLineNumbers ? lineNumbers() : [];
   return lineNumbersCompartment.of(v);
 }
-export function updateLineNumbersState(showLineNumbers) {
+export function updateLineNumbersState(showLineNumbers: boolean) {
   if (!editorView) return;
   const v = showLineNumbers ? lineNumbers() : [];
   editorView.dispatch({
@@ -65,11 +59,11 @@ export function updateLineNumbersState(showLineNumbers) {
 }
 
 const visualBraceMatchingCompartment = new Compartment();
-export function makeVisualBraceMatching(visualBraceMatching) {
+export function makeVisualBraceMatching(visualBraceMatching: boolean) {
   const v = visualBraceMatching ? bracketMatching() : [];
   return visualBraceMatchingCompartment.of(v);
 }
-export function updateVisualBraceMatching(visualBraceMatching) {
+export function updateVisualBraceMatching(visualBraceMatching: boolean) {
   if (!editorView) return;
   const v = visualBraceMatching ? bracketMatching() : [];
   editorView.dispatch({
@@ -87,11 +81,11 @@ let foldGutterExt = foldGutter({
 });
 
 const codeFoldingCompartment = new Compartment();
-export function makeCodeFolding(codeFolding) {
+export function makeCodeFolding(codeFolding: boolean) {
   const v = codeFolding ? foldGutterExt : [];
   return codeFoldingCompartment.of(v);
 }
-export function updateCodeFolding(codeFolding) {
+export function updateCodeFolding(codeFolding: boolean) {
   if (!editorView) return;
   const v = codeFolding ? foldGutterExt : [];
   editorView.dispatch({
@@ -100,11 +94,11 @@ export function updateCodeFolding(codeFolding) {
 }
 
 const indentGuidesCompartment = new Compartment();
-export function makeIndentGuides(indentGuides) {
+export function makeIndentGuides(indentGuides: boolean) {
   const v = indentGuides ? indentationMarkers() : [];
   return indentGuidesCompartment.of(v);
 }
-export function updateIndentGuides(indentGuides) {
+export function updateIndentGuides(indentGuides: boolean) {
   if (!editorView) return;
   const v = indentGuides ? indentationMarkers() : [];
   editorView.dispatch({
@@ -113,11 +107,11 @@ export function updateIndentGuides(indentGuides) {
 }
 
 const enableMultipleSelectionCompartment = new Compartment();
-export function makeMultipleSelection(multipleSel) {
+export function makeMultipleSelection(multipleSel: boolean) {
   const v = EditorState.allowMultipleSelections.of(multipleSel);
   return enableMultipleSelectionCompartment.of(v);
 }
-export function updateEnableMultipleSelection(flag) {
+export function updateEnableMultipleSelection(flag: boolean) {
   if (!editorView) return;
   const v = EditorState.allowMultipleSelections.of(flag);
   editorView.dispatch({
@@ -126,12 +120,12 @@ export function updateEnableMultipleSelection(flag) {
 }
 
 const lineSeparatorCompartment = new Compartment();
-export function makeLineSeparator(lineSeparator) {
+export function makeLineSeparator(lineSeparator: string) {
   const v = EditorState.lineSeparator.of(lineSeparator);
   return lineSeparatorCompartment.of(v);
 }
 
-export function updateLineSeparator(lineSeparator) {
+export function updateLineSeparator(lineSeparator: string) {
   if (!editorView) return;
   const v = EditorState.lineSeparator.of(lineSeparator);
   editorView.dispatch({
@@ -140,11 +134,11 @@ export function updateLineSeparator(lineSeparator) {
 }
 
 const showWhitespaceCompartment = new Compartment();
-export function makeShowWhiteSpace(showWhitespace) {
+export function makeShowWhiteSpace(showWhitespace: boolean) {
   const v = showWhitespace ? highlightWhitespace() : [];
   return showWhitespaceCompartment.of(v);
 }
-export function updateShowWhitespace(showWhitespace) {
+export function updateShowWhitespace(showWhitespace: boolean) {
   if (!editorView) return;
   const v = showWhitespace ? highlightWhitespace() : [];
   editorView.dispatch({
@@ -153,11 +147,11 @@ export function updateShowWhitespace(showWhitespace) {
 }
 
 const showTrailingWhitespaceCompartment = new Compartment();
-export function makeShowTrailingWhitespace(showTrailingWhitespace) {
+export function makeShowTrailingWhitespace(showTrailingWhitespace: boolean) {
   const v = showTrailingWhitespace ? highlightTrailingWhitespace() : [];
   return showTrailingWhitespaceCompartment.of(v);
 }
-export function updateShowTrailingWhitespace(showTrailingWhitespace) {
+export function updateShowTrailingWhitespace(showTrailingWhitespace: boolean) {
   if (!editorView) return;
   const v = showTrailingWhitespace ? highlightTrailingWhitespace() : [];
   editorView.dispatch({
@@ -166,11 +160,11 @@ export function updateShowTrailingWhitespace(showTrailingWhitespace) {
 }
 
 const tabSizeCompartment = new Compartment();
-export function makeTabSize(tabSize) {
+export function makeTabSize(tabSize: number) {
   let v = EditorState.tabSize.of(tabSize);
   return tabSizeCompartment.of(v);
 }
-export function updateTabSize(tabSize) {
+export function updateTabSize(tabSize: number) {
   if (!editorView) return;
   const v = EditorState.tabSize.of(tabSize);
   editorView.dispatch({
@@ -179,12 +173,12 @@ export function updateTabSize(tabSize) {
 }
 
 const tabsCompartment = new Compartment();
-export function makeTabState(tabsAsSpaces, tabSpaces) {
+export function makeTabState(tabsAsSpaces: boolean, tabSpaces: number) {
   const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
   const v = indentUnit.of(indentChar);
   return tabsCompartment.of(v);
 }
-export function updateTabsState(tabsAsSpaces, tabSpaces) {
+export function updateTabsState(tabsAsSpaces: boolean, tabSpaces: number) {
   if (!editorView) return;
   const indentChar = tabsAsSpaces ? " ".repeat(tabSpaces) : "\t";
   const v = indentUnit.of(indentChar);
@@ -199,9 +193,8 @@ const activeLineAltCSS = `.cm-activeLine {
     outline-offset: -3px;
     background-color: transparent !important;
 }`;
-/** @type {HTMLStyleElement} */
-let activeLineCSSElement = null;
-export function makeLineHighlight(lineHighlightType) {
+let activeLineCSSElement: HTMLStyleElement | null = null;
+export function makeLineHighlight(lineHighlightType: number) {
   // TODO: only on mount
   if (!activeLineCSSElement) {
     activeLineCSSElement = document.createElement("style");
@@ -218,7 +211,7 @@ export function makeLineHighlight(lineHighlightType) {
     lineHighlightType != m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
   return lineHighlightTypeCompartment.of(v);
 }
-export function updateLineHighlightType(lht) {
+export function updateLineHighlightType(lht: number) {
   if (!editorView) return;
   activeLineCSSElement.disabled = lht != m.IDM_VIEW_HIGHLIGHTCURRENTLINE_FRAME;
   const v =
@@ -231,13 +224,13 @@ export function updateLineHighlightType(lht) {
 }
 
 const langCompartment = new Compartment();
-export function makeLang(lang) {
+export function makeLang(lang: any) {
   if (!lang) {
     lang = [];
   }
   return langCompartment.of(lang);
 }
-export function updateLang(lang) {
+export function updateLang(lang: any) {
   if (!editorView) return;
   if (!lang) {
     lang = [];
@@ -249,7 +242,7 @@ export function updateLang(lang) {
 }
 
 const scrollPastEndCompartment = new Compartment();
-export function makeScrollPastEnd(id) {
+export function makeScrollPastEnd(id: number) {
   let v;
   switch (id) {
     case m.IDM_VIEW_SCROLLPASTLASTLINE_ONE:
@@ -263,7 +256,7 @@ export function makeScrollPastEnd(id) {
   }
   return scrollPastEndCompartment.of(v);
 }
-export function updateScrollPastEnd(id) {
+export function updateScrollPastEnd(id: number) {
   if (!editorView) return;
   const v = id === m.IDM_VIEW_SCROLLPASTLASTLINE_ONE ? scrollPastEnd() : [];
   editorView.dispatch({
@@ -275,11 +268,11 @@ export const themeNameDark = "oneDark";
 export const themeNameDefault = "default";
 
 const themeCompartment = new Compartment();
-export function makeTheme(theme) {
+export function makeTheme(theme: string) {
   const v = theme === themeNameDark ? oneDarkTheme : [];
   return themeCompartment.of(v);
 }
-export function updateTheme(theme) {
+export function updateTheme(theme: string) {
   if (!editorView) return;
   const v = theme === themeNameDark ? oneDarkTheme : [];
   editorView.dispatch({
