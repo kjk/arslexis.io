@@ -1,6 +1,6 @@
-/** @typedef { import("@codemirror/view").KeyBinding} KeyBinding */
-/** @typedef { import("@codemirror/state").Extension} Extension */
-/** @typedef { import("./Settings").Settings} Settings */
+type KeyBinding = import("@codemirror/view").KeyBinding;
+type Extension = import("@codemirror/state").Extension;
+type Settings = import("./Settings").Settings;
 
 import { EditorView } from "codemirror";
 import {
@@ -72,8 +72,7 @@ import { toggleFoldAll } from "../cmcommands";
 const placeholder =
   "Welcome to notepad2web - a web re-implementation of notepad2 Windows text editor.\nYou can save files in the browser (indexeddb) or open files from the file system (if supported by your browser).\nStart typing...";
 
-/** @type {KeyBinding} */
-const indentWithTab2 = {
+const indentWithTab2: KeyBinding = {
   key: "Tab",
   run: indentMore,
   shift: indentLess,
@@ -120,14 +119,8 @@ let defaultKeymap2 = [
   { key: "Alt-A", run: toggleBlockComment },
 ];
 
-/**
- * @param {Settings} settings
- * @param {Extension} lang
- * @returns
- */
-export function makeConfig(settings, lang) {
-  /** @type {Extension[]}*/
-  let res = [
+export function makeConfig(settings: Settings, lang: Extension) {
+  let res: Extension[] = [
     EditorView.editable.of(true), // ???
     highlightActiveLineGutter(),
     highlightSpecialChars(),
