@@ -1,25 +1,14 @@
 <svelte:options runes={true} />
 
 <script module>
+  import type { FsEntry, FileSys } from "../fs";
   import { sortEntries } from "../fs";
-  /** @typedef {import("../fs").FsEntry} FsEntry */
-  /** @typedef {import("../fs").FileSys} FileSys */
 
-  /**
-   * @param {FileSys} fs
-   * @param {FsEntry} e
-   * @returns {boolean}
-   */
-  export function isExpanded(fs, e) {
+  export function isExpanded(fs: FileSys, e: FsEntry): boolean {
     return fs.entryMeta(e, "expanded") || false;
   }
 
-  /**
-   * @param {FileSys} fs
-   * @param {FsEntry} e
-   * @param {boolean} expanded
-   */
-  export function setExpanded(fs, e, expanded) {
+  export function setExpanded(fs: FileSys, e: FsEntry, expanded: boolean) {
     fs.entrySetMeta(e, "expanded", expanded);
   }
 </script>
@@ -29,16 +18,17 @@
   import { fmtNum, fmtSize, len, throwIf } from "../util";
   import { tick } from "svelte";
 
-  /** @type { {
-   fs: FileSys,
-   dirRoot: FsEntry,
-   isRoot?: boolean,
-   indent: number,
-   recalc: Function,
-   onSelected: Function,
-   onGoUp: Function,
-   initialSelectionIdx?: number,
-  }}*/
+  type Props = {
+    fs: FileSys;
+    dirRoot: FsEntry;
+    isRoot?: boolean;
+    indent: number;
+    recalc: Function;
+    onSelected: Function;
+    onGoUp: Function;
+    initialSelectionIdx?: number;
+  };
+
   let {
     fs,
     dirRoot,
@@ -48,31 +38,23 @@
     onSelected,
     onGoUp,
     initialSelectionIdx = 0,
-  } = $props();
+  }: Props = $props();
 
   let selectedIdx = $state(0);
-  /** @type {HTMLElement} */
-  let tbodyEl;
-  /** @type {HTMLElement} */
-  let noFilesEl = $state(null);
+  let tbodyEl: HTMLElement;
+  let noFilesEl: HTMLElement | null = $state(null);
 
-  /** @type {FsEntry[]} */
-  let entries = $derived(calcEntries(dirRoot));
+  let entries: FsEntry[] = $derived(calcEntries(dirRoot));
 
   let forceRender = $state(0);
 
-  /**
-   * @param {FsEntry} dirRoot
-   * @return {FsEntry[]}
-   */
-  function calcEntries(dirRoot) {
+  function calcEntries(dirRoot: FsEntry): FsEntry[] {
     // console.log("calcEntries");
     // SUBTLE: important to not re-order  because
     // they could be used in calcLineCount()
     // we use and sort a copy
     let c = fs.entryChildren(dirRoot);
-    /** @type {FsEntry[]} */
-    let res = [].concat(c);
+    let res: FsEntry[] = [].concat(c);
     sortEntries(fs, res);
     if (!isRoot) {
       // TODO: restore ".."
@@ -91,54 +73,35 @@
     return res;
   }
 
-  /**
-   * @param {FsEntry} e
-   */
-  function toggleExpand(e) {
+  function toggleExpand(e: FsEntry) {
     console.log("toggleExpand", e);
     let expanded = isExpanded(fs, e);
     setExpanded(fs, e, !expanded);
     forceRender++;
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {string}
-   */
-  function fmtDirs(e) {
+  function fmtDirs(e: FsEntry): string {
     let isDir = fs.entryIsDir(e);
     throwIf(!isDir);
     let nDirs = fs.entryDirCount(e);
     return "D: " + fmtNum(nDirs);
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {string}
-   */
-  function fmtFiles(e) {
+  function fmtFiles(e: FsEntry): string {
     let isDir = fs.entryIsDir(e);
     throwIf(!isDir);
     let nFiles = fs.entryFileCount(e);
     return "F: " + fmtNum(nFiles);
   }
 
-  /**
-   * @param {FsEntry} e
-   * @returns {string}
-   */
-  function fmtEntrySize(e) {
+  function fmtEntrySize(e: FsEntry): string {
     let size = fs.entrySize(e);
     // console.log("e:", e, "size:", size);
     let s = fmtSize(size);
     return s;
   }
 
-  /**
-   * @param {HTMLElement} el
-   * @returns {number}
-   */
-  function findClickedIdx(el) {
+  function findClickedIdx(el: HTMLElement): number {
     while (el) {
       let idxStr = el.getAttribute("data-idx");
       if (idxStr) {
@@ -151,11 +114,8 @@
     return -1;
   }
 
-  /**
-   * @param {MouseEvent} e
-   */
-  function handleDoubleClicked(e) {
-    let el = /** @type {HTMLElement} */ (e.target);
+  function handleDoubleClicked(e: MouseEvent) {
+    let el = e.target as HTMLElement;
     let idx = findClickedIdx(el);
     let entry = entries[idx];
     let isDir = fs.entryIsDir(entry);
@@ -164,20 +124,14 @@
     }
   }
 
-  /**
-   * @param {MouseEvent} e
-   */
-  function handleClicked(e) {
-    let el = /** @type {HTMLElement} */ (e.target);
+  function handleClicked(e: MouseEvent) {
+    let el = e.target as HTMLElement;
     let idx = findClickedIdx(el);
     setSelected(idx);
     return;
   }
 
-  /**
-   * @param {KeyboardEvent} e
-   */
-  function handleKeyDown(e) {
+  function handleKeyDown(e: KeyboardEvent) {
     let nItems = len(entries);
     let key = e.key;
 
@@ -223,17 +177,14 @@
     }
   }
 
-  /**
-   * @param {number} idx
-   */
-  function setSelected(idx) {
+  function setSelected(idx: number) {
     let nItems = len(entries);
     if (idx < 0 || idx >= nItems) {
       return;
     }
     selectedIdx = idx;
     let q = `[data-idx="${idx}"]`;
-    let el = /** @type {HTMLElement} */ (tbodyEl.querySelector(q));
+    let el = tbodyEl.querySelector(q) as HTMLElement;
     el.focus();
   }
 </script>
