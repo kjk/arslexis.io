@@ -3,18 +3,16 @@
 
 import { len } from "./util";
 
-/**
-  @typedef {Object} Size
-  @property {number} dx
-  @property {number} dy
-*/
+type Size = {
+  dx: number;
+  dy: number;
+};
 
-/**
-  @typedef {Object} FileTypeInfo
-  @property {string} kind
-  @property {number} [dx]
-  @property {number} [dy]
-*/
+type FileTypeInfo = {
+  kind: string;
+  dx?: number;
+  dy?: number;
+};
 
 export const kindFilePDF = "pdf";
 export const kindFilePS = "ps";
@@ -104,12 +102,7 @@ const fileSigs = [
   [0, "AT&T"],
 ];
 
-/**
- @param {Uint8Array} d
- @param {number} off
- @param {string} str
- */
-function startsWith(d, off, str) {
+function startsWith(d: Uint8Array, off: number, str: string) {
   for (let c of str) {
     let n1 = c.charCodeAt(0);
     let n2 = d[off++];
@@ -120,44 +113,28 @@ function startsWith(d, off, str) {
   return true;
 }
 
-/**
- @param {Uint8Array} d
- @param {number} off
- */
-function rByte(d, off) {
+function rByte(d: Uint8Array, off: number) {
   if (off + 1 > len(d)) {
     return 0;
   }
   return d[off];
 }
 
-/**
- @param {Uint8Array} d
- @param {number} off
- */
-function rWordBE(d, off) {
+function rWordBE(d: Uint8Array, off: number) {
   if (off + 2 > len(d)) {
     return 0;
   }
   return (d[off] << 8) | d[off + 1];
 }
 
-/**
- @param {Uint8Array} d
- @param {number} off
- */
-function rDWordBE(d, off) {
+function rDWordBE(d: Uint8Array, off: number) {
   if (off + 4 > len(d)) {
     return 0;
   }
   return (d[off] << 24) | (d[off + 1] << 16) | (d[off + 2] << 8) | d[off + 3];
 }
 
-/**
- @param {Uint8Array} d
- @returns {Size|undefined}
- */
-function jpegSizeFromData(d) {
+function jpegSizeFromData(d: Uint8Array): Size | undefined {
   // find the last start of frame marker for non-differential Huffman/arithmetic coding
   let n = len(d);
   let idx = 2;
@@ -180,11 +157,7 @@ function jpegSizeFromData(d) {
   }
 }
 
-/**
- @param {Uint8Array} d
- @returns {Size|undefined}
- */
-function pngSizeFromData(d) {
+function pngSizeFromData(d: Uint8Array): Size | undefined {
   if (!startsWith(d, 12, "IHDR")) {
     return undefined;
   }
@@ -193,12 +166,7 @@ function pngSizeFromData(d) {
   return { dx, dy };
 }
 
-/**
- @param {Uint8Array} d
- @param {any} sig
- @returns {boolean}
- */
-function matchesFileSig(d, sig) {
+function matchesFileSig(d: Uint8Array, sig: any): boolean {
   let idx = sig[0];
   for (let i = 1; i < len(sig); i++) {
     let el = sig[i];
@@ -219,13 +187,8 @@ function matchesFileSig(d, sig) {
   return true;
 }
 
-/**
- @param {Uint8Array|File|Blob} dIn
- @returns {Promise<FileTypeInfo|undefined>}
- */
-export async function sniffFileType(dIn) {
-  /** @type {Uint8Array} */
-  let d;
+export async function sniffFileType(dIn: Uint8Array | File | Blob): Promise<FileTypeInfo | undefined> {
+  let d: Uint8Array;
   if (dIn instanceof Blob) {
     d = new Uint8Array(await dIn.slice(0, 4100).arrayBuffer());
   } else if (dIn instanceof Uint8Array) {
