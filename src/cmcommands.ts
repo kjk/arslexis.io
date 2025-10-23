@@ -1,6 +1,6 @@
-/** @typedef { import("@codemirror/state").EditorState} EditorState */
-/** @typedef { import("@codemirror/view").EditorView} EditorView */
-/** @typedef {import("@codemirror/state").TextIterator} TextIterator */
+type EditorState = import("@codemirror/state").EditorState;
+type EditorView = import("@codemirror/view").EditorView;
+type TextIterator = import("@codemirror/state").TextIterator;
 
 import {
   b64Decode,
@@ -16,24 +16,14 @@ import { foldAll, unfoldAll } from "@codemirror/language";
 import { EditorSelection } from "@codemirror/state";
 import { getClipboard, len, setClipboard, throwIf } from "./util";
 
-/**
- * @param {EditorSelection} sel
- * @returns {boolean}
- */
-function isEmptySelection(sel) {
+function isEmptySelection(sel: EditorSelection): boolean {
   if (len(sel.ranges) > 1) {
     return false;
   }
   return sel.ranges[0].empty;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} fn
- * @param {string} userEvent
- * @returns {boolean}
- */
-function runOnSelIter({ state, dispatch }, fn, userEvent) {
+function runOnSelIter({ state, dispatch }: {state: EditorState, dispatch: Function}, fn: Function, userEvent: string): boolean {
   if (state.readOnly) return false;
   const changes = [];
   const doc = state.doc;
@@ -50,13 +40,7 @@ function runOnSelIter({ state, dispatch }, fn, userEvent) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} fn
- * @param {string} userEvent
- * @returns {boolean}
- */
-function runOnIter({ state, dispatch }, fn, userEvent) {
+function runOnIter({ state, dispatch }: {state: EditorState, dispatch: Function}, fn: Function, userEvent: string): boolean {
   if (state.readOnly) return false;
   const changes = [];
   const doc = state.doc;
@@ -79,11 +63,7 @@ function runOnIter({ state, dispatch }, fn, userEvent) {
 
 // iterates content of lines, skipping newline characaters
 // for each element returns [pos, line string]
-/**
- * @param {TextIterator} iter
- * @returns {*}
- */
-export function* iterLines(iter) {
+export function* iterLines(iter: TextIterator): any {
   let pos = 0;
   const res = [0, "", ""];
   res[0] = 0;
@@ -111,17 +91,8 @@ export function* iterLines(iter) {
 }
 
 const rxLeadingWS = /^\s+/;
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function deleteLeadingWhitespace({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function deleteLeadingWhitespace({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     for (const li of iterLines(iter)) {
       const s = li[1];
       const m = s.match(rxLeadingWS);
@@ -137,17 +108,8 @@ export function deleteLeadingWhitespace({ state, dispatch }) {
 }
 
 const rxTrailingWS = /\s+$/;
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function deleteTrailingWhitespace({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function deleteTrailingWhitespace({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     for (const li of iterLines(iter)) {
       const s = li[1];
       const m = s.match(rxTrailingWS);
@@ -162,17 +124,8 @@ export function deleteTrailingWhitespace({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.trailinghitespace");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function deleteFirstChar({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function deleteFirstChar({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     for (const li of iterLines(iter)) {
       const s = li[1];
       if (len(s) > 0) {
@@ -185,17 +138,8 @@ export function deleteFirstChar({ state, dispatch }) {
   return runOnSelIter({ state, dispatch }, iter, "delete.firstchar");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function deleteLastChar({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function deleteLastChar({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     for (const li of iterLines(iter)) {
       const s = li[1];
       if (len(s) > 0) {
@@ -208,11 +152,7 @@ export function deleteLastChar({ state, dispatch }) {
   return runOnSelIter({ state, dispatch }, iter, "delete.lastchar");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function duplicateSelection({ state, dispatch }) {
+export function duplicateSelection({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   if (state.readOnly) return false;
   let changes = [];
   let doc = state.doc;
@@ -231,18 +171,8 @@ export function duplicateSelection({ state, dispatch }) {
   return true;
 }
 
-/**
- * replace 2 or more consequitive blank lines with single blank line
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function mergeBlankLines({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function mergeBlankLines({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     let prevWasBlank = false;
     for (let li of iterLines(iter)) {
       let s = li[1];
@@ -261,17 +191,8 @@ export function mergeBlankLines({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.mergeblanklines");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function removeBlankLines({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function removeBlankLines({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     for (const li of iterLines(iter)) {
       const s = li[1];
       if (len(s) === 0) {
@@ -284,13 +205,7 @@ export function removeBlankLines({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.removeblanklines");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {string} before
- * @param {string} after
- * @returns {boolean}
- */
-export function encloseSelection({ state, dispatch }, before, after) {
+export function encloseSelection({ state, dispatch }: {state: EditorState, dispatch: Function}, before: string, after: string): boolean {
   if (state.readOnly) return false;
   const changes = [];
   const sel = state.selection;
@@ -312,21 +227,9 @@ export function encloseSelection({ state, dispatch }, before, after) {
   return true;
 }
 
-/**
- * TODO: more efficient implementation which uses line lengths
- * to optimize back searches and use less memory
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function mergeDuplicateLines({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
-    /** @type {Set<string>} */
-    let seenLines = new Set();
+export function mergeDuplicateLines({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
+    let seenLines: Set<string> = new Set();
     for (let li of iterLines(iter)) {
       let s = li[1];
       if (seenLines.has(s)) {
@@ -341,19 +244,9 @@ export function mergeDuplicateLines({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.mergeduplicatelines");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function deleteDuplicateLines({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
-    /** @type {Map<string, number[]>} */
-    let seenLines = new Map();
+export function deleteDuplicateLines({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
+    let seenLines: Map<string, number[]> = new Map();
     for (let li of iterLines(iter)) {
       let s = li[1];
       if (seenLines.has(s)) {
@@ -376,17 +269,8 @@ export function deleteDuplicateLines({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.deleteduplicatelines");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function compressWhitespace({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function compressWhitespace({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     for (let li of iterLines(iter)) {
       let s = li[1];
       let s2 = strCompressWS(s);
@@ -401,17 +285,8 @@ export function compressWhitespace({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.compresswhitespace");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function padWithSpaces({ state, dispatch }) {
-  /**
-   * @param {TextIterator} iter
-   * @param {any[]} changes
-   * @param {number} start
-   */
-  function iter(iter, changes, start = 0) {
+export function padWithSpaces({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
+  function iter(iter: TextIterator, changes: any[], start: number = 0) {
     let lines = [];
     let max = 0;
     for (let li of iterLines(iter)) {
@@ -436,12 +311,7 @@ export function padWithSpaces({ state, dispatch }) {
   return runOnIter({ state, dispatch }, iter, "delete.padwithspaces");
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} convertFn
- * @returns {boolean}
- */
-export function replaceSelections({ state, dispatch }, convertFn) {
+export function replaceSelections({ state, dispatch }: {state: EditorState, dispatch: Function}, convertFn: Function): boolean {
   if (state.readOnly) return false;
   const changes = [];
   const sel = state.selection;
@@ -518,12 +388,7 @@ export function cmdUrlDecode({ state, dispatch }) {
   return replaceSelections({ state, dispatch }, urlDecode);
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {string} insert
- * @returns {string}
- */
-export function replaceSelectionsWithStr({ state, dispatch }, insert) {
+export function replaceSelectionsWithStr({ state, dispatch }: {state: EditorState, dispatch: Function}, insert: string): string {
   let changes = [];
   let sel = state.selection;
   let res = "";
@@ -542,13 +407,7 @@ export function replaceSelectionsWithStr({ state, dispatch }, insert) {
   return res;
 }
 
-/**
- * Note: works differently than notepad2 if multiple selection, but notepad2
- * seems to be wrong
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {Promise<boolean>}
- */
-export async function swapSelectionsWithClipboard({ state, dispatch }) {
+export async function swapSelectionsWithClipboard({ state, dispatch }: {state: EditorState, dispatch: Function}): Promise<boolean> {
   if (state.readOnly) return false;
   let sel = state.selection;
   if (isEmptySelection(sel)) {
@@ -563,12 +422,7 @@ export async function swapSelectionsWithClipboard({ state, dispatch }) {
   return true;
 }
 
-/**
- * swaps current line with the line before it
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function transposeLines({ state, dispatch }) {
+export function transposeLines({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   if (state.readOnly) return false;
   let sel = state.selection;
   // find the line where last selection ends
@@ -591,11 +445,7 @@ export function transposeLines({ state, dispatch }) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function duplicateLine({ state, dispatch }) {
+export function duplicateLine({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   if (state.readOnly) return false;
   let sel = state.selection;
   // find the line where last selection ends
@@ -618,11 +468,7 @@ export function duplicateLine({ state, dispatch }) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function cutLine({ state, dispatch }) {
+export function cutLine({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   if (state.readOnly) return false;
   let sel = state.selection;
   // find the line where last selection ends
@@ -637,11 +483,7 @@ export function cutLine({ state, dispatch }) {
   return true;
 }
 
-/**
- * @param {{state: EditorState}} arg0
- * @returns {boolean}
- */
-export function copyLine({ state }) {
+export function copyLine({ state }: {state: EditorState}): boolean {
   let sel = state.selection;
   // find the line where last selection ends
   let pos = sel.ranges[len(sel.ranges) - 1].to;
@@ -653,11 +495,7 @@ export function copyLine({ state }) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function joinLines({ state, dispatch }) {
+export function joinLines({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   if (state.readOnly) return false;
   let sel = state.selection;
   // find the lines where last selection ends
@@ -683,12 +521,7 @@ export function joinLines({ state, dispatch }) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} fn
- * @returns {boolean}
- */
-export function replaceSelectionsWith({ state, dispatch }, fn) {
+export function replaceSelectionsWith({ state, dispatch }: {state: EditorState, dispatch: Function}, fn: Function): boolean {
   if (state.readOnly) return false;
   let changes = [];
   let ranges = [];
@@ -716,19 +549,12 @@ export function replaceSelectionsWith({ state, dispatch }, fn) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} fn
- * @param {string} eventName
- * @param {boolean} skipEmpty
- * @returns {boolean}
- */
 export function iterSelections(
-  { state, dispatch },
-  fn,
-  eventName,
-  skipEmpty = false
-) {
+  { state, dispatch }: {state: EditorState, dispatch: Function},
+  fn: Function,
+  eventName: string,
+  skipEmpty: boolean = false
+): boolean {
   if (state.readOnly) return false;
   let changes = [];
   let ranges = [];
@@ -753,12 +579,7 @@ export function iterSelections(
   return true;
 }
 
-/**
- * for debugging
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function dumpSelections({ state, dispatch }) {
+export function dumpSelections({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   console.log("dumpSelections:");
   function iterFn(state, sel, changes, ranges) {
     console.log(
@@ -773,13 +594,7 @@ export function dumpSelections({ state, dispatch }) {
   );
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {string} before
- * @param {string} after
- * @returns {boolean}
- */
-export function encloseSelections({ state, dispatch }, before, after) {
+export function encloseSelections({ state, dispatch }: {state: EditorState, dispatch: Function}, before: string, after: string): boolean {
   function iterFn(state, { from, to }, changes, ranges) {
     if (len(before) > 0) {
       changes.push({ from, insert: before });
@@ -796,12 +611,7 @@ export function encloseSelections({ state, dispatch }, before, after) {
   );
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} fn
- * @returns {boolean}
- */
-export function insertAfterSelection2({ state, dispatch }, fn) {
+export function insertAfterSelection2({ state, dispatch }: {state: EditorState, dispatch: Function}, fn: Function): boolean {
   function iterFn(state, { from, to }, changes, ranges) {
     let s = state.sliceDoc(from, to);
     let insert = fn(s);
@@ -818,12 +628,7 @@ export function insertAfterSelection2({ state, dispatch }, fn) {
   );
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function} fn
- * @returns {boolean}
- */
-export function insertAfterSelection({ state, dispatch }, fn) {
+export function insertAfterSelection({ state, dispatch }: {state: EditorState, dispatch: Function}, fn: Function): boolean {
   if (state.readOnly) return false;
   let changes = [];
   let ranges = [];
@@ -850,18 +655,7 @@ export function insertAfterSelection({ state, dispatch }, fn) {
   return true;
 }
 
-/**
- * Insert at cursor position or replace first selection with
- * text returned by fn
- * note: notepad2 differs in handling selection. it uses last
- * selection user made. CodeMirror normalizes selections so they
- * are in order in the document, not ordered by timeline of user
- * selections
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {Function|string} fnOrStr
- * @returns {boolean}
- */
-export function insertText({ state, dispatch }, fnOrStr) {
+export function insertText({ state, dispatch }: {state: EditorState, dispatch: Function}, fnOrStr: Function | string): boolean {
   if (state.readOnly) return false;
   let insert = typeof fnOrStr === "string" ? fnOrStr : fnOrStr();
   if (insert === "") {
@@ -885,12 +679,7 @@ export function insertText({ state, dispatch }, fnOrStr) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @param {boolean} end
- * @returns {boolean}
- */
-export function goToSelectionStartEnd({ state, dispatch }, end) {
+export function goToSelectionStartEnd({ state, dispatch }: {state: EditorState, dispatch: Function}, end: boolean): boolean {
   // anchor is where selection starts, head is where the cursor is
   // going to start: head to from, anchor to to
   let { from, to, anchor, head } = state.selection.ranges[0];
@@ -910,7 +699,7 @@ export function goToSelectionStartEnd({ state, dispatch }, end) {
   return true;
 }
 
-export function goToPos({ state, dispatch }, pos) {
+export function goToPos({ state, dispatch }: {state: EditorState, dispatch: Function}, pos: number) {
   console.log("goToPos: pos:", pos);
   const ranges = [EditorSelection.range(pos, pos)];
   dispatch(
@@ -922,11 +711,7 @@ export function goToPos({ state, dispatch }, pos) {
   return true;
 }
 
-/**
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function selectToDocStart({ state, dispatch }) {
+export function selectToDocStart({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   let pos = 0;
   for (let { to } of state.selection.ranges) {
     pos = to;
@@ -941,12 +726,7 @@ export function selectToDocStart({ state, dispatch }) {
   return true;
 }
 
-/**
- * note: works differently from notepad2 in multiple selections
- * @param {{state: EditorState, dispatch: Function}} arg0
- * @returns {boolean}
- */
-export function selectToDocEnd({ state, dispatch }) {
+export function selectToDocEnd({ state, dispatch }: {state: EditorState, dispatch: Function}): boolean {
   let pos = state.selection.ranges[0].from;
   let ranges = [EditorSelection.range(pos, state.doc.length)];
   dispatch(
@@ -963,18 +743,11 @@ const kFoldingStateUnfolded = 1;
 
 let foldingState = kFoldingStateUnfolded;
 
-/**
- * @param {boolean} isFolded
- */
-export function setIsFolded(isFolded) {
+export function setIsFolded(isFolded: boolean) {
   foldingState = isFolded ? kFoldingStateFolded : kFoldingStateUnfolded;
 }
 
-/**
- * @param {EditorView} editorView
- * @returns {boolean}
- */
-export function toggleFoldAll(editorView) {
+export function toggleFoldAll(editorView: EditorView): boolean {
   console.log("toggleFoldAll");
   switch (foldingState) {
     case kFoldingStateUnfolded:
