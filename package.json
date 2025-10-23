@@ -72,6 +72,7 @@
     "protobufjs": "^7.5.4",
     "qr-scanner": "^1.4.2",
     "svgo": "^4.0.0",
+    "typescript": "^5.9.3",
     "yaml": "^2.8.1"
   }
 }
