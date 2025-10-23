@@ -11,19 +11,13 @@
   import { logFmEvent } from "../events";
   import { fmtSize, len } from "../util";
   import { readFileSysDirRecur, calcDirSizes } from "../fs";
+  import type { FsEntry, FileSysDir, ReadFilesCbArgs } from "../fs";
 
-  /** @typedef {import("../fs").FsEntry} FsEntry */
-  /** @typedef {import("../fs").FileSysDir} FileSysDir */
-  /** @typedef {import("../fs").ReadFilesCbArgs} ReadFilesCbArgs */
+  let fs: FileSysDir | null = $state(null);
 
-  /** @type {FileSysDir} */
-  let fs = $state(null);
+  let dirPath: any[][] = $state([]);
 
-  /** @type {any[][]} */
-  let dirPath = $state([]);
-
-  /** @type {FsEntry} */
-  let dirRoot = $derived(calcDirRoot(dirPath));
+  let dirRoot: FsEntry = $derived(calcDirRoot(dirPath));
   let initialSelectionIdx = $state(0);
 
   function calcDirRoot(dirPath) {
@@ -44,10 +38,7 @@
 
   let hasFileSystemSupport = supportsFileSystem();
 
-  /**
-   * @param {FileSystemDirectoryHandle} dh
-   */
-  async function addToRecent(dh) {
+  async function addToRecent(dh: FileSystemDirectoryHandle) {
     // note: no way to check for duplicates
     // dirHandle for a directory doesn't compare equal
     // to another dirHandle for the same directory
@@ -67,20 +58,13 @@
   }
 
   let fsStack = [];
-  /**
-   * @param {FileSystemDirectoryHandle} dirHandle
-   */
-  async function openDirectory(dirHandle) {
+  async function openDirectory(dirHandle: FileSystemDirectoryHandle) {
     await verifyHandlePermission(dirHandle, false);
     fs = null;
     dirPath = [];
     progressHTML = "<div>Reading directory entries...</div>";
 
-    /**
-     * @param {ReadFilesCbArgs} a
-     * @returns {boolean}
-     */
-    function cbProgress(a) {
+    function cbProgress(a: ReadFilesCbArgs): boolean {
       // interrupt scans in progress if we started a new one
       if (!fsStack.includes(a.fs)) {
         fsStack.push(a.fs);
@@ -114,10 +98,7 @@
     readFileSysDirRecur(dirHandle, cbProgress).then(finish);
   }
 
-  /**
-   * @param {FileSystemDirectoryHandle} dirHandle
-   */
-  async function openRecentDir(dirHandle) {
+  async function openRecentDir(dirHandle: FileSystemDirectoryHandle) {
     try {
       await verifyHandlePermission(dirHandle, false);
     } catch {
@@ -128,8 +109,7 @@
   }
 
   async function openFolder() {
-    /** @type {FileSystemDirectoryHandle} */
-    let dirHandle;
+    let dirHandle: FileSystemDirectoryHandle;
     try {
       // @ts-ignore
       dirHandle = await window.showDirectoryPicker();
@@ -147,10 +127,7 @@
     fs = fs;
   }
 
-  /**
-   * @param {FsEntry} e
-   */
-  function handleSelected(e, idx) {
+  function handleSelected(e: FsEntry, idx: number) {
     let name = fs.entryName(e);
     if (name === "..") {
       handleGoUp();
@@ -173,10 +150,7 @@
     dirPath = dirPath;
   }
 
-  /**
-   * @param {FsEntry} de
-   */
-  function goToDir(de) {
+  function goToDir(de: FsEntry) {
     console.log("goToDir:", de);
     if (de === dirRoot) {
       console.log("goToDir: same directory");
