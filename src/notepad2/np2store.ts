@@ -10,23 +10,16 @@ const db = new KV("np2store", "keyval");
 // TODO: not great, needed to avoid circular dependencies
 setIDB(db);
 
-/**
- * @typedef {Object} FavEntry
- * @property {string} fs
- * @property {string} name
- * @property {string} id
- * @property {FileSystemFileHandle} fileHandle
- * @property {string} favName
- */
+type FavEntry = {
+  fs: string;
+  name: string;
+  id: string;
+  fileHandle: FileSystemFileHandle;
+  favName: string;
+};
 
-/**
- * @param {FsFile} file
- * @param {string} favName
- * @returns {FavEntry}
- */
-export function favEntryFromFsFile(file, favName) {
-  /** @type {FavEntry} */
-  const e = {
+export function favEntryFromFsFile(file: FsFile, favName: string): FavEntry {
+  const e: FavEntry = {
     fs: file.type,
     name: file.name,
     favName: favName,
@@ -36,11 +29,7 @@ export function favEntryFromFsFile(file, favName) {
   return e;
 }
 
-/**
- * @param {FavEntry} fav
- * @returns {FsFile}
- */
-export function fsFileFromFavEntry(fav) {
+export function fsFileFromFavEntry(fav: FavEntry): FsFile {
   const name = fav.name; // or fav.favName?
   const f = new FsFile(fav.fs, name, name);
   f.fileHandle = fav.fileHandle;
@@ -48,12 +37,7 @@ export function fsFileFromFavEntry(fav) {
   return f;
 }
 
-/**
- * @param {FavEntry} e1
- * @param {FavEntry} e2
- * @returns {Promise<boolean>}
- */
-export async function favEq(e1, e2) {
+export async function favEq(e1: FavEntry, e2: FavEntry): Promise<boolean> {
   if (e1.fs !== e2.fs) return false;
   if (e1.name !== e2.name) return false;
   if (e1.favName !== e2.favName) return false;
@@ -70,18 +54,12 @@ export async function favEq(e1, e2) {
 
 const keyFileForNewWindow = "file-for-new-window";
 
-/**
- * @param {FsFile} f
- */
-export async function rememberFileForNewWindow(f) {
+export async function rememberFileForNewWindow(f: FsFile) {
   const e = favEntryFromFsFile(f, f.name);
   await db.set(keyFileForNewWindow, e);
 }
 
-/**
- * @returns {Promise<FsFile>}
- */
-export async function getAndClearFileForNewWindow() {
+export async function getAndClearFileForNewWindow(): Promise<FsFile> {
   const fav = await db.get(keyFileForNewWindow);
   const f = fsFileFromFavEntry(fav);
   await db.del(keyFileForNewWindow);
@@ -94,8 +72,6 @@ export async function getAndClearFileForNewWindow() {
  */
 export let browseFolders = makeIndexedDBStore(db, "browse-folders", [], true);
 
-/** @type {import("svelte/store").Writable<FavEntry[]>} */
-export let recent = makeIndexedDBStore(db, "recent", [], true);
+export let recent: import("svelte/store").Writable<FavEntry[]> = makeIndexedDBStore(db, "recent", [], true);
 
-/** @type {import("svelte/store").Writable<FavEntry[]>} */
-export let favorites = makeIndexedDBStore(db, "favorites", [], true);
+export let favorites: import("svelte/store").Writable<FavEntry[]> = makeIndexedDBStore(db, "favorites", [], true);
