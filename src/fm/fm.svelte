@@ -235,16 +235,19 @@
     <div class="flex font-bold font-mono text-sm ml-3">
       <button
         disabled={!isUpEnabled}
-        class="hover:bg-gray-200 disabled:hover:bg-white disabled:text-gray-300 px-[4px] mr-0.5"
+        class="hover:bg-gray-200 disabled:hover:bg-white disabled:text-gray-300 px-1 mr-0.5"
         onclick={handleGoUp}>▲</button
       >
       {#each dirPath as e, idx}
         {@const isLast = len(dirPath) === idx + 1}
-        <button onclick={() => goToDir(e[0])} class="ml-1 underline"
-          >{fs.entryName(e[0])}</button
-        >
         {#if !isLast}
+          <button
+            onclick={() => goToDir(e[0])}
+            class="ml-1 underline cursor-pointer">{fs.entryName(e[0])}</button
+          >
           <div class="ml-1">/</div>
+        {:else}
+          <button class="ml-1">{fs.entryName(e[0])}</button>
         {/if}
       {/each}
     </div>
