@@ -32,7 +32,7 @@ import { indentUnit } from "@codemirror/language";
 import { indentWithTab } from "@codemirror/commands";
 import { lintKeymap } from "@codemirror/lint";
 
-/** @typedef { import("@codemirror/state").Extension} Extension */
+type Extension = import("@codemirror/state").Extension;
 
 // (The superfluous function calls around the list of extensions work
 // around current limitations in tree-shaking software.)
@@ -130,15 +130,13 @@ export const basicSetup2 = (() => [
 
 // all extensions that can be reconfigured
 export class EditorConfigurator {
-  /** @type {EditorView} */
-  editorView;
-  /** @type {Extension[]} */
-  exts = [];
+  editorView: EditorView;
+  exts: Extension[] = [];
   readOnlyCompartment = new Compartment();
   constructor() {
     this.exts = [this.readOnlyCompartment.of(EditorState.readOnly.of(false))];
   }
-  setReadOnly(readOnly) {
+  setReadOnly(readOnly: boolean) {
     this.editorView.dispatch({
       effects: this.readOnlyCompartment.reconfigure(
         EditorState.readOnly.of(readOnly)
@@ -146,25 +144,15 @@ export class EditorConfigurator {
     });
   }
 }
-/**
- * @param {boolean} basic
- * @param {boolean} useTab
- * @param {number} tabSize
- * @param {boolean} lineWrapping
- * @param {string} placeholder
- * @param {boolean} editable
- * @returns {Extension[]}
- */
 export function getBaseExtensions(
-  basic,
-  useTab,
-  tabSize,
-  lineWrapping,
-  placeholder,
-  editable
-) {
-  /** @type {Extension[]} */
-  const res = [
+  basic: boolean,
+  useTab: boolean,
+  tabSize: number,
+  lineWrapping: boolean,
+  placeholder: string,
+  editable: boolean
+): Extension[] {
+  const res: Extension[] = [
     indentUnit.of(" ".repeat(tabSize)),
     EditorView.editable.of(editable),
   ];
@@ -177,29 +165,18 @@ export function getBaseExtensions(
   return res;
 }
 
-/**
- * @param {import("@codemirror/view").EditorView} editorView
- * @param {Compartment} readOnlyCompartment
- * @param {boolean} readOnly
- */
 export function editorViewSetReadOnly(
-  editorView,
-  readOnlyCompartment,
-  readOnly
+  editorView: import("@codemirror/view").EditorView,
+  readOnlyCompartment: Compartment,
+  readOnly: boolean
 ) {
   editorView.dispatch({
     effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(readOnly)),
   });
 }
 
-/**
- * @param {*} theme
- * @param {*} styles
- * @returns {Extension[]}
- */
-export function getTheme(theme, styles) {
-  /** @type {Extension[]} */
-  const extensions = [];
+export function getTheme(theme: any, styles: any): Extension[] {
+  const extensions: Extension[] = [];
   if (styles) extensions.push(EditorView.theme(styles));
   if (theme) extensions.push(theme);
   return extensions;
