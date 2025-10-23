@@ -1,4 +1,4 @@
-/** @typedef {import("../dbutil").KV} KV */
+type KV = import("../dbutil").KV;
 import { verifyHandlePermission } from "../fileutil";
 import { genRandomID, splitMax, throwIf } from "../util";
 
@@ -11,26 +11,17 @@ export class FsFile {
   id = "";
   // name doesn't have to be unique
   name = "";
-  /** @type {FileSystemFileHandle} */
-  fileHandle;
-  /**
-   * @param {string} id
-   * @param {string} [name]
-   */
-  constructor(type, id, name) {
+  fileHandle: FileSystemFileHandle;
+  constructor(type: string, id: string, name?: string) {
     this.type = type;
     this.id = id;
     this.name = name || "";
   }
 }
 
-/** @type {KV} */
-let db;
+let db: KV;
 
-/**
- * @param {KV} idb
- */
-export function setIDB(idb) {
+export function setIDB(idb: KV) {
   db = idb;
 }
 
@@ -38,16 +29,11 @@ export function setIDB(idb) {
 // np2:file:${id}:${name}
 const idbKeyPrefix = "np2:file:";
 
-/**
- * must have id and name set
- * @param {FsFile} f
- * @result {string}
- */
-function mkIDBKey(f) {
+function mkIDBKey(f: FsFile): string {
   return idbKeyPrefix + f.id + ":" + f.name;
 }
 
-export function newIndexedDBFile(name) {
+export function newIndexedDBFile(name: string): FsFile {
   let id = genRandomID(6);
   let f = new FsFile(fsTypeIndexedDB, id, name);
   f.type = fsTypeIndexedDB;
@@ -55,10 +41,7 @@ export function newIndexedDBFile(name) {
 }
 
 // TODO: could store file list under a single key + content
-/**
- * @returns {Promise<FsFile[]>}
- */
-async function getFileListIndexedDB() {
+async function getFileListIndexedDB(): Promise<FsFile[]> {
   let keys = await db.keys();
   const res = [];
   for (const dbKey of keys) {
@@ -77,12 +60,7 @@ async function getFileListIndexedDB() {
   return res;
 }
 
-/**
- * must have id and name set
- * @param {FsFile} f
- * @returns {string}
- */
-export function serialize(f) {
+export function serialize(f: FsFile): string {
   switch (f.type) {
     case fsTypeIndexedDB:
       return "ls--" + f.id + "--" + f.name;
@@ -90,11 +68,7 @@ export function serialize(f) {
   throwIf(true, `invalid FsFile.type ${f.type}`);
 }
 
-/**
- * @param {string} s
- * @returns {?FsFile}
- */
-export function deserialize(s) {
+export function deserialize(s: string): FsFile | null {
   let parts = splitMax(s, "--", 3);
   let type = parts[0];
   switch (type) {
@@ -110,11 +84,7 @@ export function deserialize(s) {
   return null;
 }
 
-/**
- * @param {FsFile} f
- * @returns {Promise<boolean>}
- */
-async function deleteFileIndexedDB(f) {
+async function deleteFileIndexedDB(f: FsFile): Promise<boolean> {
   const key = mkIDBKey(f);
   try {
     await db.del(key);
@@ -125,11 +95,7 @@ async function deleteFileIndexedDB(f) {
   return true;
 }
 
-/**
- * @param {FsFile} f
- * @returns {Promise<boolean>}
- */
-async function deleteFileComputer(f) {
+async function deleteFileComputer(f: FsFile): Promise<boolean> {
   const fh = f.fileHandle;
   const ok = await verifyHandlePermission(fh, true);
   if (!ok) {
@@ -140,11 +106,7 @@ async function deleteFileComputer(f) {
   return true;
 }
 
-/**
- * @param {FsFile} f
- * @returns {Promise<boolean>}
- */
-export async function deleteFile(f) {
+export async function deleteFile(f: FsFile): Promise<boolean> {
   switch (f.type) {
     case fsTypeIndexedDB:
       return await deleteFileIndexedDB(f);
@@ -156,21 +118,13 @@ export async function deleteFile(f) {
   return null;
 }
 
-/**
- * @param {FsFile} f
- * @returns {Promise<Blob>}
- */
-async function readFileIndexedDB(f) {
+async function readFileIndexedDB(f: FsFile): Promise<Blob> {
   const key = mkIDBKey(f);
   const d = await db.get(key);
   return d;
 }
 
-/**
- * @param {FsFile} f
- * @returns {Promise<Blob>}
- */
-async function readFileComputer(f) {
+async function readFileComputer(f: FsFile): Promise<Blob> {
   const fh = f.fileHandle;
   const ok = await verifyHandlePermission(fh, false);
   if (!ok) {
@@ -186,12 +140,7 @@ async function readFileComputer(f) {
   return null;
 }
 
-/**
- * must have id and name set
- * @param {FsFile} f
- * @returns {Promise<Blob>}
- */
-export async function readFile(f) {
+export async function readFile(f: FsFile): Promise<Blob> {
   switch (f.type) {
     case fsTypeIndexedDB:
       return await readFileIndexedDB(f);
@@ -203,11 +152,7 @@ export async function readFile(f) {
   return null;
 }
 
-/**
- * @param {FsFile} f
- * @param {Blob} d
- */
-async function writeFileComputer(f, d) {
+async function writeFileComputer(f: FsFile, d: Blob) {
   const fileHandle = f.fileHandle;
   // @ts-ignore
   const writable = await fileHandle.createWritable();
@@ -215,20 +160,12 @@ async function writeFileComputer(f, d) {
   await writable.close();
 }
 
-/**
- * @param {FsFile} f
- * @param {Blob} d
- */
-async function writeFileIndexedDB(f, d) {
+async function writeFileIndexedDB(f: FsFile, d: Blob) {
   const key = mkIDBKey(f);
   await db.set(key, d);
 }
 
-/**
- * @param {FsFile} f
- * @param {Blob} d
- */
-export async function writeFile(f, d) {
+export async function writeFile(f: FsFile, d: Blob) {
   throwIf(!(d instanceof Blob));
   switch (f.type) {
     case fsTypeIndexedDB:
@@ -242,12 +179,7 @@ export async function writeFile(f, d) {
   }
 }
 
-/**
- * return array of FsFile objects without objects
- * @param {string} type
- * @returns {Promise<FsFile[]>}
- */
-export async function getFileList(type) {
+export async function getFileList(type: string): Promise<FsFile[]> {
   switch (type) {
     case fsTypeIndexedDB:
       return await getFileListIndexedDB();
@@ -256,11 +188,7 @@ export async function getFileList(type) {
   }
 }
 
-/**
- * https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker
- * @returns {Promise<FsFile>}
- */
-export async function openFilePicker() {
+export async function openFilePicker(): Promise<FsFile> {
   const opts = {
     mutltiple: false,
   };
@@ -279,11 +207,7 @@ export async function openFilePicker() {
   return res;
 }
 
-/**
- * https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker
- * @returns {Promise<FsFile>}
- */
-export async function saveFilePicker(suggestedName = "") {
+export async function saveFilePicker(suggestedName: string = ""): Promise<FsFile> {
   const opts = {
     suggestedName: suggestedName,
     mutltiple: false,
