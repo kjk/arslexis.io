@@ -2,58 +2,33 @@ import { writable as internal } from "svelte/store";
 
 // based on https://github.com/futurGH/ts-to-jsdoc
 
-/** @typedef  */
-const stores = {
+type Updater<T> = (value: T) => T;
+
+type StoreDict<T> = { [key: string]: import("svelte/store").Writable<T> };
+
+type StorageType = 'local' | 'session';
+
+type Stores = {
+  local: StoreDict<any>;
+  session: StoreDict<any>;
+};
+
+type Serializer = Object;
+
+type Options = {
+  storage?: StorageType;
+};
+
+const stores: Stores = {
   local: {},
   session: {},
 };
 
-/**
- * @typedef {(value: T) => T} Updater
- * @template T
- */
-
-/**
- * @typedef {{ [key: string]: import("svelte/store").Writable<T> }} StoreDict
- * @template T
- */
-
-/** @typedef {'local' | 'session'} StorageType */
-
-/**
- * @typedef {Object} Stores
- * @property {StoreDict<any>} local
- * @property {StoreDict<any>} session
- */
-
-/** @typedef {Object} Serializer */
-
-/**
- * @typedef {Object} Options
- * @property {StorageType} [storage]
- */
-
-/**
- * @param {StorageType} type
- * @returns {any}
- */
-function getStorage(type) {
+function getStorage(type: StorageType): any {
   return type === "local" ? localStorage : sessionStorage;
 }
 
-/**
- * @typedef {import("svelte/store").Writable<T>} Writable<T>
- * @template T
- */
-
-/**
- * @param {string} key
- * @template T
- * @param {T} initialValue
- * @param {Options} [options]
- * @returns {Writable<T>}
- */
-export function persisted(key, initialValue, options) {
+export function persisted<T>(key: string, initialValue: T, options?: Options): import("svelte/store").Writable<T> {
   const storageType = options?.storage ?? "local";
   const isBrowser =
     typeof window !== "undefined" && typeof document !== "undefined";
