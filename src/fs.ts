@@ -11,28 +11,28 @@ import { strCompareNoCase } from "./strutil";
 
 export const kFileSysInvalidEntry = -1;
 
-type FsEntry = number;
+export type FsEntry = number;
 
 // Note: named FileSys because FileSystem is a type in js stdlib
-type FileSys = {
-  rootEntry: () => FsEntry,
-  entriesCount: () => number,
-  entryParent: (FsEntry) => FsEntry,
-  entryIsDir: (FsEntry) => boolean,
-  entryName: (FsEntry) => string,
-  entrySize: (FsEntry) => number,
-  entryCreateTime: (FsEntry) => number,
-  entryModTime: (FsEntry) => number,
-  entryChildren: (FsEntry) => number[],
-  entryDirCount: (FsEntry) => number,
-  entryFileCount: (FsEntry) => number,
-  entrySetMeta: (FsEntry, string, any) => any,
-  entryMeta: (FsEntry, string) => any,
+export type FileSys = {
+  rootEntry: () => FsEntry;
+  entriesCount: () => number;
+  entryParent: (FsEntry) => FsEntry;
+  entryIsDir: (FsEntry) => boolean;
+  entryName: (FsEntry) => string;
+  entrySize: (FsEntry) => number;
+  entryCreateTime: (FsEntry) => number;
+  entryModTime: (FsEntry) => number;
+  entryChildren: (FsEntry) => number[];
+  entryDirCount: (FsEntry) => number;
+  entryFileCount: (FsEntry) => number;
+  entrySetMeta: (FsEntry, string, any) => any;
+  entryMeta: (FsEntry, string) => any;
   // perf: cache for use in entryMetaByKeyIdx
-  internMetaKey: (string) => number,
+  internMetaKey: (string) => number;
   // perf: when doing entryMeta frequently, save internMetaKey cost
   // by doing entryMetaByKeyIdx
-  entryMetaByKeyIdx: (FsEntry, number) => any,
+  entryMetaByKeyIdx: (FsEntry, number) => any;
 };
 
 // index withing entryInfo flat array
@@ -241,7 +241,11 @@ export class FileSysDir {
     return this._entryCountChildren(e, false);
   }
 
-  allocEntry(parent: FsEntry, name: string, handle: FileSystemDirectoryHandle): FsEntry {
+  allocEntry(
+    parent: FsEntry,
+    name: string,
+    handle: FileSystemDirectoryHandle,
+  ): FsEntry {
     let e = len(this.names);
     this.names.push(name);
     this.handles.push(handle);
@@ -254,7 +258,7 @@ export class FileSysDir {
   }
 }
 
-type ReadFilesCbArgs = {
+export type ReadFilesCbArgs = {
   fs: FileSysDir;
   dirName: string;
   fileCount: number;
@@ -265,7 +269,10 @@ type ReadFilesCbArgs = {
 
 type readFileSysDirCallback = (args: ReadFilesCbArgs) => boolean;
 
-export async function readFileSysDirRecur(dirHandle: FileSystemDirectoryHandle, progress: readFileSysDirCallback): Promise<FileSysDir> {
+export async function readFileSysDirRecur(
+  dirHandle: FileSystemDirectoryHandle,
+  progress: readFileSysDirCallback,
+): Promise<FileSysDir> {
   let fs = new FileSysDir();
   let name = dirHandle.name;
   let entry = fs.allocEntry(kFileSysInvalidEntry, name, dirHandle);
@@ -312,7 +319,7 @@ export async function readFileSysDirRecur(dirHandle: FileSystemDirectoryHandle, 
       }
       if (isFile) {
         // @ts-ignore
-        let f = await fshandle.getFile() as File;
+        let f = (await fshandle.getFile()) as File;
         let info = fs.entryInfo;
         let idx = echild * kEntryInfoCount;
         info[idx + kSizeIdx] = f.size;
@@ -361,7 +368,11 @@ export function entryPath(fs: FileSys, e: FsEntry): FsEntry[] {
   return res;
 }
 
-export function forEachParent(fs: FileSys, e: FsEntry, fn: (fs: FileSys, e: FsEntry) => void) {
+export function forEachParent(
+  fs: FileSys,
+  e: FsEntry,
+  fn: (fs: FileSys, e: FsEntry) => void,
+) {
   while (e != kFileSysInvalidEntry) {
     e = fs.entryParent(e);
     if (e !== kFileSysInvalidEntry) {
@@ -398,7 +409,10 @@ export function sortEntries(fs: FileSys, entries: FsEntry[]) {
   entries.sort(sortFn);
 }
 
-export function fsVisitDirs(fs: FileSys, fn: (fs: FileSys, e: FsEntry) => boolean) {
+export function fsVisitDirs(
+  fs: FileSys,
+  fn: (fs: FileSys, e: FsEntry) => boolean,
+) {
   if (fs.entriesCount() === 0) {
     return;
   }
@@ -486,15 +500,15 @@ export function fsPropagateNumberMeta(fs: FileSys, key: string) {
       if (isDir) {
         continue;
       }
-      let v = fs.entryMetaByKeyIdx(keyIdx);
+      let v = fs.entryMetaByKeyIdx(de, keyIdx);
       throwIf(v === undefined); // must be set
       total += v;
     }
-    // propage to parent directories
+    // propagate to parent directories
     let e = de;
     while (e !== kFileSysInvalidEntry) {
       let curr = fs.entryMetaByKeyIdx(e, keyIdx);
-      fs.entrySetMeta(e, curr + total);
+      fs.entrySetMeta(e, key, curr + total);
       e = fs.entryParent(e);
     }
   }
