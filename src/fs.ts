@@ -23,7 +23,7 @@ export type FileSys = {
   entrySize: (FsEntry) => number;
   entryCreateTime: (FsEntry) => number;
   entryModTime: (FsEntry) => number;
-  entryChildren: (FsEntry) => number[];
+  entryChildren: (FsEntry) => FsEntry[];
   entryDirCount: (FsEntry) => number;
   entryFileCount: (FsEntry) => number;
   entrySetMeta: (FsEntry, string, any) => any;
@@ -70,7 +70,6 @@ export class FileSysDir {
   // TODO: optimize as a flat array and keeping info
   // as index / length into the array
   // if value is null, it's directory
-  //
   children: FsEntry[][] = [];
 
   internMetaKey(key: string): number {
@@ -199,7 +198,7 @@ export class FileSysDir {
     return this.entryInfo[idx + kModTimeIdx];
   }
 
-  entryChildren(e: FsEntry): number[] {
+  entryChildren(e: FsEntry): FsEntry[] {
     let res = this.children[e];
     throwIf(res === null); // not a directory
     return res;
