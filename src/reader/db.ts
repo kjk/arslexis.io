@@ -10,8 +10,7 @@ const dbName = "comic-book-reader"
 const storeNameMeta = "meta";
 const storeNameFiles = "files";
 
-/** @type {import("idb").IDBPDatabase} */
-let db;
+let db: import("idb").IDBPDatabase;
 
 async function getDB() {
   if (!db) {
@@ -26,33 +25,21 @@ async function getDB() {
 }
 
 export class ComicBookFile {
-  /** @type {string} */
-  name; // name of the file in the archive
-  /** @type {string}  */
-  dbKey; // key in files stores
-  /** @type {string} */
-  type; // type of the file e.g. "image/jpeg", "image/png" etc.
-  /** @type {number} */
-  size; // size of the file in bytes
-  /** @type {number} */
-  resX; // horizontal resolution in pixels
-  /** @type {number} */
-  resY; // vertical resolution in pixels
+  name: string; // name of the file in the archive
+  dbKey: string; // key in files stores
+  type: string; // type of the file e.g. "image/jpeg", "image/png" etc.
+  size: number; // size of the file in bytes
+  resX: number; // horizontal resolution in pixels
+  resY: number; // vertical resolution in pixels
 }
 
 export class ComicBookMeta {
-  /** @type {string} */
-  archiveFileName;
-  /** @type {ComicBookFile[]} */
-  files;
+  archiveFileName: string;
+  files: ComicBookFile[];
   // TODO: remember when added?
 }
 
-/**
-  * Potentially expensive but I dont see a way around it.
-  * @returns {Promise<ComicBookMeta[]>}
-*/
-export async function getMeta() {
+export async function getMeta(): Promise<ComicBookMeta[]> {
   let db = await getDB();
   let res = await db.getAll(storeNameMeta);
   return res;
