@@ -4,7 +4,7 @@
 
 // TODO: more https://github.com/codemirror/legacy-modes
 
-/** @typedef { import("@codemirror/language").LanguageSupport} LanguageSupport */
+type LanguageSupport = import("@codemirror/language").LanguageSupport;
 
 import { StreamLanguage } from "@codemirror/language";
 import * as m from "./notepad2/menu-notepad2";
@@ -426,11 +426,7 @@ async function getDelayedLang(langInfo) {
   return langInfo[0];
 }
 
-/**
- * @param {string} fileName
- * @returns {Promise<any>}
- */
-export async function getCMLangFromFileName(fileName) {
+export async function getCMLangFromFileName(fileName: string): Promise<any> {
   const name = fileName.toLowerCase();
   const ext = getFileExt(fileName).toLowerCase();
   for (let langInfo of langs) {
