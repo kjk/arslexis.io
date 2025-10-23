@@ -1,21 +1,11 @@
-/**
- * return length of an array
- * @param {*} o
- * @returns {!number}
- */
-export function len(o) {
+export function len(o: any): number {
   if (o && o.length) {
     return o.length;
   }
   return 0;
 }
 
-/**
- * @param {string} src
- * @param {*} opts
- * @returns {Promise}
- */
-export function lazyLoadScript(src, opts = {}) {
+export function lazyLoadScript(src: string, opts: any = {}): Promise<any> {
   return new Promise(function (resolve, reject) {
     if (!src) {
       throw new Error("src parameter must be specified");
@@ -73,12 +63,7 @@ export function lazyLoadScript(src, opts = {}) {
   });
 }
 
-/**
- * @param {string} src
- * @param {*} opts
- * @returns {Promise}
- */
-export function lazyLoadCSS(src, opts = {}) {
+export function lazyLoadCSS(src: string, opts: any = {}): Promise<any> {
   // @ts-ignore
   return new Promise(function (resolve, reject) {
     if (!src) {
@@ -133,13 +118,7 @@ export function lazyLoadCSS(src, opts = {}) {
   });
 }
 
-/**
- * @param {number} n
- * @param {number} min
- * @param {number} max
- * @returns {number}
- */
-export function clamp(n, min, max) {
+export function clamp(n: number, min: number, max: number): number {
   if (n < min) {
     return min;
   }
@@ -149,12 +128,7 @@ export function clamp(n, min, max) {
   return n;
 }
 
-/**
- * "foo.txt" => ".txt"
- * @param {string} fileName
- * @returns {string}
- */
-export function fileExt(fileName) {
+export function fileExt(fileName: string): string {
   const idx = fileName.lastIndexOf(".");
   if (idx === -1) {
     return "";
@@ -163,12 +137,7 @@ export function fileExt(fileName) {
   return ext.toLowerCase();
 }
 
-/**
- * @param {string} s
- * @param {number} n
- * @returns {string}
- */
-export function inflect(s, n) {
+export function inflect(s: string, n: number): string {
   if (n == 1) {
     return s;
   }
@@ -198,10 +167,7 @@ export function startTimer() {
   };
 }
 
-/**
- * @param {string} key
- */
-export function getLocalStorageAsJSON(key) {
+export function getLocalStorageAsJSON(key: string) {
   // console.log("getLocalStorageAsJSON:", key);
   const v = localStorage.getItem(key);
   if (v) {
@@ -211,11 +177,7 @@ export function getLocalStorageAsJSON(key) {
   return null;
 }
 
-/**
- * @param {string} key
- * @param {*} js
- */
-export function setLocalStorageFromJSON(key, js) {
+export function setLocalStorageFromJSON(key: string, js: any) {
   const s = JSON.stringify(js);
   // console.log("setLocalStorageFromJSON:", key, "size:", len(s));
   localStorage.setItem(key, s);
@@ -242,11 +204,7 @@ export function debounce(func, threshold, execAsap = false) {
   };
 }
 
-/**
- * @param {boolean} cond
- * @param {string} [msg]
- */
-export function throwIf(cond, msg) {
+export function throwIf(cond: boolean, msg?: string) {
   if (cond) {
     throw new Error(msg || "invalid condition");
   }
@@ -254,11 +212,7 @@ export function throwIf(cond, msg) {
 
 // TODO: doesn't belong here but in gisteditor
 const adText = "(made with https://codeeval.dev)";
-/**
- * @param {string} s
- * @returns {string}
- */
-export function removeDescriptionAd(s) {
+export function removeDescriptionAd(s: string): string {
   if (!s) {
     return "";
   }
@@ -275,12 +229,7 @@ export function fnNoOp() {
 }
 
 // https://svelte.dev/examples/modal
-/**
- *
- * @param {*} parent
- * @param {KeyboardEvent} e
- */
-export function trapFocus(parent, e) {
+export function trapFocus(parent: any, e: KeyboardEvent) {
   const nodes = parent.querySelectorAll("*:not([disabled])");
   const tabbable = Array.from(nodes).filter((n) => n.tabIndex >= 0);
 
@@ -317,13 +266,8 @@ export function trapFocus2(parent, e) {
 }
 */
 
-/**
- * @param {number} n
- * @returns {string}
- */
-export function fmtSize(n) {
-  /** @type {[number, string][]} */
-  const a = [
+export function fmtSize(n: number): string {
+  const a: [number, string][] = [
     [1024 * 1024 * 1024 * 1024, "TB"],
     [1024 * 1024 * 1024, "GB"],
     [1024 * 1024, "MB"],
@@ -339,22 +283,12 @@ export function fmtSize(n) {
   return `${n} B`;
 }
 
-/**
- * 1023 => 1,023
- * @param {number} n
- * @param {string} sep
- * @returns {string}
- */
-export function fmtNum(n, sep = ",") {
+export function fmtNum(n: number, sep: string = ","): string {
   // TODO: maybe n.toLocaleString("en-US").replaceAll(",", ".");
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, sep);
 }
 
-/**
- * @param {number} n
- * @returns {string}
- */
-export function notepad2Size(n) {
+export function notepad2Size(n: number): string {
   const sizes = [
     1024 * 1024 * 1024 * 1024,
     1024 * 1024 * 1024,
@@ -411,15 +345,9 @@ export async function collectAllDirectoryEntries(directoryReader, queue) {
   }
 }
 
-/**
- * @param {DataTransferItemList} dataTransferItemList
- * @returns {Promise<FileSystemEntry[]>}
- */
-export async function getAllFileEntries(dataTransferItemList) {
-  /** @type {FileSystemEntry[]} */
-  let fileEntries = [];
-  /** @type {FileSystemEntry[]} */
-  let queue = [];
+export async function getAllFileEntries(dataTransferItemList: DataTransferItemList): Promise<FileSystemEntry[]> {
+  let fileEntries: FileSystemEntry[] = [];
+  let queue: FileSystemEntry[] = [];
   let n = dataTransferItemList.length;
   for (let i = 0; i < n; i++) {
     let item = dataTransferItemList[i];
@@ -443,8 +371,7 @@ export async function getAllFileEntries(dataTransferItemList) {
 }
 
 export class FileWithPath {
-  /** @type {File} */
-  file;
+  file: File;
   path = "";
   constructor(file, path) {
     this.file = file;
@@ -452,14 +379,8 @@ export class FileWithPath {
   }
 }
 
-/**
- * @param {FileList} files
- * @param {Function} fnAllowed
- * @returns {FileWithPath[]}
- */
-export function filterFiles(files, fnAllowed) {
-  /** @type {FileWithPath[]} */
-  let res = [];
+export function filterFiles(files: FileList, fnAllowed: Function): FileWithPath[] {
+  let res: FileWithPath[] = [];
   for (const file of files) {
     if (fnAllowed && !fnAllowed(file.name)) {
       console.log(`${file.name} is not a supported file type`);
@@ -472,12 +393,7 @@ export function filterFiles(files, fnAllowed) {
   return res;
 }
 
-/**
- * @param {DataTransfer} dt
- * @param {Function} [fnAllowed]
- * @returns {Promise<FileWithPath[]>}
- */
-export async function filterDataTransferEntries(dt, fnAllowed = null) {
+export async function filterDataTransferEntries(dt: DataTransfer, fnAllowed?: Function): Promise<FileWithPath[]> {
   let fileEntries = await getAllFileEntries(dt.items);
   // convert to File objects
 
@@ -499,11 +415,7 @@ export async function filterDataTransferEntries(dt, fnAllowed = null) {
   return res;
 }
 
-/**
- * @param {number} n
- * @returns {string}
- */
-export function genRandomID(n) {
+export function genRandomID(n: number): string {
   const SHORT_ID_SYMBOLS =
     "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const nShortSymbols = len(SHORT_ID_SYMBOLS);
@@ -517,15 +429,7 @@ export function genRandomID(n) {
   return res;
 }
 
-/**
- * split("a.b.c", "." 2) => ["a" "b.c"]
- * which is different from "a.b.c".split(".",2) => ["a", "b"]
- * @param {string} s
- * @param {string} sep
- * @param {number} max
- * @returns {string[]}
- */
-export function splitMax(s, sep, max) {
+export function splitMax(s: string, sep: string, max: number): string[] {
   throwIf(max === 0);
   let parts = s.split(sep);
   if (parts.length <= max) {
@@ -537,10 +441,7 @@ export function splitMax(s, sep, max) {
   return parts.slice(0, max);
 }
 
-/**
- * @param {string} s
- */
-export function setClipboard(s) {
+export function setClipboard(s: string) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(s);
   }
@@ -550,10 +451,7 @@ export function clearClipboard() {
   setClipboard("");
 }
 
-/**
- * @returns {Promise<string>}
- */
-export async function getClipboard() {
+export async function getClipboard(): Promise<string> {
   if (navigator.clipboard) {
     let s = await navigator.clipboard.readText();
     return s;
@@ -561,10 +459,7 @@ export async function getClipboard() {
   return "";
 }
 
-/**
- * @param {string} s
- */
-export async function appendClipboard(s) {
+export async function appendClipboard(s: string) {
   let curr = await getClipboard();
   setClipboard(curr + s);
 }
@@ -613,11 +508,7 @@ export function toggleFullScreen() {
   }
 }
 
-/**
- * @param {string} name
- * @returns {string}
- */
-export function stripExt(name) {
+export function stripExt(name: string): string {
   let pos = name.lastIndexOf(".");
   if (pos > 0) {
     return name.slice(0, pos);
@@ -625,14 +516,7 @@ export function stripExt(name) {
   return name;
 }
 
-/**
- *
- * @param {number} n
- * @param {number} min
- * @param {number} max
- * @returns {number}
- */
-export function limit(n, min, max) {
+export function limit(n: number, min: number, max: number): number {
   if (n < min) {
     return min;
   }
@@ -642,12 +526,7 @@ export function limit(n, min, max) {
   return n;
 }
 
-/**
- * @param {any[]} a
- * @param {any} el
- * @returns {any[]}
- */
-export function arrayRemove(a, el) {
+export function arrayRemove(a: any[], el: any): any[] {
   const idx = a.indexOf(el);
   if (idx >= 0) {
     a.splice(idx, 1);
@@ -655,13 +534,7 @@ export function arrayRemove(a, el) {
   return a;
 }
 
-/**
- * @param {any[]} a
- * @param {any} el
- * @param {Function} [cmpFn]
- * @returns {any[]}
- */
-export function arrayRemoveFn(a, el, cmpFn) {
+export function arrayRemoveFn(a: any[], el: any, cmpFn?: Function): any[] {
   let res = [];
   for (const el2 of a) {
     const eq = cmpFn(el, el2);
@@ -672,13 +545,7 @@ export function arrayRemoveFn(a, el, cmpFn) {
   return res;
 }
 
-/**
- * @param {any[]} a
- * @param {any} el
- * @param {Function} [cmpFn]
- * @returns {Promise<any[]>}
- */
-export async function arrayRemoveFnAsync(a, el, cmpFn) {
+export async function arrayRemoveFnAsync(a: any[], el: any, cmpFn?: Function): Promise<any[]> {
   let res = [];
   for (const el2 of a) {
     const eq = await cmpFn(el, el2);
@@ -701,23 +568,11 @@ export async function sha1(str) {
     .join("");
 }
 
-/**
- *
- * @param {number} waitInMilliseconds
- * @returns {Promise}
- */
-export function sleep(waitInMilliseconds) {
+export function sleep(waitInMilliseconds: number): Promise<any> {
   return new Promise((resolve) => setTimeout(resolve, waitInMilliseconds));
 }
 
-/**
- * for small sets of strings, inter a string by conerting it to
- * a unique number
- * @param {string[]} a
- * @param {string} s
- * @returns {number}
- */
-export function internStringArray(a, s) {
+export function internStringArray(a: string[], s: string): number {
   let n = len(a);
   for (let i = 0; i < n; i++) {
     if (a[i] === s) {
