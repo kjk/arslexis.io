@@ -15,7 +15,7 @@
    */
 </script>
 
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
   import WinDialogBaseNoOverlay from "../WinDialogBaseNoOverlay.svelte";
   import { progress } from "../Progress.svelte";

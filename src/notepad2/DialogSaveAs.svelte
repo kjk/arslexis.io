@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
   import WinDialogBase from "../WinDialogBase.svelte";
   import { focus } from "../actions/focus";

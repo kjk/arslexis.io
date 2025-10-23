@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import SvgHome from "../svg/SvgHome.svelte";
   import Login from "./Login.svelte";
   import Overlay from "../Overlay.svelte";

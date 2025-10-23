@@ -169,7 +169,7 @@
   }
 </script>
 
-<script>
+<script lang="ts">
   import DialogConfirm from "../DialogConfirm.svelte";
   import { fmtNum, fmtSize, throwIf } from "../util";
   import { showInfoMessage } from "../Messages.svelte";

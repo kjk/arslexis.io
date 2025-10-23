@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { supportsFileSystem } from "./fileutil";
 
   let hasFileSystemSupport = supportsFileSystem();

@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import FileDrop from "../FileDrop.svelte";
   import { fmtNum, fmtSize, len, log } from "../util";
   import * as zip from "@zip.js/zip.js";

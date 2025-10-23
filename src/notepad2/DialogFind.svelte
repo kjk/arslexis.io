@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Close from "../icons/Close.svelte";
   import { draggable } from "@neodrag/svelte";
   import { positionModal } from "../actions/positionnode";

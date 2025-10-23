@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import { Fcal } from "fcal";
   import { len } from "../util";
   import { onMount } from "svelte";

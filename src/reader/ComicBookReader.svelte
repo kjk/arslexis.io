@@ -19,7 +19,7 @@
    */
 </script>
 
-<script>
+<script lang="ts">
   import FileDrop from "../FileDrop.svelte";
   import { fmtNum, fmtSize, len } from "../util";
   import TopNav from "../TopNav.svelte";

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onDestroy } from "svelte";
   import { focus } from "./actions/focus";
   import { trapFocus } from "./util";

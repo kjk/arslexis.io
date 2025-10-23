@@ -7,7 +7,7 @@
   /** @typedef {import("./np2store").FavEntry} FavEntry */
 </script>
 
-<script>
+<script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import MenuBar from "../MenuBar.svelte";
   import Toolbar from "./Toolbar.svelte";

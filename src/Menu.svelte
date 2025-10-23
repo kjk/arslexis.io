@@ -17,7 +17,7 @@
   export const menuSep = "---";
 </script>
 
-<script>
+<script lang="ts">
   import { parseShortcut, serializeShortuct } from "./keys.js";
   import { len, splitMax } from "./util.js";
   import Menu from "./Menu.svelte";

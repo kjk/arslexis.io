@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import Overlay from "../Overlay.svelte";
   import { tooltip } from "../actions/tooltip.js";
 

@@ -24,7 +24,7 @@
   }
 </script>
 
-<script>
+<script lang="ts">
   import Folder from "./Folder.svelte";
   import { fmtNum, fmtSize, len, throwIf } from "../util";
   import { tick } from "svelte";

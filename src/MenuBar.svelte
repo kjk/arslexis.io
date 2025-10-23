@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   // menu based on https://play.tailwindcss.com/0xQBSdXxsK
   import Menu, { fixMenuName } from "./Menu.svelte";
   import { len, splitMax } from "./util";

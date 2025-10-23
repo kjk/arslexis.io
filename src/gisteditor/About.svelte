@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import { openLoginWindow } from "../github_login.js";
 </script>
 

@@ -33,7 +33,7 @@
    */
 </script>
 
-<script>
+<script lang="ts">
   import { EditorView, lineNumbers } from "@codemirror/view";
   import { EditorState } from "@codemirror/state";
   import { marked } from "marked";

@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import TopNav from "../TopNav.svelte";
   import Folder, {
     updateFilesLineCount,

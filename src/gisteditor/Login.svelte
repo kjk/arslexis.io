@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import SvgTwitter from "../svg/SvgTwitter.svelte";
   import SvgArrowDown from "../svg/SvgArrowDown.svelte";
 

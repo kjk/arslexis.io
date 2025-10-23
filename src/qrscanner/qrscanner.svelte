@@ -1,7 +1,7 @@
 <script module>
 </script>
 
-<script>
+<script lang="ts">
   import QrScanner from "qr-scanner";
 
   import Messages from "../Messages.svelte";

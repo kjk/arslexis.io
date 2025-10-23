@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import WinDialogBase from "../WinDialogBase.svelte";
   import { focus } from "../actions/focus";
   import * as m from "./menu-notepad2";

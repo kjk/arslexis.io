@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import { len, removeDescriptionAd } from "../util.js";
   import { tooltip } from "../actions/tooltip.js";
 

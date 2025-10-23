@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import GitHub from "./icons/GitHub.svelte";
   import Twitter from "./icons/Twitter.svelte";
 

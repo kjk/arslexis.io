@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   // from https://icones.js.org/collection/all?s=home
   export let style = "";
 </script>

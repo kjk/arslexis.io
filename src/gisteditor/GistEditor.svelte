@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   // import SvgReddit from "../svg/SvgReddit.svelte";
   import Messages from "../Messages.svelte";
   import HelpButton from "./HelpButton.svelte";

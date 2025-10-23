@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { focus } from "../actions/focus";
   import WinDialogBase from "../WinDialogBase.svelte";
 

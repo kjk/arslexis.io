@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   import SvgDots from "../svg/SvgDots.svelte";
   import SelectLangDialog from "./SelectLangDialog.svelte";
   import { tooltip } from "../actions/tooltip.js";

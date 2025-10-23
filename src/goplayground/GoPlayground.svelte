@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script>
+<script lang="ts">
   /** @typedef { import("@codemirror/state").Extension} Extension */
 
   import TopNav from "../TopNav.svelte";

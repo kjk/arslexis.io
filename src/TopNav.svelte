@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import SvgHome from "./svg/SvgHome.svelte";
   import Twitter from "./icons/Twitter.svelte";
   import GitHub from "./icons/GitHub.svelte";

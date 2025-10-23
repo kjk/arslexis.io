@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   /** @type {{size?: string, [key: string]: any}} */
   let { size = "16", ...rest } = $props();
 </script>

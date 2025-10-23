@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 </script>
 
 <div class="mb-4">

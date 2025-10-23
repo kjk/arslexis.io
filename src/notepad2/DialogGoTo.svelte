@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import WinDialogBase from "../WinDialogBase.svelte";
 
   // TODO:

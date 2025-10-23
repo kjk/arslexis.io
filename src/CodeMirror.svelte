@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   //based on https://github.com/touchifyapp/svelte-codemirror-editor/blob/main/src/lib/CodeMirror.svelte
   import { createEventDispatcher, onDestroy, onMount } from "svelte";
   import { basicSetup } from "codemirror";
