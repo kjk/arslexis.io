@@ -3,17 +3,11 @@ import { len } from "./util";
 import { openDB } from "idb";
 
 export class KV {
-  /** @type {string} */
-  dbName;
-  /** @type {string} */
-  storeName;
+  dbName: string;
+  storeName: string;
   dbPromise;
 
-  /**
-    * @param {string} dbName
-    * @param {string} storeName
-  */
-  constructor(dbName, storeName) {
+  constructor(dbName: string, storeName: string) {
     this.dbName = dbName;
     this.storeName = storeName;
     this.dbPromise = openDB(dbName, 1, {
@@ -23,33 +17,18 @@ export class KV {
     });
   }
 
-  /**
-    * @param {string} key
-  */
-  async get(key) {
+  async get(key: string) {
     return (await this.dbPromise).get(this.storeName, key);
   }
-  /**
-    * @param {string} key
-    * @param {any} val
-  */
-  async set(key, val) {
+  async set(key: string, val: any) {
     let db = await this.dbPromise;
     return db.put(this.storeName, val, key);
   }
-  /**
-    * rejects if already exists
-    * @param {string} key
-    * @param {any} val
-  */
-  async add(key, val) {
+  async add(key: string, val: any) {
     let db = await this.dbPromise;
     return db.add(this.storeName, val, key);
   }
-  /**
-    * @param {string} key
-  */
-  async del(key) {
+  async del(key: string) {
     let db = await this.dbPromise;
     return db.delete(this.storeName, key);
   }
@@ -57,35 +36,20 @@ export class KV {
     let db = await this.dbPromise;
     return db.clear(this.storeName);
   }
-  /**
-    * @returns {Promise<IDBValidKey[]>}
-  */
-  async keys() {
+  async keys(): Promise<IDBValidKey[]> {
     let db = await this.dbPromise;
     return db.getAllKeys(this.storeName);
   }
 }
 
-/**
- * Create a generic Svelte store persisted in IndexedDB
- * @param {string} dbKey unique IndexedDB key for storing this value
- * @param {any} initialValue
- * @param {boolean} crossTab if true, changes are visible in other browser tabs (windows)
- * @returns {any}
- */
 export function makeIndexedDBStore(
-  db,
-  dbKey,
-  initialValue,
-  crossTab,
-  log = false
-) {
-  /**
-    * @param {string} dbKey
-    * @param {any} initialValue
-    * @param {boolean} crossTab
-  */
-  function makeStoreMaker(dbKey, initialValue, crossTab) {
+  db: KV,
+  dbKey: string,
+  initialValue: any,
+  crossTab: boolean,
+  log: boolean = false
+): any {
+  function makeStoreMaker(dbKey: string, initialValue: any, crossTab: boolean) {
     const lsKey = "store-notify:" + dbKey;
     let curr = initialValue;
     const subscribers = new Set();
@@ -101,10 +65,7 @@ export function makeIndexedDBStore(
 
     getCurrentValue();
 
-    /**
-     * @param {StorageEvent} event
-     */
-    function storageChanged(event) {
+    function storageChanged(event: StorageEvent) {
       if (event.storageArea === localStorage && event.key === lsKey) {
         getCurrentValue();
       }
@@ -113,10 +74,7 @@ export function makeIndexedDBStore(
       window.addEventListener("storage", storageChanged, false);
     }
 
-    /**
-     * @param {any} v
-     */
-    function set(v) {
+    function set(v: any) {
       if (log) {
         console.log(`db.set() key '${dbKey}', len(v): ${len(v)}`);
         console.log("v:", v);
@@ -132,10 +90,7 @@ export function makeIndexedDBStore(
       });
     }
 
-    /**
-     * @param {Function} subscriber
-     */
-    function subscribe(subscriber) {
+    function subscribe(subscriber: Function) {
       subscriber(curr);
       subscribers.add(subscriber);
       function unsubscribe() {
@@ -149,10 +104,7 @@ export function makeIndexedDBStore(
   return makeStoreMaker(dbKey, initialValue, crossTab);
 }
 
-/**
- * @param {import("svelte/store").Writable<any>} store
- */
-export function resaveStore(store) {
+export function resaveStore(store: import("svelte/store").Writable<any>) {
   let v = get(store);
   console.log("resaveStore: Len(v)", len(v));
   store.set(v);
