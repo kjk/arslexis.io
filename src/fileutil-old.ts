@@ -17,83 +17,51 @@ const dirEntriesIdx = 4;
 const metaIdx = 5;
 
 export class FsEntry extends Array {
-  /**
-   * @returns {string}
-   */
-  get name() {
+  get name(): string {
     return this[handleIdx].name;
   }
 
-  /**
-   * @returns {boolean}
-   */
-  get isDir() {
+  get isDir(): boolean {
     return this[handleIdx].kind === "directory";
   }
 
-  /**
-   * @returns {number}
-   */
-  get size() {
+  get size(): number {
     return this[sizeIdx];
   }
 
-  /**
-   * @param {number} n
-   */
-  set size(n) {
+  set size(n: number) {
     throwIf(!this.isDir);
     this[sizeIdx] = n;
   }
 
-  /**
-   * @returns {string}
-   */
-  get path() {
+  get path(): string {
     return this[pathIdx];
   }
 
-  /**
-   * @param {string} v
-   */
-  set path(v) {
+  set path(v: string) {
     this[pathIdx] = v;
   }
 
-  /**
-   * @return any
-   */
-  get meta() {
+  get meta(): any {
     return this[metaIdx];
   }
 
-  set meta(o) {
+  set meta(o: any) {
     this[metaIdx] = o;
   }
 
-  /**
-   * @returns {Promise<File>}
-   */
-  async getFile() {
+  async getFile(): Promise<File> {
     throwIf(this.isDir);
     let h = this[handleIdx];
     return await h.getFile();
   }
 
-  /**
-   * @param {string} key
-   * @retruns {any}
-   */
-  getMeta(key) {
+  getMeta(key: string): any {
     let m = this[metaIdx];
     return m ? m[key] : undefined;
   }
 
-  /**
-   * @param {string} key
-   * @param {any} val
-   */
-  setMeta(key, val) {
+  setMeta(key: string, val: any) {
     let m = this[metaIdx] || {};
     m[key] = val;
     this[metaIdx] = m;
@@ -107,29 +75,17 @@ export class FsEntry extends Array {
     return this[parentHandleIdx];
   }
 
-  /**
-   * @returns {FsEntry[]}
-   */
-  get dirEntries() {
+  get dirEntries(): FsEntry[] {
     throwIf(!this.isDir);
     return this[dirEntriesIdx];
   }
 
-  /**
-   * @param {FsEntry[]} v
-   */
-  set dirEntries(v) {
+  set dirEntries(v: FsEntry[]) {
     throwIf(!this.isDir);
     this[dirEntriesIdx] = v;
   }
 
-  /**
-   * @param {any} handle
-   * @param {any} parentHandle
-   * @param {string} path
-   * @returns {Promise<FsEntry>}
-   */
-  static async fromHandle(handle, parentHandle, path) {
+  static async fromHandle(handle: any, parentHandle: any, path: string): Promise<FsEntry> {
     let size = 0;
     if (handle.kind === "file") {
       let file = await handle.getFile();
@@ -143,19 +99,12 @@ function dontSkip(entry, dir) {
   return false;
 }
 
-/**
- * @param {FileSystemDirectoryHandle} dirHandle
- * @param {Function} skipEntryFn
- * @param {string} dir
- * @returns {Promise<FsEntry>}
- */
 export async function readDir(
-  dirHandle,
-  skipEntryFn = dontSkip,
-  dir = dirHandle.name
-) {
-  /** @type {FsEntry[]} */
-  let entries = [];
+  dirHandle: FileSystemDirectoryHandle,
+  skipEntryFn: Function = dontSkip,
+  dir: string = dirHandle.name
+): Promise<FsEntry> {
+  let entries: FsEntry[] = [];
   // @ts-ignore
   for await (const handle of dirHandle.values()) {
     if (skipEntryFn(handle, dir)) {
@@ -170,18 +119,13 @@ export async function readDir(
   return res;
 }
 
-/**
- * @param {FileSystemDirectoryHandle} dirHandle
- * @param {string} dir
- * @returns {Promise<File[]>}
- */
-export async function readDirRecurFiles(dirHandle, dir = dirHandle.name) {
+export async function readDirRecurFiles(dirHandle: FileSystemDirectoryHandle, dir: string = dirHandle.name): Promise<File[]> {
   const dirs = [];
   const files = [];
   for await (const entry of dirHandle.values()) {
     const path = dir == "" ? entry.name : `${dir}/${entry.name}`;
     if (entry.kind === "file") {
-      let fh = /** @type {FileSystemFileHandle} */ (entry);
+      let fh = entry as FileSystemFileHandle;
       files.push(
         fh.getFile().then((file) => {
           // @ts-ignore
@@ -196,7 +140,7 @@ export async function readDirRecurFiles(dirHandle, dir = dirHandle.name) {
         })
       );
     } else if (entry.kind === "directory") {
-      let dh = /** @type {FileSystemDirectoryHandle} */ (entry);
+      let dh = entry as FileSystemDirectoryHandle;
       dirs.push(readDirRecurFiles(dh, path));
     }
   }
