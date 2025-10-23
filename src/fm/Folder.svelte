@@ -207,12 +207,16 @@
     tabindex="0"
     class="hover:bg-gray-200 hover:cursor-pointer w-full"
   >
-    <td class="ind-{indent} font-semibold" onclick={() => toggleExpand(e)}>
-      {#if isExpanded(fs, e)}
-        ▼
-      {:else}
-        ▶
-      {/if}
+    <td class="ind-{indent} font-semibold">
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span onclick={() => toggleExpand(e)} class="hover:bg-gray-300">
+        {#if isExpanded(fs, e)}
+          ▼
+        {:else}
+          ▶
+        {/if}
+      </span>
       {fs.entryName(e)}
     </td>
     <td class="pl-2 text-right whitespace-nowrap w-auto">
