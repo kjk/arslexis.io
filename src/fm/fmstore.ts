@@ -4,12 +4,9 @@ import { KV, makeIndexedDBStore } from "../dbutil";
 
 const db = new KV("fmstore", "keyval");
 
-/**
- @typedef {{
-    name: string,
-    dirHandle: FileSystemDirectoryHandle
-  }} RecentEntry
-*/
+type RecentEntry = {
+  name: string;
+  dirHandle: FileSystemDirectoryHandle;
+};
 
-/** @type {import("svelte/store").Writable<RecentEntry[]>} */
-export let recent = makeIndexedDBStore(db, "recent", [], false);
+export let recent: import("svelte/store").Writable<RecentEntry[]> = makeIndexedDBStore(db, "recent", [], false);
