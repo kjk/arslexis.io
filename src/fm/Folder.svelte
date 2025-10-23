@@ -80,6 +80,23 @@
     forceRender++;
   }
 
+  function fmtDirFiles(e: FsEntry): string {
+    let isDir = fs.entryIsDir(e);
+    throwIf(!isDir);
+    let nDirs = fs.entryDirCount(e);
+    let nFiles = fs.entryFileCount(e);
+    //return fmtNum(nDirs) + " d " + fmtNum(nFiles) + " f";
+    return fmtNum(nDirs) + "/" + fmtNum(nFiles);
+  }
+
+  function fmtDirFilesFull(e: FsEntry): string {
+    let isDir = fs.entryIsDir(e);
+    throwIf(!isDir);
+    let nDirs = fs.entryDirCount(e);
+    let nFiles = fs.entryFileCount(e);
+    return fmtNum(nDirs) + " dirs " + fmtNum(nFiles) + " files";
+  }
+
   function fmtDirs(e: FsEntry): string {
     let isDir = fs.entryIsDir(e);
     throwIf(!isDir);
@@ -99,6 +116,11 @@
     // console.log("e:", e, "size:", size);
     let s = fmtSize(size);
     return s;
+  }
+
+  function fmtEntrySizeBytes(e: FsEntry): string {
+    let size = fs.entrySize(e);
+    return size == 1 ? "1 byte" : fmtNum(size) + " bytes";
   }
 
   function findClickedIdx(el: HTMLElement): number {
@@ -207,7 +229,7 @@
     tabindex="0"
     class="hover:bg-gray-200 hover:cursor-pointer w-full"
   >
-    <td class="ind-{indent} font-semibold">
+    <td class="ind-{indent} font-semibold w-full">
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span onclick={() => toggleExpand(e)} class="hover:bg-gray-300">
@@ -219,13 +241,16 @@
       </span>
       {fs.entryName(e)}
     </td>
-    <td class="pl-2 text-right whitespace-nowrap w-auto">
-      {fmtDirs(e)}
+    <td
+      class="pl-4 text-right whitespace-nowrap w-fit"
+      title={fmtDirFilesFull(e)}
+    >
+      {fmtDirFiles(e)}
     </td>
-    <td class="pl-2 text-right whitespace-nowrap w-auto">
-      {fmtFiles(e)}
-    </td>
-    <td class="pl-2 text-right whitespace-nowrap w-auto">
+    <td
+      class="pl-4 text-right whitespace-nowrap w-fit"
+      title={fmtEntrySizeBytes(e)}
+    >
       {fmtEntrySize(e)}
     </td>
   </tr>
@@ -233,7 +258,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <table
-  class="font-mono text-sm mt-[2px] w-full table-auto border-collapse"
+  class="font-mono text-sm mt-0.5 w-full table-auto border-collapse"
   onclick={handleClicked}
   ondblclick={handleDoubleClicked}
   onkeydown={handleKeyDown}
@@ -265,7 +290,10 @@
             class="hover:bg-gray-200 even:bg-gray-50"
           >
             <td class="ind-{indent + 1}">{fs.entryName(e)} </td>
-            <td colspan="3" class="pl-2 text-right whitespace-nowrap"
+            <td
+              colspan="2"
+              class="pl-2 text-right whitespace-nowrap"
+              title={fmtEntrySizeBytes(e)}
               >{fmtEntrySize(e)}
             </td>
           </tr>
