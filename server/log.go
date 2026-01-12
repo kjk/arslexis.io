@@ -301,7 +301,7 @@ func logErrorEventFromRequest(r *http.Request, name string, vals []any, err erro
 	logEvent(name, vals)
 }
 
-func apiLogEvent(w http.ResponseWriter, r *http.Request) {
+func handleEvent(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	var vals []any
 	name := ""
@@ -328,7 +328,7 @@ func apiLogEvent(w http.ResponseWriter, r *http.Request) {
 	serveJSONOk(w, v)
 }
 
-func logHttpRequestToWriteDaily(w *WriteDaily, r *http.Request, code int, nWritten int64, dur time.Duration) error {
+func logHTTPRequestToWriteDaily(w *WriteDaily, r *http.Request, code int, nWritten int64, dur time.Duration) error {
 	ip := getBestIPAddress(r)
 
 	rawQuery := r.URL.RawQuery
@@ -369,8 +369,8 @@ func logHttpRequestToWriteDaily(w *WriteDaily, r *http.Request, code int, nWritt
 	return w.Write([]byte(buf.String()))
 }
 
-func handleLogEvent(r *http.Request, code int, nWritten int64, dur time.Duration) error {
-	return logHttpRequestToWriteDaily(httpLog, r, code, nWritten, dur)
+func logHTTPRequest(r *http.Request, code int, nWritten int64, dur time.Duration) error {
+	return logHTTPRequestToWriteDaily(httpLog, r, code, nWritten, dur)
 }
 
 func toStr(a any) string {

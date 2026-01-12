@@ -18,7 +18,6 @@ import (
 
 	"github.com/felixge/httpsnoop"
 	hutil "github.com/kjk/common/httputil"
-	"github.com/kjk/common/logtastic"
 
 	"github.com/google/go-github/github"
 	"github.com/kjk/common/u"
@@ -85,19 +84,17 @@ func logLogin(ctx context.Context, r *http.Request, token *oauth2.Token) {
 		return
 	}
 	logf("logged in as GitHub user: %s\n", *user.Login)
-	m := map[string]any{
-		"name": "github_login",
-	}
+	vals := []any{}
 	if user.Login != nil {
-		m["user"] = *user.Login
+		vals = append(vals, "user_login", *user.Login)
 	}
 	if user.Email != nil {
-		m["email"] = *user.Email
+		vals = append(vals, "email", *user.Email)
 	}
 	if user.Name != nil {
-		m["name"] = *user.Name
+		vals = append(vals, "user_name", *user.Name)
 	}
-	logtastic.LogEvent(r, m)
+	logEventFromRequest(r, "github_login", vals, zeroTime)
 }
 
 // /auth/ghlogin
@@ -170,7 +167,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 
 		if uri == "/event" {
 			logf("mainHandler: Logging event\n")
-			logtastic.HandleEvent(w, r)
+			handleEvent(w, r)
 			return
 		}
 
@@ -226,8 +223,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 				http.Error(w, errStr, http.StatusInternalServerError)
 				return
 			}
-			logtastic.LogHit(r, m.Code, m.Written, m.Duration)
-			handleLogEvent(r, m.Code, m.Written, m.Duration)
+			logHTTPRequest(r, m.Code, m.Written, m.Duration)
 		}()
 	})
 
@@ -309,17 +305,6 @@ func serverListen(httpSrv *http.Server) func() {
 	}
 }
 
-func startLogtastic() {
-	logtastic.BuildHash = GitCommitHash
-	logtastic.LogDir = getLogsDirMust()
-	if flgRunProd && !isWinOrMac() {
-		logtastic.Server = "l.arslexis.io"
-	} else {
-		logtastic.Server = "127.0.0.1:9327"
-	}
-	logf("logtatistic server: %s\n", logtastic.Server)
-}
-
 func mkFsysEmbedded() fs.FS {
 	fsys := DistFS
 	printFS(fsys, "dist")
@@ -353,8 +338,6 @@ func runServerDev() {
 	must(err)
 	defer closeDev()
 
-	// startLogtastic()
-
 	proxyURL, err := url.Parse(proxyURLStr)
 	must(err)
 	proxyHandler := httputil.NewSingleHostReverseProxy(proxyURL)
@@ -378,9 +361,6 @@ func runServerProd() {
 	fsys := mkFsysEmbedded()
 	checkHasEmbeddedFilesMust()
 
-	if !testingProd {
-		startLogtastic()
-	}
 	serveOpts := mkServeFileOptions(fsys)
 	httpSrv := makeHTTPServer(serveOpts, nil)
 	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, testingProd: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, testingProd)
