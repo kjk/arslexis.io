@@ -172,32 +172,25 @@ func Main() {
 		return
 	}
 
+	loadSecrets()
+
 	if flgRunProdLocal {
+		setupLogging()
+		defer closeLogging()
 		runServerProdLocal()
 		return
 	}
 
-	n := 0
 	if flgRunDev {
-		n++
-	}
-	if flgRunProd {
-		n++
-	}
-	if n == 0 {
-		flag.Usage()
-		return
-	}
-	panicIf(n > 1, "can only use one of: -run-dev, -run-prod, -run-local-prod")
-
-	loadSecrets()
-
-	if flgRunDev {
+		setupLogging()
+		defer closeLogging()
 		runServerDev()
 		return
 	}
 
 	if flgRunProd {
+		setupLogging()
+		defer closeLogging()
 		runServerProd()
 		return
 	}
