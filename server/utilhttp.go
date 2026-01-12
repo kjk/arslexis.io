@@ -21,7 +21,7 @@ func writeHeader(w http.ResponseWriter, code int, contentType string) {
 	w.WriteHeader(code)
 }
 
-func serveJSONWithCode(w http.ResponseWriter, r *http.Request, code int, v interface{}) {
+func serveJSONWithCode(w http.ResponseWriter, r *http.Request, code int, v any) {
 	d, err := json.Marshal(v)
 	if err != nil {
 		serveInternalError(w, e("json.Marshal() failed with '%s'", err))
@@ -32,7 +32,7 @@ func serveJSONWithCode(w http.ResponseWriter, r *http.Request, code int, v inter
 	logIfErrf(err)
 }
 
-func serveJSONOK(w http.ResponseWriter, r *http.Request, v interface{}) {
+func serveJSONOK(w http.ResponseWriter, r *http.Request, v any) {
 	serveJSONWithCode(w, r, http.StatusOK, v)
 }
 
@@ -42,7 +42,7 @@ func serveJSONData(w http.ResponseWriter, d []byte, code int) {
 	w.Write(d)
 }
 
-func serveJSON(w http.ResponseWriter, v interface{}, code int) {
+func serveJSON(w http.ResponseWriter, v any, code int) {
 	d, err := json.Marshal(v)
 	if err != nil {
 		serveInternalError(w, err)
@@ -51,19 +51,19 @@ func serveJSON(w http.ResponseWriter, v interface{}, code int) {
 	serveJSONData(w, d, code)
 }
 
-func serveJSONOk(w http.ResponseWriter, v interface{}) {
+func serveJSONOk(w http.ResponseWriter, v any) {
 	serveJSON(w, v, http.StatusOK)
 }
 
-func serveJSONOkMsg(w http.ResponseWriter, format string, args ...interface{}) {
+func serveJSONOkMsg(w http.ResponseWriter, format string, args ...any) {
 	s := fmtSmart2(format, args...)
-	v := map[string]interface{}{
+	v := map[string]any{
 		"Message": s,
 	}
 	serveJSON(w, v, http.StatusOK)
 }
 
-func fmtSmart2(format string, args ...interface{}) string {
+func fmtSmart2(format string, args ...any) string {
 	if len(args) == 0 {
 		return format
 	}

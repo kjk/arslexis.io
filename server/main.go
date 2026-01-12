@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kjk/common/logtastic"
 	"github.com/kjk/common/u"
 )
 
@@ -83,7 +82,6 @@ func loadSecrets() {
 	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
 	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
 	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
-	getEnv("LOGTASTIC_API_KEY", &logtastic.ApiKey, 30, must)
 
 }
 
@@ -171,15 +169,11 @@ func Main() {
 	if flgSetupAndRun {
 		defer measureDuration()()
 		setupAndRun()
-		logf("stopping logtastic\n")
-		logtastic.Stop()
 		return
 	}
 
 	if flgRunProdLocal {
 		runServerProdLocal()
-		logf("stopping logtastic\n")
-		logtastic.Stop()
 		return
 	}
 

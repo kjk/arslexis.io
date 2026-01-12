@@ -118,14 +118,14 @@ type JSONRequest struct {
 	Request    *http.Request
 	Response   *http.Response
 	Body       []byte
-	Value      interface{}
+	Value      any
 	Err        error
 	StatusCode int
 	NoChange   bool // if Etag was given and StatusCode is 304 (NotModified)
 }
 
 // NewGitHubRequest creates new GitHub request
-func NewGitHubRequest(uri string, value interface{}) *JSONRequest {
+func NewGitHubRequest(uri string, value any) *JSONRequest {
 	return &JSONRequest{
 		URIPath:   uri,
 		Server:    githubServer,

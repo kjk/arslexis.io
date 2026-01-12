@@ -11,7 +11,7 @@ var (
 	verboseLog = false
 )
 
-func logf(s string, args ...interface{}) {
+func logf(s string, args ...any) {
 	if len(args) > 0 {
 		s = fmt.Sprintf(s, args...)
 	}
@@ -19,7 +19,7 @@ func logf(s string, args ...interface{}) {
 	logtastic.Log(s)
 }
 
-func logErrorf(format string, args ...interface{}) {
+func logErrorf(format string, args ...any) {
 	s := format
 	if len(args) > 0 {
 		s = fmt.Sprintf(format, args...)
@@ -31,7 +31,7 @@ func logErrorf(format string, args ...interface{}) {
 }
 
 // return true if there was an error
-func logIfErrf(err error, msgAndArgs ...interface{}) bool {
+func logIfErrf(err error, msgAndArgs ...any) bool {
 	if err == nil {
 		return false
 	}
@@ -56,7 +56,7 @@ func logIfErrf(err error, msgAndArgs ...interface{}) bool {
 	return true
 }
 
-func logvf(s string, args ...interface{}) {
+func logvf(s string, args ...any) {
 	if !verboseLog {
 		return
 	}

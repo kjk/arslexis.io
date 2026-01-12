@@ -43,7 +43,7 @@ const (
 	markdownMimeType = "text/markdown; charset=UTF-8"
 )
 
-func jsonUnmarshalReader(r io.Reader, v interface{}) error {
+func jsonUnmarshalReader(r io.Reader, v any) error {
 	d, err := io.ReadAll(r)
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func jsonUnmarshalReader(r io.Reader, v interface{}) error {
 	return json.Unmarshal(d, v)
 }
 
-func fmtSmart(format string, args ...interface{}) string {
+func fmtSmart(format string, args ...any) string {
 	if len(args) == 0 {
 		return format
 	}
