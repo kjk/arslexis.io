@@ -28,8 +28,6 @@ const secretsDev = `# secrets for dev mode
 # COOKIE_ENCR_KEY=2780ffc17eec2d85960473c407ee37c0249db93e4586ec52e3ef9e153ba61e72
 GITHUB_SECRET_TOOLS_ARSLEXIS=
 GITHUB_SECRET_LOCAL=
-MAILGUN_DOMAIN=
-MAILGUN_API_KEY=
 `
 
 func getSecrets() []byte {
@@ -80,9 +78,6 @@ func loadSecrets() {
 	must = flgRunProd
 	getEnv("GITHUB_SECRET_TOOLS_ARSLEXIS", &secretGitHubToolsArslexis, 40, must)
 	getEnv("GITHUB_SECRET_LOCAL", &secretGitHubLocal, 40, must)
-	getEnv("MAILGUN_DOMAIN", &mailgunDomain, 4, must)
-	getEnv("MAILGUN_API_KEY", &mailgunAPIKey, 32, must)
-
 }
 
 func getDataDirMust() string {

@@ -21,7 +21,7 @@ var (
 	domain            = "arslexis.io"
 	httpPort          = 9301
 	frontEndBuildDir  = "dist"
-	wantedProdSecrets = []string{"GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL", "MAILGUN_DOMAIN", "MAILGUN_API_KEY"}
+	wantedProdSecrets = []string{"GITHUB_SECRET_TOOLS_ARSLEXIS", "GITHUB_SECRET_LOCAL"}
 )
 
 // stuff that is derived from the above
