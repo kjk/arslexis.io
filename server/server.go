@@ -227,7 +227,7 @@ func makeHTTPServer(serveOpts *hutil.ServeFileOptions, proxyHandler *httputil.Re
 				return
 			}
 			logtastic.LogHit(r, m.Code, m.Written, m.Duration)
-			logHTTPReq(r, m.Code, m.Written, m.Duration)
+			handleLogEvent(r, m.Code, m.Written, m.Duration)
 		}()
 	})
 

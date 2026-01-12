@@ -369,7 +369,7 @@ func logHttpRequestToWriteDaily(w *WriteDaily, r *http.Request, code int, nWritt
 	return w.Write([]byte(buf.String()))
 }
 
-func logHttpRequest(r *http.Request, code int, nWritten int64, dur time.Duration) error {
+func handleLogEvent(r *http.Request, code int, nWritten int64, dur time.Duration) error {
 	return logHttpRequestToWriteDaily(httpLog, r, code, nWritten, dur)
 }
 
