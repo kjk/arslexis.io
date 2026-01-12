@@ -11,7 +11,9 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/felixge/httpsnoop"
@@ -275,10 +277,7 @@ func sererListen(httpSrv *http.Server) func() {
 	go func() {
 		err := httpSrv.ListenAndServe()
 		// mute error caused by Shutdown()
-		if err == http.ErrServerClosed {
-			err = nil
-		}
-		if err == nil {
+		if err == nil || err == http.ErrServerClosed {
 			logf("HTTP server shutdown gracefully\n")
 		} else {
 			logf("httpSrv.ListenAndServe error '%s'\n", err)
@@ -287,10 +286,19 @@ func sererListen(httpSrv *http.Server) func() {
 	}()
 
 	return func() {
-		u.WaitForSigIntOrKill()
-		logf("Got stop signal. Shutting down http server\n")
+		sctx, stop := signal.NotifyContext(ctx(), os.Interrupt /*SIGINT*/, os.Kill /* SIGKILL */, syscall.SIGTERM)
+		defer stop()
 
-		_ = httpSrv.Shutdown(ctx())
+		select {
+		case <-sctx.Done():
+			logf("Got Ctrl+C stop signal. Shutting down http server\n")
+			_ = httpSrv.Shutdown(ctx())
+		case <-chServerClosed:
+			logf("server stopped")
+			return
+		}
+
+		// got ctrl-c signal, wait for server to close
 		select {
 		case <-chServerClosed:
 			// do nothing
@@ -298,8 +306,6 @@ func sererListen(httpSrv *http.Server) func() {
 			// timeout
 			logf("timed out trying to shut down http server")
 		}
-		logf("stopping logtastic\n")
-		logtastic.Stop()
 	}
 }
 

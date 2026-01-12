@@ -121,7 +121,6 @@ func Main() {
 	var (
 		flgDeployHetzner bool
 		flgSetupAndRun   bool
-		flgUpdateGoDeps  bool
 		flgTest          bool
 		flgRunProdLocal  bool
 	)
@@ -129,9 +128,8 @@ func Main() {
 		flag.BoolVar(&flgRunDev, "run-dev", false, "run the server in dev mode")
 		flag.BoolVar(&flgRunProd, "run-prod", false, "run server in production")
 		flag.BoolVar(&flgRunProdLocal, "run-prod-local", false, "build production version, run locally, to test production build")
-		flag.BoolVar(&flgDeployHetzner, "deploy-hetzner", false, "deploy to hetzner")
+		flag.BoolVar(&flgDeployHetzner, "deploy", false, "deploy to hetzner")
 		flag.BoolVar(&flgSetupAndRun, "setup-and-run", false, "setup and run on the server")
-		flag.BoolVar(&flgUpdateGoDeps, "update-go-deps", false, "update go dependencies")
 		flag.BoolVar(&flgTest, "test", false, "run go and js tests")
 		flag.Parse()
 	}
@@ -139,12 +137,6 @@ func Main() {
 	if GitCommitHash != "" {
 		uriBase := "https://github.com/kjk/tools.arslexis.io/commit/"
 		logf("arslexis.io, build: %s (%s)\n", GitCommitHash, uriBase+GitCommitHash)
-	}
-
-	if flgUpdateGoDeps {
-		defer measureDuration()()
-		u.UpdateGoDeps(".", true)
-		return
 	}
 
 	if false {
@@ -179,11 +171,15 @@ func Main() {
 	if flgSetupAndRun {
 		defer measureDuration()()
 		setupAndRun()
+		logf("stopping logtastic\n")
+		logtastic.Stop()
 		return
 	}
 
 	if flgRunProdLocal {
 		runServerProdLocal()
+		logf("stopping logtastic\n")
+		logtastic.Stop()
 		return
 	}
 
