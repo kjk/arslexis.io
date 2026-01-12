@@ -24,7 +24,7 @@ const (
 func notifyMeViaEmail(subject, body, userEmail string) {
 	mg := mailgun.NewMailgun(mailgunDomain, mailgunAPIKey)
 	// add unique prefix to make it easy to create a filter for those messages in gmail
-	if isDev() {
+	if isDevOrLocal() {
 		subject = "(dev) notif: " + subject
 	} else {
 		subject = "notif: " + subject

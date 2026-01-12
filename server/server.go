@@ -270,8 +270,8 @@ func openBrowserForServer(httpSrv *http.Server) {
 	u.OpenBrowser("http://" + httpSrv.Addr)
 }
 
-func sererListen(httpSrv *http.Server) func() {
-	logf("serverListenAndWait: listening on '%s', isDev: %v\n", httpSrv.Addr, isDev())
+func serverListen(httpSrv *http.Server) func() {
+	logf("serverListenAndWait: listening on '%s', isDevOrLocal: %v\n", httpSrv.Addr, isDevOrLocal())
 
 	chServerClosed := make(chan bool, 1)
 	go func() {
@@ -366,8 +366,8 @@ func runServerDev() {
 	//closeHTTPLog := OpenHTTPLog("onlinetool")
 	//defer closeHTTPLog()
 
-	logf("runServerDev(): starting on '%s', dev: %v\n", httpSrv.Addr, isDev())
-	waitFn := sererListen(httpSrv)
+	logf("runServerDev(): starting on '%s', isDevOrLocal: %v\n", httpSrv.Addr, isDevOrLocal())
+	waitFn := serverListen(httpSrv)
 	openBrowserForServer(httpSrv)
 	waitFn()
 }
@@ -385,7 +385,7 @@ func runServerProd() {
 	httpSrv := makeHTTPServer(serveOpts, nil)
 	logf("runServerProd(): starting on 'http://%s', dev: %v, prod: %v, testingProd: %v\n", httpSrv.Addr, flgRunDev, flgRunProd, testingProd)
 
-	waitFn := sererListen(httpSrv)
+	waitFn := serverListen(httpSrv)
 	if testingProd {
 		openBrowserForServer(httpSrv)
 	}

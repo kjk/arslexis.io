@@ -66,7 +66,7 @@ func loadSecrets() {
 			return
 		}
 		*val = v
-		if isDev() {
+		if isDevOrLocal() {
 			logf("Got %s='%s'\n", key, v)
 		} else {
 			logf("Got %s\n", key)
@@ -113,8 +113,8 @@ var (
 	flgRunProd bool
 )
 
-func isDev() bool {
-	return flgRunDev
+func isDevOrLocal() bool {
+	return flgRunDev || isWinOrMac()
 }
 
 func Main() {
