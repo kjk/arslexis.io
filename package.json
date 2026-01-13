@@ -68,8 +68,8 @@
     "fcal": "^0.4.3",
     "idb": "^8.0.2",
     "js-base64": "^3.7.8",
-    "marked": "^16.4.1",
-    "protobufjs": "^7.5.4",
+    "marked": "^17.0.1",
+    "protobufjs": "^8.0.0",
     "qr-scanner": "^1.4.2",
     "svgo": "^4.0.0",
     "yaml": "^2.8.1"
